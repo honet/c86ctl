@@ -1,0 +1,15 @@
+c86ctl/prj/vc8/Debug
+c86ctl/prj/vc8/Release
+c86ctl/import/ddk/HID.LIB
+c86ctl/import/ddk/HIDPI.H
+c86ctl/import/ddk/HIDSDI.H
+c86ctl/import/ddk/HIDUSAGE.H
+c86ctl/import/ddk/SETUPAPI.LIB
+c86ctl/import/ddk/Setupapi.h
+c86ctlTest/Debug
+c86ctlTest/Release
+debug
+*.ncb
+*.suo
+*.aps
+*.user
