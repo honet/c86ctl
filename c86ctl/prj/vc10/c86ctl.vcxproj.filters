@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="vis">
+      <UniqueIdentifier>{206ca894-8723-42c7-a943-a62df0a53c75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="module">
+      <UniqueIdentifier>{f61d3ce0-16af-436e-9aa5-2230c3464eb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{eea9252a-8b03-400e-b69b-91ee4b4256dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{3198d819-8b3f-4fd4-b3aa-cacb446a134b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\vis_c86fm.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_c86key.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_c86main.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_c86reg.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_c86sub.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_c86wnd.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\module.cpp">
+      <Filter>module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opna.cpp">
+      <Filter>module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\c86ctl.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\config.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ringbuff.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\stdafx.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\vis_c86fm.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_c86key.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_c86main.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_c86reg.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_c86sub.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_c86wnd.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\module.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\opna.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\c86ctl.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\config.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\resource.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ringbuff.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\stdafx.h">
+      <Filter>core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\c86ctl.def">
+      <Filter>core</Filter>
+    </None>
+    <None Include="..\..\src\res\skin.bmp">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="..\..\ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\c86ctl.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
