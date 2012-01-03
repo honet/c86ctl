@@ -1,5 +1,6 @@
 LIBRARY	"c86ctl"
 EXPORTS
+	CreateInstance
 	c86ctl_initialize
 	c86ctl_deinitialize
 	c86ctl_reset

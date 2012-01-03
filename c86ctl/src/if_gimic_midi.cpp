@@ -57,9 +57,9 @@ GimicMIDI::~GimicMIDI( void)
 /*----------------------------------------------------------------------------
 	MIDI-IF factory
 ----------------------------------------------------------------------------*/
-std::list< std::shared_ptr<GimicIF> > GimicMIDI::CreateInstances(void)
+std::vector< std::shared_ptr<GimicIF> > GimicMIDI::CreateInstances(void)
 {
-	std::list< std::shared_ptr<GimicIF> > instances;
+	std::vector< std::shared_ptr<GimicIF> > instances;
 
 	// MIDIOUTCAPSでgimicかどうか選別できないかと思ったけどダメだった。
 //	UINT n = midiOutGetNumDevs();
@@ -78,7 +78,7 @@ std::list< std::shared_ptr<GimicIF> > GimicMIDI::CreateInstances(void)
 	return instances;
 }
 
-void GimicMIDI::SendSysEx( uint8_t *data, uint32_t sz )
+void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )
 {
 	MIDIHDR head;
 	ZeroMemory(&head, sizeof(MIDIHDR));
@@ -93,9 +93,10 @@ void GimicMIDI::SendSysEx( uint8_t *data, uint32_t sz )
 }
 
 /*----------------------------------------------------------------------------
-	リセット
+	実装
 ----------------------------------------------------------------------------*/
-void GimicMIDI::Reset( void )
+
+int GimicMIDI::reset( void )
 {
 	// 転送完了待ち
 	while(rbuff.get_length()){
@@ -104,31 +105,34 @@ void GimicMIDI::Reset( void )
 
 	// GM System ON
 	UCHAR d[] = { 0xf0, 0x7e, 0x7f, 0x9, 0x1, 0xf7 };
-	SendSysEx( &d[0], 6 );
+	sendSysEx( &d[0], 6 );
+	return C86CTL_ERR_NONE;
 }
 
-void GimicMIDI::Out(uint16_t addr, uint8_t data)
+void GimicMIDI::out(UINT addr, UCHAR data)
 {
 	// data packing.
 	UCHAR d[3] = { (addr>>6)&0x0f, (addr&0x3f)<<1 | (data>>7), (data&0x7f) };
 	rbuff.write(d,3);
 }
 
-void GimicMIDI::SetSSGVolume(uint8_t vol)
+int GimicMIDI::setSSGVolume(UCHAR vol)
 {
 	// master volume set.
 	UCHAR d[] = { 0xf0, 0x7f, 0x04, (vol<<6)&0x7f, (vol>>1)&0x7f, 0xf7 };
-	SendSysEx( &d[0], 6 );
+	sendSysEx( &d[0], 6 );
+	return C86CTL_ERR_NONE;
 }
 
-void GimicMIDI::SetPLLClock(uint32_t clock)
+int GimicMIDI::setPLLClock(UINT clock)
 {
 	UCHAR d[] = { 0xf0, 0x7d, 0x40, 0x01, 0x00, 0x70,
 		clock&0x7f, (clock>>7)&0x7f, (clock>>14)&0x7f, 0xf7 };
-	SendSysEx( &d[0], 10 );
+	sendSysEx( &d[0], 10 );
+	return C86CTL_ERR_NONE;
 }
 
-void GimicMIDI::Tick(void)
+void GimicMIDI::tick(void)
 {
 	UCHAR buff[150];
 	
@@ -143,7 +147,7 @@ void GimicMIDI::Tick(void)
 	if( 0 < sz ){
 		rbuff.read( &buff[2], MIN(sz*3,144) );
 		buff[sz*3+2] = 0xf7;		// end of sysex
-		SendSysEx( &buff[0], sz*3+3 );
+		sendSysEx( &buff[0], sz*3+3 );
 	}
 	
 	return;

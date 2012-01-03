@@ -49,9 +49,9 @@ GimicHID::~GimicHID(void)
 /*----------------------------------------------------------------------------
 	HIDIF factory
 ----------------------------------------------------------------------------*/
-std::list< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
+std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 {
-	std::list< std::shared_ptr<GimicIF> > instances;
+	std::vector< std::shared_ptr<GimicIF> > instances;
 	
 	GUID hidGuid;
 	HDEVINFO devinf;
@@ -109,7 +109,11 @@ std::list< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 }
 
 
-void GimicHID::Reset(void)
+/*----------------------------------------------------------------------------
+	実装
+----------------------------------------------------------------------------*/
+
+int GimicHID::reset(void)
 {
 	// リセットコマンド送信
 	UCHAR d[4] = { 0x82, 0, 0, 0 };
@@ -117,9 +121,11 @@ void GimicHID::Reset(void)
 	// 転送完了待ち
 	while(rbuff.get_length())
 		Sleep(10);
+
+	return C86CTL_ERR_NONE;
 }
 
-void GimicHID::SetSSGVolume(uint8_t vol)
+int GimicHID::setSSGVolume(UCHAR vol)
 {
 	UCHAR d[4] = { 0x84, vol, 0, 0 };
 	rbuff.write(d,4);
@@ -127,9 +133,11 @@ void GimicHID::SetSSGVolume(uint8_t vol)
 	// 転送完了待ち
 	while(rbuff.get_length())
 		Sleep(10);
+
+	return C86CTL_ERR_NONE;
 }
 
-void GimicHID::SetPLLClock(uint32_t clock)
+int GimicHID::setPLLClock(UINT clock)
 {
 	UCHAR d[4] = { 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff };
 	rbuff.write(d,4);
@@ -137,16 +145,18 @@ void GimicHID::SetPLLClock(uint32_t clock)
 	// 転送完了待ち
 	while(rbuff.get_length())
 		Sleep(10);
+
+	return C86CTL_ERR_NONE;
 }
 
 
-void GimicHID::Out(uint16_t addr, uint8_t data)
+void GimicHID::out(UINT addr, UCHAR data)
 {
 	UCHAR d[4] = { 0, addr>>8, addr&0xff, data };
 	rbuff.write(d,4);
 }
 
-void GimicHID::Tick(void)
+void GimicHID::tick(void)
 {
 	UCHAR buff[128];
 

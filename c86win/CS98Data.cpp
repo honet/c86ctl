@@ -1,3 +1,14 @@
+/***
+	c86win
+	
+	Copyright (c) 2009-2010, honet. All rights reserved.
+	This software is licensed under the BSD license.
+
+	honet.kk(at)gmail.com
+
+	note: honet
+	元々 S98のエディタ用に作ったクラスなので重い＆いろいろ冗長です。
+*/
 #include "stdafx.h"
 #include "CS98Data.h"
 #include <iostream>

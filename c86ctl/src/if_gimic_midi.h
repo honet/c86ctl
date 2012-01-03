@@ -16,32 +16,40 @@
 #ifdef SUPPORT_MIDI
 
 #include <mmsystem.h>
-#include <list>
+#include <vector>
 #include "ringbuff.h"
 
-class GimicMIDI : public GimicIF {
-private:
-	HMIDIOUT hHandle;
-	CRingBuff<UCHAR> rbuff;
-
+class GimicMIDI : public GimicIF
+{
 private:
 	GimicMIDI(HMIDIOUT h);
-	void SendSysEx( uint8_t *data, uint32_t sz );
 
 public:
 	~GimicMIDI(void);
 
-	void Reset(void);
-	void SetSSGVolume(uint8_t vol);
-	void SetPLLClock(uint32_t clock);
-	
-	void Out(uint16_t addr, uint8_t data);
-	void Tick(void);
+public:
+	// IGimicModule
+	virtual int __stdcall setSSGVolume(UCHAR vol);
+	virtual int __stdcall setPLLClock(UINT clock);
 
 public:
-	static std::list< std::shared_ptr<GimicIF> > CreateInstances(void);
+	// IRealChip
+	virtual int __stdcall reset(void);
+	virtual void __stdcall out(UINT addr, UCHAR data);
+	virtual void __stdcall tick(void);
+
+private:
+	void sendSysEx( uint8_t *data, uint32_t sz );
+	
+private:
+	HMIDIOUT hHandle;
+	CRingBuff<UCHAR> rbuff;
+
+public:
+	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
 };
 
 typedef std::shared_ptr<GimicMIDI> GimicMIDIPtr;
 
 #endif
+

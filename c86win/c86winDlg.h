@@ -46,8 +46,12 @@ public:
 	UINT threadID;
 	HANDLE hThread;
 
+	UINT m_tick;
 
 	CEdit m_editFilePath;
 	CStatic m_staticTick;
 	CEdit m_editMessage;
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBnClickedButtonInitialize();
+	afx_msg void OnBnClickedButtonDeinitialize();
 };

@@ -18,6 +18,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 #include <algorithm>
 
 
@@ -36,14 +37,6 @@
 #endif
 
 // ------------------------------------------------------------------
-static HANDLE gMainThread = 0;
-static HANDLE gSenderThread = 0;
-static UINT mainThreadID = 0;
-static UINT senderThreadID = 0;
-DWORD timerPeriod = 0;
-
-static bool terminateFlag = false;
-std::list< std::shared_ptr<GimicIF> > gGIMIC;
 
 
 // ------------------------------------------------------------------
@@ -76,9 +69,65 @@ BOOL APIENTRY DllMain(
 #endif
 
 
+class C86Ctl : public IRealChipBase
+{
+public:
+	C86Ctl(){
+		gMainThread = 0;
+		gSenderThread = 0;
+		mainThreadID = 0;
+		senderThreadID = 0;
+		timerPeriod = 0;
+		terminateFlag = 0;
+	};
+	~C86Ctl(){};
+
+public:
+	// IUnknown
+	virtual HRESULT __stdcall QueryInterface( REFIID riid, LPVOID *ppvObj );
+	virtual ULONG __stdcall AddRef(VOID);
+	virtual ULONG __stdcall Release(VOID);
+
+public:
+	// IRealChipBase
+	int __stdcall initialize(void);
+	int __stdcall deinitialize(void);
+	virtual int __stdcall getNumberOfChip(void);
+	HRESULT __stdcall getChipInterface( int id, REFIID riid, void** ppi );
+
+
+public:
+	int reset(void);
+	void out( UINT addr, UCHAR data );
+	UCHAR in( UINT addr );
+	//getModuleType();
+
+public:
+	static bool terminateFlag;
+	static std::vector< std::shared_ptr<GimicIF> > gGIMIC;
+
+protected:
+	static unsigned int WINAPI threadMain(LPVOID param);
+	static unsigned int WINAPI threadSender(LPVOID param);
+	
+protected:
+	HANDLE gMainThread;
+	HANDLE gSenderThread;
+	UINT mainThreadID;
+	UINT senderThreadID;
+	DWORD timerPeriod;
+};
+
+C86Ctl gc86ctl;
+bool C86Ctl::terminateFlag;
+std::vector< std::shared_ptr<GimicIF> > C86Ctl::gGIMIC;
+
+
+
+
 // 描画処理スレッド
 // mm-timerによる60fps生成
-unsigned int WINAPI threadMain(LPVOID param)
+unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 {
 	MSG msg;
 	CVisC86Main mainWnd;
@@ -116,7 +165,7 @@ unsigned int WINAPI threadMain(LPVOID param)
 // mm-timerによる1ms単位処理
 // note: timeSetEvent()だと転送処理がタイマ周期より遅いときに
 //       再入されるのが怖かったので自前ループにした
-unsigned int WINAPI threadSender(LPVOID param)
+unsigned int WINAPI C86Ctl::threadSender(LPVOID param)
 {
 	const UINT period = 1;
 	UINT next = ::timeGetTime() + period;
@@ -135,23 +184,44 @@ unsigned int WINAPI threadSender(LPVOID param)
 
 		// update
 		//for( std::list< std::shared_ptr<CGimicIF> >::iterator it = gGIMIC.begin(); it != gGIMIC.end(); it++ )
-		//	(*it)->Tick();
-		std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->Tick(); } );
+		//	(*it)->tick();
+		std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->tick(); } );
 	}
 	
 	return 0;
 }
 
 
+HRESULT C86Ctl::QueryInterface( REFIID riid, LPVOID *ppvObj )
+{
+	if( ::IsEqualGUID( riid, IID_IRealChipBase ) ){
+		*ppvObj = (LPVOID)this;
+		return NOERROR;
+	}
+	*ppvObj = 0;
+	return E_NOINTERFACE;
+}
 
-// ----------------------------------------------------------------------
-// 外部インターフェイス
+ULONG C86Ctl::AddRef(VOID)
+{
+	return 1;
+}
 
-int WINAPI c86ctl_initialize(void)
+ULONG C86Ctl::Release(VOID)
+{
+	return 0;
+}
+
+
+int C86Ctl::initialize(void)
 {
 	// インスタンス生成
-	//gGIMIC = GimicHID::CreateInstances();
-	gGIMIC = GimicMIDI::CreateInstances();
+	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
+	if( type==0 ){
+		gGIMIC = GimicHID::CreateInstances();
+	}else if( type==1 ){
+		gGIMIC = GimicMIDI::CreateInstances();
+	}
 	
 	// タイマ分解能設定
 	TIMECAPS timeCaps;
@@ -179,8 +249,7 @@ int WINAPI c86ctl_initialize(void)
 	return C86CTL_ERR_NONE;
 }
 
-
-int WINAPI c86ctl_deinitialize(void)
+int C86Ctl::deinitialize(void)
 {
 	c86ctl_reset();
 
@@ -208,29 +277,79 @@ int WINAPI c86ctl_deinitialize(void)
 	return C86CTL_ERR_NONE;
 }
 
-int WINAPI c86ctl_reset(void)
+int C86Ctl::reset(void)
 {
 	gOPNA[0].reset();
 	gOPNA[1].reset();
 
-	std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->Reset(); } );
+	std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->reset(); } );
 	return 0;
 }
 
-void WINAPI c86ctl_out( UINT addr, UCHAR data )
+int C86Ctl::getNumberOfChip(void)
+{
+	return gGIMIC.size();
+}
+
+HRESULT C86Ctl::getChipInterface( int id, REFIID riid, void** ppi )
+{
+	if( id < gGIMIC.size() ){
+		return gGIMIC[id]->QueryInterface( riid, ppi );
+	}
+	return E_NOINTERFACE;
+}
+
+void C86Ctl::out( UINT addr, UCHAR data )
 {
 	UINT id = 0;//addr >> 10;
 	//addr &= 0x3ff;
 	if( id < gGIMIC.size() ){
 		gOPNA[0].setReg(addr,data);
-		gGIMIC.front()->Out((uint16_t)addr,data);
+		gGIMIC.front()->out((uint16_t)addr,data);
 	}
+}
 
+UCHAR C86Ctl::in( UINT addr )
+{
+	return gOPNA[0].getReg(addr);
+}
+
+//getModuleType()
+
+
+// ----------------------------------------------------------------------
+// 外部インターフェイス
+HRESULT CreateInstance( REFIID riid, void** ppi )
+{
+	// C86Ctlが単一インスタンスなので手抜き実装。
+	return gc86ctl.QueryInterface(riid,ppi);
+}
+
+// ---------------------------------------------------
+// 以下は後方互換のためのnative I/F
+int WINAPI c86ctl_initialize(void)
+{
+	return gc86ctl.initialize();
+}
+
+int WINAPI c86ctl_deinitialize(void)
+{
+	return gc86ctl.deinitialize();
+}
+
+int WINAPI c86ctl_reset(void)
+{
+	return gc86ctl.reset();
+}
+
+void WINAPI c86ctl_out( UINT addr, UCHAR data )
+{
+	gc86ctl.out( addr, data );
 }
 
 UCHAR WINAPI c86ctl_in( UINT addr )
 {
-	return gOPNA[0].getReg(addr);
+	return gc86ctl.in( addr );
 }
 
 // ---------------------------------------------------------------------------
@@ -260,3 +379,4 @@ C86CTL_API INT c86ctl_set_volume(UINT module, UINT ch, UINT vol )
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 #endif
+

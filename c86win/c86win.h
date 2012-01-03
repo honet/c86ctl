@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "c86ctl.h"
+
 #ifndef __AFXWIN_H__
 	#error "PCH に対してこのファイルをインクルードする前に 'stdafx.h' をインクルードしてください"
 #endif
@@ -25,8 +27,12 @@ public:
 	virtual BOOL InitInstance();
 
 // 実装
-
+public:
+	HMODULE hC86DLL;
+	IRealChipBase *pChipBase;
+	
 	DECLARE_MESSAGE_MAP()
 };
 
 extern C86winApp theApp;
+

@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "c86win.h"
 #include "c86winDlg.h"
-#include "c86ctl.h"
 
 
 #ifdef _DEBUG
@@ -36,6 +35,8 @@ C86winApp::C86winApp()
 
 C86winApp theApp;
 
+
+typedef HRESULT (*TCreateInstance)( REFIID, LPVOID* );
 
 // C86winApp 初期化
 
@@ -69,6 +70,17 @@ BOOL C86winApp::InitInstance()
 	// この文字列を変更してください。
 	SetRegistryKey(_T("アプリケーション ウィザードで生成されたローカル アプリケーション"));
 
+	
+	// ---------------------------------------------------------------------
+	// C86CTL のロード
+	TCreateInstance pCI;
+
+	hC86DLL = ::LoadLibrary( _T("c86ctl.dll") );
+	pCI = (TCreateInstance)::GetProcAddress( hC86DLL, "CreateInstance" );
+	(*pCI)( IID_IRealChipBase, (void**)&pChipBase );
+	// ---------------------------------------------------------------------
+	
+	
 	C86winDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();

@@ -27,6 +27,7 @@
 #define INIKEY_WNDVISIBLE	TEXT("wndvisible")
 #define INIKEY_MIDIDEVICE	TEXT("mididevice")
 #define INIKEY_HIDDEVICE	TEXT("hiddevice")
+#define INIKEY_GIMICIFTYPE	TEXT("gimic_iftype")
 
 
 class CC86CtlConfig
