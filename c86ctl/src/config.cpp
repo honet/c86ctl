@@ -12,9 +12,9 @@
 #include <tchar.h>
 #include "config.h"
 
-TCHAR inipath[_MAX_PATH] = {0};
+class CC86CtlConfig gConfig;
 
-BOOL writeConfigInt( LPCTSTR section, LPCTSTR key, INT val )
+BOOL CC86CtlConfig::writeInt( LPCTSTR section, LPCTSTR key, INT val )
 {
 	TCHAR cfg[128];
 	_stprintf( cfg, TEXT("%d"), val );

@@ -7,77 +7,57 @@
 	honet.kk(at)gmail.com
  */
 #include "stdafx.h"
+
+#include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <tchar.h>
 #include <assert.h>
+#include <process.h>
+#include <mmsystem.h>
+
 #include <string>
+#include <list>
+#include <algorithm>
+
+
 
 #include "c86ctl.h"
 #include "module.h"
 #include "config.h"
 #include "vis_c86main.h"
 #include "ringbuff.h"
-
-#include <windows.h>
-#include <mmsystem.h>
-#include <process.h>
-#pragma comment(lib, "winmm.lib")
-
-#include <setupapi.h>
-extern "C" {
-#include "hidsdi.h"
-}
-#pragma comment(lib, "hid.lib")
-#pragma comment(lib, "setupapi.lib")
-
+#include "if.h"
+#include "if_gimic_hid.h"
+#include "if_gimic_midi.h"
 
 #ifdef _MANAGED
 #pragma managed(push, off)
 #endif
 
-// 実験コードなのでどれか一種類しか使えません。
-//#define SUPPORT_MIDI
-#define SUPPORT_HID
-
-
+// ------------------------------------------------------------------
 static HANDLE gMainThread = 0;
 static HANDLE gSenderThread = 0;
+static UINT mainThreadID = 0;
+static UINT senderThreadID = 0;
+DWORD timerPeriod = 0;
+
 static bool terminateFlag = false;
-
-#ifdef SUPPORT_MIDI
-HMIDIOUT hmidi=0;
-#endif
-
-#ifdef SUPPORT_HID
-HANDLE gHidFile=0;
-#endif
-
-//CRingBuff gSendBuff;
-
-HANDLE hMutex=NULL;
-std::basic_string<UCHAR> buff;
-//static UCHAR buff[10000];
-//static UINT idx = 0;
+std::list< std::shared_ptr<GimicIF> > gGIMIC;
 
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-					 )
+// ------------------------------------------------------------------
+BOOL APIENTRY DllMain(
+	HMODULE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved
+	)
 {
-	TCHAR modulePath[_MAX_PATH];
-	TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
-
 	switch (ul_reason_for_call){
 	case DLL_PROCESS_ATTACH:
 		initializeWndManager();
-		::GetModuleFileName( hModule, modulePath, _MAX_PATH );
-		_tsplitpath( modulePath, drv, dir, fname, ext );
-		_tcsncat( inipath, drv, _MAX_PATH );
-		_tcsncat( inipath, dir, _MAX_PATH );
-		_tcsncat( inipath, TEXT("c86ctl.ini"), _MAX_PATH );
 		gModule = hModule;
+		gConfig.init(hModule);
 		break;
 	case DLL_PROCESS_DETACH:
 		uninitializeWndManager();
@@ -95,315 +75,188 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 #pragma managed(pop)
 #endif
 
+
+// 描画処理スレッド
+// mm-timerによる60fps生成
 unsigned int WINAPI threadMain(LPVOID param)
 {
 	MSG msg;
 	CVisC86Main mainWnd;
+	DWORD next;
+	next = ::timeGetTime()*6 + 100;
 
 	mainWnd.create();
+	while(1){
+		if( terminateFlag )
+			break;
+		
+		if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
 
-	while ( !terminateFlag && GetMessage(&msg , NULL , 0 , 0 )) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DWORD now = ::timeGetTime() * 6;
+		if(now < next){
+			if( terminateFlag ) break;
+			Sleep(1);
+			continue;
+		}
+		next += 100;
+
+		//update();
 	}
-
+	
 	mainWnd.close();
 
 	return (DWORD)msg.wParam;
 }
 
 
+// 演奏処理スレッド
+// mm-timerによる1ms単位処理
+// note: timeSetEvent()だと転送処理がタイマ周期より遅いときに
+//       再入されるのが怖かったので自前ループにした
 unsigned int WINAPI threadSender(LPVOID param)
 {
-	LARGE_INTEGER last_send;
-	LARGE_INTEGER timer_freq;
-	UCHAR sndbuf[65];
+	const UINT period = 1;
+	UINT next = ::timeGetTime() + period;
 
-	QueryPerformanceCounter(&last_send);
-	QueryPerformanceFrequency(&timer_freq);
-
-	while( !terminateFlag ){
-		LARGE_INTEGER current;
-		QueryPerformanceCounter(&current);
-		if( ((current.QuadPart-last_send.QuadPart)*1000/timer_freq.QuadPart) > 1 )
-		{
-			WaitForSingleObject(hMutex, INFINITE);
-
-			int len = buff.length();
-			int idx=0;
-			while( idx<len ){
-				//memset( sndbuf, 0, 65 );
-				sndbuf[0] = 0; // report ID.
-				int s = len - idx;
-				if( 64<s ) s = 64;
-				memcpy( &sndbuf[1], &buff[idx], s );
-
-				if( s<64 ){
-					memset( &sndbuf[1+s], 0xff, 64-s );
-				}
-				idx += s;
-
-				DWORD wlen=0;
-				WriteFile( gHidFile, sndbuf, 65, &wlen, 0 );
-			}
-			
-			buff.clear();
-			ReleaseMutex(hMutex);
-			last_send = current;
-			
-#ifdef SUPPORT_MIDI
-			MIDIHDR midiheader;
-//			midiheader.lpData = (LPSTR)&d[0];
-			midiheader.dwBufferLength = 6;
-			midiheader.dwFlags = 0;
-			
-			MMRESULT ret;
-			ret = midiOutPrepareHeader( hmidi, &midiheader, sizeof(MIDIHDR) );
-			ret = midiOutLongMsg( hmidi, &midiheader, sizeof(MIDIHDR) );
-			while ((midiheader.dwFlags & MHDR_DONE) == 0);
-			ret = midiOutUnprepareHeader( hmidi, &midiheader, sizeof(MIDIHDR) );
-#endif
+	while(1){
+		if( terminateFlag )
+			break;
+		
+		DWORD now = ::timeGetTime();
+		if(now < next){
+			if( terminateFlag ) break;
+			Sleep(1);
+			continue;
 		}
+		next += period;
+
+		// update
+		//for( std::list< std::shared_ptr<CGimicIF> >::iterator it = gGIMIC.begin(); it != gGIMIC.end(); it++ )
+		//	(*it)->Tick();
+		std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->Tick(); } );
 	}
 	
 	return 0;
 }
-
-
-#ifdef SUPPORT_HID
-void OpenHID(void)
-{
-	GUID hidGuid;
-	HDEVINFO devinf;
-	SP_DEVICE_INTERFACE_DATA spid;
-	SP_DEVICE_INTERFACE_DETAIL_DATA* fc_data=NULL;
-	
-	HidD_GetHidGuid(&hidGuid);
-	devinf = SetupDiGetClassDevs(&hidGuid, NULL, 0, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-
-	for( int i=0; ;i++ ){
-		ZeroMemory(&spid, sizeof(spid));
-		spid.cbSize = sizeof(spid);
-		if( !SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid) )
-			break;
-
-		unsigned long sz;
-		SetupDiGetDeviceInterfaceDetail( devinf, &spid, NULL, 0, &sz, 0 );
-		
-		PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)( malloc(sz) );
-		dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
-		SetupDiGetDeviceInterfaceDetail( devinf, &spid, dev_det, sz, &sz, 0 );
-
-
-		HANDLE handle = CreateFile( dev_det->DevicePath, GENERIC_READ|GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_NO_BUFFERING, NULL );
-		free(dev_det); dev_det = NULL;
-		
-		if( handle == INVALID_HANDLE_VALUE ) continue;
-
-		HIDD_ATTRIBUTES attr;
-		HidD_GetAttributes( handle, &attr ) ;
-
-		if( attr.VendorID == 0x16c0 && attr.ProductID == 0x05e4 ){
-			gHidFile = handle;
-			break;
-		}
-
-		CloseHandle(handle);
-	}
-}
-void CloseHID(void)
-{
-	if( gHidFile ){
-
-		CloseHandle(gHidFile);
-		gHidFile = NULL;
-	}
-}
-
-#endif
-
 
 
 
 // ----------------------------------------------------------------------
+// 外部インターフェイス
 
-C86CTL_API int WINAPI c86ctl_initialize(void)
+int WINAPI c86ctl_initialize(void)
 {
-	unsigned int mainThreadID, senderThreadID;
-
-#ifdef SUPPORT_HID
-	//idx = 1;
-	buff.clear();
-	OpenHID();
-#endif
+	// インスタンス生成
+	//gGIMIC = GimicHID::CreateInstances();
+	gGIMIC = GimicMIDI::CreateInstances();
 	
-#ifdef SUPPORT_MIDI
-	buff.clear();
-	//idx = 2;
-	MMRESULT res = midiOutOpen(&hmidi, MIDI_MAPPER, 0, 0, CALLBACK_NULL);
-#endif
+	// タイマ分解能設定
+	TIMECAPS timeCaps;
+	if( ::timeGetDevCaps(&timeCaps, sizeof(timeCaps)) == TIMERR_NOERROR ){
+		::timeBeginPeriod(timeCaps.wPeriodMin);
+		timerPeriod = timeCaps.wPeriodMin;
+	}
 
-	hMutex = CreateMutex( NULL, FALSE, NULL );
-	
-	gMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, NULL, 0, &mainThreadID );
+	// 描画スレッド開始
+	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) ){
+		gMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, NULL, 0, &mainThreadID );
+		if( !gMainThread )
+			return C86CTL_ERR_UNKNOWN;
+	}
+
+	// 演奏スレッド開始
 	gSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, NULL, 0, &senderThreadID );
+	if( !gSenderThread ){
+		SetThreadPriority( gSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
+		terminateFlag = true;
+		::WaitForSingleObject( gMainThread, INFINITE );
+		return C86CTL_ERR_UNKNOWN;
+	}
 	
-	return 0;
+	return C86CTL_ERR_NONE;
 }
 
-C86CTL_API int WINAPI c86ctl_deinitialize(void)
+
+int WINAPI c86ctl_deinitialize(void)
 {
 	c86ctl_reset();
 
+	// 各種スレッド終了
 	terminateFlag = true;
-
-	::WaitForSingleObject( gMainThread, INFINITE );
-	::WaitForSingleObject( gSenderThread, INFINITE );
-	
-	if( hMutex ){
-		ReleaseMutex( hMutex );
-		hMutex = NULL;
+	if( gMainThread ){
+		::WaitForSingleObject( gMainThread, INFINITE );
+		gMainThread = NULL;
+		mainThreadID = 0;
 	}
+	if( gSenderThread ){
+		::WaitForSingleObject( gSenderThread, INFINITE );
+		gSenderThread = NULL;
+		senderThreadID = 0;
+	}
+	terminateFlag = false;
 
-		
-#ifdef SUPPORT_HID
-	buff.clear();
-	//idx = 1;
-	CloseHID();
-#endif
+	// インスタンス削除
+	// note: このタイミングで終了処理が行われる。
+	gGIMIC.clear();
+
+	// タイマ分解能設定解除
+	::timeEndPeriod(timerPeriod);
 	
-#ifdef SUPPORT_MIDI
-	buff.clear();
-	//idx = 2;
-	midiOutClose(hmidi);
-#endif
-
-	return 0;
+	return C86CTL_ERR_NONE;
 }
 
-C86CTL_API int WINAPI c86ctl_reset(void)
+int WINAPI c86ctl_reset(void)
 {
 	gOPNA[0].reset();
 	gOPNA[1].reset();
 
-#ifdef SUPPORT_HID
-	WaitForSingleObject(hMutex, INFINITE);
-	buff.push_back(0x82);	// software reset
-	buff.push_back(0x0);
-	buff.push_back(0x0);
-	buff.push_back(0x0);
-	ReleaseMutex(hMutex);
-#endif
-	for(;;){
-		WaitForSingleObject(hMutex, INFINITE);
-		if( buff.length() == 0 ) break;
-		ReleaseMutex(hMutex);
-		Sleep(100);
-	}
-	
-#ifdef SUPPORT_MIDI
-	midiOutReset(hmidi);
-#endif
-	
+	std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->Reset(); } );
 	return 0;
 }
 
-C86CTL_API void WINAPI c86ctl_out( UINT addr, UCHAR data )
+void WINAPI c86ctl_out( UINT addr, UCHAR data )
 {
-	gOPNA[0].setReg(addr,data);
-
-	//UCHAR *d = &buff[idx];
-
-	addr &= 0x1ff;
-
-#ifdef SUPPORT_HID
-	if(gHidFile){
-		WaitForSingleObject(hMutex, INFINITE);
-		buff.push_back(0);// cmd
-		buff.push_back( (UCHAR)(addr>>8) );
-		buff.push_back( (UCHAR)(addr&0xff) );
-		buff.push_back( data );
-		ReleaseMutex(hMutex);
-#if 0
-		d[0] = 0;// cmd
-		d[1] = (UCHAR)(addr>>8);
-		d[2] = (UCHAR)(addr&0xff);
-		d[3] = data;
-		idx +=4;
-		
-		LARGE_INTEGER current;
-		QueryPerformanceCounter(&current);
-		if( (idx >= 65) ||
-			((current.QuadPart-last_send.QuadPart)*1000/timer_freq.QuadPart) >= 1 )
-		{
-			if(idx<65){
-				memset(&buff[idx], 0xff, 65-idx );
-			}
-
-			DWORD len=65, wlen=0;
-			buff[0] = 0; // report ID
-			WriteFile( gHidFile, buff, len, &wlen, 0 );
-			
-			idx = 1;
-			last_send = current;
-		}
-#endif
+	UINT id = 0;//addr >> 10;
+	//addr &= 0x3ff;
+	if( id < gGIMIC.size() ){
+		gOPNA[0].setReg(addr,data);
+		gGIMIC.front()->Out((uint16_t)addr,data);
 	}
-#endif
-	
-#ifdef SUPPORT_MIDI
-	if(hmidi){
-		d[0] = (UCHAR)(addr>>6);
-		d[1] = (UCHAR)(((addr&0x3f)<<1) | (data>>7));
-		d[2] = (UCHAR)(data&0x7f);
-		idx +=3;
-//		if( addr >= 0x200 ){
-//			OutputDebugString("ERROR\r\n");
-//		}
-
-		LARGE_INTEGER current;
-		QueryPerformanceCounter(&current);
-		if( (idx >= /*23*/128) || // 32/4=8 ((8-2)+1)*3=21+2=23
-			((current.QuadPart-last_send.QuadPart)*1000/timer_freq.QuadPart) > 2 )
-//		if( idx >= 10000 || ((current.QuadPart-last_send.QuadPart)*1000/timer_freq.QuadPart) > 10 )
-		{
-			buff[0] = 0xf0;
-			buff[1] = 0x7d;
-			buff[idx++] = 0xf7;
-			MIDIHDR midiheader;
-			midiheader.lpData = (LPSTR)&buff[0];
-			midiheader.dwBufferLength = idx;
-			midiheader.dwFlags = 0;
-
-			assert( idx % 3 == 0 );
-			
-			//CHAR str[128];
-			//sprintf(str, "OUT:%d ",idx);
-			//OutputDebugString(str);
-			//for( int j=0; j<idx; j++ ){
-			//	sprintf(str, "%02x ", buff[j] );
-			//	OutputDebugString(str);
-			//}
-			//OutputDebugString("\r\n");
-
-			MMRESULT ret;
-			ret = midiOutPrepareHeader( hmidi, &midiheader, sizeof(MIDIHDR) );
-			ret = midiOutLongMsg( hmidi, &midiheader, sizeof(MIDIHDR) );
-			while ((midiheader.dwFlags & MHDR_DONE) == 0);
-			ret = midiOutUnprepareHeader( hmidi, &midiheader, sizeof(MIDIHDR) );
-
-
-
-			idx = 2;
-			last_send = current;
-		}
-	}
-#endif
 
 }
 
-C86CTL_API UCHAR WINAPI c86ctl_in( UINT addr )
+UCHAR WINAPI c86ctl_in( UINT addr )
 {
 	return gOPNA[0].getReg(addr);
 }
 
+// ---------------------------------------------------------------------------
+#if 0
+C86CTL_API INT c86ctl_get_version(UINT *ver)
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+C86CTL_API INT c86ctl_out2(UINT module, UINT addr, UCHAR adata )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+C86CTL_API INT c86ctl_in2(UINT module, UINT addr, UCHAR *data )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+C86CTL_API INT c86ctl_set_pll_clock(UINT module, UINT clock )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+C86CTL_API INT c86ctl_set_volume(UINT module, UINT ch, UINT vol )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+#endif

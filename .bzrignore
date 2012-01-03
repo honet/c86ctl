@@ -9,6 +9,8 @@ c86ctl/import/ddk/Setupapi.h
 c86ctlTest/Debug
 c86ctlTest/Release
 debug
+release
+ipch
 *.ncb
 *.suo
 *.aps

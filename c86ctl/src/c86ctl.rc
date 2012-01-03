@@ -8,6 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
+#include "res/c86ctl.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS

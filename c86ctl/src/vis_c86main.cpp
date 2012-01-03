@@ -38,8 +38,8 @@ const struct {
 
 bool CVisC86Main::create()
 {
-	int left = getConfigInt( INISC_MAIN, INIKEY_WNDLEFT, INT_MIN );
-	int top  = getConfigInt( INISC_MAIN, INIKEY_WNDTOP,  INT_MIN );
+	int left = gConfig.getInt( INISC_MAIN, INIKEY_WNDLEFT, INT_MIN );
+	int top  = gConfig.getInt( INISC_MAIN, INIKEY_WNDTOP,  INT_MIN );
 	
 	if ( CVisWnd::create( TEXT("C86CTL"), TEXT("C86 CONTROL"), left, top, WINDOW_WIDTH, WINDOW_HEIGHT, 
 		0, WS_POPUP | WS_CLIPCHILDREN ) ){
@@ -133,25 +133,25 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 				fmWnd[i].attach( &gOPNA[0].fm[i] );
 	
 			::GetWindowRect(hWnd, &rc);
-			left = getConfigInt( INISC_KEY, INIKEY_WNDLEFT, rc.left+offsetx );
-			top  = getConfigInt( INISC_KEY, INIKEY_WNDTOP, rc.top+offsety );
-			enable = getConfigInt( INISC_KEY, INIKEY_WNDVISIBLE, TRUE );
+			left = gConfig.getInt( INISC_KEY, INIKEY_WNDLEFT, rc.left+offsetx );
+			top  = gConfig.getInt( INISC_KEY, INIKEY_WNDTOP, rc.top+offsety );
+			enable = gConfig.getInt( INISC_KEY, INIKEY_WNDVISIBLE, TRUE );
 			keyWnd.create( TEXT("C86KEY"), TEXT("C86 KEYBOARD VIEW"), left, top, hWnd );
 			if( enable )
 				::ShowWindow( keyWnd.getFrameHWND(), SW_SHOWNOACTIVATE );
 			
-			left = getConfigInt( INISC_REG, INIKEY_WNDLEFT, left+offsetx );
-			top  = getConfigInt( INISC_REG, INIKEY_WNDTOP,  top+offsety  );
-			enable = getConfigInt( INISC_REG, INIKEY_WNDVISIBLE, TRUE );
+			left = gConfig.getInt( INISC_REG, INIKEY_WNDLEFT, left+offsetx );
+			top  = gConfig.getInt( INISC_REG, INIKEY_WNDTOP,  top+offsety  );
+			enable = gConfig.getInt( INISC_REG, INIKEY_WNDVISIBLE, TRUE );
 			regWnd.create( TEXT("C86REG"), TEXT("C86 REGISTER VIEW"), left, top, hWnd );
 			if( enable )
 				::ShowWindow( regWnd.getFrameHWND(), SW_SHOWNOACTIVATE );
 
 			for( int i=0; i<6; i++ ){
 				_stprintf( cname, INISC_FMx, i+1 );
-				left = getConfigInt( cname, INIKEY_WNDLEFT, left+offsetx );
-				top  = getConfigInt( cname, INIKEY_WNDTOP,  top+offsety  );
-				enable = getConfigInt( cname, INIKEY_WNDVISIBLE, TRUE );
+				left = gConfig.getInt( cname, INIKEY_WNDLEFT, left+offsetx );
+				top  = gConfig.getInt( cname, INIKEY_WNDTOP,  top+offsety  );
+				enable = gConfig.getInt( cname, INIKEY_WNDVISIBLE, TRUE );
 				_stprintf( cname, TEXT("C86FM%d"), i+1 );
 				_stprintf( wname, TEXT("C86 FM PARAMETER VIEW CH%d"), i+1 );
 				fmWnd[i].create( cname, wname, left, top, hWnd );
@@ -168,26 +168,26 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 			RECT rc;
 			TCHAR cname[128];
 			::GetWindowRect( getFrameHWND(), &rc );
-			writeConfigInt( INISC_MAIN, INIKEY_WNDLEFT, rc.left );
-			writeConfigInt( INISC_MAIN, INIKEY_WNDTOP, rc.top );
-			writeConfigInt( INISC_MAIN, INIKEY_WNDVISIBLE, ::IsWindowVisible(getFrameHWND())?1:0 );
+			gConfig.writeInt( INISC_MAIN, INIKEY_WNDLEFT, rc.left );
+			gConfig.writeInt( INISC_MAIN, INIKEY_WNDTOP, rc.top );
+			gConfig.writeInt( INISC_MAIN, INIKEY_WNDVISIBLE, ::IsWindowVisible(getFrameHWND())?1:0 );
 
 			::GetWindowRect( keyWnd.getFrameHWND(), &rc );
-			writeConfigInt( INISC_KEY, INIKEY_WNDLEFT, rc.left );
-			writeConfigInt( INISC_KEY, INIKEY_WNDTOP, rc.top );
-			writeConfigInt( INISC_KEY, INIKEY_WNDVISIBLE, ::IsWindowVisible(keyWnd.getFrameHWND())?1:0 );
+			gConfig.writeInt( INISC_KEY, INIKEY_WNDLEFT, rc.left );
+			gConfig.writeInt( INISC_KEY, INIKEY_WNDTOP, rc.top );
+			gConfig.writeInt( INISC_KEY, INIKEY_WNDVISIBLE, ::IsWindowVisible(keyWnd.getFrameHWND())?1:0 );
 
 			::GetWindowRect( regWnd.getFrameHWND(), &rc );
-			writeConfigInt( INISC_REG, INIKEY_WNDLEFT, rc.left );
-			writeConfigInt( INISC_REG, INIKEY_WNDTOP, rc.top );
-			writeConfigInt( INISC_REG, INIKEY_WNDVISIBLE, ::IsWindowVisible(regWnd.getFrameHWND())?1:0 );
+			gConfig.writeInt( INISC_REG, INIKEY_WNDLEFT, rc.left );
+			gConfig.writeInt( INISC_REG, INIKEY_WNDTOP, rc.top );
+			gConfig.writeInt( INISC_REG, INIKEY_WNDVISIBLE, ::IsWindowVisible(regWnd.getFrameHWND())?1:0 );
 
 			for( int i=0; i<6; i++ ){
 				::GetWindowRect( fmWnd[i].getFrameHWND(), &rc );
 				_stprintf( cname, INISC_FMx, i+1 );
-				writeConfigInt( cname, INIKEY_WNDLEFT, rc.left );
-				writeConfigInt( cname, INIKEY_WNDTOP,  rc.top  );
-				writeConfigInt( cname, INIKEY_WNDVISIBLE, ::IsWindowVisible(fmWnd[i].getFrameHWND())?1:0 );
+				gConfig.writeInt( cname, INIKEY_WNDLEFT, rc.left );
+				gConfig.writeInt( cname, INIKEY_WNDTOP,  rc.top  );
+				gConfig.writeInt( cname, INIKEY_WNDVISIBLE, ::IsWindowVisible(fmWnd[i].getFrameHWND())?1:0 );
 			}
 		}
 		return DefWindowProc(hWnd , msg , wp , lp);

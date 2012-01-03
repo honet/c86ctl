@@ -13,6 +13,9 @@
     <Filter Include="resource">
       <UniqueIdentifier>{3198d819-8b3f-4fd4-b3aa-cacb446a134b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="interface">
+      <UniqueIdentifier>{90aca024-fbc9-4b77-9d51-8bcfdd1b97c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\vis_c86fm.cpp">
@@ -50,6 +53,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\stdafx.cpp">
       <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\if_gimic_hid.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\if_gimic_midi.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\if_gimic_winsub.cpp">
+      <Filter>interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +102,21 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\stdafx.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\if.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\if_gimic_hid.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\if_gimic_midi.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\if_gimic_winusb.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\version.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

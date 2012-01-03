@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "c86ctlTest.h"
-#include "..\c86ctl\src\c86ctl.h"
+#include "c86ctl.h"
 
 #define MAX_LOADSTRING 100
 
