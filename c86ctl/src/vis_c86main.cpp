@@ -53,6 +53,25 @@ void CVisC86Main::close()
 	::SendMessage( hWnd, WM_CLOSE, 0, 0 );
 }
 
+void CVisC86Main::attach( COPNA *p )
+{
+	chip = p;
+	regWnd.attach( chip );
+	keyWnd.attach( chip );
+	for( int i=0; i<6; i++ )
+		fmWnd[i].attach(&chip->fm[i]);
+};
+
+COPNA* CVisC86Main::detach( void ){
+	COPNA* oldchip = chip;
+	regWnd.detach();
+	keyWnd.detach();
+	for( int i=0; i<6; i++ )
+		fmWnd[i].detach();
+	chip = 0;
+	return oldchip;
+};
+
 void CVisC86Main::OnPaint()
 {
 	PAINTSTRUCT ps;
@@ -127,10 +146,10 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 			int left, top, enable;
 			RECT rc;
 
-			regWnd.attach( &gOPNA[0] );
-			keyWnd.attach( &gOPNA[0] );
-			for( int i=0; i<6; i++ )
-				fmWnd[i].attach( &gOPNA[0].fm[i] );
+//			regWnd.attach( chip );
+//			keyWnd.attach( chip );
+//			for( int i=0; i<6; i++ )
+//				fmWnd[i].attach(&chip->fm[i]);
 	
 			::GetWindowRect(hWnd, &rc);
 			left = gConfig.getInt( INISC_KEY, INIKEY_WNDLEFT, rc.left+offsetx );
@@ -165,6 +184,8 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 		
 	case WM_CLOSE:
 		{
+			detach();
+			
 			RECT rc;
 			TCHAR cname[128];
 			::GetWindowRect( getFrameHWND(), &rc );
@@ -194,7 +215,7 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 
 	case WM_TIMER:
 		tick++;
-		gOPNA[0].update();
+		if(chip) chip->update();
 		::InvalidateRect( hWnd, NULL, FALSE );
 		regWnd.update();
 		keyWnd.update();

@@ -17,6 +17,7 @@
 #include <mmsystem.h>
 #include <vector>
 #include "ringbuff.h"
+#include "chip.h"
 
 
 class GimicHID : public GimicIF
@@ -27,6 +28,11 @@ private:
 public:
 	~GimicHID(void);
 
+public:
+	virtual int init(void);
+	virtual void tick(void);
+	virtual Chip* getChip(void){ return chip; };
+	
 public:
 	// IGimic
 	virtual int __stdcall setSSGVolume(UCHAR vol);
@@ -40,13 +46,17 @@ public:
 	// IRealChip
 	virtual int __stdcall reset(void);
 	virtual void __stdcall out(UINT addr, UCHAR data);
+	virtual UCHAR __stdcall in( UINT addr );
 
-public:
-	virtual void __stdcall tick(void);
+private:
+	int sendData( uint8_t *data, uint32_t sz );
 	
 private:
 	HANDLE hHandle;
 	CRingBuff<UCHAR> rbuff;
+
+	Chip *chip;
+	ChipType chiptype;
 	
 public:
 	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);

@@ -128,10 +128,12 @@ std::vector< std::shared_ptr<GimicIF> > C86Ctl::gGIMIC;
 unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 {
 	MSG msg;
+	C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
 	CVisC86Main mainWnd;
 	DWORD next;
 	next = ::timeGetTime()*6 + 100;
 
+	mainWnd.attach( (COPNA*)pThis->gGIMIC.front()->getChip() );
 	mainWnd.create();
 	while(1){
 		if( terminateFlag )
@@ -152,8 +154,8 @@ unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 
 		//update();
 	}
-	
 	mainWnd.close();
+	mainWnd.detach();
 
 	return (DWORD)msg.wParam;
 }
@@ -277,9 +279,6 @@ int C86Ctl::deinitialize(void)
 
 int C86Ctl::reset(void)
 {
-	gOPNA[0].reset();
-	gOPNA[1].reset();
-
 	std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->reset(); } );
 	return 0;
 }
@@ -299,17 +298,17 @@ HRESULT C86Ctl::getChipInterface( int id, REFIID riid, void** ppi )
 
 void C86Ctl::out( UINT addr, UCHAR data )
 {
-	UINT id = 0;//addr >> 10;
-	//addr &= 0x3ff;
-	if( id < gGIMIC.size() ){
-		gOPNA[0].setReg(addr,data);
-		gGIMIC.front()->out((uint16_t)addr,data);
+	if( gGIMIC.size() ){
+		gGIMIC.front()->out(addr,data);
 	}
 }
 
 UCHAR C86Ctl::in( UINT addr )
 {
-	return gOPNA[0].getReg(addr);
+	if( gGIMIC.size() ){
+		return gGIMIC.front()->in(addr);
+	}else
+		return 0;
 }
 
 //getModuleType()

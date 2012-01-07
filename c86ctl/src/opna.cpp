@@ -11,10 +11,8 @@
 #include "opna.h"
 
 
-COPNA gOPNA[2];
-
-void COPNA::setReg( int addr, UCHAR data ){
-	if( 0x200 < addr ) return;
+bool COPNA::setReg( int addr, UCHAR data ){
+	if( 0x200 < addr ) return false;
 	int idx = 0;
 	if( 0x100 < addr ){
 		addr -= 0x100;
@@ -25,17 +23,19 @@ void COPNA::setReg( int addr, UCHAR data ){
 
 	if( idx == 0 ){
 		if( ssgRegHandling( addr, data ) )
-			return;
+			return true;
 		if( rhythmRegHandling( addr, data ) )
-			return;
+			return true;
 		if( fmCommonRegHandling( addr, data ) )
-			return;
+			return true;
 	}else{
 		if( adpcmRegHandling( addr, data ) )
-			return;
+			return true;
 	}
 	if( fmRegHandling( idx, addr, data ) )
-		return;
+		return true;
+
+	return false;
 };
 
 UCHAR COPNA::getReg( int addr ){
@@ -72,7 +72,7 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 		prescale_ssg = 1;
 		break;
 
-	case 0x27:
+	case 0x27:// Timer Control / Mode
 		fm[2].setExMode( (data>>6)&0x3 );
 		break;
 		
@@ -84,12 +84,18 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 		case 0x4: ch=3; break;
 		case 0x5: ch=4; break;
 		case 0x6: ch=5; break;
-		default: ch=-1; break;
+		default: ch=-1; handled=false; break;
 		}
 		if(0<=ch){
 			fm[ch].keyOn( (data>>4) & 0xf );
 		}
-
+		break;
+		
+	case 0x22:	// LFO
+	case 0x24:	// Timer-A Corse
+	case 0x25:	// Timer-A Fine
+	//case 0x26:	// Timer-B
+	case 0x29:	// IRQ/SCH
 		break;
 		
 	default:
@@ -298,7 +304,9 @@ bool COPNA::ssgRegHandling( UCHAR adrs, UCHAR data )
 	case 0x0d: // env type
 		ssg.setEnvType(data);
 		break;
-		
+	case 0x0e: // I/O portA
+	case 0x0f: // I/O portB
+		break;
 	default:
 		handled = false;
 	}
@@ -367,6 +375,9 @@ bool COPNA::rhythmRegHandling( UCHAR adrs, UCHAR data )
 
 bool COPNA::adpcmRegHandling( UCHAR adrs, UCHAR data )
 {
+	if(adrs<=0x10)
+		return true;
+
 	return false;
 	/*
 	UINT h, l;

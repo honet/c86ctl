@@ -11,6 +11,7 @@
 #pragma once
 #include <memory>
 #include "c86ctl.h"
+#include "chip.h"
 
 //#define SUPPORT_WINUSB
 #define SUPPORT_MIDI
@@ -19,8 +20,9 @@
 class GimicIF : public IRealChip, public IGimic
 {
 public:
-	virtual int __stdcall  init(void){ return 0; };
-	virtual void __stdcall tick(void){};
+	virtual int init(void){ return 0; };
+	virtual void tick(void){};
+	virtual Chip* getChip(){ return 0; };
 
 public:
 	// IUnknown

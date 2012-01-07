@@ -8,7 +8,6 @@
 	honet.kk(at)gmail.com
 	Thanks to Nagai "Guu" Osamu 2011/12/08 for his advice.
  */
-
 #pragma once
 
 #include "if.h"
@@ -18,6 +17,8 @@
 #include <mmsystem.h>
 #include <vector>
 #include "ringbuff.h"
+#include "chip.h"
+
 
 class GimicMIDI : public GimicIF
 {
@@ -26,6 +27,11 @@ private:
 
 public:
 	~GimicMIDI(void);
+
+public:
+	virtual int init(void);
+	virtual void tick(void);
+	virtual Chip* getChip(){ return chip; };
 
 public:
 	// IGimic
@@ -40,9 +46,7 @@ public:
 	// IRealChip
 	virtual int __stdcall reset(void);
 	virtual void __stdcall out(UINT addr, UCHAR data);
-
-public:
-	virtual void __stdcall tick(void);
+	virtual UCHAR __stdcall in( UINT addr );
 
 private:
 	void sendSysEx( uint8_t *data, uint32_t sz );
@@ -50,6 +54,9 @@ private:
 private:
 	HMIDIOUT hHandle;
 	CRingBuff<UCHAR> rbuff;
+
+	Chip *chip;
+	ChipType chiptype;
 
 public:
 	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);

@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include "chip.h"
 
 // ---------------------------------------------------------------------------------------
 class COPNAFmSlot {
@@ -467,7 +468,8 @@ protected:
 };
 
 // ---------------------------------------------------------------------------------------
-class COPNA{
+class COPNA : public Chip
+{
 public:
 	COPNA(){ reset(); };
 	virtual ~COPNA(){};
@@ -500,7 +502,7 @@ public:
 	};
 
 public:
-	void setReg( int addr, UCHAR data );
+	bool setReg( int addr, UCHAR data );
 	UCHAR getReg( int addr );
 
 	int getTimerA(){ return timerA; };
@@ -511,7 +513,6 @@ public:
 	bool isLFOOn(){ return lfo_sw; };
 
 
-	
 public:
 	COPNAFm fm[6];
 	COPNASsg ssg;
@@ -543,8 +544,5 @@ protected:
 	bool lfo_sw;
 	//int ch3mode;
 };
-
-
-extern COPNA gOPNA[2];
 
 

@@ -104,10 +104,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\chip.h" />
     <ClInclude Include="..\..\src\if.h" />
     <ClInclude Include="..\..\src\if_gimic_hid.h" />
     <ClInclude Include="..\..\src\if_gimic_midi.h" />
     <ClInclude Include="..\..\src\if_gimic_winusb.h" />
+    <ClInclude Include="..\..\src\opm.h" />
+    <ClInclude Include="..\..\src\opn3l.h" />
     <ClInclude Include="..\..\src\version.h" />
     <ClInclude Include="..\..\src\vis_c86fm.h" />
     <ClInclude Include="..\..\src\vis_c86key.h" />

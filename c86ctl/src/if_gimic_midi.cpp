@@ -30,14 +30,19 @@
 	SSG Vol      : f0, 7f, 04, vol[6:0], vol[13:7], f7
  */
 
-#include	<stdafx.h>
-#include	"if_gimic_midi.h"
-#include	"config.h"
+#include <stdafx.h>
+#include <algorithm>
+#include "if_gimic_midi.h"
+#include "config.h"
+#include "chip.h"
+#include "opm.h"
+#include "opna.h"
+#include "opn3l.h"
 
 /*----------------------------------------------------------------------------
 	コンストラクタ
 ----------------------------------------------------------------------------*/
-GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h)
+GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h), chip(0), chiptype(CHIP_OPNA)
 {
 	rbuff.alloc(128);
 }
@@ -45,12 +50,14 @@ GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h)
 /*----------------------------------------------------------------------------
 	デストラクタ
 ----------------------------------------------------------------------------*/
-GimicMIDI::~GimicMIDI( void)
+GimicMIDI::~GimicMIDI(void)
 {
 	if(hHandle) {
 		midiOutClose(hHandle);
 		hHandle = NULL;
 	}
+	if( chip )
+		delete chip;
 }
 
 
@@ -75,6 +82,7 @@ std::vector< std::shared_ptr<GimicIF> > GimicMIDI::CreateInstances(void)
 		instances.push_back( GimicMIDIPtr(new GimicMIDI(hmidi)) );
 	}
 
+	std::for_each( instances.begin(), instances.end(), [](std::shared_ptr<GimicIF> x){ x->init(); } );
 	return instances;
 }
 
@@ -95,6 +103,13 @@ void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )
 /*----------------------------------------------------------------------------
 	実装
 ----------------------------------------------------------------------------*/
+int GimicMIDI::init(void)
+{
+	// MIDI-IFの場合はOPNA決めうち(module判定ifを作ってないから)
+	chiptype = CHIP_OPNA;
+	chip = new COPNA();
+	return C86CTL_ERR_NONE;
+}
 
 int GimicMIDI::reset( void )
 {
@@ -111,9 +126,22 @@ int GimicMIDI::reset( void )
 
 void GimicMIDI::out(UINT addr, UCHAR data)
 {
-	// data packing.
-	UCHAR d[3] = { (addr>>6)&0x0f, (addr&0x3f)<<1 | (data>>7), (data&0x7f) };
-	rbuff.write(d,3);
+	bool flag = true;
+	if( chip )
+		flag = chip->setReg(addr, data );
+	if( flag ){
+		// data packing.
+		UCHAR d[3] = { (addr>>6)&0x0f, (addr&0x3f)<<1 | (data>>7), (data&0x7f) };
+		rbuff.write(d,3);
+	}
+}
+
+UCHAR GimicMIDI::in(UINT addr)
+{
+	if( chip )
+		return chip->getReg(addr);
+
+	return 0;
 }
 
 int GimicMIDI::setSSGVolume(UCHAR vol)

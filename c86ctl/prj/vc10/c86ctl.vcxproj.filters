@@ -119,6 +119,15 @@
     <ClInclude Include="..\..\src\module.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\chip.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\opm.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\opn3l.h">
+      <Filter>module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\c86ctl.def">

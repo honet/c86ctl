@@ -13,6 +13,7 @@
 #include "vis_c86key.h"
 #include "vis_c86reg.h"
 #include "vis_c86fm.h"
+#include "opna.h"
 
 class CVisC86Main : public CVisWnd
 {
@@ -20,6 +21,7 @@ public:
 	CVisC86Main()
 		: CVisWnd()
 		, tick(0)
+		, chip(0)
 	{
 	};
 	~CVisC86Main(){};
@@ -27,6 +29,9 @@ public:
 public:
 	bool create();
 	void close();
+	
+	void attach( COPNA *p );
+	COPNA* detach( void );
 
 protected:
 	void OnPaint();
@@ -38,6 +43,7 @@ protected:
 	CVisC86Key keyWnd;
 	CVisC86Reg regWnd;
 	CVisC86Fm fmWnd[6];
+	COPNA *chip;
 	UINT tick;
 };
 

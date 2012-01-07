@@ -19,13 +19,20 @@ extern "C" {
 
 
 /*----------------------------------------------------------------------------*/
-/*  エラーコード定義                                                          */
+/*  定数定義                                                                  */
 /*----------------------------------------------------------------------------*/
 #define C86CTL_ERR_NONE						0
 #define C86CTL_ERR_UNKNOWN					-1
 #define C86CTL_ERR_INVALID_PARAM			-2
 #define C86CTL_ERR_NOT_IMPLEMENTED			-9999
 #define C86CTL_ERR_NODEVICE					-1000
+
+enum ChipType {
+	CHIP_UNKNOWN = 0,
+	CHIP_OPNA,
+	CHIP_OPM,
+	CHIP_OPN3L,
+};
 
 /*----------------------------------------------------------------------------*/
 /*  構造体定義                                                                */

@@ -232,3 +232,4 @@ void CVisC86Key::drawRhythmTrackView( HDC hdc, int ltx, int lty, int trNo )
 	if( pOPNA->rhythm.bd.isOn() )
 		vis_draw_str( hdc, hSkinDC, hSkinMaskDC, 0, ltx+5+cx*37, lty+sy+5+18, "BD");
 }
+

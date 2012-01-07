@@ -18,6 +18,12 @@
 #define GIMIC_USBPID 0x05e4
 
 #include <setupapi.h>
+#include <algorithm>
+#include "chip.h"
+#include "opm.h"
+#include "opna.h"
+#include "opn3l.h"
+
 extern "C" {
 #include "hidsdi.h"
 }
@@ -32,7 +38,8 @@ extern "C" {
 /*----------------------------------------------------------------------------
 	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
 ----------------------------------------------------------------------------*/
-GimicHID::GimicHID( HANDLE h ): hHandle(h)
+GimicHID::GimicHID( HANDLE h )
+	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN)
 {
 	rbuff.alloc( 128 );
 }
@@ -44,6 +51,8 @@ GimicHID::~GimicHID(void)
 {
 	CloseHandle(hHandle);
 	hHandle = NULL;
+	if( chip )
+		delete chip;
 }
 
 /*----------------------------------------------------------------------------
@@ -105,35 +114,71 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 		}
 	}
 
+	std::for_each( instances.begin(), instances.end(), [](std::shared_ptr<GimicIF> x){ x->init(); } );
 	return instances;
+}
+
+int GimicHID::sendData( uint8_t *data, uint32_t sz )
+{
+	UCHAR buff[128];
+
+	if( !hHandle )
+		return C86CTL_ERR_NODEVICE;
+
+	buff[0] = 0; // HID interface id.
+
+	sz = MIN(sz,64) & ~0x3;
+	if( 0<sz ){
+		memcpy( &buff[1], data, sz );
+		if( sz<64 )
+			memset( &buff[1+sz], 0xff, 64-sz );
+
+		DWORD len;
+		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
+
+		if(ret == 0 || 65 != len){
+			CloseHandle(hHandle);
+			hHandle = NULL;
+			return C86CTL_ERR_UNKNOWN;
+		}
+	}
+
+	return C86CTL_ERR_NONE;
 }
 
 
 /*----------------------------------------------------------------------------
 	ŽÀ‘•
 ----------------------------------------------------------------------------*/
+int GimicHID::init(void)
+{
+	Devinfo info;
+	getModuleInfo(&info);
+	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
+		chiptype = CHIP_OPN3L;
+		chip = new COPN3L();
+	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
+		chiptype = CHIP_OPM;
+		chip = new COPM();
+	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
+		chiptype = CHIP_OPNA;
+		chip = new COPNA();
+	}
+	return C86CTL_ERR_NONE;
+}
 
 int GimicHID::reset(void)
 {
 	// ƒŠƒZƒbƒgƒRƒ}ƒ“ƒh‘—M
 	UCHAR d[4] = { 0x82, 0, 0, 0 };
-	rbuff.write(d,4);
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
+	sendData( d, 4 );
 	return C86CTL_ERR_NONE;
 }
 
 int GimicHID::setSSGVolume(UCHAR vol)
 {
 	UCHAR d[4] = { 0x84, vol, 0, 0 };
-	rbuff.write(d,4);
-
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
+	sendData( d, 4 );
 	return C86CTL_ERR_NONE;
 }
 
@@ -143,15 +188,10 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	UCHAR d[4] = { 0x86, 0, 0, 0 };
-	rbuff.write(d,4);
+	sendData( d, 4 );
 
 	UCHAR buff[66];
 	DWORD len;
-
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
 	*vol = buff[1];
 
@@ -161,12 +201,7 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 int GimicHID::setPLLClock(UINT clock)
 {
 	UCHAR d[4] = { 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff };
-	rbuff.write(d,4);
-	
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
+	sendData( d, 4 );
 	return C86CTL_ERR_NONE;
 }
 
@@ -176,15 +211,10 @@ int GimicHID::getPLLClock(UINT *clock)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	UCHAR d[4] = { 0x85, 0, 0, 0 };
-	rbuff.write(d,4);
+	sendData( d, 4 );
 
 	UCHAR buff[66];
 	DWORD len;
-
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
 	*clock = *((UINT*)&buff[1]);
 
@@ -198,15 +228,10 @@ int GimicHID::getMBInfo( struct Devinfo *info )
 		return C86CTL_ERR_INVALID_PARAM;
 
 	UCHAR d[4] = { 0x91, 0xff, 0, 0 };
-	rbuff.write(d,4);
+	sendData( d, 4 );
 
 	UCHAR buff[66];
 	DWORD len;
-
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
 	memcpy( info, &buff[1], 32 ); // 1byte–Ú‚ÍUSB‚ÌInterfaceNo.‚È‚Ì‚Å”ò‚Î‚·
 
@@ -219,15 +244,10 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 		return C86CTL_ERR_INVALID_PARAM;
 
 	UCHAR d[4] = { 0x91, 0, 0, 0 };
-	rbuff.write(d,4);
+	sendData( d, 4 );
 
 	UCHAR buff[66];
 	DWORD len;
-
-	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length())
-		Sleep(10);
-
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
 	memcpy( info, &buff[1], 32 ); // 1byte–Ú‚ÍUSB‚ÌInterfaceNo.‚È‚Ì‚Å”ò‚Î‚·
 
@@ -237,8 +257,21 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 
 void GimicHID::out(UINT addr, UCHAR data)
 {
-	UCHAR d[4] = { 0, addr>>8, addr&0xff, data };
-	rbuff.write(d,4);
+	bool flag = true;
+	if( chip )
+		flag = chip->setReg(addr, data );
+	if( flag ){
+		UCHAR d[4] = { 0, addr>>8, addr&0xff, data };
+		rbuff.write(d,4);
+	}
+}
+
+UCHAR GimicHID::in(UINT addr)
+{
+	if( chip )
+		return chip->getReg(addr);
+
+	return 0;
 }
 
 void GimicHID::tick(void)
