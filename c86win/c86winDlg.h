@@ -54,4 +54,12 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButtonInitialize();
 	afx_msg void OnBnClickedButtonDeinitialize();
+	afx_msg void OnBnClickedButtonSetSSGVol();
+	afx_msg void OnBnClickedButtonSetPllClock();
+	UINT m_ssgVol;
+	UINT m_pllClock;
+	afx_msg void OnBnClickedButtonMbinfo();
+	afx_msg void OnBnClickedButtonModuleinfo();
+	afx_msg void OnBnClickedButtonGetSsgvol();
+	afx_msg void OnBnClickedButtonGetPllclock();
 };

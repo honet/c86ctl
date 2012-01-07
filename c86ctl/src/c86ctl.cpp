@@ -90,17 +90,15 @@ public:
 
 public:
 	// IRealChipBase
-	int __stdcall initialize(void);
-	int __stdcall deinitialize(void);
+	virtual int __stdcall initialize(void);
+	virtual int __stdcall deinitialize(void);
 	virtual int __stdcall getNumberOfChip(void);
-	HRESULT __stdcall getChipInterface( int id, REFIID riid, void** ppi );
-
+	virtual HRESULT __stdcall getChipInterface( int id, REFIID riid, void** ppi );
 
 public:
 	int reset(void);
 	void out( UINT addr, UCHAR data );
 	UCHAR in( UINT addr );
-	//getModuleType();
 
 public:
 	static bool terminateFlag;
@@ -351,32 +349,4 @@ UCHAR WINAPI c86ctl_in( UINT addr )
 {
 	return gc86ctl.in( addr );
 }
-
-// ---------------------------------------------------------------------------
-#if 0
-C86CTL_API INT c86ctl_get_version(UINT *ver)
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-
-C86CTL_API INT c86ctl_out2(UINT module, UINT addr, UCHAR adata )
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-
-C86CTL_API INT c86ctl_in2(UINT module, UINT addr, UCHAR *data )
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-
-C86CTL_API INT c86ctl_set_pll_clock(UINT module, UINT clock )
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-
-C86CTL_API INT c86ctl_set_volume(UINT module, UINT ch, UINT vol )
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-#endif
 

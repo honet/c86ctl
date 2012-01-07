@@ -16,7 +16,7 @@
 #define SUPPORT_MIDI
 #define SUPPORT_HID
 
-class GimicIF : public IRealChip, public IGimicModule
+class GimicIF : public IRealChip, public IGimic
 {
 public:
 	virtual int __stdcall  init(void){ return 0; };
@@ -25,29 +25,39 @@ public:
 public:
 	// IUnknown
 	virtual HRESULT __stdcall QueryInterface( REFIID riid, LPVOID *ppvObj ){
+		if( !ppvObj )
+			return ERROR_INVALID_PARAMETER;
+		
 		if( ::IsEqualIID( riid, IID_IRealChip ) ){
-			*ppvObj = (LPVOID)this;
+			*ppvObj = static_cast<IRealChip*>(this);
 			return NOERROR;
-		}else if( ::IsEqualIID( riid, IID_IGimicModule ) ){
-			*ppvObj = (LPVOID)this;
+		}else if( ::IsEqualIID( riid, IID_IGimic ) ){
+			*ppvObj = static_cast<IGimic*>(this);
 			return NOERROR;
 		}
 		*ppvObj = NULL;
 		return E_NOINTERFACE;
 	};
+
+	// TODO: Ç±Ç¢Ç¬ÇÁê^ñ ñ⁄Ç…èëÇ≠ÅB
 	virtual ULONG __stdcall AddRef(VOID){ return 1; };
 	virtual ULONG __stdcall Release(VOID){ return 0; };
 
 public:
 	// IRealChip
-	virtual int __stdcall reset(void){ return 0; };
+	virtual int __stdcall reset(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual void __stdcall out( UINT addr, UCHAR data){};
 	virtual UCHAR __stdcall in( UINT addr ){ return 0; };
 
 public:
-	// IGimicModule
-	int __stdcall setSSGVolume(UCHAR vol){ return 0; };
-	int __stdcall setPLLClock(UINT clock){ return 0; };
+	// IGimic
+	int __stdcall setSSGVolume(UCHAR vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	int __stdcall getSSGVolume(UCHAR *vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	int __stdcall setPLLClock(UINT clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	int __stdcall getPLLClock(UINT *clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall getFWVer(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall getMBInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall getModuleInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 };
 
 typedef std::shared_ptr<GimicIF> GimicIFPtr;

@@ -28,14 +28,20 @@ public:
 	~GimicMIDI(void);
 
 public:
-	// IGimicModule
+	// IGimic
 	virtual int __stdcall setSSGVolume(UCHAR vol);
+	virtual int __stdcall getSSGVolume(UCHAR *vol);
 	virtual int __stdcall setPLLClock(UINT clock);
+	virtual int __stdcall getPLLClock(UINT *clock);
+	virtual int __stdcall getMBInfo(struct Devinfo *info);
+	virtual int __stdcall getModuleInfo(struct Devinfo *info);
 
 public:
 	// IRealChip
 	virtual int __stdcall reset(void);
 	virtual void __stdcall out(UINT addr, UCHAR data);
+
+public:
 	virtual void __stdcall tick(void);
 
 private:

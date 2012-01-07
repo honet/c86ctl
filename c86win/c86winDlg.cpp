@@ -55,6 +55,8 @@ END_MESSAGE_MAP()
 
 C86winDlg::C86winDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(C86winDlg::IDD, pParent)
+	, m_ssgVol(255)
+	, m_pllClock(8000000)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	hThread = NULL;
@@ -68,6 +70,8 @@ void C86winDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_FILENAME, m_editFilePath);
 	DDX_Control(pDX, IDC_STATIC_TICK, m_staticTick);
 	DDX_Control(pDX, IDC_EDIT_MESSAGE, m_editMessage);
+	DDX_Text(pDX, IDC_EDIT_SSGVOL, m_ssgVol);
+	DDX_Text(pDX, IDC_EDIT_PLLCLOCK, m_pllClock);
 }
 
 BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
@@ -82,6 +86,12 @@ BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_BUTTON_INITIALIZE, &C86winDlg::OnBnClickedButtonInitialize)
 	ON_BN_CLICKED(IDC_BUTTON_DEINITIALIZE, &C86winDlg::OnBnClickedButtonDeinitialize)
+	ON_BN_CLICKED(IDC_BUTTON_SSGVOL, &C86winDlg::OnBnClickedButtonSetSSGVol)
+	ON_BN_CLICKED(IDC_BUTTON_PLLCLOCK, &C86winDlg::OnBnClickedButtonSetPllClock)
+	ON_BN_CLICKED(IDC_BUTTON_MBINFO, &C86winDlg::OnBnClickedButtonMbinfo)
+	ON_BN_CLICKED(IDC_BUTTON_MODULEINFO, &C86winDlg::OnBnClickedButtonModuleinfo)
+	ON_BN_CLICKED(IDC_BUTTON_GET_SSGVOL, &C86winDlg::OnBnClickedButtonGetSsgvol)
+	ON_BN_CLICKED(IDC_BUTTON_GET_PLLCLOCK, &C86winDlg::OnBnClickedButtonGetPllclock)
 END_MESSAGE_MAP()
 
 
@@ -119,9 +129,10 @@ BOOL C86winDlg::OnInitDialog()
 
 	// -----------------------------------------------------------------
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
-	pApp->pChipBase->initialize();
+	//pApp->pChipBase->initialize();
 	//pApp->pChipBase->deinitialize();
 	// -----------------------------------------------------------------
+	UpdateData(FALSE);
 
 
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
@@ -311,6 +322,7 @@ void C86winDlg::OnBnClickedButtonOpen()
 	CFileDialog dlg( TRUE, _T("s98"), NULL, NULL, _T("s98 files (*.s98)|*.s98||"), this );
 
 	if( dlg.DoModal() == IDOK ){
+		OnBnClickedButtonStop();
 		m_editFilePath.SetWindowText( dlg.GetPathName() );
 		s98data.loadFile(dlg.GetPathName());
 	}
@@ -343,4 +355,98 @@ void C86winDlg::OnBnClickedButtonDeinitialize()
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
 	pApp->pChipBase->deinitialize();
+}
+
+
+void C86winDlg::OnBnClickedButtonSetSSGVol()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	UpdateData();
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		pGimicModule->setSSGVolume(m_ssgVol);
+		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonSetPllClock()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	UpdateData();
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		pGimicModule->setPLLClock(m_pllClock);
+		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonMbinfo()
+{
+	UpdateData();
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		struct Devinfo info;
+		pGimicModule->getMBInfo(&info);
+
+		CString str, devname, rev, serial;
+		devname = info.Devname;
+		rev = info.Rev;
+		serial = info.Serial;
+		str = devname + _T("\r\n") + rev + _T("\r\n") + serial;
+		m_editMessage.SetWindowText(str);
+		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonModuleinfo()
+{
+	UpdateData();
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		struct Devinfo info;
+		pGimicModule->getModuleInfo(&info);
+
+		CString str, devname, rev, serial;
+		devname = info.Devname;
+		rev = info.Rev;
+		serial = info.Serial;
+		str = devname + _T("\r\n") + rev + _T("\r\n") + serial;
+		m_editMessage.SetWindowText(str);
+		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonGetSsgvol()
+{
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		UCHAR vol;
+		pGimicModule->getSSGVolume(&vol);
+		m_ssgVol = vol;
+		UpdateData(FALSE);
+		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonGetPllclock()
+{
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		UINT clock;
+		pGimicModule->getPLLClock(&clock);
+		m_pllClock = clock;
+		UpdateData(FALSE);
+		pGimicModule->Release();
+	}
 }

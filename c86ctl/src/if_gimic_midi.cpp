@@ -124,12 +124,31 @@ int GimicMIDI::setSSGVolume(UCHAR vol)
 	return C86CTL_ERR_NONE;
 }
 
+int GimicMIDI::getSSGVolume(UCHAR *vol)
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
 int GimicMIDI::setPLLClock(UINT clock)
 {
 	UCHAR d[] = { 0xf0, 0x7d, 0x40, 0x01, 0x00, 0x70,
 		clock&0x7f, (clock>>7)&0x7f, (clock>>14)&0x7f, 0xf7 };
 	sendSysEx( &d[0], 10 );
 	return C86CTL_ERR_NONE;
+}
+int GimicMIDI::getPLLClock(UINT *clock)
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicMIDI::getMBInfo( struct Devinfo *info )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicMIDI::getModuleInfo( struct Devinfo *info )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
 void GimicMIDI::tick(void)

@@ -103,6 +103,7 @@ BOOL C86winApp::InitInstance()
 
 	// ダイアログは閉じられました。アプリケーションのメッセージ ポンプを開始しないで
 	//  アプリケーションを終了するために FALSE を返してください。
+	::FreeLibrary(hC86DLL);
 	return FALSE;
 }
 

@@ -36,9 +36,6 @@
     <ClCompile Include="..\..\src\vis_c86wnd.cpp">
       <Filter>vis</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\module.cpp">
-      <Filter>module</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\opna.cpp">
       <Filter>module</Filter>
     </ClCompile>
@@ -63,6 +60,9 @@
     <ClCompile Include="..\..\src\if_gimic_winsub.cpp">
       <Filter>interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\module.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vis_c86fm.h">
@@ -82,9 +82,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\vis_c86wnd.h">
       <Filter>vis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\module.h">
-      <Filter>module</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\opna.h">
       <Filter>module</Filter>
@@ -117,6 +114,9 @@
       <Filter>interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\version.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\module.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

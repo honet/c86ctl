@@ -9,10 +9,10 @@
 
 // ＤＬＬのバージョン定義
 #define VERSION_MAJOR      1
-#define VERSION_MINOR      1
+#define VERSION_MINOR      2
 #define VERSION_REVISION   0
-#define VERSION_BUILD      3
-#define VERSION_STRING     "1, 1, 0, 3"
+#define VERSION_BUILD      4
+#define VERSION_STRING     "1, 2, 0, 4"
 
 
 // 以下はDLLリソース用定義につき変更禁止

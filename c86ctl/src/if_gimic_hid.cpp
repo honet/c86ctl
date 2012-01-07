@@ -137,6 +137,27 @@ int GimicHID::setSSGVolume(UCHAR vol)
 	return C86CTL_ERR_NONE;
 }
 
+int GimicHID::getSSGVolume(UCHAR *vol)
+{
+	if( !vol )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	UCHAR d[4] = { 0x86, 0, 0, 0 };
+	rbuff.write(d,4);
+
+	UCHAR buff[66];
+	DWORD len;
+
+	// “]‘—Š®—¹‘Ò‚¿
+	while(rbuff.get_length())
+		Sleep(10);
+
+	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
+	*vol = buff[1];
+
+	return C86CTL_ERR_NONE;
+}
+
 int GimicHID::setPLLClock(UINT clock)
 {
 	UCHAR d[4] = { 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff };
@@ -145,6 +166,70 @@ int GimicHID::setPLLClock(UINT clock)
 	// “]‘—Š®—¹‘Ò‚¿
 	while(rbuff.get_length())
 		Sleep(10);
+
+	return C86CTL_ERR_NONE;
+}
+
+int GimicHID::getPLLClock(UINT *clock)
+{
+	if( !clock )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	UCHAR d[4] = { 0x85, 0, 0, 0 };
+	rbuff.write(d,4);
+
+	UCHAR buff[66];
+	DWORD len;
+
+	// “]‘—Š®—¹‘Ò‚¿
+	while(rbuff.get_length())
+		Sleep(10);
+
+	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
+	*clock = *((UINT*)&buff[1]);
+
+	return C86CTL_ERR_NONE;
+}
+
+
+int GimicHID::getMBInfo( struct Devinfo *info )
+{
+	if( !info )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	UCHAR d[4] = { 0x91, 0xff, 0, 0 };
+	rbuff.write(d,4);
+
+	UCHAR buff[66];
+	DWORD len;
+
+	// “]‘—Š®—¹‘Ò‚¿
+	while(rbuff.get_length())
+		Sleep(10);
+
+	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
+	memcpy( info, &buff[1], 32 ); // 1byte–Ú‚ÍUSB‚ÌInterfaceNo.‚È‚Ì‚Å”ò‚Î‚·
+
+	return C86CTL_ERR_NONE;
+}
+
+int GimicHID::getModuleInfo( struct Devinfo *info )
+{
+	if( !info )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	UCHAR d[4] = { 0x91, 0, 0, 0 };
+	rbuff.write(d,4);
+
+	UCHAR buff[66];
+	DWORD len;
+
+	// “]‘—Š®—¹‘Ò‚¿
+	while(rbuff.get_length())
+		Sleep(10);
+
+	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
+	memcpy( info, &buff[1], 32 ); // 1byte–Ú‚ÍUSB‚ÌInterfaceNo.‚È‚Ì‚Å”ò‚Î‚·
 
 	return C86CTL_ERR_NONE;
 }
