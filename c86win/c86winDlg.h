@@ -62,4 +62,5 @@ public:
 	afx_msg void OnBnClickedButtonModuleinfo();
 	afx_msg void OnBnClickedButtonGetSsgvol();
 	afx_msg void OnBnClickedButtonGetPllclock();
+	afx_msg void OnDestroy();
 };

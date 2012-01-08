@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_MODULEINFO, &C86winDlg::OnBnClickedButtonModuleinfo)
 	ON_BN_CLICKED(IDC_BUTTON_GET_SSGVOL, &C86winDlg::OnBnClickedButtonGetSsgvol)
 	ON_BN_CLICKED(IDC_BUTTON_GET_PLLCLOCK, &C86winDlg::OnBnClickedButtonGetPllclock)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -129,7 +130,7 @@ BOOL C86winDlg::OnInitDialog()
 
 	// -----------------------------------------------------------------
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
-	//pApp->pChipBase->initialize();
+	pApp->pChipBase->initialize();
 	//pApp->pChipBase->deinitialize();
 	// -----------------------------------------------------------------
 	UpdateData(FALSE);
@@ -449,4 +450,14 @@ void C86winDlg::OnBnClickedButtonGetPllclock()
 		UpdateData(FALSE);
 		pGimicModule->Release();
 	}
+}
+
+
+void C86winDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	pApp->pChipBase->deinitialize();
+
 }

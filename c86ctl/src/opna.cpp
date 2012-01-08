@@ -370,7 +370,7 @@ bool COPNA::rhythmRegHandling( UCHAR adrs, UCHAR data )
 	default:
 		handled = false;
 	}
-	return false;
+	return handled;
 }
 
 bool COPNA::adpcmRegHandling( UCHAR adrs, UCHAR data )

@@ -73,6 +73,7 @@ class C86Ctl : public IRealChipBase
 {
 public:
 	C86Ctl(){
+		isInitialized = false;
 		gMainThread = 0;
 		gSenderThread = 0;
 		mainThreadID = 0;
@@ -114,6 +115,7 @@ protected:
 	UINT mainThreadID;
 	UINT senderThreadID;
 	DWORD timerPeriod;
+	bool isInitialized;
 };
 
 C86Ctl gc86ctl;
@@ -215,6 +217,9 @@ ULONG C86Ctl::Release(VOID)
 
 int C86Ctl::initialize(void)
 {
+	if( isInitialized )
+		return C86CTL_ERR_UNKNOWN;
+
 	// インスタンス生成
 	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
 	if( type==0 ){
@@ -245,12 +250,15 @@ int C86Ctl::initialize(void)
 		::WaitForSingleObject( gMainThread, INFINITE );
 		return C86CTL_ERR_UNKNOWN;
 	}
-	
+	isInitialized = true;
 	return C86CTL_ERR_NONE;
 }
 
 int C86Ctl::deinitialize(void)
 {
+	if( !isInitialized )
+		return C86CTL_ERR_UNKNOWN;
+
 	c86ctl_reset();
 
 	// 各種スレッド終了
@@ -273,6 +281,7 @@ int C86Ctl::deinitialize(void)
 
 	// タイマ分解能設定解除
 	::timeEndPeriod(timerPeriod);
+	isInitialized = false;
 	
 	return C86CTL_ERR_NONE;
 }

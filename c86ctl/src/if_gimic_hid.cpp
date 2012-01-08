@@ -189,7 +189,7 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 
 	UCHAR d[4] = { 0x86, 0, 0, 0 };
 	sendData( d, 4 );
-
+	Sleep(100);
 	UCHAR buff[66];
 	DWORD len;
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
@@ -212,7 +212,7 @@ int GimicHID::getPLLClock(UINT *clock)
 
 	UCHAR d[4] = { 0x85, 0, 0, 0 };
 	sendData( d, 4 );
-
+	Sleep(100);
 	UCHAR buff[66];
 	DWORD len;
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
@@ -229,7 +229,7 @@ int GimicHID::getMBInfo( struct Devinfo *info )
 
 	UCHAR d[4] = { 0x91, 0xff, 0, 0 };
 	sendData( d, 4 );
-
+	Sleep(100);
 	UCHAR buff[66];
 	DWORD len;
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
@@ -245,7 +245,7 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 
 	UCHAR d[4] = { 0x91, 0, 0, 0 };
 	sendData( d, 4 );
-
+	Sleep(100);
 	UCHAR buff[66];
 	DWORD len;
 	int ret = ReadFile( hHandle, buff, 65, &len, NULL);

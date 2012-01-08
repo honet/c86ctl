@@ -99,8 +99,8 @@ void CVisC86Main::OnPaint()
 	}
 	vis_draw_logo( hMemDC, hSkinDC, hSkinMaskDC, 2, 2 );
 	vis_draw_tickcircle( hMemDC, hSkinDC, hSkinMaskDC, 10, 35, tick&0x7 );
-	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 8, "FOR PC-9801-86 SOUND CARD & C86USB CONTROL" );
-	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 18, "OPNA STATUS DISPLAY VER 0.2(C79EDITION)  " );
+	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 8, "FOR GIMIC & C86USB CONTROL" );
+	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 18, "OPNA STATUS DISPLAY VER 1.2.0.4(PREVIEW)" );
 
 	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0,   5, 78, "WINDOWS -------------------------------------------------------" );
 	CVisWnd *wnd[] = { &keyWnd, &regWnd, 
