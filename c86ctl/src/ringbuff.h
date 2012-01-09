@@ -41,7 +41,7 @@ public:
 	
 	BOOL alloc( UINT asize ){
 		free();
-		p = new UCHAR[asize];
+		p = new T[asize];
 		if( p ){
 			sz = asize;
 			mask = sz - 1;
@@ -84,15 +84,25 @@ public:
 		}
 	};
 
-		
-	T read1(VOID){
+	BOOL isempty(void){
+		if( !p ) return 0;
+		return ( get_length() == 0 );
+	}
+
+	T* query_read_ptr(void){
 		if( !p )
 			return 0;
+		
+		return p + (ridx&mask);
+	};
+	
+	BOOL read1( T *data ){
+		if( !p )
+			return FALSE;
 
-		T *pd = p + (ridx&mask);
-		T d = *pd;
+		*data = *(p + (ridx&mask));
 		::InterlockedIncrement(&ridx);
-		return d;
+		return TRUE;
 	};
 
 	BOOL read( T *data, UINT sz ){

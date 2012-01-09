@@ -135,7 +135,9 @@ unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 	DWORD next;
 	next = ::timeGetTime()*6 + 100;
 
-	mainWnd.attach( (COPNA*)pThis->gGIMIC.front()->getChip() );
+	if( !pThis->gGIMIC.empty() )
+		mainWnd.attach( (COPNA*)pThis->gGIMIC.front()->getChip() );
+
 	mainWnd.create();
 	while(1){
 		if( terminateFlag )
@@ -236,7 +238,9 @@ int C86Ctl::initialize(void)
 	}
 
 	// 描画スレッド開始
-	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) ){
+//	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) ){
+	// 2012/1/9 honet: OPMの時に激しくバグっているので一旦無効化
+	if(0){
 		gMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, NULL, 0, &mainThreadID );
 		if( !gMainThread )
 			return C86CTL_ERR_UNKNOWN;

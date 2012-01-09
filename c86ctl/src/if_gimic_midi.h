@@ -41,6 +41,7 @@ public:
 	virtual int __stdcall getPLLClock(UINT *clock);
 	virtual int __stdcall getMBInfo(struct Devinfo *info);
 	virtual int __stdcall getModuleInfo(struct Devinfo *info);
+	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
 
 public:
 	// IRealChip

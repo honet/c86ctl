@@ -504,6 +504,8 @@ public:
 public:
 	bool setReg( int addr, UCHAR data );
 	UCHAR getReg( int addr );
+	//void setPartMask(int ch);
+	
 
 	int getTimerA(){ return timerA; };
 	int getTimerB(){ return timerB; };
@@ -543,6 +545,7 @@ protected:
 	bool timerB_sw;
 	bool lfo_sw;
 	//int ch3mode;
+	//bool partmask[14];
 };
 
 

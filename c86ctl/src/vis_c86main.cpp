@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <typeinfo>
 #include "module.h"
 #include "resource.h"
 #include "vis_c86sub.h"
@@ -54,17 +55,19 @@ void CVisC86Main::close()
 	::SendMessage( hWnd, WM_CLOSE, 0, 0 );
 }
 
-void CVisC86Main::attach( COPNA *p )
+void CVisC86Main::attach( Chip *p )
 {
 	chip = p;
-	regWnd.attach( chip );
-	keyWnd.attach( chip );
-	for( int i=0; i<6; i++ )
-		fmWnd[i].attach(&chip->fm[i]);
+	if( typeid(chip) == typeid(COPNA*) ){
+		regWnd.attach( dynamic_cast<COPNA*>(chip) );
+		keyWnd.attach( dynamic_cast<COPNA*>(chip) );
+		for( int i=0; i<6; i++ )
+			fmWnd[i].attach(&dynamic_cast<COPNA*>(chip)->fm[i]);
+	}
 };
 
-COPNA* CVisC86Main::detach( void ){
-	COPNA* oldchip = chip;
+Chip* CVisC86Main::detach( void ){
+	Chip* oldchip = chip;
 	regWnd.detach();
 	keyWnd.detach();
 	for( int i=0; i<6; i++ )
@@ -151,7 +154,7 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 //			keyWnd.attach( chip );
 //			for( int i=0; i<6; i++ )
 //				fmWnd[i].attach(&chip->fm[i]);
-	
+			if( typeid(chip) == typeid(COPNA*) ){
 			::GetWindowRect(hWnd, &rc);
 			left = gConfig.getInt( INISC_KEY, INIKEY_WNDLEFT, rc.left+offsetx );
 			top  = gConfig.getInt( INISC_KEY, INIKEY_WNDTOP, rc.top+offsety );
@@ -179,7 +182,8 @@ LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM 
 				if( enable )
 					::ShowWindow( fmWnd[i].getFrameHWND(), SW_SHOWNOACTIVATE );
 			}
-			::SetTimer( hWnd, 0, 50, NULL );
+			}
+//			::SetTimer( hWnd, 0, 50, NULL );
 		}
 		break;
 		

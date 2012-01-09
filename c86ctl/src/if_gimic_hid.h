@@ -22,6 +22,13 @@
 
 class GimicHID : public GimicIF
 {
+public:
+	struct MSG{
+		// なんとなく合計2-DWORDになるようにしてみた。
+		UCHAR len;
+		UCHAR dat[7];	// 最大メッセージ長は今のところ6byte.
+	};
+	
 private:
 	GimicHID(HANDLE h);
 
@@ -41,6 +48,7 @@ public:
 	virtual int __stdcall getPLLClock(UINT *clock);
 	virtual int __stdcall getMBInfo(struct Devinfo *info);
 	virtual int __stdcall getModuleInfo(struct Devinfo *info);
+	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
 
 public:
 	// IRealChip
@@ -49,13 +57,12 @@ public:
 	virtual UCHAR __stdcall in( UINT addr );
 
 private:
-	int sendData( uint8_t *data, uint32_t sz );
-	int transaction( uint8_t *txdata, uint32_t txsz,
-					 uint8_t *rxdata, uint32_t rxsz );
+	int sendMsg( MSG *data );
+	int transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz );
 	
 private:
 	HANDLE hHandle;
-	CRingBuff<UCHAR> rbuff;
+	CRingBuff<MSG> rbuff;
 	uint32_t seqno;
 
 	Chip *chip;

@@ -93,6 +93,7 @@ BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_GET_SSGVOL, &C86winDlg::OnBnClickedButtonGetSsgvol)
 	ON_BN_CLICKED(IDC_BUTTON_GET_PLLCLOCK, &C86winDlg::OnBnClickedButtonGetPllclock)
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_GET_FWVER, &C86winDlg::OnBnClickedButtonGetFwver)
 END_MESSAGE_MAP()
 
 
@@ -460,4 +461,21 @@ void C86winDlg::OnDestroy()
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
 	pApp->pChipBase->deinitialize();
 
+}
+
+
+void C86winDlg::OnBnClickedButtonGetFwver()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		UINT clock;
+		UINT major=0, minor=0, rev=0, build=0;
+		pGimicModule->getFWVer( &major, &minor, &rev, &build );
+		CString str;
+		str.Format( _T("%d. %d. %d. %d\r\n"), major, minor, rev, build );
+		m_editMessage.SetWindowText( str );
+		pGimicModule->Release();
+	}
 }

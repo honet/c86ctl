@@ -179,6 +179,11 @@ int GimicMIDI::getModuleInfo( struct Devinfo *info )
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
+int GimicMIDI::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
 void GimicMIDI::tick(void)
 {
 	UCHAR buff[150];

@@ -30,8 +30,8 @@ public:
 	bool create();
 	void close();
 	
-	void attach( COPNA *p );
-	COPNA* detach( void );
+	void attach( Chip *p );
+	Chip* detach( void );
 
 protected:
 	void OnPaint();
@@ -43,7 +43,7 @@ protected:
 	CVisC86Key keyWnd;
 	CVisC86Reg regWnd;
 	CVisC86Fm fmWnd[6];
-	COPNA *chip;
+	Chip *chip;
 	UINT tick;
 };
 

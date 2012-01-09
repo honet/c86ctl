@@ -118,7 +118,7 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 	return instances;
 }
 
-int GimicHID::sendData( uint8_t *data, uint32_t sz )
+int GimicHID::sendMsg( MSG *data )
 {
 	UCHAR buff[66];
 
@@ -127,17 +127,11 @@ int GimicHID::sendData( uint8_t *data, uint32_t sz )
 
 	buff[0] = 0; // HID interface id.
 
-//	sz = MIN(sz,64) & ~0x3;
-	sz = MIN(sz,60) & ~0x3;
+	UINT sz = data->len;
 	if( 0<sz ){
-//		memcpy( &buff[1], data, sz );
-//		if( sz<64 )
-//			memset( &buff[1+sz], 0xff, 64-sz );
-
-		*((uint32_t*)&buff[1]) = seqno++;
-		memcpy( &buff[5], data, sz );
-		if( sz<60 )
-			memset( &buff[5+sz], 0xff, 60-sz );
+		memcpy( &buff[1], &data->dat[0], sz );
+		if( sz<64 )
+			memset( &buff[1+sz], 0xff, 64-sz );
 
 		DWORD len;
 		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
@@ -152,11 +146,10 @@ int GimicHID::sendData( uint8_t *data, uint32_t sz )
 	return C86CTL_ERR_NONE;
 }
 
-int GimicHID::transaction( uint8_t *txdata, uint32_t txsz,
-						   uint8_t *rxdata, uint32_t rxsz )
+int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 {
 	int ret;
-	if( C86CTL_ERR_NONE != ( ret = sendData( txdata, txsz ) ) )
+	if( C86CTL_ERR_NONE != ( ret = sendMsg( txdata ) ) )
 		return ret;
 
 	UCHAR buff[66];
@@ -165,7 +158,7 @@ int GimicHID::transaction( uint8_t *txdata, uint32_t txsz,
 	if( !ReadFile( hHandle, buff, 65, &len, NULL) ){
 		return C86CTL_ERR_UNKNOWN;
 	}
-	memcpy( rxdata, &buff[1], 32 ); // 1byte目はUSBのInterfaceNo.なので飛ばす
+	memcpy( rxdata, &buff[1], rxsz ); // 1byte目はUSBのInterfaceNo.なので飛ばす
 
 	return C86CTL_ERR_NONE;
 }
@@ -193,16 +186,14 @@ int GimicHID::init(void)
 int GimicHID::reset(void)
 {
 	// リセットコマンド送信
-	UCHAR d[4] = { 0x82, 0, 0, 0 };
-	sendData( d, 4 );
-	return C86CTL_ERR_NONE;
+	MSG d = { 2, { 0xfd, 0x82, 0 } };
+	return sendMsg( &d );
 }
 
 int GimicHID::setSSGVolume(UCHAR vol)
 {
-	UCHAR d[4] = { 0x84, vol, 0, 0 };
-	sendData( d, 4 );
-	return C86CTL_ERR_NONE;
+	MSG d = { 3, { 0xfd, 0x84, vol } };
+	return sendMsg( &d );
 }
 
 int GimicHID::getSSGVolume(UCHAR *vol)
@@ -210,22 +201,14 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 	if( !vol )
 		return C86CTL_ERR_INVALID_PARAM;
 
-	UCHAR d[4] = { 0x86, 0, 0, 0 };
-	sendData( d, 4 );
-	Sleep(100);
-	UCHAR buff[66];
-	DWORD len;
-	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
-	*vol = buff[1];
-
-	return C86CTL_ERR_NONE;
+	MSG d = { 2, { 0xfd, 0x86 } };
+	return transaction( &d, (uint8_t*)vol, 1 );
 }
 
 int GimicHID::setPLLClock(UINT clock)
 {
-	UCHAR d[4] = { 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff };
-	sendData( d, 4 );
-	return C86CTL_ERR_NONE;
+	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
+	return sendMsg( &d );
 }
 
 int GimicHID::getPLLClock(UINT *clock)
@@ -233,25 +216,17 @@ int GimicHID::getPLLClock(UINT *clock)
 	if( !clock )
 		return C86CTL_ERR_INVALID_PARAM;
 
-	UCHAR d[4] = { 0x85, 0, 0, 0 };
-	sendData( d, 4 );
-	Sleep(100);
-	UCHAR buff[66];
-	DWORD len;
-	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
-	*clock = *((UINT*)&buff[1]);
-
-	return C86CTL_ERR_NONE;
+	MSG d = { 2, { 0xfd, 0x85 } };
+	return transaction( &d, (uint8_t*)clock, 4 );
 }
-
 
 int GimicHID::getMBInfo( struct Devinfo *info )
 {
 	if( !info )
 		return C86CTL_ERR_INVALID_PARAM;
 
-	UCHAR d[4] = { 0x91, 0xff, 0, 0 };
-	return transaction( d, 4, (uint8_t*)info, 32 );
+	MSG d = { 3, { 0xfd, 0x91, 0xff } };
+	return transaction( &d, (uint8_t*)info, 32 );
 }
 
 int GimicHID::getModuleInfo( struct Devinfo *info )
@@ -259,10 +234,24 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 	if( !info )
 		return C86CTL_ERR_INVALID_PARAM;
 
-	UCHAR d[4] = { 0x91, 0, 0, 0 };
-	return transaction( d, 4, (uint8_t*)info, 32 );
+	MSG d = { 3, { 0xfd, 0x91, 0 } };
+	return transaction( &d, (uint8_t*)info, 32 );
 }
 
+int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
+{
+	uint8_t rx[16];
+	MSG d = { 2, { 0xfd, 0x92 } };
+	int ret;
+
+	if( C86CTL_ERR_NONE == (ret = transaction( &d, rx, 16 )) ){
+		if( major ) *major = *((uint32_t*)&rx[0]);
+		if( minor ) *minor = *((uint32_t*)&rx[4]);
+		if( rev )   *rev   = *((uint32_t*)&rx[8]);
+		if( build ) *build = *((uint32_t*)&rx[12]);
+	}
+	return ret;
+}
 
 void GimicHID::out(UINT addr, UCHAR data)
 {
@@ -270,8 +259,24 @@ void GimicHID::out(UINT addr, UCHAR data)
 	if( chip )
 		flag = chip->setReg(addr, data );
 	if( flag ){
-		UCHAR d[4] = { 0, addr>>8, addr&0xff, data };
-		rbuff.write(d,4);
+		switch( chiptype ){
+		case CHIP_OPNA:
+		case CHIP_OPN3L:
+			if( 0x100<=addr && addr<=0x110 )
+				addr -= 0x40;
+			break;
+		case CHIP_OPM:
+			if( 0xfc<=addr && addr<=0xff )
+				addr -= 0xe0;
+			break;
+		}
+		if( addr < 0xfc ){
+			MSG d = { 2, { addr&0xff, data } };
+			rbuff.write1(d);
+		}else if( 0x100 <= addr && addr <= 0x1fb ){
+			MSG d = { 3, { 0xfe, addr&0xff, data } };
+			rbuff.write1(d);
+		}
 	}
 }
 
@@ -285,41 +290,47 @@ UCHAR GimicHID::in(UINT addr)
 
 void GimicHID::tick(void)
 {
-	UCHAR buff[128];
-
 	if( !hHandle )
 		return;
-
+	if( rbuff.isempty() )
+		return;
+	
+	UCHAR buff[128];
+	UINT sz=0, i=1;
+	MSG d;
+	
 	buff[0] = 0; // HID interface id.
-	UINT sz = rbuff.get_length();
-	if( 0<sz ){
-//		sz = MIN(sz,64) & ~0x3;
-//		rbuff.read( &buff[1], sz );
-//		if( sz<64 )
-//			memset( &buff[1+sz], 0xff, 64-sz );
-		
-		sz = MIN(sz,60) & ~0x3;
-		*((uint32_t*)&buff[1]) = seqno++;
-		rbuff.read( &buff[5], sz );
-		if( sz<60 )
-			memset( &buff[5+sz], 0xff, 60-sz );
 
-		DWORD len;
-		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
+	for(;;){
+		UINT l = rbuff.query_read_ptr()->len;
+		if( 64<(sz+l) )
+			break;
+		if( !rbuff.read1(&d) )
+			break;
+		sz += d.len;
+		for( UINT j=0; j<d.len; j++ )
+			buff[i++] = d.dat[j];
+		if( rbuff.isempty() )
+			break;
+	}
+
+	if( sz<64 )
+		memset( &buff[1+sz], 0xff, 64-sz );
+		
+	DWORD len;
+	int ret = WriteFile(hHandle, buff, 65, &len, NULL);
 		//{
 		//	char str[128];
 		//	sprintf(str, "%02x %02x %02x %02x\n", buff[1], buff[2], buff[3], buff[4] );
 		//	OutputDebugStringA(str);
 		//}
 
-		if(ret == 0 || 65 != len){
-			CloseHandle(hHandle);
-			hHandle = NULL;
-			// なんかthrowする？
-			return;
-		}
+	if(ret == 0 || 65 != len){
+		CloseHandle(hHandle);
+		hHandle = NULL;
+		// なんかthrowする？
+		return;
 	}
-
 	return;
 }
 

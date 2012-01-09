@@ -79,7 +79,7 @@ static const GUID IID_IGimic =
 
 interface IGimic : public IUnknown
 {
-	virtual int __stdcall getFWVer( struct Devinfo *info ) = 0;
+	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *revision, UINT *build ) = 0;
 	virtual int __stdcall getMBInfo( struct Devinfo *info ) = 0;
 	virtual int __stdcall getModuleInfo( struct Devinfo *info ) = 0;
 	virtual int __stdcall setSSGVolume(UCHAR vol) = 0;
