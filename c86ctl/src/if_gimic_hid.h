@@ -50,10 +50,13 @@ public:
 
 private:
 	int sendData( uint8_t *data, uint32_t sz );
+	int transaction( uint8_t *txdata, uint32_t txsz,
+					 uint8_t *rxdata, uint32_t rxsz );
 	
 private:
 	HANDLE hHandle;
 	CRingBuff<UCHAR> rbuff;
+	uint32_t seqno;
 
 	Chip *chip;
 	ChipType chiptype;

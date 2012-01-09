@@ -11,9 +11,9 @@
 #define VERSION_MAJOR      1
 #define VERSION_MINOR      2
 #define VERSION_REVISION   0
-#define VERSION_BUILD      4
-#define VERSION_STRING     "1, 2, 0, 4"
-
+#define VERSION_BUILD      5
+#define VERSION_STRING     "1, 2, 0, 5"
+#define VERSION_MESSAGE    "VER 1.2.0.5(DBG-ONLY)"
 
 // 以下はDLLリソース用定義につき変更禁止
 #define C86CTL_VERSION        VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD

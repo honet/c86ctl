@@ -39,7 +39,7 @@ extern "C" {
 	コンストラクタ
 ----------------------------------------------------------------------------*/
 GimicHID::GimicHID( HANDLE h )
-	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN)
+	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0)
 {
 	rbuff.alloc( 128 );
 }
@@ -95,7 +95,7 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,
 				NULL,
 				OPEN_EXISTING,
-				FILE_FLAG_NO_BUFFERING,
+				0,//FILE_FLAG_NO_BUFFERING,
 				NULL);
 			free(dev_det);
 			dev_det = NULL;
@@ -120,18 +120,24 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 
 int GimicHID::sendData( uint8_t *data, uint32_t sz )
 {
-	UCHAR buff[128];
+	UCHAR buff[66];
 
 	if( !hHandle )
 		return C86CTL_ERR_NODEVICE;
 
 	buff[0] = 0; // HID interface id.
 
-	sz = MIN(sz,64) & ~0x3;
+//	sz = MIN(sz,64) & ~0x3;
+	sz = MIN(sz,60) & ~0x3;
 	if( 0<sz ){
-		memcpy( &buff[1], data, sz );
-		if( sz<64 )
-			memset( &buff[1+sz], 0xff, 64-sz );
+//		memcpy( &buff[1], data, sz );
+//		if( sz<64 )
+//			memset( &buff[1+sz], 0xff, 64-sz );
+
+		*((uint32_t*)&buff[1]) = seqno++;
+		memcpy( &buff[5], data, sz );
+		if( sz<60 )
+			memset( &buff[5+sz], 0xff, 60-sz );
 
 		DWORD len;
 		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
@@ -146,6 +152,23 @@ int GimicHID::sendData( uint8_t *data, uint32_t sz )
 	return C86CTL_ERR_NONE;
 }
 
+int GimicHID::transaction( uint8_t *txdata, uint32_t txsz,
+						   uint8_t *rxdata, uint32_t rxsz )
+{
+	int ret;
+	if( C86CTL_ERR_NONE != ( ret = sendData( txdata, txsz ) ) )
+		return ret;
+
+	UCHAR buff[66];
+	DWORD len = 0;
+
+	if( !ReadFile( hHandle, buff, 65, &len, NULL) ){
+		return C86CTL_ERR_UNKNOWN;
+	}
+	memcpy( rxdata, &buff[1], 32 ); // 1byte目はUSBのInterfaceNo.なので飛ばす
+
+	return C86CTL_ERR_NONE;
+}
 
 /*----------------------------------------------------------------------------
 	実装
@@ -228,14 +251,7 @@ int GimicHID::getMBInfo( struct Devinfo *info )
 		return C86CTL_ERR_INVALID_PARAM;
 
 	UCHAR d[4] = { 0x91, 0xff, 0, 0 };
-	sendData( d, 4 );
-	Sleep(100);
-	UCHAR buff[66];
-	DWORD len;
-	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
-	memcpy( info, &buff[1], 32 ); // 1byte目はUSBのInterfaceNo.なので飛ばす
-
-	return C86CTL_ERR_NONE;
+	return transaction( d, 4, (uint8_t*)info, 32 );
 }
 
 int GimicHID::getModuleInfo( struct Devinfo *info )
@@ -244,14 +260,7 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 		return C86CTL_ERR_INVALID_PARAM;
 
 	UCHAR d[4] = { 0x91, 0, 0, 0 };
-	sendData( d, 4 );
-	Sleep(100);
-	UCHAR buff[66];
-	DWORD len;
-	int ret = ReadFile( hHandle, buff, 65, &len, NULL);
-	memcpy( info, &buff[1], 32 ); // 1byte目はUSBのInterfaceNo.なので飛ばす
-
-	return C86CTL_ERR_NONE;
+	return transaction( d, 4, (uint8_t*)info, 32 );
 }
 
 
@@ -284,10 +293,16 @@ void GimicHID::tick(void)
 	buff[0] = 0; // HID interface id.
 	UINT sz = rbuff.get_length();
 	if( 0<sz ){
-		sz = MIN(sz,64) & ~0x3;
-		rbuff.read( &buff[1], sz );
-		if( sz<64 )
-			memset( &buff[1+sz], 0xff, 64-sz );
+//		sz = MIN(sz,64) & ~0x3;
+//		rbuff.read( &buff[1], sz );
+//		if( sz<64 )
+//			memset( &buff[1+sz], 0xff, 64-sz );
+		
+		sz = MIN(sz,60) & ~0x3;
+		*((uint32_t*)&buff[1]) = seqno++;
+		rbuff.read( &buff[5], sz );
+		if( sz<60 )
+			memset( &buff[5+sz], 0xff, 60-sz );
 
 		DWORD len;
 		int ret = WriteFile(hHandle, buff, 65, &len, NULL);

@@ -15,6 +15,7 @@
 #include "vis_c86sub.h"
 #include "vis_c86main.h"
 #include "config.h"
+#include "version.h"
 
 
 #define WINDOW_WIDTH  400
@@ -100,7 +101,7 @@ void CVisC86Main::OnPaint()
 	vis_draw_logo( hMemDC, hSkinDC, hSkinMaskDC, 2, 2 );
 	vis_draw_tickcircle( hMemDC, hSkinDC, hSkinMaskDC, 10, 35, tick&0x7 );
 	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 8, "FOR GIMIC & C86USB CONTROL" );
-	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 18, "OPNA STATUS DISPLAY VER 1.2.0.4(PREVIEW)" );
+	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0, 130, 18, "OPNA STATUS DISPLAY " VERSION_MESSAGE );
 
 	vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 0,   5, 78, "WINDOWS -------------------------------------------------------" );
 	CVisWnd *wnd[] = { &keyWnd, &regWnd, 
