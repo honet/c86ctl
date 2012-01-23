@@ -12,9 +12,9 @@
 
 
 bool COPNA::setReg( int addr, UCHAR data ){
-	if( 0x200 < addr ) return false;
+	if( 0x200 <= addr ) return false;
 	int idx = 0;
-	if( 0x100 < addr ){
+	if( 0x100 <= addr ){
 		addr -= 0x100;
 		idx = 1;
 	}
@@ -39,9 +39,9 @@ bool COPNA::setReg( int addr, UCHAR data ){
 };
 
 UCHAR COPNA::getReg( int addr ){
-	if( 0x200 < addr ) return 0;
+	if( 0x200 <= addr ) return 0;
 	int idx = 0;
-	if( 0x100 < addr ){
+	if( 0x100 <= addr ){
 		addr -= 0x100;
 		idx = 1;
 	}

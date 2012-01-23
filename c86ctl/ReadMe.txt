@@ -24,9 +24,6 @@ OPNAのパラメータビュアーです。本DLLに対して音源チップへ�
 ==========
 Copyright (c) 2009-2011, Kiichiro Kotajima. All rights reserved.
 
-This code is derived from software contributed to Kiichiro Kotajima
-by 
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
 are met:
@@ -53,4 +50,16 @@ POSSIBILITY OF SUCH DAMAGE.
 For further information please contact.
  honet.kk (at) gmail.com
 
+============
+ ChangeLog
+============
+
+1.2.0.7					・LICENSE文修正（コピーライト文にコピペ消し忘れの変な文が残ってた･･･）
+						　※利用条件に変更はありません。
+						・OPMのレジスタアクセスフィルタにおいて
+						　0x20<addrの時にレジスタキャッシュ値が更新されていなかったバグを修正
+						・OPNAのレジスタアクセスフィルタにおいて
+						　0x100==addrのアクセスがおかしくなってしまっていたバグを修正
+1.2.0.6					HID通信の仕様を大幅変更。gimic-r158以降用
+1.1.0.3					バージョンリソース追加
 

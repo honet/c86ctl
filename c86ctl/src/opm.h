@@ -22,10 +22,15 @@ public:
 
 public:
 	bool setReg( int addr, UCHAR data ){
-		if( 0x20 <= addr )
+		if( 0x20 <= addr ){
 			regmem[addr] = data;
 			return true;
+		}
 		switch( addr ){
+		case 0x01:
+			data &= 0x02; // LFO RESET
+			regmem[addr] = data;
+			return true;
 		case 0x08:
 		case 0x0f:
 		case 0x10:
