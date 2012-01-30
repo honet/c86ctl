@@ -62,6 +62,7 @@ private:
 	
 private:
 	HANDLE hHandle;
+	CRITICAL_SECTION csection;
 	CRingBuff<MSG> rbuff;
 	uint32_t seqno;
 

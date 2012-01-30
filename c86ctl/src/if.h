@@ -53,10 +53,10 @@ public:
 
 public:
 	// IGimic
-	int __stdcall setSSGVolume(UCHAR vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	int __stdcall getSSGVolume(UCHAR *vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	int __stdcall setPLLClock(UINT clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	int __stdcall getPLLClock(UINT *clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall setSSGVolume(UCHAR vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall getSSGVolume(UCHAR *vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall setPLLClock(UINT clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual int __stdcall getPLLClock(UINT *clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall getMBInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall getModuleInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };

@@ -329,7 +329,7 @@ UCHAR C86Ctl::in( UINT addr )
 
 // ----------------------------------------------------------------------
 // 外部インターフェイス
-HRESULT CreateInstance( REFIID riid, void** ppi )
+HRESULT WINAPI CreateInstance( REFIID riid, void** ppi )
 {
 	// C86Ctlが単一インスタンスなので手抜き実装。
 	return gc86ctl.QueryInterface(riid,ppi);

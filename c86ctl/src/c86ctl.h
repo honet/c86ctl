@@ -46,9 +46,9 @@ struct Devinfo{
 /*----------------------------------------------------------------------------*/
 /*  InterfaceíËã`                                                             */
 /*----------------------------------------------------------------------------*/
-// IRealChip {F959C007-6B4D-46F3-BB60-9B0897C7E642}
-static const GUID IID_IRealChip = 
-{ 0xf959c007, 0x6b4d, 0x46f3, { 0xbb, 0x60, 0x9b, 0x8, 0x97, 0xc7, 0xe6, 0x42 } };
+// IRealChipBase {5C457918-E66D-4AC1-8CB5-B91C4704DF79}
+static const GUID IID_IRealChipBase = 
+{ 0x5c457918, 0xe66d, 0x4ac1, { 0x8c, 0xb5, 0xb9, 0x1c, 0x47, 0x4, 0xdf, 0x79 } };
 
 interface IRealChipBase : public IUnknown
 {
@@ -59,8 +59,8 @@ interface IRealChipBase : public IUnknown
 };
 
 
-// IRealChipUnit {F959C007-6B4D-46F3-BB60-9B0897C7E642}
-static const GUID IID_IRealChipBase = 
+// IRealChip {F959C007-6B4D-46F3-BB60-9B0897C7E642}
+static const GUID IID_IRealChip = 
 { 0xf959c007, 0x6b4d, 0x46f3, { 0xbb, 0x60, 0x9b, 0x8, 0x97, 0xc7, 0xe6, 0x42 } };
 
 interface IRealChip : public IUnknown
@@ -93,7 +93,7 @@ interface IGimic : public IUnknown
 /*----------------------------------------------------------------------------*/
 /*  åˆäJä÷êîíËã`                                                              */
 /*----------------------------------------------------------------------------*/
-HRESULT CreateInstance( REFIID riid, void** ppi );
+HRESULT WINAPI CreateInstance( REFIID riid, void** ppi );
 
 
 int WINAPI c86ctl_initialize(void);					// DEPRECATED

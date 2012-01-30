@@ -36,7 +36,7 @@ C86winApp::C86winApp()
 C86winApp theApp;
 
 
-typedef HRESULT (*TCreateInstance)( REFIID, LPVOID* );
+typedef HRESULT (WINAPI *TCreateInstance)( REFIID, LPVOID* );
 
 // C86winApp èâä˙âª
 

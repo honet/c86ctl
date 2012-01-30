@@ -36,11 +36,11 @@ public:
 	};
 
 	~CRingBuff(){
-		free();
+		freeres();
 	};
 	
 	BOOL alloc( UINT asize ){
-		free();
+		freeres();
 		p = new T[asize];
 		if( p ){
 			sz = asize;
@@ -51,7 +51,7 @@ public:
 		return p ? TRUE : FALSE;
 	};
 
-	VOID free(VOID){
+	VOID freeres(VOID){
 		if( p )
 			delete [] p;
 

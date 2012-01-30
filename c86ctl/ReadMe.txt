@@ -54,12 +54,21 @@ For further information please contact.
  ChangeLog
 ============
 
+1.2.0.8					・CreateInstance関数の呼び出し規約をWINAPIに変更
+						　（1.2.0.6で付け忘れました。ごめんなさい。）
+						・IRealChipBaseのGUID変更
+						　（IRealChipと同じGUIDになっていたバグを修正）
+						・HID通信時のトランザクションに同期処理追加
+						・IGimic::getMBInfo/getModuleInfo において
+						　文字列終端が０にならない場合があるバグを修正
+
 1.2.0.7					・LICENSE文修正（コピーライト文にコピペ消し忘れの変な文が残ってた･･･）
 						　※利用条件に変更はありません。
 						・OPMのレジスタアクセスフィルタにおいて
 						　0x20<addrの時にレジスタキャッシュ値が更新されていなかったバグを修正
 						・OPNAのレジスタアクセスフィルタにおいて
 						　0x100==addrのアクセスがおかしくなってしまっていたバグを修正
+
 1.2.0.6					HID通信の仕様を大幅変更。gimic-r158以降用
 1.1.0.3					バージョンリソース追加
 

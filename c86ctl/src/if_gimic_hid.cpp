@@ -8,6 +8,43 @@
 	honet.kk(at)gmail.com
 	Thanks to Nagai "Guu" Osamu 2011/12/08 for his advice.
 	
+	HIDメッセージ体系
+		注意：HIDパケット先頭＝メッセージの開始バイトで有ること
+		　　　（HIDパケット２つにまたがるメッセージは不可）
+		
+	 XX YY             : 2byte レジスタアクセスコマンド, XX=アドレス(00~fb), YY=データ(0~ff)
+	 FE XX YY          : 3byte Exレジスタアクセスコマンド, XX=アドレス(00~fb), YY=データ(0~ff)
+	 FE FC             : 予約(利用禁止)
+	 FE FD             : 予約(利用禁止)
+	 FE FE             : 予約(利用禁止)
+	 FE FF             : 予約(利用禁止)
+
+	 FD 81             : HARDWARE Reset
+	 FD 82             : Software Reset
+	 FD 83 WW XX YY ZZ : set PLL clock, WW=clock[7:0], XX=clock[15:8], YY=clock[23:16], ZZ=clock[31:24]
+	 FD 84 XX          : set SSG volume (OPNAモジュール時のみ処理), XX=volume(0-127)
+	 FD 85             : get PLL clock
+	 FD 86             : get SSG volume
+	 FD 91 XX          : get HW report, XX=番号(00=モジュール, FF=マザーボード)
+	 FD 92             : get Firmware version
+	 FD 93 XX          : get STATUS, XX=番号(00=STATUS0, 01=STATUS1)
+	 FD A0             : adpcm ZERO Reset.
+	 FD A1
+	 FD A2
+	 FD A3
+
+	 FC                : 予約(利用禁止)
+	 FF                : terminator
+
+	  ポートリマップ仕様
+		YM2608 & YMF288
+		  実アドレス      通信時のアドレス
+		  100~110     →  C0~D0
+		
+		YM2151
+		  実アドレス      通信時のアドレス
+		  FC~FF       →  1C~1F
+		  
  */
 #include "stdafx.h"
 #include "if_gimic_hid.h"
@@ -42,6 +79,7 @@ GimicHID::GimicHID( HANDLE h )
 	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0)
 {
 	rbuff.alloc( 128 );
+	::InitializeCriticalSection(&csection);
 }
 
 /*----------------------------------------------------------------------------
@@ -49,6 +87,7 @@ GimicHID::GimicHID( HANDLE h )
 ----------------------------------------------------------------------------*/
 GimicHID::~GimicHID(void)
 {
+	::DeleteCriticalSection(&csection);
 	CloseHandle(hHandle);
 	hHandle = NULL;
 	if( chip )
@@ -134,8 +173,10 @@ int GimicHID::sendMsg( MSG *data )
 			memset( &buff[1+sz], 0xff, 64-sz );
 
 		DWORD len;
+		::EnterCriticalSection(&csection);
 		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
-
+		::LeaveCriticalSection(&csection);
+		
 		if(ret == 0 || 65 != len){
 			CloseHandle(hHandle);
 			hHandle = NULL;
@@ -148,17 +189,33 @@ int GimicHID::sendMsg( MSG *data )
 
 int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 {
-	int ret;
-	if( C86CTL_ERR_NONE != ( ret = sendMsg( txdata ) ) )
-		return ret;
-
 	UCHAR buff[66];
+	buff[0] = 0; // HID interface id.
 	DWORD len = 0;
 
-	if( !ReadFile( hHandle, buff, 65, &len, NULL) ){
-		return C86CTL_ERR_UNKNOWN;
+	::EnterCriticalSection(&csection);
+	{
+		UINT sz = txdata->len;
+		if( 0<sz ){
+			memcpy( &buff[1], &txdata->dat[0], sz );
+			if( sz<64 )
+				memset( &buff[1+sz], 0xff, 64-sz );
+
+			int ret = WriteFile(hHandle, buff, 65, &len, NULL);
+			if(ret == 0 || 65 != len){
+				CloseHandle(hHandle);
+				hHandle = NULL;
+				return C86CTL_ERR_UNKNOWN;
+			}
+		}
+
+		len = 0;
+		if( !ReadFile( hHandle, buff, 65, &len, NULL) ){
+			return C86CTL_ERR_UNKNOWN;
+		}
+		memcpy( rxdata, &buff[1], rxsz ); // 1byte目はUSBのInterfaceNo.なので飛ばす
 	}
-	memcpy( rxdata, &buff[1], rxsz ); // 1byte目はUSBのInterfaceNo.なので飛ばす
+	::LeaveCriticalSection(&csection);
 
 	return C86CTL_ERR_NONE;
 }
@@ -222,20 +279,36 @@ int GimicHID::getPLLClock(UINT *clock)
 
 int GimicHID::getMBInfo( struct Devinfo *info )
 {
+	int ret;
+	
 	if( !info )
 		return C86CTL_ERR_INVALID_PARAM;
 
 	MSG d = { 3, { 0xfd, 0x91, 0xff } };
-	return transaction( &d, (uint8_t*)info, 32 );
+	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
+		char *p = &info->Devname[15];
+		while(*p==0||*p==0xff) *p--=0;
+		p = &info->Serial[14];
+		while(*p==0||*p==0xff) *p--=0;
+	}
+	return ret;
 }
 
 int GimicHID::getModuleInfo( struct Devinfo *info )
 {
+	int ret;
+	
 	if( !info )
 		return C86CTL_ERR_INVALID_PARAM;
 
 	MSG d = { 3, { 0xfd, 0x91, 0 } };
-	return transaction( &d, (uint8_t*)info, 32 );
+	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
+		char *p = &info->Devname[15];
+		while(*p==0||*p==0xff) *p--=0;
+		p = &info->Serial[14];
+		while(*p==0||*p==0xff) *p--=0;
+	}
+	return ret;
 }
 
 int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
@@ -316,14 +389,11 @@ void GimicHID::tick(void)
 
 	if( sz<64 )
 		memset( &buff[1+sz], 0xff, 64-sz );
-		
+
 	DWORD len;
+	::EnterCriticalSection(&csection);
 	int ret = WriteFile(hHandle, buff, 65, &len, NULL);
-		//{
-		//	char str[128];
-		//	sprintf(str, "%02x %02x %02x %02x\n", buff[1], buff[2], buff[3], buff[4] );
-		//	OutputDebugStringA(str);
-		//}
+	::LeaveCriticalSection(&csection);
 
 	if(ret == 0 || 65 != len){
 		CloseHandle(hHandle);
