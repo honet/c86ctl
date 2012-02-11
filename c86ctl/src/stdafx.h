@@ -35,9 +35,19 @@
 // Windows ヘッダー ファイル:
 #include <windows.h>
 #include <stdint.h>
+#include <memory.h>
 
-#define MIN(a,b)  ((a)<(b)?(a):(b))
-
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください。
+#include <ComSvcs.h>
+#include <gdiplus.h>
+//#include <d2d1.h>
+//#include <d2d1helper.h>
+#include <algorithm>
+
+#include "mydef.h"

@@ -21,6 +21,11 @@
 //#include "log_opm.h"
 //#include "log_opna.h"
 
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 
 CS98Data::CS98Data()

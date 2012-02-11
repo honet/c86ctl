@@ -11,50 +11,205 @@
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86wnd.h"
+#include "vis_manager.h"
 #include <map>
 #include <assert.h>
 #include <tchar.h>
 
-std::map< HWND, CVisWnd* > frameWndMap;
-std::map< HWND, CVisWnd* > wndMap;
-CVisWnd* creatingWnd;
-HANDLE hCreatingMutex = NULL;
+//#pragma comment(lib, "d2d1.lib")
+
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
 
 #define MUTEX_NAME TEXT("C86WINDOW_MANAGER_MUTEX")
 
-void initializeWndManager()
-{
-	if( !hCreatingMutex )
-		hCreatingMutex = ::CreateMutex( NULL, FALSE, MUTEX_NAME );
-}
 
-void uninitializeWndManager()
+std::map< HWND, CVisWnd* > CVisWnd::wndMap;
+CVisWnd* CVisWnd::creatingWnd;
+HANDLE CVisWnd::hCreatingMutex = NULL;
+
+
+CVisWnd::CVisWnd()
+	: hWnd(0)
+	, canvas(0)
+	, clientCanvas(0)
+	, wcapture(0)
+	, windowWidth(0)
+	, windowHeight(0)
+	, windowClass(_T("C86CTL"))
+	, windowTitle(_T("C86CTL"))
 {
+	hCreatingMutex = ::CreateMutex( NULL, FALSE, MUTEX_NAME );
+};
+
+CVisWnd::~CVisWnd()
+{
+	//d2dTarget.Release();
+	close();
+	
 	if( hCreatingMutex ){
 		::CloseHandle( hCreatingMutex );
 		hCreatingMutex = NULL;
 	}
-}
-
-static LRESULT CALLBACK framwWndMsgDispatcher(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
-{
-	std::map< HWND, CVisWnd* >::iterator it;
-	it = frameWndMap.find( hWnd );
-	if( it != frameWndMap.end() )
-		return it->second->frameWndProc(hWnd,msg,wp,lp);
-	else if( creatingWnd ){
-		frameWndMap.insert( std::pair<HWND,CVisWnd*>(hWnd, creatingWnd) );
-		return creatingWnd->frameWndProc(hWnd,msg,wp,lp);
-	}
-
-	assert(0);
-	return -1;
 };
 
-static LRESULT CALLBACK clientWndMsgDispatcher(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
+bool CVisWnd::isClose( int a, int b ) const {
+	const int margin = 10;
+	return abs(a-b) < margin;
+};
+
+void CVisWnd::onPaint()
 {
-	std::map< HWND, CVisWnd* >::iterator it;
-	it = wndMap.find( hWnd );
+	const int maxlen = 256;
+	char str[maxlen];
+	
+	PAINTSTRUCT ps;
+	HDC hdc = ::BeginPaint(hWnd, &ps);
+
+	::GetWindowTextA(hWnd, str, maxlen);
+	gVisSkin.drawFrame( canvas, str);
+
+	onPaintClient();
+	std::for_each( widgets.begin(), widgets.end(),
+				   [this](std::shared_ptr<CVisWidget> x){ x->onPaint(this->clientCanvas); } );
+
+	::StretchDIBits(
+		hdc, 0, 0, canvas->getWidth(), canvas->getHeight(),
+		0, 0, canvas->getWidth(), canvas->getHeight(),
+		canvas->getRow0(0), canvas->getBMPINFO(),
+		DIB_RGB_COLORS, SRCCOPY );
+	
+	::EndPaint(hWnd, &ps);
+
+/*
+	if( !(d2dTarget->CheckWindowState() & D2D1_WINDOW_STATE_OCCLUDED) ){
+		d2dTarget->BeginDraw();
+		d2dTarget->Clear( D2D1::ColorF(D2D1::ColorF::Red) );
+		if( d2dTarget->EndDraw() == D2DERR_RECREATE_TARGET ){
+			;
+		}
+	}
+*/
+}
+
+
+LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
+{
+	bool handled = false;
+	
+	switch (msg) {
+	case WM_DESTROY:
+		onDestroy();
+		return 0;
+
+	case WM_CREATE:
+		onCreate();
+		return 0;
+
+	// mouse events
+	case WM_LBUTTONDBLCLK:
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONDBLCLK:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+	case WM_MOUSEMOVE:
+	case WM_MOUSEWHEEL:
+		POINT pt;
+		::GetCursorPos(&pt);
+		::ScreenToClient(hWnd, &pt);
+		windowToClient(pt);
+		if( wcapture ){
+			wcapture->onMouseEvent(msg, wp, lp);
+		}else{
+			for( auto it = widgets.begin(); it != widgets.end(); it++ ){
+				RECT rc;
+				(*it)->getWindowRect(rc);
+				if( (rc.left <= pt.x) && (pt.x < rc.right) &&
+					( rc.top <= pt.y ) && (pt.y < rc.bottom) ){
+					(*it)->onMouseEvent(msg, wp, lp);
+					handled = true;
+					break;
+				}
+			}
+		}
+		break;
+
+	case WM_PAINT:
+		onPaint();
+		return 0;
+	case WM_ERASEBKGND:
+		return 0;
+	}
+	
+	if( !handled ){
+		switch( msg ){
+		case WM_RBUTTONUP:
+			break;
+		case WM_LBUTTONDOWN:
+			PostMessage(hWnd, WM_NCLBUTTONDOWN, (WPARAM)HTCAPTION, lp);
+			break;
+#if 0
+		case WM_MOVING:
+			{
+				std::map< HWND, CVisWnd* >::iterator it;
+				RECT *prc = reinterpret_cast<LPRECT>(lp);
+				if( ::GetAsyncKeyState(VK_SHIFT) < 0 )
+					break;
+
+				for( it=frameWndMap.begin(); it!=frameWndMap.end(); it++ ){
+					if( it->first == hWnd ) continue;
+					::GetWindowRect( it->first, &rc );
+
+
+					if( isClose( prc->left, rc.right ) ){
+						if( isClose( prc->top, rc.top ) ){ // 右上-左上
+							::OffsetRect( prc, rc.right-prc->left, rc.top-prc->top );
+						}else if( isClose( prc->bottom, rc.bottom ) ){ // 右下-左下
+							::OffsetRect( prc, rc.right-prc->left, rc.bottom-prc->bottom );
+						}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
+							::OffsetRect( prc, rc.right-prc->left, 0 );
+						}
+					}else if( isClose( prc->right, rc.left ) ){
+						if( isClose( prc->top, rc.top ) ){ // 左上-右上
+							::OffsetRect( prc, rc.left-prc->right, rc.top-prc->top );
+						}else if( isClose( prc->bottom, rc.bottom ) ){ // 左下-右下
+							::OffsetRect( prc, rc.left-prc->right, rc.bottom-prc->bottom );
+						}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
+							::OffsetRect( prc, rc.left-prc->right, 0 );
+						}
+					}
+					else if( isClose( prc->left, rc.left ) ){
+						if( isClose( prc->top, rc.bottom ) ){
+							::OffsetRect( prc, rc.left-prc->left, rc.bottom-prc->top );
+						}else if( isClose( prc->bottom, rc.top ) ){
+							::OffsetRect( prc, rc.left-prc->left, rc.top-prc->bottom );
+						}
+					}
+					else if( isClose( prc->right, rc.right ) ){
+						if( isClose( prc->top, rc.bottom ) ){
+							::OffsetRect( prc, rc.right-prc->right, rc.bottom-prc->top );
+						}else if( isClose( prc->bottom, rc.top ) ){
+							::OffsetRect( prc, rc.right-prc->right, rc.top-prc->bottom );
+						}
+					}
+				}
+			}
+#endif
+			break;
+
+		default:
+			return DefWindowProc(hWnd , msg , wp , lp);
+		}
+	}
+	return 0;
+}
+
+LRESULT CALLBACK CVisWnd::wndProcDispatcher(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
+{
+	auto it = wndMap.find( hWnd );
 	if( it != wndMap.end() )
 		return it->second->wndProc(hWnd,msg,wp,lp);
 	else if( creatingWnd ){
@@ -64,137 +219,16 @@ static LRESULT CALLBACK clientWndMsgDispatcher(HWND hWnd , UINT msg , WPARAM wp 
 
 	assert(0);
 	return -1;
-};
-
-bool CVisWnd::isClose( int a, int b ) const {
-	const int margin = 10;
-	return abs(a-b) < margin;
-};
-
-LRESULT CALLBACK CVisWnd::frameWndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
-{
-	RECT rc;
-	const int maxlen = 256;
-	
-	switch (msg) {
-	case WM_DESTROY:
-		if( hSkinBMP ){
-			::SelectObject(hSkinDC, hSkinOldBMP);
-			::DeleteObject(hSkinBMP);
-			hSkinBMP = NULL;
-			hSkinOldBMP = NULL;
-		}
-		if( hSkinMaskBMP ){
-			::SelectObject(hSkinMaskDC, hSkinMaskOldBMP);
-			::DeleteObject(hSkinMaskBMP);
-			hSkinMaskBMP = NULL;
-			hSkinMaskOldBMP = NULL;
-		}
-		if( hSkinDC ){
-			::DeleteDC(hSkinDC);
-			hSkinDC = NULL;
-		}
-		if( hSkinMaskDC ){
-			::DeleteDC(hSkinMaskDC);
-			hSkinMaskDC = NULL;
-		}
-		break;
-	case WM_CREATE:
-		{
-			BITMAP bmp;
-			hSkinBMP = LoadBitmap( getModuleHandle(), MAKEINTRESOURCE(IDB_MAINSKIN) );
-			::GetObject( hSkinBMP, sizeof(BITMAP), &bmp );
-			hSkinMaskBMP = ::CreateBitmap( bmp.bmWidth, bmp.bmHeight, 1, 1, NULL );
-				
-			HDC hdc = ::GetDC(hWnd);
-			hSkinDC = ::CreateCompatibleDC(hdc);
-			hSkinMaskDC = ::CreateCompatibleDC(hdc);
-			hSkinOldBMP = (HBITMAP)::SelectObject(hSkinDC, hSkinBMP);
-			hSkinMaskOldBMP = (HBITMAP)::SelectObject(hSkinMaskDC, hSkinMaskBMP);
-			::SetBkColor( hSkinDC, 0 );
-			::BitBlt( hSkinMaskDC, 0, 0, bmp.bmWidth, bmp.bmHeight, hSkinDC, 0, 0, SRCCOPY );
-			ReleaseDC(hWnd, hdc);
-		}
-		break;
-	case WM_RBUTTONUP:
-		break;
-	case WM_LBUTTONDOWN:
-		PostMessage(hWnd, WM_NCLBUTTONDOWN, (WPARAM)HTCAPTION, lp);
-		break;
-	case WM_MOVING:
-		{
-			std::map< HWND, CVisWnd* >::iterator it;
-			RECT *prc = reinterpret_cast<LPRECT>(lp);
-			if( ::GetAsyncKeyState(VK_SHIFT) < 0 )
-				break;
-
-			for( it=frameWndMap.begin(); it!=frameWndMap.end(); it++ ){
-				if( it->first == hWnd ) continue;
-				::GetWindowRect( it->first, &rc );
-
-
-				if( isClose( prc->left, rc.right ) ){ 
-					if( isClose( prc->top, rc.top ) ){ // 右上-左上
-						::OffsetRect( prc, rc.right-prc->left, rc.top-prc->top );
-					}else if( isClose( prc->bottom, rc.bottom ) ){ // 右下-左下
-						::OffsetRect( prc, rc.right-prc->left, rc.bottom-prc->bottom );
-					}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
-						::OffsetRect( prc, rc.right-prc->left, 0 );
-					}
-				}else if( isClose( prc->right, rc.left ) ){ 
-					if( isClose( prc->top, rc.top ) ){ // 左上-右上
-						::OffsetRect( prc, rc.left-prc->right, rc.top-prc->top );
-					}else if( isClose( prc->bottom, rc.bottom ) ){ // 左下-右下
-						::OffsetRect( prc, rc.left-prc->right, rc.bottom-prc->bottom );
-					}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
-						::OffsetRect( prc, rc.left-prc->right, 0 );
-					}
-				}
-				else if( isClose( prc->left, rc.left ) ){
-					if( isClose( prc->top, rc.bottom ) ){
-						::OffsetRect( prc, rc.left-prc->left, rc.bottom-prc->top );
-					}else if( isClose( prc->bottom, rc.top ) ){
-						::OffsetRect( prc, rc.left-prc->left, rc.top-prc->bottom );
-					}
-				}
-				else if( isClose( prc->right, rc.right ) ){
-					if( isClose( prc->top, rc.bottom ) ){
-						::OffsetRect( prc, rc.right-prc->right, rc.bottom-prc->top );
-					}else if( isClose( prc->bottom, rc.top ) ){
-						::OffsetRect( prc, rc.right-prc->right, rc.top-prc->bottom );
-					}
-				}
-			}
-		}
-		break;
-	case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			char str[maxlen];
-			HDC hdc = BeginPaint(hWnd, &ps);
-			::GetWindowTextA(hWnd, str, maxlen);
-			vis_draw_frame(hWnd, hdc, hSkinDC, hSkinMaskDC, str);
-			EndPaint(hWnd, &ps);
-		}
-		break;
-	default:
-		return DefWindowProc(hWnd , msg , wp , lp);
-	}
-	return 0;
-}
-
-LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
-{
-	return DefWindowProc( hWnd, msg, wp, lp );
 }
 
 
-bool CVisWnd::create( LPCTSTR className, LPCTSTR windowName, int left, int top, int width, int height, DWORD exstyle, DWORD style, HWND hParent )
+
+bool CVisWnd::create( int left, int top, int width, int height, DWORD exstyle, DWORD style, HWND hParent )
 {
 	WNDCLASS winc;
-	const int maxlen = 256;
-	TCHAR clientWindowName[maxlen];
 
+	windowWidth = width;
+	windowHeight = height;
 	if( left == INT_MIN || top == INT_MIN ){
 		int wx = GetSystemMetrics(SM_CXSCREEN);
 		int wy = GetSystemMetrics(SM_CYSCREEN);
@@ -202,71 +236,44 @@ bool CVisWnd::create( LPCTSTR className, LPCTSTR windowName, int left, int top, 
 		top  = (wy - height) / 2;
 	}
 
+	canvas = new CVisBitmap( width, height );
+	clientCanvas = new CVisChildBitmap( canvas, 2, 17, width-4, height-19 );
+
 	HINSTANCE hinst = getModuleHandle();
-	_tcscpy( this->className, className );
-	_tcscpy( clientClassName, className );
-	_tcsncat( clientClassName, TEXT("CLIENT"), maxlen );
-	_tcscpy( clientWindowName, windowName );
-	_tcsncat( clientWindowName, TEXT("CLIENT"), maxlen );
 
 	winc.style			= CS_HREDRAW | CS_VREDRAW;
-	winc.lpfnWndProc	= framwWndMsgDispatcher;
+	winc.lpfnWndProc	= wndProcDispatcher;
 	winc.cbClsExtra		= winc.cbWndExtra = 0;
 	winc.hInstance		= hinst;
 	winc.hIcon			= LoadIcon(NULL , IDI_APPLICATION);
 	winc.hCursor		= LoadCursor(NULL , IDC_ARROW);
 	winc.hbrBackground	= (HBRUSH)GetStockObject(BLACK_BRUSH);
 	winc.lpszMenuName	= NULL;
-	winc.lpszClassName	= className;
+	winc.lpszClassName	= windowClass.c_str();
 
 	if (!RegisterClass(&winc))
 		return false;
 
 	::WaitForSingleObject( hCreatingMutex, INFINITE );
 	creatingWnd = this;
-	hFrameWnd = CreateWindowEx(
+	hWnd = CreateWindowEx(
 		exstyle,
-		className, windowName,
-		style,
+		windowClass.c_str(), windowTitle.c_str(),
+		(style&~WS_VISIBLE),
 		left, top, width, height,
 		hParent, NULL, hinst, NULL
 	);
+
 	creatingWnd = NULL;
 	::ReleaseMutex( hCreatingMutex );
-	if(!hFrameWnd) return false;
+	if(!hWnd) return false;
 
 
-	winc.style			= CS_HREDRAW | CS_VREDRAW;
-	winc.lpfnWndProc	= clientWndMsgDispatcher;
-	winc.cbClsExtra		= winc.cbWndExtra = 0;
-	winc.hInstance		= hinst;
-	winc.hIcon			= LoadIcon(NULL , IDI_APPLICATION);
-	winc.hCursor		= LoadCursor(NULL , IDC_ARROW);
-	winc.hbrBackground	= (HBRUSH)GetStockObject(BLACK_BRUSH);
-	winc.lpszMenuName	= NULL;
-	winc.lpszClassName	= clientClassName;
+//	visManager.getD2DFactory()->CreateHwndRenderTarget( 
+//		D2D1::RenderTargetProperties(),
+//		D2D1::HwndRenderTargetProperties( hFrameWnd, D2D1::Size( static_cast<UINT>(width), static_cast<UINT>(height) ), D2D1_PRESENT_OPTIONS_IMMEDIATELY ), 
+//		&d2dTarget );
 
-	if (!RegisterClass(&winc))
-		return false;
-
-	left=2;
-	top=17;
-	width-=4;
-	height-=19;
-	
-	::WaitForSingleObject( hCreatingMutex, INFINITE );
-	creatingWnd = this;
-	hWnd = CreateWindow(
-		clientClassName, clientWindowName, 
-		WS_CHILD | WS_VISIBLE,
-		left, top, width, height,
-		hFrameWnd, NULL, hinst, NULL
-	);
-	creatingWnd = NULL;
-	::ReleaseMutex( hCreatingMutex );
-	if( !hWnd ) return false;
-	//ShowWindow(hWnd, SW_SHOW);
-	
 	return true;
 }
 
@@ -277,12 +284,14 @@ void CVisWnd::close()
 		wndMap.erase( hWnd );
 		hWnd = NULL;
 	}
-	if(hFrameWnd){
-		DestroyWindow( hFrameWnd );
-		frameWndMap.erase( hFrameWnd );
-		hFrameWnd = NULL;
+	if( clientCanvas ){
+		delete clientCanvas;
+		clientCanvas = NULL;
 	}
-	::UnregisterClass( clientClassName, getModuleHandle() );
-	::UnregisterClass( className, getModuleHandle() );
+	if( canvas ){
+		delete canvas;
+		canvas = NULL;
+	}
+	::UnregisterClass( windowClass.c_str(), getModuleHandle() );
 }
 

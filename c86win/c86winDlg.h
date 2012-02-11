@@ -64,4 +64,6 @@ public:
 	afx_msg void OnBnClickedButtonGetPllclock();
 	afx_msg void OnDestroy();
 	afx_msg void OnBnClickedButtonGetFwver();
+	afx_msg void OnBnClickedButtonTest1();
+	afx_msg void OnBnClickedButtonAdpcmZeroreset();
 };

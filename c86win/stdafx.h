@@ -23,9 +23,7 @@
 #include <afxwin.h>         // MFC のコアおよび標準コンポーネント
 #include <afxext.h>         // MFC の拡張部分
 
-
 #include <afxdisp.h>        // MFC オートメーション クラス
-
 
 
 #ifndef _AFX_NO_OLE_SUPPORT
@@ -37,9 +35,10 @@
 
 #include <afxcontrolbars.h>     // MFC におけるリボンとコントロール バーのサポート
 
-
-
-
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 
 
 

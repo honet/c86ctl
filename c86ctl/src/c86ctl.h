@@ -72,6 +72,17 @@ public:
 	//virtual __stdcall getModuleType() = 0;
 };
 
+// IRealChip2 {BEFA830A-0DF3-46E4-A79E-FABB78E80357}
+static const GUID IID_IRealChip2 = 
+{ 0xbefa830a, 0xdf3, 0x46e4, { 0xa7, 0x9e, 0xfa, 0xbb, 0x78, 0xe8, 0x3, 0x57 } };
+
+interface IRealChip2 : public IRealChip
+{
+	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status ) = 0;
+	virtual int __stdcall adpcmZeroClear(void) = 0;
+	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ) = 0;
+	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ) = 0;
+};
 
 // IGimic {175C7DA0-8AA5-4173-96DA-BB43B8EB8F17}
 static const GUID IID_IGimic = 

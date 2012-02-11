@@ -94,6 +94,8 @@ BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_GET_PLLCLOCK, &C86winDlg::OnBnClickedButtonGetPllclock)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTON_GET_FWVER, &C86winDlg::OnBnClickedButtonGetFwver)
+	ON_BN_CLICKED(IDC_BUTTON_TEST1, &C86winDlg::OnBnClickedButtonTest1)
+	ON_BN_CLICKED(IDC_BUTTON_ADPCM_ZERORESET, &C86winDlg::OnBnClickedButtonAdpcmZeroreset)
 END_MESSAGE_MAP()
 
 
@@ -275,8 +277,6 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 	}
 
 	pRC->reset();
-//	c86ctl_reset();
-//	c86ctl_deinitialize();
 
 	return 0;
 }
@@ -477,5 +477,36 @@ void C86winDlg::OnBnClickedButtonGetFwver()
 		str.Format( _T("%d. %d. %d. %d\r\n"), major, minor, rev, build );
 		m_editMessage.SetWindowText( str );
 		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonTest1()
+{
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		IRealChip *pchip=NULL;
+		if( S_OK == pGimicModule->QueryInterface( IID_IRealChip, (void**)&pchip ) ){
+			//pchip->out( 0x28, 0 );
+			for( int i=0x38; i<=0x3f; i++ ){
+				pchip->out( i, 0x73 );
+			}
+
+			pchip->Release();
+		}
+		pGimicModule->Release();
+	}
+}
+
+
+void C86winDlg::OnBnClickedButtonAdpcmZeroreset()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IRealChip2 *pchip;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IRealChip2, (void**)&pchip ) ){
+		pchip->adpcmZeroClear();
+		pchip->Release();
 	}
 }

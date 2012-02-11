@@ -65,6 +65,10 @@ extern "C" {
 #include "hidsdi.h"
 }
 
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
 /*----------------------------------------------------------------------------
 	追加ライブラリ
 ----------------------------------------------------------------------------*/
@@ -76,7 +80,7 @@ extern "C" {
 	コンストラクタ
 ----------------------------------------------------------------------------*/
 GimicHID::GimicHID( HANDLE h )
-	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0)
+	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0), cps(0), cal(0)
 {
 	rbuff.alloc( 128 );
 	::InitializeCriticalSection(&csection);
@@ -326,6 +330,42 @@ int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 	return ret;
 }
 
+int GimicHID::getChipStatus( UINT addr, UCHAR *status )
+{
+	if( !status )
+		return C86CTL_ERR_INVALID_PARAM;
+	
+	uint8_t rx[4];
+	MSG d = { 3, { 0xfd, 0x93, addr&0x01 } };
+	int ret;
+
+	if( C86CTL_ERR_NONE == (ret = transaction( &d, rx, 4 )) ){
+		*status = *((uint32_t*)&rx[0]);
+	}
+	return ret;
+}
+
+int GimicHID::adpcmZeroClear(void)
+{
+	uint8_t rx[1];
+	MSG d = { 2, { 0xfd, 0xa0 } };
+	int ret;
+
+	ret = transaction( &d, rx, 1 );
+	return ret;
+}
+
+int GimicHID::adpcmWrite( UINT startAddr, UINT size, UCHAR *data )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicHID::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+
 void GimicHID::out(UINT addr, UCHAR data)
 {
 	bool flag = true;
@@ -367,11 +407,11 @@ void GimicHID::tick(void)
 		return;
 	if( rbuff.isempty() )
 		return;
-	
+
 	UCHAR buff[128];
 	UINT sz=0, i=1;
 	MSG d;
-	
+
 	buff[0] = 0; // HID interface id.
 
 	for(;;){
@@ -401,7 +441,18 @@ void GimicHID::tick(void)
 		// なんかthrowする？
 		return;
 	}
+	cal+=64;
+
 	return;
 }
+
+void GimicHID::update(void)
+{
+	if( chip )
+		chip->update();
+
+	cps = cal;
+	cal=0;
+};
 
 #endif

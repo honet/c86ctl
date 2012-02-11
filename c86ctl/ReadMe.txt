@@ -53,7 +53,7 @@ For further information please contact.
 ============
  ChangeLog
 ============
-
+1.3.0.9					
 1.2.0.8					・CreateInstance関数の呼び出し規約をWINAPIに変更
 						　（1.2.0.6で付け忘れました。ごめんなさい。）
 						・IRealChipBaseのGUID変更

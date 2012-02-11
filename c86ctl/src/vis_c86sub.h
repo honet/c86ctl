@@ -8,11 +8,8 @@
  */
 #pragma once
 #include "opna.h"
+#include "vis_bitmap.h"
 
-#define col_light	RGB(199,200,255)
-#define col_shadow	RGB(43,44,75)
-#define col_mid		RGB(68,68,119)
-#define col_high	RGB(128,128,255)
 
 #define BUTTON_PLAY		0
 #define BUTTON_STOP		1
@@ -49,4 +46,17 @@ void vis_fill_rect(HDC hdc, COLORREF col, RECT *rc);
 
 void vis_draw_fm_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFm *pFM );
 void vis_draw_fmslot_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFmSlot *pFM, int slotidx );
+
+// bitmap operations ------------------------------------------------
+void blt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+		  IVisBitmap *src, int src_x, int src_y );
+void alphablt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+			   IVisBitmap *src, int src_x, int src_y );
+void transblt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+			   IVisBitmap *src1, int src1_x, int src1_y,
+			   IVisBitmap *src2, int src2_x, int src2_y,
+			   IVisBitmap *trans, int trans_x, int trans_y, int t );
+
+void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col );
+void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col );
 

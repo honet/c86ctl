@@ -12,50 +12,17 @@
 #include "vis_c86reg.h"
 #include "vis_c86sub.h"
 
-#define WINDOW_WIDTH  284
-#define WINDOW_HEIGHT 350
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
 
-bool CVisC86Reg::create(
-	LPCTSTR className, LPCTSTR windowName, int left, int top, HWND parent )
-{
-	if( !CVisWnd::create(
-		className, windowName, left, top, WINDOW_WIDTH, WINDOW_HEIGHT,
-		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
-		return false;
-
-	//::ShowWindow( getFrameHWND(), SW_SHOWNOACTIVATE );
-	return true;
-}
-
-void CVisC86Reg::close()
-{
-	CVisWnd::close();
-}
-
-LRESULT CALLBACK CVisC86Reg::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
-{
-	switch(msg){
-	case WM_CREATE:
-		//::SetTimer(hWnd, 0, 50, NULL);
-		break;
-//	case WM_TIMER:
-//		::InvalidateRect(hWnd, NULL, FALSE);
-		break;
-	case WM_PAINT:
-		OnPaint();
-		break;
-	default:
-		return DefWindowProc(hWnd , msg , wp , lp);
-	}
-	return 0;
-}
-
-void CVisC86Reg::drawRegView( HDC hdc, HDC hSkinDC, HDC hSkinMaskDC, int ltx, int lty,
+// --------------------------------------------------------
+void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 							  const UCHAR *regval, const UCHAR *regatime )
 {
 	const int dc = 8;
 	CHAR str[64];
-	RECT rc;
+	CVisC86Skin *skin = &gVisSkin;
 
 	int ox = 0;
 	int oy = 0;
@@ -64,13 +31,14 @@ void CVisC86Reg::drawRegView( HDC hdc, HDC hSkinDC, HDC hSkinMaskDC, int ltx, in
 		sprintf( str, "+%X", x );
 		int sx = ltx+ox+(cx*2+4)*(x+1);
 		int sy = lty+oy;
-		vis_draw_str( hdc, hSkinDC, hSkinMaskDC, 1, sx, sy, str );
+
+		skin->drawStr( canvas, 1, sx, sy, str );
 	}
 	for( int y=0; y<16; y++ ){
 		sprintf( str, "%02X", y*16 );
 		int sx = ltx+ox;
 		int sy = lty+oy+cy*(y+1);
-		vis_draw_str( hdc, hSkinDC, hSkinMaskDC, 1, sx, sy, str );
+		skin->drawStr( canvas, 1, sx, sy, str );
 	}
 	
 	ox = cx*2+4;
@@ -85,41 +53,64 @@ void CVisC86Reg::drawRegView( HDC hdc, HDC hSkinDC, HDC hSkinMaskDC, int ltx, in
 			int sx = ltx+ox+(cx*2+4)*x;
 			int sy = lty+oy+cy*y;
 			
-			rc.left = sx;		rc.right = sx+cx*2;
-			rc.top = sy;		rc.bottom = sy+cy;
-			vis_fill_rect( hdc, RGB(c,c,0), &rc );
-			vis_draw_str( hdc, hSkinDC, hSkinMaskDC, 1, sx, sy, str );
+			visFillRect( canvas, sx, sy, cx*2, cy, ARGB(255,c,c,0) );
+			skin->drawStr( canvas, 1, sx, sy, str );
 		}
 	}
 }
 
-void CVisC86Reg::OnPaint()
+bool CVisC86Reg::create( HWND parent )
 {
-	PAINTSTRUCT ps;
-	HDC hDC = ::BeginPaint(hWnd, &ps);
+	int left = INT_MIN;
+	int top = INT_MIN;
 	
-	RECT rc;
-	::GetClientRect(hWnd, &rc);
-	INT wx = rc.right-rc.left;
-	INT wy = rc.bottom-rc.top;
-	HDC hMemDC = ::CreateCompatibleDC(hDC);
-	HBITMAP hMemBMP = ::CreateCompatibleBitmap(hDC, wx, wy);
-	HBITMAP hOldBMP = (HBITMAP)::SelectObject(hMemDC, hMemBMP);
-	vis_fill_rect( hMemDC, 0, &rc );
+	if( !CVisWnd::create(
+		left, top, windowWidth, windowHeight,
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
+		return false;
 
+	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+	
+	return true;
+}
+
+void CVisC86Reg::close()
+{
+	CVisWnd::close();
+}
+
+// --------------------------------------------------------
+void CVisC86OPNAReg::onPaintClient()
+{
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
 
 	if( pOPNA ){
 		int sx=5, sy=5, cx=6, cy=8;
-		vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( hMemDC, hSkinDC, hSkinMaskDC, sx, sy+cy* 1, pOPNA->reg[0], pOPNA->regATime[0] );
-		vis_draw_str( hMemDC, hSkinDC, hSkinMaskDC, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
-		drawRegView( hMemDC, hSkinDC, hSkinMaskDC, sx, sy+cy*21, pOPNA->reg[1], pOPNA->regATime[1] );
+		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
+		drawRegView( clientCanvas, sx, sy+cy* 1, pOPNA->reg[0], pOPNA->regATime[0] );
+		gVisSkin.drawStr( clientCanvas, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
+		drawRegView( clientCanvas, sx, sy+cy*21, pOPNA->reg[1], pOPNA->regATime[1] );
 	}
-
-	::BitBlt(hDC, 0, 0, wx, wy, hMemDC, 0, 0, SRCCOPY);
-
-	::SelectObject(hMemDC,hOldBMP);
-	::DeleteObject(hMemBMP);
-	::DeleteDC(hMemDC);
-	::EndPaint(hWnd, &ps);
 }
+
+void CVisC86OPN3LReg::onPaintClient()
+{
+}
+
+void CVisC86OPMReg::onPaintClient()
+{
+}
+
+// --------------------------------------------------------
+CVisC86RegPtr visC86RegViewFactory(Chip *pchip, int id)
+{
+	if( typeid(*pchip) == typeid(COPNA) ){
+		return CVisC86RegPtr( new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id ) );
+	}else if( typeid(*pchip) == typeid(COPN3L) ){
+		return CVisC86RegPtr( new CVisC86OPN3LReg(dynamic_cast<COPN3L*>(pchip), id) );
+	}else if( typeid(*pchip) == typeid(COPM) ){
+		return CVisC86RegPtr( new CVisC86OPMReg(dynamic_cast<COPM*>(pchip), id) );
+	}
+	return 0;
+}
+

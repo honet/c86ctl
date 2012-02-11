@@ -8,7 +8,6 @@
  */
 #include "stdafx.h"
 
-#include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <tchar.h>
@@ -19,8 +18,6 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <algorithm>
-
 
 
 #include "c86ctl.h"
@@ -32,9 +29,17 @@
 #include "if_gimic_hid.h"
 #include "if_gimic_midi.h"
 
+
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
 #ifdef _MANAGED
 #pragma managed(push, off)
 #endif
+
+ULONG_PTR gdiToken = 0;
+Gdiplus::GdiplusStartupInput gdiInput;
 
 // ------------------------------------------------------------------
 
@@ -48,12 +53,10 @@ BOOL APIENTRY DllMain(
 {
 	switch (ul_reason_for_call){
 	case DLL_PROCESS_ATTACH:
-		initializeWndManager();
 		gModule = hModule;
 		gConfig.init(hModule);
 		break;
 	case DLL_PROCESS_DETACH:
-		uninitializeWndManager();
 		gModule = NULL;
 		break;
 	case DLL_THREAD_ATTACH:
@@ -68,18 +71,20 @@ BOOL APIENTRY DllMain(
 #pragma managed(pop)
 #endif
 
-
+// -----------------------------------------------------------------------
 class C86Ctl : public IRealChipBase
 {
 public:
-	C86Ctl(){
-		isInitialized = false;
-		gMainThread = 0;
-		gSenderThread = 0;
-		mainThreadID = 0;
-		senderThreadID = 0;
-		timerPeriod = 0;
-		terminateFlag = 0;
+	C86Ctl() : 
+	  isInitialized(false),
+		  gMainThread(0),
+		  mainThreadID(0),
+		  gSenderThread(0),
+		  senderThreadID(0),
+		  timerPeriod(0),
+		  terminateFlag(false),
+		  refCount(0)
+	{
 	};
 	~C86Ctl(){};
 
@@ -101,9 +106,9 @@ public:
 	void out( UINT addr, UCHAR data );
 	UCHAR in( UINT addr );
 
-public:
-	static bool terminateFlag;
-	static std::vector< std::shared_ptr<GimicIF> > gGIMIC;
+protected:
+	bool terminateFlag;
+	std::vector< std::shared_ptr<GimicIF> > gGIMIC;
 
 protected:
 	static unsigned int WINAPI threadMain(LPVOID param);
@@ -116,80 +121,112 @@ protected:
 	UINT senderThreadID;
 	DWORD timerPeriod;
 	bool isInitialized;
+protected:
+	UINT refCount;
 };
 
+
 C86Ctl gc86ctl;
-bool C86Ctl::terminateFlag;
-std::vector< std::shared_ptr<GimicIF> > C86Ctl::gGIMIC;
 
 
-
-
+// ---------------------------------------------------------
 // 描画処理スレッド
 // mm-timerによる60fps生成
 unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 {
 	MSG msg;
-	C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
-	CVisC86Main mainWnd;
-	DWORD next;
-	next = ::timeGetTime()*6 + 100;
+	ZeroMemory(&msg, sizeof(msg));
 
-	if( !pThis->gGIMIC.empty() )
-		mainWnd.attach( (COPNA*)pThis->gGIMIC.front()->getChip() );
+	try{
+		C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
+		if( Gdiplus::Ok != Gdiplus::GdiplusStartup(&gdiToken, &gdiInput, NULL) )
+			throw "failed to initialize GDI+";
 
-	mainWnd.create();
-	while(1){
-		if( terminateFlag )
-			break;
+		//	if( !pThis->gGIMIC.empty() )
+		//		mainWnd.attach( (COPNA*)pThis->gGIMIC.front()->getChip() );
+
+		CVisManager *wm = new CVisManager();
+		CVisC86Main *mainWnd = new CVisC86Main();
 		
-		if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
+		mainWnd->attach( pThis->gGIMIC );
+		wm->add( mainWnd );
+		mainWnd->create();
 
-		DWORD now = ::timeGetTime() * 6;
-		if(now < next){
-			if( terminateFlag ) break;
-			Sleep(1);
-			continue;
-		}
-		next += 100;
+		DWORD next = ::timeGetTime()*6 + 100;
+		while(1){
+			if( pThis->terminateFlag )
+				break;
+		
+			// message proc
+			if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
 
-		//update();
+			// fps management
+			DWORD now = ::timeGetTime() * 6;
+			if(now < next){
+				if( pThis->terminateFlag ) break;
+				Sleep(1);
+				continue;
+			}
+			next += 100;
+			if( next < now ){
+				next = now;
+			}
+
+			//update
+			wm->draw();
+		}
+		wm->del( mainWnd );
+		mainWnd->close();
+
+		delete mainWnd;
+		delete wm;
+		
+		Gdiplus::GdiplusShutdown(gdiToken);
+	}catch(...){
 	}
-	mainWnd.close();
-	mainWnd.detach();
-
+	
 	return (DWORD)msg.wParam;
 }
 
 
+// ---------------------------------------------------------
 // 演奏処理スレッド
 // mm-timerによる1ms単位処理
 // note: timeSetEvent()だと転送処理がタイマ周期より遅いときに
 //       再入されるのが怖かったので自前ループにした
 unsigned int WINAPI C86Ctl::threadSender(LPVOID param)
 {
-	const UINT period = 1;
-	UINT next = ::timeGetTime() + period;
+	try{
+		const UINT period = 1;
+		UINT now = ::timeGetTime();
+		UINT next = now + period;
+		UINT nextSec10 = now + 100;
+		C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
 
-	while(1){
-		if( terminateFlag )
-			break;
+		while(1){
+			if( pThis->terminateFlag )
+				break;
 		
-		DWORD now = ::timeGetTime();
-		if(now < next){
-			if( terminateFlag ) break;
-			Sleep(1);
-			continue;
-		}
-		next += period;
+			now = ::timeGetTime();
+			if(now < next){
+				if( pThis->terminateFlag ) break;
+				Sleep(1);
+				continue;
+			}
+			next += period;
 
-		// update
-		//for( std::list< std::shared_ptr<CGimicIF> >::iterator it = gGIMIC.begin(); it != gGIMIC.end(); it++ )
-		//	(*it)->tick();
-		std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->tick(); } );
+			// update
+			std::for_each( pThis->gGIMIC.begin(), pThis->gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->tick(); } );
+			
+			if( nextSec10 < now ){
+				nextSec10 += 100;
+				std::for_each( pThis->gGIMIC.begin(), pThis->gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->update(); } );
+			}
+		}
+	}catch(...){
 	}
 	
 	return 0;
@@ -208,12 +245,12 @@ HRESULT C86Ctl::QueryInterface( REFIID riid, LPVOID *ppvObj )
 
 ULONG C86Ctl::AddRef(VOID)
 {
-	return 1;
+	return ++refCount;
 }
 
 ULONG C86Ctl::Release(VOID)
 {
-	return 0;
+	return --refCount;
 }
 
 
@@ -221,7 +258,7 @@ int C86Ctl::initialize(void)
 {
 	if( isInitialized )
 		return C86CTL_ERR_UNKNOWN;
-
+	
 	// インスタンス生成
 	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
 	if( type==0 ){
@@ -238,16 +275,14 @@ int C86Ctl::initialize(void)
 	}
 
 	// 描画スレッド開始
-//	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) ){
-	// 2012/1/9 honet: OPMの時に激しくバグっているので一旦無効化
-	if(0){
-		gMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, NULL, 0, &mainThreadID );
+	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) ){
+		gMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, this, 0, &mainThreadID );
 		if( !gMainThread )
 			return C86CTL_ERR_UNKNOWN;
 	}
 
 	// 演奏スレッド開始
-	gSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, NULL, 0, &senderThreadID );
+	gSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
 	if( !gSenderThread ){
 		SetThreadPriority( gSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
 		terminateFlag = true;
@@ -257,6 +292,7 @@ int C86Ctl::initialize(void)
 	isInitialized = true;
 	return C86CTL_ERR_NONE;
 }
+
 
 int C86Ctl::deinitialize(void)
 {

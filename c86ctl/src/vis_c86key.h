@@ -12,37 +12,62 @@
 #include "vis_c86wnd.h"
 
 
+// --------------------------------------------------------
 class CVisC86Key : public CVisWnd
 {
 public:
-	CVisC86Key()
+	CVisC86Key(int idx)
 		: CVisWnd()
-		, pOPNA(NULL)
+		, id(idx)
 	{
+		windowWidth = 334;
+		windowHeight = 530;
 	};
 	~CVisC86Key(){};
 
 public:
-	bool create( LPCTSTR className, LPCTSTR windowName, int left, int top, HWND parent = 0 );
+	virtual bool create( HWND parent = 0 );
+	virtual void close();
+	virtual int getId(void){ return id; };
 
-	void close();
-	void update(){
-		::InvalidateRect(hWnd, NULL, FALSE);
+protected:
+	int id;
+};
+
+typedef std::shared_ptr<CVisC86Key> CVisC86KeyPtr;
+
+
+// --------------------------------------------------------
+class CVisC86OPNAKey : public CVisC86Key
+{
+public:
+	CVisC86OPNAKey(COPNA *pchip, int id)
+		: CVisC86Key(id)
+		, pOPNA(pchip)
+	{
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86OPNAKEY%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] OPNA KEYBOARD VIEW"), id);
+		windowTitle = str;
 	};
+	~CVisC86OPNAKey(){};
 
-	void attach( COPNA *pOPNA ){ this->pOPNA = pOPNA; };
-	COPNA* detach( void ){ return pOPNA; };
+protected:
+	virtual void onPaintClient(void);
 	
 protected:
-	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);
-	void OnPaint();
-	void drawFMTrackView( HDC hdc, int ltx, int lty, int trNo, int fmNo );
-	void drawFM3EXTrackView( HDC hdc, int ltx, int lty, int trNo, int fmNo, int exNo );
-	void drawSSGTrackView( HDC hdc, int ltx, int lty, int trNo, int ssgNo );
-	void drawADPCMTrackView( HDC hdc, int ltx, int lty, int trNo );
-	void drawRhythmTrackView( HDC hdc, int ltx, int lty, int trNo );
+	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int fmNo );
+	void drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int fmNo, int exNo );
+	void drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int ssgNo );
+	void drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
+	void drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
 
 protected:
 	COPNA *pOPNA;
 };
+
+// --------------------------------------------------------
+// factory
+CVisC86KeyPtr visC86KeyViewFactory(Chip *pchip, int id);
 

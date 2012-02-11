@@ -1,0 +1,388 @@
+/***
+	c86ctl
+	
+	Copyright (c) 2009-2012, honet. All rights reserved.
+	This software is licensed under the BSD license.
+
+	honet.kk(at)gmail.com
+ */
+
+#include "stdafx.h"
+#include "resource.h"
+#include "vis_c86skin.h"
+#include "vis_c86sub.h"
+#include "module.h"
+
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
+
+#define PI 3.14159265358979
+
+
+static HBITMAP hSkinBMP = NULL;
+static HDC hSkinDC = NULL;
+
+struct BMPREG{
+	INT left;
+	INT top;
+	INT width;
+	INT height;
+};
+
+const BMPREG skinreg_frame[] = {
+	{144,129,8,15},		// window frame left
+	{279,129,8,15},		// window frame right
+	{152,129,129,15}	// window frame center
+};
+const BMPREG skinreg_fonts[] = {
+	{0,0,6,8},			// 0:font1
+	{97,0,6,8},			// 1:font2
+	{194,0,6,8},		// 2:font3
+	{0,143,6,8},		// 3:vfont1
+	{48,143,6,8},		// 4:vfont2
+	{96,143,6,8},		// 5:vfont3
+	{144,67,8,11},		// 6:num font1 (mini)
+	{144,48,10,18},		// 7:num font2 (big)
+	{144,79,5,5},		// 8:num font3 (nano)
+	{144,85,5,5},		// 9:num font3 (nano)
+	{144,91,5,5},		// 10:num font3 (nano)
+};
+const BMPREG skinreg_alg[] = {
+	{  1,323,94,62},	// ALG0
+	{ 96,323,94,62},	// ALG1
+	{191,323,94,62},	// ALG2
+	{  1,386,94,62},	// ALG3
+	{ 96,386,94,62},	// ALG4
+	{191,386,94,62},	// ALG5
+	{  1,449,94,62},	// ALG6
+	{ 96,449,94,62},	// ALG7
+	{ 45,231,52,11},	// SSG EG0
+	{ 45,241,52,11},	// SSG EG0
+	{ 45,251,52,11},	// SSG EG1
+	{ 45,261,52,11},	// SSG EG2
+	{ 45,271,52,11},	// SSG EG3
+	{ 45,281,52,11},	// SSG EG4
+	{ 45,291,52,11},	// SSG EG5
+	{ 45,301,52,11},	// SSG EG6
+	{ 45,311,52,11},	// SSG EG7
+};
+const BMPREG skinreg_tick[] = {
+	{0,145,31,31},		// rot none
+	{32,145,31,31},		// rot0
+	{64,145,31,31},		// rot1
+	{96,145,31,31},		// rot2
+	{128,145,31,31},	// rot3
+	{160,145,31,31},	// rot4
+	{192,145,31,31},	// rot5
+	{224,145,31,31},	// rot6
+	{256,145,31,31}		// rot7
+};
+
+#define ID_BAR_SHADOW		0
+#define ID_BAR_LIGHT		1
+#define ID_KEYBOARD			2
+#define ID_DARK_KEYBOARD	3
+#define ID_DIPSW_OFF		4
+#define ID_DIPSW_ON			5
+#define ID_LOGO				6
+#define ID_SLOT1_ON			7
+#define ID_SLOT2_ON			8
+#define ID_SLOT3_ON			9
+#define ID_SLOT4_ON			10
+#define ID_SLOT1_OFF		11
+#define ID_SLOT2_OFF		12
+#define ID_SLOT3_OFF		13
+#define ID_SLOT4_OFF		14
+#define ID_KNOB_DARK		15
+#define ID_KNOB_LIGHT		16
+#define ID_KNOB_TRANS		17
+#define ID_CHECK_OFF		18
+#define ID_CHECK_ON			19
+
+
+const BMPREG skinreg_tool[] = {
+	{435,385,21,96},	// 0:bar shadow
+	{457,385,21,96},	// 1:bar light
+	{  0,178,59,20},	// 2:keyboard
+	{ 60,178,40,20},	// 3:dark keyboard
+	{113,178,11,20},	// 4:SW OFF
+	{101,178,11,20},	// 5:SW ON
+	{  0,199,115,24},	// 6:logo
+	{144,101,13,13},	// 7:(A)
+	{158,101,13,13},	// 8:(B)
+	{172,101,13,13},	// 9:(C)
+	{186,101,13,13},	// 10:(D)
+	{144,115,13,13},	// 11:(A)
+	{158,115,13,13},	// 12:(B)
+	{172,115,13,13},	// 13:(C)
+	{186,115,13,13},	// 14:(D)
+	{125,178,22,22},	// 15:knob-dark
+	{148,178,22,22},	// 16:knob-light
+	{171,178,22,22},	// 17:knob-trans
+	{200,113,7,7},		// 18:check off
+	{200,121,7,7},		// 19:check on
+};
+
+const BMPREG skinreg_view[] = {
+	{324,0,316,75},			// FM view1
+	{324,75,316,75},		// FM view2
+	{324,150,316,75},		// FM slot view
+};
+
+const int keyW1 = 5;	// îíåÆ
+const int keyH1 = 20;
+const int keyW2 = 3;	// çïåÆ
+const int keyH2 = 10;
+const int keyXOffset[] = { 0,3,5,8,10,15,18,20,23,25,28,30,33,35 };
+const int keyHiXOffset[] = { 40,55,45,55,50,40,55,45,55,45,55,45,55,50 };
+const int keyHiW[] = { 4,3,4,3,4,4,3,4,3,4,3,4,3,4 };
+const int keyHiH[] = { 20,10,20,10,20,20,10,20,10,20,10,20,10,20 };
+
+
+
+CVisC86Skin gVisSkin;
+
+CVisC86Skin::CVisC86Skin() : skinbmp(0)
+{
+}
+
+CVisC86Skin::~CVisC86Skin(){
+	deinit();
+}
+
+void CVisC86Skin::init(void){
+	skinbmp = CVisBitmap::LoadFromResource( IDB_PNGSKIN1, _T("PNG"), getModuleHandle() );
+}
+
+void CVisC86Skin::deinit(void){
+	if(skinbmp){
+		delete skinbmp;
+		skinbmp = 0;
+	}
+}
+
+// ÉEÉBÉìÉhÉEÉtÉåÅ[ÉÄÇÃï`âÊ
+void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
+{
+	int xe = canvas->getWidth() - 1;
+	int ye = canvas->getHeight() - 1;
+
+	// frame
+	visDrawLine( canvas, 0, 0, xe, 0, col_light );
+	visDrawLine( canvas, 0, 0, 0, ye, col_light );
+
+	visDrawLine( canvas, xe, 1, xe, ye, col_shadow ); // âE
+	visDrawLine( canvas, 1, ye, xe, ye, col_shadow ); // â∫
+	
+	visDrawLine( canvas, 1, 1, xe-1, 1, col_mid ); // è„
+	visDrawLine( canvas, 1, 1, 1, ye-1, col_mid ); // ç∂
+	visDrawLine( canvas, xe-1, 1, xe-1, ye-1, col_mid ); // âE
+	visDrawLine( canvas, 1, ye-1, xe-1, ye-1, col_mid ); // â∫
+
+	// topbar
+	BMPREG reg_l = skinreg_frame[0];
+	BMPREG reg_r = skinreg_frame[1];
+	BMPREG reg_c = skinreg_frame[2];
+
+	blt(canvas,    2, 2, reg_l.width, reg_l.height, skinbmp, reg_l.left, reg_l.top );
+	blt(canvas, xe-9, 2, reg_r.width, reg_r.height, skinbmp, reg_r.left, reg_r.top );
+
+	int tw = xe - 3 - reg_l.width - reg_r.width;
+	int l = 10;
+	while(0<tw){
+		INT w = __min( tw, reg_c.width );
+		blt(canvas, l, 2, w, reg_c.height, skinbmp, reg_c.left, reg_c.top);
+		l+=w;  tw-=w;
+	}
+
+	// title
+	l = (int)strlen(title);
+	if( 0<l ){
+		visFillRect( canvas, 3, 3, (6*(l+2)), 13, RGB(0,0,0) );
+		drawStr( canvas, 1, 10, 6, title );
+	}
+}
+
+// ï∂éöï`âÊ
+void CVisC86Skin::drawStr( IVisBitmap *canvas, int type, int x, int y, const char *str )
+{
+	if( type < 0 || 3 <= type )
+		return;
+
+	int left = skinreg_fonts[type].left;
+	int top = skinreg_fonts[type].top;
+	int len = (int)strlen(str);
+	for( int i=0; i<len; i++ ){
+		int c = str[i]-0x20;
+		if( 0<=c && c<96 ){
+			int srcx = left + 6 * (c&0x0f);
+			int srcy = top  + 8 * (c>>4);
+			alphablt( canvas, x+6*i, y, 6, 7, skinbmp, srcx, srcy );
+		}
+	}
+}
+
+// ècï∂éöï`âÊ
+void CVisC86Skin::drawVStr( IVisBitmap *canvas, int type, int x, int y, const char *str )
+{
+	if( type < 0 || 3 <= type )
+		return;
+
+	int left = skinreg_fonts[3+type].left;
+	int top = skinreg_fonts[3+type].top;
+	int len = (int)strlen(str);
+	for( int i=0; i<len; i++ ){
+		int c = str[i]-0x20;
+		if( 0<=c && c<96 ){
+			int srcx = left + (8 * (c>>4));
+			int srcy = top  - (6 * (c&0x0f)) - 5;
+			alphablt(canvas, x-5, y-i*6, 7, 6, skinbmp, srcx, srcy );
+		}
+	}
+}
+
+// ÇøÇ¡ÇøÇ·Ç¢êîéöï`âÊ
+void CVisC86Skin::drawNanoNumStr( IVisBitmap *canvas, int x, int y, const char *str )
+{
+	int left = skinreg_fonts[8].left;
+	int top = skinreg_fonts[8].top;
+	int cx = skinreg_fonts[8].width;
+	int cy = skinreg_fonts[8].height;
+	int len = (int)strlen(str);
+	for( int i=0; i<len; i++ ){
+		char c = str[i] - '0';
+		int srcx = left + cx * c;
+		int srcy = top;
+		alphablt(canvas, x+cx*i, y, cx, cy, skinbmp, srcx, srcy );
+	}
+}
+
+// ëÂÇ´Ç¢êîéöï`âÊ
+void CVisC86Skin::drawNumStr1( IVisBitmap *canvas, int x, int y, const char *str )
+{
+	int left = skinreg_fonts[6].left;
+	int top = skinreg_fonts[6].top;
+	int cx = 8;//skinreg_fonts[6].width;
+	int cy = 11;//skinreg_fonts[6].height;
+	int len = (int)strlen(str);
+	for( int i=0; i<len; i++ ){
+		char c = str[i]==' ' ? 0 : str[i] - '0' + 1;
+		int srcx = left + cx * c;
+		int srcy = top;
+		alphablt(canvas, x+cx*i, y, cx, cy, skinbmp, srcx, srcy );
+	}
+}
+
+// ÉLÅ[É{Å[Éhï`âÊ
+void CVisC86Skin::drawKeyboard( IVisBitmap *canvas, int x, int y )
+{
+	int sx = skinreg_tool[ID_KEYBOARD].left;
+	int sy = skinreg_tool[ID_KEYBOARD].top;
+	
+	for( int i=0; i<8; i++ ){
+		int w = keyW1*8;
+		alphablt(canvas, x+w*i, y, w, keyH1, skinbmp, sx, sy );
+	}
+}
+
+// à√Ç¢êFÇÃÉLÅ[É{Å[Éhï`âÊ
+void CVisC86Skin::drawDarkKeyboard( IVisBitmap *canvas, int x, int y )
+{
+	int sx = skinreg_tool[ID_DARK_KEYBOARD].left;
+	int sy = skinreg_tool[ID_DARK_KEYBOARD].top;
+	
+	for( int i=0; i<8; i++ ){
+		int w = keyW1*8;
+		alphablt(canvas, x+w*i, y, w, keyH1, skinbmp, sx, sy );
+	}
+}
+
+// î≠âπíÜÉLÅ[ï\é¶
+void CVisC86Skin::drawHilightKey( IVisBitmap *canvas, int x, int y, int oct, int note )
+{
+	int srcx = skinreg_tool[ID_KEYBOARD].left + keyHiXOffset[note];
+	int srcy = skinreg_tool[ID_KEYBOARD].top;
+	int dstx = keyW1*8*oct + keyXOffset[note];
+	int w = keyHiW[note];
+	int h = keyHiH[note];
+	alphablt(canvas, x+dstx, y, w, h, skinbmp, srcx, srcy );
+}
+
+// Ç≠ÇÈÇ≠ÇÈÉTÅ[ÉNÉã
+void CVisC86Skin::drawTickCircle( IVisBitmap *canvas, int x, int y, int tick )
+{
+	int idx = (tick==-1) ? 0 : 1+(tick&0x7);
+	BMPREG reg = skinreg_tick[idx];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// ÉçÉSï`âÊ
+void CVisC86Skin::drawLogo(IVisBitmap *canvas, int x, int y )
+{
+	BMPREG reg = skinreg_tool[ID_LOGO];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// dip-sw
+void CVisC86Skin::drawDipSw(IVisBitmap *canvas, int x, int y, int sw )
+{
+	BMPREG reg = skinreg_tool[(sw ? ID_DIPSW_ON : ID_DIPSW_OFF)];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// checkbox
+void CVisC86Skin::drawCheckBox(IVisBitmap *canvas, int x, int y, int sw )
+{
+	BMPREG reg = skinreg_tool[(sw ? ID_CHECK_ON : ID_CHECK_OFF)];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// Ç¬Ç‹Ç›
+void CVisC86Skin::drawKnob(IVisBitmap *canvas, int x, int y, int val, int numval )
+{
+	BMPREG reg_d = skinreg_tool[ID_KNOB_DARK];
+	BMPREG reg_l = skinreg_tool[ID_KNOB_LIGHT];
+	BMPREG reg_t = skinreg_tool[ID_KNOB_TRANS];
+	char buff[10];
+	
+	transblt( canvas, x, y, reg_d.width, reg_d.height,
+		skinbmp, reg_d.left, reg_d.top,
+		skinbmp, reg_l.left, reg_l.top,
+		skinbmp, reg_t.left, reg_t.top, val );
+
+	sprintf( buff, "%d", numval );
+	if( numval < 10 )       x+=9;
+	else if( numval < 100 ) x+=7;
+	else if( numval < 300 ) x+=3;
+	drawNanoNumStr( canvas, x, y+8, buff );
+}
+
+// FMÉAÉãÉSÉäÉYÉÄ
+void CVisC86Skin::drawFMAlgorithm(IVisBitmap *canvas, int x, int y, int no )
+{
+	BMPREG reg = skinreg_alg[no];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// FMïîîwåi
+void CVisC86Skin::drawFMSkin(IVisBitmap *canvas, int x, int y, int exmode )
+{
+	BMPREG reg = skinreg_view[ exmode?1:0 ];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// FM slotïîîwåi
+void CVisC86Skin::drawFMSlotSkin(IVisBitmap *canvas, int x, int y )
+{
+	BMPREG reg = skinreg_view[2];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+void CVisC86Skin::drawFMSlotLight(IVisBitmap *canvas, int x, int y, int no, int sw )
+{
+	BMPREG reg = skinreg_tool[7+sw*4+no];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+

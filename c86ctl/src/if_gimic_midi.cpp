@@ -39,6 +39,12 @@
 #include "opna.h"
 #include "opn3l.h"
 
+
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
+
 /*----------------------------------------------------------------------------
 	コンストラクタ
 ----------------------------------------------------------------------------*/
@@ -106,8 +112,10 @@ void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )
 int GimicMIDI::init(void)
 {
 	// MIDI-IFの場合はOPNA決めうち(module判定ifを作ってないから)
-	chiptype = CHIP_OPNA;
-	chip = new COPNA();
+	//chiptype = CHIP_OPNA;
+	//chip = new COPNA();
+	chiptype=CHIP_OPM;
+	chip = new COPM();
 	return C86CTL_ERR_NONE;
 }
 
@@ -180,6 +188,26 @@ int GimicMIDI::getModuleInfo( struct Devinfo *info )
 }
 
 int GimicMIDI::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicMIDI::getChipStatus( UINT addr, UCHAR *status )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicMIDI::adpcmZeroClear(void)
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicMIDI::adpcmWrite( UINT startAddr, UINT size, UCHAR *data )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicMIDI::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }

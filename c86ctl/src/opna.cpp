@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include "opna.h"
 
+#ifdef _DEBUG
+#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#endif
+
+
 
 bool COPNA::setReg( int addr, UCHAR data ){
 	if( 0x200 <= addr ) return false;

@@ -63,6 +63,21 @@
     <ClCompile Include="..\..\src\module.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vis_manager.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_bitmap.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_c86skin.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fpscounter.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis_widget.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vis_c86fm.h">
@@ -128,15 +143,31 @@
     <ClInclude Include="..\..\src\opn3l.h">
       <Filter>module</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\vis_manager.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_bitmap.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_c86skin.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fpscounter.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis_widget.h">
+      <Filter>vis</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\c86ctl.def">
       <Filter>core</Filter>
     </None>
-    <None Include="..\..\src\res\skin.bmp">
+    <None Include="..\..\ReadMe.txt" />
+    <None Include="..\..\src\res\skin.png">
       <Filter>resource</Filter>
     </None>
-    <None Include="..\..\ReadMe.txt" />
+    <None Include="res\skin.png" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\c86ctl.rc">

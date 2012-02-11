@@ -43,11 +43,19 @@ public:
 	virtual int __stdcall getModuleInfo(struct Devinfo *info);
 	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
 
+
 public:
 	// IRealChip
 	virtual int __stdcall reset(void);
 	virtual void __stdcall out(UINT addr, UCHAR data);
 	virtual UCHAR __stdcall in( UINT addr );
+
+public:
+	// IRealChip2
+	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
+	virtual int __stdcall adpcmZeroClear(void);
+	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
+	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
 
 private:
 	void sendSysEx( uint8_t *data, uint32_t sz );
