@@ -36,15 +36,6 @@ void COPNA::filter( int addr, UCHAR *data )
 			*data &= 0x3f;
 		break;
 
-//	case 0x07: // SSG keyon
-//		if( getMixedMask( 9 ) )
-//			*data |= 0x09;
-//		if( getMixedMask( 10 ) )
-//			*data |= 0x12;
-//		if( getMixedMask( 11 ) )
-//			*data |= 0x24;
-//		break;
-
 	case 0x08: // SSG amp level
 	case 0x09:
 	case 0x0a:
@@ -101,9 +92,6 @@ UCHAR COPNA::getReg( int addr ){
 	}
 	return reg[idx][addr];
 };
-
-
-
 
 
 bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
@@ -212,35 +200,7 @@ bool COPNAFm::setReg( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0xae:
 		ch[idxoffset+2]->setFExHi(1, data);
 		break;
-#if 0
-		reg[bank][adrs] = data;
-		idx = (adrs - 0xa0) & 0x03;
-		hi = reg[bank][0xa4+idx];
-		lo = reg[bank][0xa0+idx];
-		ch[idxoffset+idx]->setFByReg( lo, hi );
-		break;
-		
-	case 0xa8: // ch3 ex: slot3
-	case 0xac:
-		reg[bank][adrs] = data;
-		hi = reg[bank][0xac];
-		lo = reg[bank][0xa8];
-		ch[idxoffset+2]->setFByRegEx( 2, lo, hi );
-		break;
-	case 0xa9: // ch3 ex: slot1
-	case 0xad:
-		hi = reg[bank][0xad];
-		lo = reg[bank][0xa9];
-		ch[idxoffset+2]->setFByRegEx( 0, lo, hi );
-		break;
-	case 0xaa: // ch3 ex: slot2
-	case 0xae:
-		hi = reg[bank][0xae];
-		lo = reg[bank][0xaa];
-		ch[idxoffset+2]->setFByRegEx( 1, lo, hi );
-		break;
-#endif
-		
+
 	// algorithm, feedback
 	case 0xb0:
 	case 0xb1:

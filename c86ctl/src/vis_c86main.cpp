@@ -71,6 +71,21 @@ bool CVisC86Main::create(void)
 	int y=40;
 	
 	for( size_t i=0; i<sz; i++ ){
+		info[i].checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
+		info[i].checkReg->changeEvent.push_back(
+			[this, i](CVisWidget* w){
+				hwinfo *info = &this->info[i];
+				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
+					info->regView = visC86RegViewFactory(this->gimic[i]->getChip(), 0);
+					info->regView->create(hWnd);
+					this->manager->add( info->regView.get() );
+				}else{
+					this->manager->del( info->regView.get() );
+					info->regView = 0;
+				}
+			} );
+		widgets.push_back(info[i].checkReg);
+
 		if( info[i].chiptype == CHIP_OPNA ){
 			info[i].checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
 			info[i].checkKey->changeEvent.push_back(
@@ -86,21 +101,6 @@ bool CVisC86Main::create(void)
 					}
 				} );
 			widgets.push_back(info[i].checkKey);
-
-			info[i].checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
-			info[i].checkReg->changeEvent.push_back(
-				[this, i](CVisWidget* w){
-					hwinfo *info = &this->info[i];
-					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-						info->regView = visC86RegViewFactory(this->gimic[i]->getChip(), 0);
-						info->regView->create(hWnd);
-						this->manager->add( info->regView.get() );
-					}else{
-						this->manager->del( info->regView.get() );
-						info->regView = 0;
-					}
-				} );
-			widgets.push_back(info[i].checkReg);
 
 			for( int ch=0; ch<6; ch++ ){
 				char str[10];
@@ -129,7 +129,7 @@ bool CVisC86Main::create(void)
 
 			info[i].checkADPCM = CVisCheckBoxPtr(new CVisCheckBox(this,280,y+42, "ADPCM"));
 			widgets.push_back(info[i].checkADPCM);
-		}	
+		}
 		y+=64;
 	}
 

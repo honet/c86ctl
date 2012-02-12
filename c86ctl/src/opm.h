@@ -17,19 +17,31 @@ public:
 	COPM(){ reset(); };
 	virtual ~COPM(){};
 
-	void reset(){};
-	void update(){};
+	void reset(){
+		memset( reg, 0, 256 );
+		memset( regATime, 0, 256 );
+	};
+	
+	void update(){
+		int dc = 8;
+		for( int i=0; i<256; i++ ){
+			UCHAR c=regATime[i];
+			regATime[i] = dc<c? c-dc : 0;
+		}
+	};
 
 public:
 	bool setReg( int addr, UCHAR data ){
 		if( 0x20 <= addr ){
-			regmem[addr] = data;
+			reg[addr] = data;
+			regATime[addr] = 255;
 			return true;
 		}
 		switch( addr ){
 		case 0x01:
 			data &= 0x02; // LFO RESET
-			regmem[addr] = data;
+			reg[addr] = data;
+			regATime[addr] = 255;
 			return true;
 		case 0x08:
 		case 0x0f:
@@ -40,7 +52,8 @@ public:
 		case 0x18:
 		case 0x19:
 		case 0x1b:
-			regmem[addr] = data;
+			reg[addr] = data;
+			regATime[addr] = 255;
 			return true;
 		}
 		
@@ -48,11 +61,12 @@ public:
 	}
 	UCHAR getReg( int addr ){
 		if( addr < 0x100 )
-			return regmem[addr];
+			return reg[addr];
 		return 0;
 	};
 
-protected:
-	UCHAR regmem[256];
+public:
+	UCHAR reg[256];
+	UCHAR regATime[256];
 };
 

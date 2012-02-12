@@ -72,7 +72,7 @@ public:
 		_stprintf_s(str, _T("[%d] OPM REGISTER VIEW"), id);
 		windowTitle = str;
 		
-		windowHeight = 250;
+		windowHeight = 200;
 	};
 	~CVisC86OPMReg(void){};
 

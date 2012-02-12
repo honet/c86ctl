@@ -18,43 +18,55 @@ public:
 	virtual ~COPN3L(){};
 
 	void reset(){};
-	void update(){};
+	void update(){
+		int dc = 8;
+		for( int j=0; j<2; j++ ){
+			for( int i=0; i<256; i++ ){
+				UCHAR c=regATime[j][i];
+				regATime[j][i] = dc<c? c-dc : 0;
+			}
+		}
+	};
 
 public:
 	bool setReg( int addr, UCHAR data ){
 		if( addr <= 0x0d ) // SSG
-			regmem[addr] = data;
+			reg[0][addr] = data;
 			return true;
 		if( 0x10<=addr && addr<=0x1d ) // Rhythm
-			regmem[addr] = data;
+			reg[0][addr] = data;
 			return true;
 		if( 0x20<=addr && addr<=0x29 ){ // FM
 			if( addr == 0x21 ||		// Test
 				addr == 0x26 )		// Timer-B
 				return false;
-			regmem[addr] = data;
+			reg[0][addr] = data;
 			return true;
 		}
 		if( 0x30<=addr && addr<=0xb6 ) // FM param 1-3
-			regmem[addr] = data;
+			reg[0][addr] = data;
 			return true;
 		//if( 0x110==addr ) return true; // flag control
 		if( 0x130<=addr && addr<=0x1b6 ) // FM param 4-6
-			regmem[addr] = data;
+			reg[1][addr] = data;
 			return true;
 		
 		return false;
 	};
 
 	UCHAR getReg( int addr ){
-		if( addr < 0x200 ){
-			return regmem[addr];
+		
+		if( addr < 0x100 ){
+			return reg[0][addr];
+		}else if( addr < 0x200 ){
+			return reg[1][addr];
 		}
 		return 0;
 	};
 
-protected:
-	UCHAR regmem[512];
+public:
+	UCHAR reg[2][256];
+	UCHAR regATime[2][256];
 };
 
 

@@ -95,10 +95,26 @@ void CVisC86OPNAReg::onPaintClient()
 
 void CVisC86OPN3LReg::onPaintClient()
 {
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+
+	if( pOPN3L ){
+		int sx=5, sy=5, cx=6, cy=8;
+		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
+		drawRegView( clientCanvas, sx, sy+cy* 1, pOPN3L->reg[0], pOPN3L->regATime[0] );
+		gVisSkin.drawStr( clientCanvas, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
+		drawRegView( clientCanvas, sx, sy+cy*21, pOPN3L->reg[1], pOPN3L->regATime[1] );
+	}
 }
 
 void CVisC86OPMReg::onPaintClient()
 {
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+
+	if( pOPM ){
+		int sx=5, sy=5, cx=6, cy=8;
+		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
+		drawRegView( clientCanvas, sx, sy+cy* 1, pOPM->reg, pOPM->regATime );
+	}
 }
 
 // --------------------------------------------------------
