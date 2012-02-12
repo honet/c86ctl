@@ -72,31 +72,68 @@ typedef std::shared_ptr<CVisCheckBox> CVisCheckBoxPtr;
 
 
 // ---------------------------------------------------------------------------
-// DIPSW
-class CVisDipSw : public CVisWidget
+// SWITCH
+class CVisSwitchBase : public CVisWidget
 {
 public:
-	CVisDipSw( CVisWnd *parentWnd, int x, int y )
-		: CVisWidget(parentWnd), sw(0){
+	CVisSwitchBase( CVisWnd *parentWnd, int x, int y, int w, int h )
+		: CVisWidget(parentWnd){
 			sx = x;
 			sy = y;
-			ex = x+11;
-			ey = y+20;
+			ex = x+w;
+			ey = y+h;
 		};
-	~CVisDipSw(){};
+	~CVisSwitchBase(){};
 
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap *canvas){};
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
 	
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
-	
-protected:
-	int sw;
+	std::function< int() > getter;
+	std::function< void(int) > setter;
 };
 
+// ---------------------------------------------------------------------------
+// DIPSW
+class CVisDipSw : public CVisSwitchBase
+{
+public:
+	CVisDipSw( CVisWnd *parentWnd, int x, int y )
+		: CVisSwitchBase(parentWnd, x, y, 11, 20){};
+	~CVisDipSw(){};
+public:
+	virtual void onPaint(IVisBitmap *canvas);
+};
 typedef std::shared_ptr<CVisDipSw> CVisDipSwPtr;
+
+// ---------------------------------------------------------------------------
+// MUTE-SW
+class CVisMuteSw : public CVisSwitchBase
+{
+public:
+	CVisMuteSw( CVisWnd *parentWnd, int x, int y )
+		: CVisSwitchBase(parentWnd, x, y, 13, 11){};
+	~CVisMuteSw(){};
+
+public:
+	virtual void onPaint(IVisBitmap *canvas);
+};
+typedef std::shared_ptr<CVisMuteSw> CVisMuteSwPtr;
+
+// ---------------------------------------------------------------------------
+// SOLO-SW
+class CVisSoloSw : public CVisSwitchBase
+{
+public:
+	CVisSoloSw( CVisWnd *parentWnd, int x, int y )
+		: CVisSwitchBase(parentWnd, x, y, 13, 11){};
+	~CVisSoloSw(){};
+public:
+	virtual void onPaint(IVisBitmap *canvas);
+};
+typedef std::shared_ptr<CVisSoloSw> CVisSoloSwPtr;
 
 // ---------------------------------------------------------------------------
 // knob
@@ -121,11 +158,6 @@ public:
 		minval = minv;
 		maxval = maxv;
 	};
-//	void setValue(int val){
-//		if( minval <= val && val <= maxval ){
-//			value = val;
-//		}
-//	}
 	
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
@@ -133,7 +165,6 @@ public:
 	std::function< void(int) > setter;
 	
 protected:
-//	int value;
 	int maxval;
 	int minval;
 	bool bMoving;

@@ -26,8 +26,8 @@ public:
 	~CVisC86Key(){};
 
 public:
-	virtual bool create( HWND parent = 0 );
-	virtual void close();
+	virtual bool create( HWND parent = 0 ){ return false; };
+	virtual void close(){};
 	virtual int getId(void){ return id; };
 
 protected:
@@ -54,6 +54,8 @@ public:
 	~CVisC86OPNAKey(){};
 
 protected:
+	virtual bool create( HWND parent = 0 );
+	virtual void close();
 	virtual void onPaintClient(void);
 	
 protected:
@@ -64,6 +66,9 @@ protected:
 	void drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
 
 protected:
+	CVisMuteSwPtr muteSw[14];
+	CVisSoloSwPtr soloSw[14];
+	
 	COPNA *pOPNA;
 };
 

@@ -30,82 +30,92 @@ bool CVisC86OPNAFm::create( HWND parent )
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
-	COPNAFm *pOPNAFm = &pOPNA->fm[this->ch];
+	COPNAFmCh *pFmCh = pOPNA->fm->ch[this->ch];
 	// AMS
 	knobAMS = CVisKnobPtr( new CVisKnob(this, 134-11, 25-10));
 	knobAMS->setRange(0,3);
-	knobAMS->getter = [pOPNAFm]() -> int{ return pOPNAFm->getAMS(); };
+	knobAMS->getter = [pFmCh]() -> int{ return pFmCh->getAMS(); };
 	//knobAMS->setter = [pOPNAFm](int ams) { pOPNAFm->setAMS(ams); };
 	widgets.push_back(knobAMS);
 
 	// PMS
 	knobPMS = CVisKnobPtr( new CVisKnob(this, 158-11, 25-10));
 	knobPMS->setRange(0,7);
-	knobPMS->getter = [pOPNAFm]() -> int{ return pOPNAFm->getPMS(); };
+	knobPMS->getter = [pFmCh]() -> int{ return pFmCh->getPMS(); };
 	widgets.push_back(knobPMS);
 
 	// FB
 	knobFB = CVisKnobPtr( new CVisKnob(this, 134-11, 59-10));
 	knobFB->setRange(0,7);
-	knobFB->getter = [pOPNAFm]() -> int{ return pOPNAFm->getFeedback(); };
+	knobFB->getter = [pFmCh]() -> int{ return pFmCh->getFeedback(); };
 	widgets.push_back(knobFB);
 
 	// PAN
 	knobPAN = CVisKnobPtr( new CVisKnob(this, 158-11, 59-10));
 	knobPAN->setRange(-1,1);
-	knobPAN->getter = [pOPNAFm]() -> int{ return pOPNAFm->getPan(); };
+	knobPAN->getter = [pFmCh]() -> int{ return pFmCh->getPan(); };
 	widgets.push_back(knobPAN);
 
 	int x=0, y=75;
 	for(int i=0; i<4; i++){
-		COPNAFmSlot *slot = &pOPNA->fm[this->ch].slot[i];
+		COPNAFmSlot *slot = pFmCh->slot[i];
 		// AR
-		knobAR[i] = CVisKnobPtr( new CVisKnob(this, x+173-11, y+27-10));
+		knobAR[i] = CVisKnobPtr( new CVisKnob(this, x+165-11, y+27-10));
 		knobAR[i]->setRange(0,31);
 		knobAR[i]->getter = [slot, i]() -> int{ return slot->getAttackRate(); };
 		widgets.push_back(knobAR[i]);
 		
-		// DR
-		knobDR[i] = CVisKnobPtr( new CVisKnob(this, x+198-11, y+27-10));
-		knobDR[i]->setRange(0,31);
-		knobDR[i]->getter = [slot, i]() -> int{ return slot->getDecayRate(); };
-		widgets.push_back(knobDR[i]);
+		// DR1
+		knobDR1[i] = CVisKnobPtr( new CVisKnob(this, x+190-11, y+27-10));
+		knobDR1[i]->setRange(0,31);
+		knobDR1[i]->getter = [slot, i]() -> int{ return slot->getDecayRate(); };
+		widgets.push_back(knobDR1[i]);
+
+		// DR2 - OPNA‚Å‚ÍŽg‚¦‚È‚¢B
+		knobDR2[i] = CVisKnobPtr( new CVisKnob(this, x+215-11, y+27-10));
+		knobDR2[i]->setRange(0,31);
+		widgets.push_back(knobDR2[i]);
 
 		// SR
-		knobSR[i] = CVisKnobPtr( new CVisKnob(this, x+223-11, y+27-10));
+		knobSR[i] = CVisKnobPtr( new CVisKnob(this, x+240-11, y+27-10));
 		knobSR[i]->setRange(0,31);
 		knobSR[i]->getter = [slot, i]() -> int{ return slot->getSustainRate(); };
 		widgets.push_back(knobSR[i]);
 
 		// RR
-		knobRR[i] = CVisKnobPtr( new CVisKnob(this, x+248-11, y+27-10));
+		knobRR[i] = CVisKnobPtr( new CVisKnob(this, x+265-11, y+27-10));
 		knobRR[i]->setRange(0,31);
 		knobRR[i]->getter = [slot, i]() -> int{ return slot->getReleaseRate(); };
 		widgets.push_back(knobRR[i]);
 
 		// SL
-		knobSL[i] = CVisKnobPtr( new CVisKnob(this, x+273-11, y+27-10));
+		knobSL[i] = CVisKnobPtr( new CVisKnob(this, x+290-11, y+27-10));
 		knobSL[i]->setRange(0,15);
 		knobSL[i]->getter = [slot, i]() -> int{ return slot->getSustainLevel(); };
 		widgets.push_back(knobSL[i]);
 
 		// TL
-		knobTL[i] = CVisKnobPtr( new CVisKnob(this, x+298-11, y+27-10));
+		knobTL[i] = CVisKnobPtr( new CVisKnob(this, x+315-11, y+27-10));
 		knobTL[i]->setRange(0,127);
 		knobTL[i]->getter = [slot, i]() -> int{ return slot->getTotalLevel(); };
 		widgets.push_back(knobTL[i]);
 		
 		// MUL
-		knobMUL[i] = CVisKnobPtr( new CVisKnob(this, x+173-11, y+60-10));
+		knobMUL[i] = CVisKnobPtr( new CVisKnob(this, x+165-11, y+60-10));
 		knobMUL[i]->setRange(0,15);
 		knobMUL[i]->getter = [slot, i]() -> int{ return slot->getMultiple(); };
 		widgets.push_back(knobMUL[i]);
 
 		// DET
-		knobDET[i] = CVisKnobPtr( new CVisKnob(this, x+198-11, y+60-10));
+		knobDET[i] = CVisKnobPtr( new CVisKnob(this, x+190-11, y+60-10));
 		knobDET[i]->setRange(0,7);
 		knobDET[i]->getter = [slot, i]() -> int{ return slot->getDetune(); };
 		widgets.push_back(knobDET[i]);
+
+		// AM
+		dipswAM[i] = CVisDipSwPtr( new CVisDipSw(this, x+216, y+50));
+		dipswAM[i]->getter = [slot, i]() -> int{ return slot->isAM(); };
+		widgets.push_back(dipswAM[i]);
 		y+=75;
 	}
 	
@@ -130,57 +140,29 @@ void CVisC86OPNAFm::onPaintClient()
 	// slot view
 	if( pOPNA ){
 		int sx=5, sy=5, cx=6, cy=8;
-		drawFMView( clientCanvas, 0, 0, &pOPNA->fm[ch] );
+		drawFMView( clientCanvas, 0, 0, pOPNA->fm->ch[ch] );
 		for( int i=0; i<4; i++ )
-			drawFMSlotView( clientCanvas, 0, 75*(1+i), &pOPNA->fm[ch].slot[i], i );
+			drawFMSlotView( clientCanvas, 0, 75*(1+i), pOPNA->fm->ch[ch]->slot[i], i );
 	}
-
-#if 0
-	PAINTSTRUCT ps;
-	HDC hDC = ::BeginPaint(hWnd, &ps);
-	
-	RECT rc;
-	::GetClientRect(hWnd, &rc);
-	INT wx = rc.right-rc.left;
-	INT wy = rc.bottom-rc.top;
-	HDC hMemDC = ::CreateCompatibleDC(hDC);
-	HBITMAP hMemBMP = ::CreateCompatibleBitmap(hDC, wx, wy);
-	HBITMAP hOldBMP = (HBITMAP)::SelectObject(hMemDC, hMemBMP);
-
-	// slot view
-	if( pFM ){
-		int sx=5, sy=5, cx=6, cy=8;
-		vis_draw_fm_view( hMemDC, hSkinDC, hSkinMaskDC, 0, 0, pFM );
-		for( int i=0; i<4; i++ )
-			vis_draw_fmslot_view( hMemDC, hSkinDC, hSkinMaskDC, 0, 75*(1+i), &pFM->slot[i], i );
-	}
-	
-	::BitBlt(hDC, 0, 0, wx, wy, hMemDC, 0, 0, SRCCOPY);
-
-	::SelectObject(hMemDC,hOldBMP);
-	::DeleteObject(hMemBMP);
-	::DeleteDC(hMemDC);
-	::EndPaint(hWnd, &ps);
-#endif
 }
 
-void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFm *pFM )
+void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFmCh )
 {
-	int exmode = pFM->getExMode();
+	int exmode = pFmCh->getExMode();
 	CVisC86Skin *skin = &gVisSkin;
 	skin->drawFMSkin( canvas, x, y, exmode );
 	
-	int algno = pFM->getAlgorithm();
+	int algno = pFmCh->getAlgorithm();
 	skin->drawFMAlgorithm( canvas, x+20, y+7, algno );
 	
 	//slot ON/OFF
 	const int lx[4] = {243, 258, 273, 288};
 	for( int i=0; i<4; i++ ){
-		skin->drawFMSlotLight( canvas, x+lx[i], y+56, i, pFM->slot[i].isOn() );
+		skin->drawFMSlotLight( canvas, x+lx[i], y+56, i, pFmCh->slot[i]->isOn() );
 	}
 
 	// freq
-	double freq = pFM->getFreq();
+	double freq = pFmCh->getFreq();
 	char str[128];
 	if( !exmode ){
 		sprintf( str, "% 11.1fHz", freq );
@@ -190,74 +172,11 @@ void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFm *pFM )
 		skin->drawStr( canvas, 0, 183, 59, modestr[exmode-1] );
 		
 		for( int i=0; i<4; i++ ){
-			freq = pFM->getFreqEx(i);
+			freq = pFmCh->getFreqEx(i);
 			sprintf( str, "% 11.1fHz", freq );
 			skin->drawStr( canvas, 0, 211, 6+12*i, str );
 		}
 	}
-
-//	knobAMS->setValue(pFM->getAMS());
-//	knobPMS->setValue(pFM->getPMS());
-//	knobFB->setValue(pFM->getFeedback());
-//	knobPAN->setValue(pFM->getPan());
-
-#if 0
-	int exmode = pFM->getExMode();
-	BMPREG reg = skinreg_view[ exmode?1:0 ];
-	::BitBlt( hdc, x, y, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
-
-	int algno = pFM->getAlgorithm();
-	reg = skinreg_alg[algno];
-	::BitBlt( hdc, x+19, y+6, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
-
-	HPEN mypen = ::CreatePen( PS_SOLID, 2, col_high);
-	HPEN oldpen = (HPEN)::SelectObject( hdc, mypen );
-
-	int cx,cy;
-	double ams = pFM->getAMS();
-	cx=x+134; cy=y+25;
-	draw_knob( hdc, ams/3.0, cx, cy ); // ams
-
-	double pms = pFM->getPMS();
-	cx=x+158; cy=y+25;
-	draw_knob( hdc, pms/7.0, cx, cy ); // pms
-
-	double fb = pFM->getFeedback();
-	cx=x+134; cy=y+59;
-	draw_knob( hdc, fb/7.0, cx, cy ); // fb
-
-	double pan = pFM->getPan();
-	cx=x+158; cy=y+59;
-	draw_knob( hdc, (pan+1.0)/2.0, cx, cy ); // pan
-
-	//slot ON/OFF
-	const int lx[4] = {243, 258, 273, 288};
-	for( int i=0; i<4; i++ ){
-		int idx = pFM->slot[i].isOn() ? 4 : 0;
-		reg = skinreg_tool[7+i+idx];
-		::BitBlt( hdc, x+lx[i], y+56, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
-	}
-
-	// freq
-	double freq = pFM->getFreq();
-	char str[128];
-	if( !exmode ){
-		sprintf( str, "% 11.1fHz", freq );
-		vis_draw_str( hdc, hskin, hmask, 0, 211, 10, str );
-	}else{
-		const char *modestr[] = { "CSM", "EFF", "???" };
-		vis_draw_str( hdc, hskin, hmask, 0, 183, 59, modestr[exmode-1] );
-		
-		for( int i=0; i<4; i++ ){
-			freq = pFM->getFreqEx(i);
-			sprintf( str, "% 11.1fHz", freq );
-			vis_draw_str( hdc, hskin, hmask, 0, 211, 6+12*i, str );
-		}
-	}
-	
-	::SelectObject( hdc, oldpen );
-	::DeleteObject( mypen );
-#endif
 }
 
 void CVisC86OPNAFm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlot *pSlot, int slotidx )
@@ -265,15 +184,6 @@ void CVisC86OPNAFm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlo
 	CVisC86Skin *skin = &gVisSkin;
 	skin->drawFMSlotSkin( canvas, x, y );
 	
-/*	knobAR[slotidx]->setValue(pSlot->getAttackRate());
-	knobDR[slotidx]->setValue(pSlot->getDecayRate());
-	knobSR[slotidx]->setValue(pSlot->getSustainRate());
-	knobRR[slotidx]->setValue(pSlot->getReleaseRate());
-	knobSL[slotidx]->setValue(pSlot->getSustainLevel());
-	knobTL[slotidx]->setValue(pSlot->getTotalLevel());
-	knobMUL[slotidx]->setValue(pSlot->getMultiple());
-	knobDET[slotidx]->setValue(pSlot->getDecayRate());
-*/
 #if 0
 	BMPREG reg = skinreg_view[2];
 	::BitBlt( hdc, x, y, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );

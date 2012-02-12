@@ -100,6 +100,10 @@ const BMPREG skinreg_tick[] = {
 #define ID_KNOB_TRANS		17
 #define ID_CHECK_OFF		18
 #define ID_CHECK_ON			19
+#define ID_MUTE_OFF			20
+#define ID_MUTE_ON			21
+#define ID_SOLO_OFF			22
+#define ID_SOLO_ON			23
 
 
 const BMPREG skinreg_tool[] = {
@@ -123,12 +127,16 @@ const BMPREG skinreg_tool[] = {
 	{171,178,22,22},	// 17:knob-trans
 	{200,113,7,7},		// 18:check off
 	{200,121,7,7},		// 19:check on
+	{208,105,13,11},	// 20:mute-off
+	{208,117,13,11},	// 21:mute-on
+	{222,105,13,11},	// 22:solo-off
+	{222,117,13,11},	// 23:solo-on
 };
 
 const BMPREG skinreg_view[] = {
-	{324,0,316,75},			// FM view1
-	{324,75,316,75},		// FM view2
-	{324,150,316,75},		// FM slot view
+	{310,0,330,75},			// FM view1
+	{310,75,330,75},		// FM view2
+	{310,150,330,75},		// FM slot view
 };
 
 const int keyW1 = 5;	// ”’Œ®
@@ -340,17 +348,17 @@ void CVisC86Skin::drawCheckBox(IVisBitmap *canvas, int x, int y, int sw )
 }
 
 // ‚Â‚Ü‚Ý
-void CVisC86Skin::drawKnob(IVisBitmap *canvas, int x, int y, int val, int numval )
+void CVisC86Skin::drawKnob(IVisBitmap *canvas, int x, int y, int minval, int maxval, int numval )
 {
 	BMPREG reg_d = skinreg_tool[ID_KNOB_DARK];
 	BMPREG reg_l = skinreg_tool[ID_KNOB_LIGHT];
 	BMPREG reg_t = skinreg_tool[ID_KNOB_TRANS];
 	char buff[10];
 	
-	transblt( canvas, x, y, reg_d.width, reg_d.height,
+	transblt2( canvas, x, y, reg_d.width, reg_d.height,
 		skinbmp, reg_d.left, reg_d.top,
 		skinbmp, reg_l.left, reg_l.top,
-		skinbmp, reg_t.left, reg_t.top, val );
+		skinbmp, reg_t.left, reg_t.top, minval, maxval );
 
 	sprintf( buff, "%d", numval );
 	if( numval < 10 )       x+=9;
@@ -385,4 +393,19 @@ void CVisC86Skin::drawFMSlotLight(IVisBitmap *canvas, int x, int y, int no, int 
 	BMPREG reg = skinreg_tool[7+sw*4+no];
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
+
+// mute switch
+void CVisC86Skin::drawMuteSw(IVisBitmap *canvas, int x, int y, int sw )
+{
+	BMPREG reg = skinreg_tool[(sw ? ID_MUTE_ON : ID_MUTE_OFF)];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
+// solo switch
+void CVisC86Skin::drawSoloSw(IVisBitmap *canvas, int x, int y, int sw )
+{
+	BMPREG reg = skinreg_tool[(sw ? ID_SOLO_ON : ID_SOLO_OFF)];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
+}
+
 

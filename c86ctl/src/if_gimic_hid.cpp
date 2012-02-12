@@ -239,13 +239,16 @@ int GimicHID::init(void)
 		chip = new COPM();
 	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
 		chiptype = CHIP_OPNA;
-		chip = new COPNA();
+		chip = new COPNA(this);
 	}
 	return C86CTL_ERR_NONE;
 }
 
 int GimicHID::reset(void)
 {
+	if( chip )
+		chip->reset();
+	
 	// リセットコマンド送信
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
 	return sendMsg( &d );
@@ -315,6 +318,15 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 	return ret;
 }
 
+int GimicHID::getModuleType(enum ChipType *type)
+{
+	if( !type )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	*type = chiptype;
+	return C86CTL_ERR_NONE;
+}
+
 int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 {
 	uint8_t rx[16];
@@ -366,11 +378,35 @@ int GimicHID::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 }
 
 
+void GimicHID::directOut(UINT addr, UCHAR data)
+{
+	switch( chiptype ){
+	case CHIP_OPNA:
+	case CHIP_OPN3L:
+		if( 0x100<=addr && addr<=0x110 )
+			addr -= 0x40;
+		break;
+	case CHIP_OPM:
+		if( 0xfc<=addr && addr<=0xff )
+			addr -= 0xe0;
+		break;
+	}
+	if( addr < 0xfc ){
+		MSG d = { 2, { addr&0xff, data } };
+		sendMsg(&d);
+	}else if( 0x100 <= addr && addr <= 0x1fb ){
+		MSG d = { 3, { 0xfe, addr&0xff, data } };
+		sendMsg(&d);
+	}
+}
+
 void GimicHID::out(UINT addr, UCHAR data)
 {
 	bool flag = true;
-	if( chip )
-		flag = chip->setReg(addr, data );
+	if( chip ){
+		flag = chip->setReg( addr, data );
+		chip->filter( addr, &data );
+	}
 	if( flag ){
 		switch( chiptype ){
 		case CHIP_OPNA:

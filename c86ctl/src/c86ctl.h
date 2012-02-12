@@ -99,6 +99,14 @@ interface IGimic : public IUnknown
 	virtual int __stdcall getPLLClock(UINT *clock) = 0;
 };
 
+// IGimic2 {47141A01-15F5-4BF5-9554-CA7AACD54BB8}
+static const GUID IID_IGimic2 = 
+{ 0x47141a01, 0x15f5, 0x4bf5, { 0x95, 0x54, 0xca, 0x7a, 0xac, 0xd5, 0x4b, 0xb8 } };
+interface IGimic2 : public IGimic
+{
+	virtual int __stdcall getModuleType( enum ChipType *type) = 0;
+};
+
 
 
 /*----------------------------------------------------------------------------*/

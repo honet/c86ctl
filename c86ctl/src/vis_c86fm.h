@@ -20,7 +20,7 @@ public:
 		: CVisWnd()
 		, id(idx)
 	{
-		windowWidth = 316+4;
+		windowWidth = 330+4;
 		windowHeight = 75*5+4+15;
 	};
 	~CVisC86Fm(){};
@@ -60,7 +60,7 @@ protected:
 	virtual void onPaintClient(void);
 
 protected:
-	void drawFMView( IVisBitmap *canvas, int x, int y, COPNAFm *pFM );
+	void drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFmCh );
 	void drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlot *pSlot, int slotidx );
 
 private:
@@ -74,13 +74,16 @@ protected:
 	CVisKnobPtr knobPAN;
 	
 	CVisKnobPtr knobAR[4];
-	CVisKnobPtr knobDR[4];
+	CVisKnobPtr knobDR1[4];
+	CVisKnobPtr knobDR2[4];
 	CVisKnobPtr knobSR[4];
 	CVisKnobPtr knobRR[4];
 	CVisKnobPtr knobSL[4];
 	CVisKnobPtr knobTL[4];
 	CVisKnobPtr knobMUL[4];
 	CVisKnobPtr knobDET[4];
+	CVisDipSwPtr dipswAM[4];
+	
 
 
 //public:

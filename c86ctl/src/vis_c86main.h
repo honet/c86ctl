@@ -50,6 +50,7 @@ protected:
 	struct hwinfo{
 		Devinfo mbinfo;
 		Devinfo chipinfo;
+		ChipType chiptype;
 		UINT major, minor, rev, build;
 		UINT clock;
 
@@ -66,14 +67,6 @@ protected:
 	};
 	std::vector<hwinfo> info;
 
-
-//protected:
-//	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);
-
-//	CVisBitmap *canvas;
-//	CVisC86Key keyWnd;
-//	CVisC86Reg regWnd;
-//	CVisC86Fm fmWnd[6];
 	UINT tick;
 };
 

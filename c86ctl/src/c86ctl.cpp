@@ -172,7 +172,8 @@ unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 			}
 			next += 100;
 			if( next < now ){
-				next = now;
+				//next = now;
+				while(next<now) next += 100;
 			}
 
 			//update

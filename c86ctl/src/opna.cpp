@@ -14,7 +14,56 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+void COPNA::filter( int addr, UCHAR *data )
+{
+	int ch;
+	if( 0x200 <= addr ) return;
 
+	switch( addr ){
+	case 0xb4: // FM -- LR, AMS, PMS
+	case 0xb5:
+	case 0xb6:
+		ch = addr - 0xb4;
+		if( getMixedMask( ch ) )
+			*data &= 0x3f;
+		break;
+			
+	case 0x1b4: // FM -- LR, AMS, PMS
+	case 0x1b5:
+	case 0x1b6:
+		ch = addr - 0x1b4;
+		if( getMixedMask( 6+ch ) )
+			*data &= 0x3f;
+		break;
+
+//	case 0x07: // SSG keyon
+//		if( getMixedMask( 9 ) )
+//			*data |= 0x09;
+//		if( getMixedMask( 10 ) )
+//			*data |= 0x12;
+//		if( getMixedMask( 11 ) )
+//			*data |= 0x24;
+//		break;
+
+	case 0x08: // SSG amp level
+	case 0x09:
+	case 0x0a:
+		ch = addr-0x08;
+		if( getMixedMask( 9+ch ) )
+			*data &= 0xf0;
+		break;
+		
+	case 0x11: // Rhythm total level
+		if( getMixedMask( 13 ) )
+			*data = 0;
+		break;
+
+	case 0x10b: // ADPCM level control
+		if( getMixedMask( 12 ) )
+			*data = 0;
+		break;
+	}
+}
 
 bool COPNA::setReg( int addr, UCHAR data ){
 	if( 0x200 <= addr ) return false;
@@ -27,17 +76,17 @@ bool COPNA::setReg( int addr, UCHAR data ){
 	regATime[idx][addr] = 255;
 
 	if( idx == 0 ){
-		if( ssgRegHandling( addr, data ) )
+		if( ssg->setReg( addr, data ) )
 			return true;
-		if( rhythmRegHandling( addr, data ) )
+		if( rhythm->setReg( addr, data ) )
 			return true;
 		if( fmCommonRegHandling( addr, data ) )
 			return true;
 	}else{
-		if( adpcmRegHandling( addr, data ) )
+		if( adpcm->setReg( addr, data ) )
 			return true;
 	}
-	if( fmRegHandling( idx, addr, data ) )
+	if( fm->setReg( idx, addr, data ) )
 		return true;
 
 	return false;
@@ -60,7 +109,6 @@ UCHAR COPNA::getReg( int addr ){
 bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 {
 	bool handled = true;
-	INT ch;
 	
 	switch(adrs){
 	// prescaler
@@ -76,33 +124,13 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 		prescale_fm = 2;
 		prescale_ssg = 1;
 		break;
-
-	case 0x27:// Timer Control / Mode
-		fm[2].setExMode( (data>>6)&0x3 );
-		break;
 		
-	case 0x28:
-		switch(data&0x7){
-		case 0x0: ch=0; break;
-		case 0x1: ch=1; break;
-		case 0x2: ch=2; break;
-		case 0x4: ch=3; break;
-		case 0x5: ch=4; break;
-		case 0x6: ch=5; break;
-		default: ch=-1; handled=false; break;
-		}
-		if(0<=ch){
-			fm[ch].keyOn( (data>>4) & 0xf );
-		}
-		break;
-		
-	case 0x22:	// LFO
 	case 0x24:	// Timer-A Corse
 	case 0x25:	// Timer-A Fine
 	//case 0x26:	// Timer-B
 	case 0x29:	// IRQ/SCH
 		break;
-		
+
 	default:
 		handled = false;
 		break;
@@ -111,64 +139,125 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 	return handled;
 }
 
-bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
+bool COPNAFm::setReg( UCHAR bank, UCHAR adrs, UCHAR data )
 {
-	UINT hi, lo;
-	INT ch, slot, tmp, choffset = bank*3;
+	INT idx, slot, tmp, idxoffset = bank*3;
 	bool handled = true;
-	static INT stbl[4] = {0,2,1,3};
+	const INT stbl[4] = {0,2,1,3};
+
+	if( bank == 0 ){
+		switch(adrs){
+		case 0x27:// Timer Control / Mode
+			ch[2]->setExMode( (data>>6)&0x3 );
+			break;
+
+		case 0x28:
+			switch(data&0x7){
+			case 0x0: idx=0; break;
+			case 0x1: idx=1; break;
+			case 0x2: idx=2; break;
+			case 0x4: idx=3; break;
+			case 0x5: idx=4; break;
+			case 0x6: idx=5; break;
+			default: idx=-1; handled=false; break;
+			}
+			if(0<=idx){
+				ch[idx]->keyOn( (data>>4) & 0xf );
+			}
+			break;
+
+		case 0x22:	// LFO
+			break;
+		default:
+			handled = false;
+			break;
+		}
+		if( handled )
+			return true;
+	}
+
+	handled = true;
 
 	switch(adrs){
 	// fno, block
 	case 0xa0: // ch1
-	case 0xa4:
 	case 0xa1: // ch2
-	case 0xa5:
 	case 0xa2: // ch3
-	case 0xa6:
-		reg[bank][adrs] = data;
-		ch = (adrs - 0xa0) & 0x03;
-		hi = reg[bank][0xa4+ch];
-		lo = reg[bank][0xa0+ch];
-		fm[choffset+ch].setFByReg( lo, hi );
+		idx = (adrs - 0xa0);
+		ch[idxoffset+idx]->setFLo(data);
 		break;
+	case 0xa4:
+	case 0xa5:
+	case 0xa6:
+		idx = (adrs - 0xa4);
+		ch[idxoffset+idx]->setFHi(data);
+		break;
+
+	case 0xa8: // ch3 ex: slot3
+		ch[idxoffset+2]->setFExLo(2, data);
+		break;
+	case 0xa9: // ch3 ex: slot1
+		ch[idxoffset+2]->setFExLo(0, data);
+		break;
+	case 0xaa: // ch3 ex: slot2
+		ch[idxoffset+2]->setFExLo(1, data);
+		break;
+
+	case 0xac:
+		ch[idxoffset+2]->setFExHi(2, data);
+		break;
+	case 0xad:
+		ch[idxoffset+2]->setFExHi(0, data);
+		break;
+	case 0xae:
+		ch[idxoffset+2]->setFExHi(1, data);
+		break;
+#if 0
+		reg[bank][adrs] = data;
+		idx = (adrs - 0xa0) & 0x03;
+		hi = reg[bank][0xa4+idx];
+		lo = reg[bank][0xa0+idx];
+		ch[idxoffset+idx]->setFByReg( lo, hi );
+		break;
+		
 	case 0xa8: // ch3 ex: slot3
 	case 0xac:
 		reg[bank][adrs] = data;
 		hi = reg[bank][0xac];
 		lo = reg[bank][0xa8];
-		fm[choffset+2].setFByRegEx( 2, lo, hi );
+		ch[idxoffset+2]->setFByRegEx( 2, lo, hi );
 		break;
 	case 0xa9: // ch3 ex: slot1
 	case 0xad:
 		hi = reg[bank][0xad];
 		lo = reg[bank][0xa9];
-		fm[choffset+2].setFByRegEx( 0, lo, hi );
+		ch[idxoffset+2]->setFByRegEx( 0, lo, hi );
 		break;
 	case 0xaa: // ch3 ex: slot2
 	case 0xae:
 		hi = reg[bank][0xae];
 		lo = reg[bank][0xaa];
-		fm[choffset+2].setFByRegEx( 1, lo, hi );
+		ch[idxoffset+2]->setFByRegEx( 1, lo, hi );
 		break;
-
+#endif
+		
 	// algorithm, feedback
 	case 0xb0:
 	case 0xb1:
 	case 0xb2:
-		ch = adrs - 0xb0;
-		fm[choffset+ch].setAlgorithm( data & 0x07 );
-		fm[choffset+ch].setFeedback( (data >> 3) & 0x07 );
+		idx = adrs - 0xb0;
+		ch[idxoffset+idx]->setAlgorithm( data & 0x07 );
+		ch[idxoffset+idx]->setFeedback( (data >> 3) & 0x07 );
 		break;
 
 	// LR, AMS, PMS
 	case 0xb4:
 	case 0xb5:
 	case 0xb6:
-		ch = adrs - 0xb4;
-		fm[choffset+ch].setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		fm[choffset+ch].setAMS( (data>>4)&0x03 );
-		fm[choffset+ch].setPMS( data&0x07 );
+		idx = adrs - 0xb4;
+		ch[idxoffset+idx]->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		ch[idxoffset+idx]->setAMS( (data>>4)&0x03 );
+		ch[idxoffset+idx]->setPMS( data&0x07 );
 		break;
 
 	// slot - detune/multi
@@ -177,10 +266,10 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x38:	case 0x39:	case 0x3a:
 	case 0x3c:	case 0x3d:	case 0x3e:
 		tmp = adrs - 0x30;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setMultiple( data&0xf );
-		fm[choffset+ch].slot[slot].setDetune( (data>>4)&0x7 );
+		ch[idxoffset+idx]->slot[slot]->setMultiple( data&0xf );
+		ch[idxoffset+idx]->slot[slot]->setDetune( (data>>4)&0x7 );
 		break;
 
 	// slot - total level
@@ -189,9 +278,9 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x48:	case 0x49:	case 0x4a:
 	case 0x4c:	case 0x4d:	case 0x4e:
 		tmp = adrs - 0x40;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setTotalLevel( data&0x7f );
+		ch[idxoffset+idx]->slot[slot]->setTotalLevel( data&0x7f );
 		break;
 		
 	// slot - keyscale / attack rate
@@ -200,10 +289,10 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x58:	case 0x59:	case 0x5a:
 	case 0x5c:	case 0x5d:	case 0x5e:
 		tmp = adrs - 0x50;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setKeyscale( (data>>6)&0x3 );
-		fm[choffset+ch].slot[slot].setAttackRate( data&0x1f );
+		ch[idxoffset+idx]->slot[slot]->setKeyscale( (data>>6)&0x3 );
+		ch[idxoffset+idx]->slot[slot]->setAttackRate( data&0x1f );
 		break;
 		
 	// slot - decay rate / amon
@@ -212,11 +301,11 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x68:	case 0x69:	case 0x6a:
 	case 0x6c:	case 0x6d:	case 0x6e:
 		tmp = adrs - 0x60;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setDecayRate( data&0x1f );
-		if( data&0x80 )	fm[ch].slot[slot].AMOn();
-		else			fm[ch].slot[slot].AMOff();
+		ch[idxoffset+idx]->slot[slot]->setDecayRate( data&0x1f );
+		if( data&0x80 )	ch[idx]->slot[slot]->AMOn();
+		else			ch[idx]->slot[slot]->AMOff();
 		break;
 		
 	// slot - sustain rate
@@ -225,9 +314,9 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x78:	case 0x79:	case 0x7a:
 	case 0x7c:	case 0x7d:	case 0x7e:
 		tmp = adrs - 0x70;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setSustainRate( data&0x1f );
+		ch[idxoffset+idx]->slot[slot]->setSustainRate( data&0x1f );
 		break;
 		
 	// slot - sustain level / rerease rate
@@ -236,10 +325,10 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x88:	case 0x89:	case 0x8a:
 	case 0x8c:	case 0x8d:	case 0x8e:
 		tmp = adrs - 0x80;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setSustainLevel( (data>>4)&0xf );
-		fm[choffset+ch].slot[slot].setReleaseRate( data&0xf );
+		ch[idxoffset+idx]->slot[slot]->setSustainLevel( (data>>4)&0xf );
+		ch[idxoffset+idx]->slot[slot]->setReleaseRate( data&0xf );
 		break;
 		
 	// slot - ssgeg-type
@@ -248,9 +337,9 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	case 0x98:	case 0x99:	case 0x9a:
 	case 0x9c:	case 0x9d:	case 0x9e:
 		tmp = adrs - 0x90;
-		ch = tmp&0x3;
+		idx = tmp&0x3;
 		slot = stbl[tmp>>2];
-		fm[choffset+ch].slot[slot].setSSGEGType( data&0xf );
+		ch[idxoffset+idx]->slot[slot]->setSSGEGType( data&0xf );
 		break;
 		
 	default:
@@ -261,53 +350,53 @@ bool COPNA::fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data )
 	return handled;
 };
 
-bool COPNA::ssgRegHandling( UCHAR adrs, UCHAR data )
+bool COPNASsg::setReg( UCHAR adrs, UCHAR data )
 {
-	INT ch;
+	INT idx;
 	bool handled = true;
 	
 	switch(adrs){
 	case 0x00: // fine tune
 	case 0x02:
 	case 0x04:
-		ch = adrs>>1;
-		ssg.ch[ch].setFineTune(data);
+		idx = adrs>>1;
+		ch[idx]->setFineTune(data);
 		break;
 	case 0x01: // coarse tune
 	case 0x03:
 	case 0x05:
-		ch = (adrs-1)>>1;
-		ssg.ch[ch].setCoarseTune(data&0x0f);
+		idx = (adrs-1)>>1;
+		ch[idx]->setCoarseTune(data&0x0f);
 		break;
 		
 	case 0x06: // noise period
-		ssg.setNoisePeriod( data&0x1f );
+		setNoisePeriod( data&0x1f );
 		break;
 	case 0x07: // keyon
-		if( data&0x01 ){ ssg.ch[0].toneOn(); }else{ ssg.ch[0].toneOff(); };
-		if( data&0x02 ){ ssg.ch[1].toneOn(); }else{ ssg.ch[1].toneOff(); };
-		if( data&0x04 ){ ssg.ch[2].toneOn(); }else{ ssg.ch[2].toneOff(); };
-		if( data&0x08 ){ ssg.ch[0].noiseOn(); }else{ ssg.ch[0].noiseOff(); };
-		if( data&0x10 ){ ssg.ch[1].noiseOn(); }else{ ssg.ch[1].noiseOff(); };
-		if( data&0x20 ){ ssg.ch[2].noiseOn(); }else{ ssg.ch[2].noiseOff(); };
+		if( data&0x01 ){ ch[0]->toneOn(); }else{ ch[0]->toneOff(); };
+		if( data&0x02 ){ ch[1]->toneOn(); }else{ ch[1]->toneOff(); };
+		if( data&0x04 ){ ch[2]->toneOn(); }else{ ch[2]->toneOff(); };
+		if( data&0x08 ){ ch[0]->noiseOn(); }else{ ch[0]->noiseOff(); };
+		if( data&0x10 ){ ch[1]->noiseOn(); }else{ ch[1]->noiseOff(); };
+		if( data&0x20 ){ ch[2]->noiseOn(); }else{ ch[2]->noiseOff(); };
 		break;
 		
 	case 0x08: // amp level
 	case 0x09:
 	case 0x0a:
-		ch = adrs-0x08;
-		ssg.ch[ch].setLevel(data&0x0f);
-		ssg.ch[ch].setUseEnv((data&0x10) ? true: false);
+		idx = adrs-0x08;
+		ch[idx]->setLevel(data&0x0f);
+		ch[idx]->setUseEnv((data&0x10) ? true: false);
 		break;
 
 	case 0x0b: // env fine tune
-		ssg.setEnvFineTune(data);
+		setEnvFineTune(data);
 		break;
 	case 0x0c: // env coarse tune
-		ssg.setEnvCoarseTune(data);
+		setEnvCoarseTune(data);
 		break;
 	case 0x0d: // env type
-		ssg.setEnvType(data);
+		setEnvType(data);
 		break;
 	case 0x0e: // I/O portA
 	case 0x0f: // I/O portB
@@ -318,7 +407,7 @@ bool COPNA::ssgRegHandling( UCHAR adrs, UCHAR data )
 	return handled;
 }
 
-bool COPNA::rhythmRegHandling( UCHAR adrs, UCHAR data )
+bool COPNARhythm::setReg( UCHAR adrs, UCHAR data )
 {
 	bool handled = true;
 	
@@ -326,50 +415,50 @@ bool COPNA::rhythmRegHandling( UCHAR adrs, UCHAR data )
 	case 0x10: // keyon
 		if( data&0x80 ){
 			// dump
-			if( data&0x1 ) rhythm.bd.off(); // bd
-			if( data&0x2 ) rhythm.sd.off(); // sd
-			if( data&0x4 ) rhythm.top.off(); // top
-			if( data&0x8 ) rhythm.hh.off(); // hh
-			if( data&0x10 ) rhythm.tom.off(); // tom
-			if( data&0x20 ) rhythm.rim.off(); // rim
+			if( data&0x1 ) bd->off(); // bd
+			if( data&0x2 ) sd->off(); // sd
+			if( data&0x4 ) top->off(); // top
+			if( data&0x8 ) hh->off(); // hh
+			if( data&0x10 ) tom->off(); // tom
+			if( data&0x20 ) rim->off(); // rim
 		}else{
 			// keyon
-			if( data&0x1 ) rhythm.bd.on(); // bd
-			if( data&0x2 ) rhythm.sd.on(); // sd
-			if( data&0x4 ) rhythm.top.on(); // top
-			if( data&0x8 ) rhythm.hh.on(); // hh
-			if( data&0x10 ) rhythm.tom.on(); // tom
-			if( data&0x20 ) rhythm.rim.on(); // rim
+			if( data&0x1 ) bd->on(); // bd
+			if( data&0x2 ) sd->on(); // sd
+			if( data&0x4 ) top->on(); // top
+			if( data&0x8 ) hh->on(); // hh
+			if( data&0x10 ) tom->on(); // tom
+			if( data&0x20 ) rim->on(); // rim
 		}
 		break;
 		
 	case 0x11: // total level
-		rhythm.setTotalLevel(data&0x3f);
+		setTotalLevel(data&0x3f);
 		break;
 
 	case 0x18: // bd
-		rhythm.bd.setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		rhythm.bd.setLevel( data&0x1f );
+		bd->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		bd->setLevel( data&0x1f );
 		break;
 	case 0x19: // sd
-		rhythm.sd.setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		rhythm.sd.setLevel( data&0x1f );
+		sd->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		sd->setLevel( data&0x1f );
 		break;
 	case 0x1a: // top
-		rhythm.top.setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		rhythm.top.setLevel( data&0x1f );
+		top->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		top->setLevel( data&0x1f );
 		break;
 	case 0x1b: // hh
-		rhythm.hh.setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		rhythm.hh.setLevel( data&0x1f );
+		hh->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		hh->setLevel( data&0x1f );
 		break;
 	case 0x1c: // tom
-		rhythm.top.setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		rhythm.top.setLevel( data&0x1f );
+		top->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		top->setLevel( data&0x1f );
 		break;
 	case 0x1d: // rim
-		rhythm.rim.setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		rhythm.rim.setLevel( data&0x1f );
+		rim->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		rim->setLevel( data&0x1f );
 		break;
 		
 	default:
@@ -378,40 +467,70 @@ bool COPNA::rhythmRegHandling( UCHAR adrs, UCHAR data )
 	return handled;
 }
 
-bool COPNA::adpcmRegHandling( UCHAR adrs, UCHAR data )
+bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 {
-	if(adrs<=0x10)
-		return true;
+//	if(adrs<=0x10)
+//		return true;
+//
+//	return false;
 
-	return false;
-	/*
-	UINT h, l;
 	bool handled = true;
 
 	switch(adrs){
-	case 0x02: /// start addr (L)
-	case 0x03: /// start addr (H)
-		h = reg[1][3];
-		l = reg[1][2];
-		adpcmStartAddr = (h<<13) | (l<<5);
-		adpcmCurrentAddr = adpcmStartAddr;
-		
+	case 0x00: // control 1
+	case 0x01: // control 2 
 		break;
+		
+	case 0x02: /// start addr (L)
+		startAddr = (startAddr & 0x1fe000) | ((int)data<<5);
+		currentAddr = startAddr;
+		break;
+	case 0x03: /// start addr (H)
+		startAddr = ((int)data<<13) | (startAddr & 0x1fe0);
+		currentAddr = startAddr;
+		break;
+		
 	case 0x04: /// stop addr (L)
+		stopAddr = (startAddr & 0x1fe000) | ((int)data<<5);
+		break;
 	case 0x05: /// stop addr (H)
-		h = reg[1][5];
-		l = reg[1][4];
-		adpcmStopAddr = (h<<13) | (l<<5);
+		stopAddr = ((int)data<<13) | (startAddr & 0x1fe0);
+		break;
+
+	case 0x06: // prescale(L)
+		prescale = (prescale&0xff00) | data;
+		break;
+	case 0x07: // prescale(H)
+		prescale = ((int)data<<8) | (prescale&0xff);
+		break;
+		
+	case 0x08: // adpcm data.
+		break;
+		
+	case 0x09: // delta-N(L)
+		deltaN = (deltaN&0xff00) | data;
+	case 0x0a: // delta-N(H)
+		deltaN = ((int)data<<8) | (deltaN&0xff);
+
+	case 0x0b: // level
+		level = data;
 		break;
 		
 	case 0x0c: /// limit addr (L)
+		limitAddr = (limitAddr<<13) | ((int)data<<5);
+		break;
 	case 0x0d: /// limit addr (H)
-		h = reg[1][5];
-		l = reg[1][4];
-		adpcmLimitAddr = (h<<13) | (l<<5);
+		limitAddr = ((int)data<<13) | (limitAddr<<5);
 		break;
 
-	case 0x08:
+	case 0x0e: // dac data.
+	case 0x0f: // pcm data.
+		break;
+		
+	case 0x10: // flag
+		break;
+
+/*	case 0x08:
 		if( reg[1][0] & 0x40 ){
 			adpcm_data[adpcmCurrentAddr] = data;
 			if( adpcmStopAddr > adpcmCurrentAddr ){
@@ -423,11 +542,72 @@ bool COPNA::adpcmRegHandling( UCHAR adrs, UCHAR data )
 			}
 		}
 		break;
+*/
 		
 	default:
 		handled = false;
 	}
 	
 	return handled;
-		*/
 }
+
+void COPNA::applyMask(int ch)
+{
+	UCHAR data;
+	bool mask = getMixedMask(ch);
+	
+	if( 0<=ch && ch<=2 ){ // FM 1~3
+		int fmNo = ch;
+		data = (fm->ch[fmNo]->getAMS()<<4) | fm->ch[fmNo]->getPMS();
+		if( !mask ){
+			bool l,r;
+			fm->ch[fmNo]->getLR( l,r );
+			data |= (l?0x80:0) | (r?0x40:0);
+		}
+		pIF->directOut( 0xb4+ch, data );
+	}
+	else if( 6<=ch && ch<=8 ){ // FM 4~6
+		int fmNo = ch - 3;
+		data = (fm->ch[fmNo]->getAMS()<<4) | fm->ch[fmNo]->getPMS();
+		if( !mask ){
+			bool l,r;
+			fm->ch[fmNo]->getLR( l,r );
+			data |= (l?0x80:0) | (r?0x40:0);
+		}
+		pIF->directOut( 0x1b4+(ch-6), data );
+	}
+	else if( 9<=ch && ch<=11 ){ // SSG 1~3
+		int ssgNo = ch-9;
+		data = mask ? 0 : ssg->ch[ssgNo]->getLevel();
+		data |= ssg->ch[ssgNo]->isUseEnv() ? 0x10 : 0;
+		pIF->directOut( 0x08+ssgNo, data );
+	}
+	else if( ch == 12 ){ // ADPCM
+		data = mask ? 0 : adpcm->getLevel();
+		pIF->directOut( 0x10b, data );
+	}
+	else if( ch == 13 ){ // RHYTHM
+		data = mask ? 0 : rhythm->getTotalLevel();
+		pIF->directOut( 0x11, data );
+	}
+}
+
+void COPNA::setPartMask(int ch, bool mask)
+{
+	if( mask ){
+		partMask |= 1<<ch;
+	}else{
+		partMask &= ~(1<<ch);
+	}
+	applyMask(ch);
+}
+
+void COPNA::setPartSolo(int ch, bool mask)
+{
+	if( mask )	partSolo |= 1<<ch;
+	else		partSolo &= ~(1<<ch);
+	
+	for( int i=0; i<14; i++ )
+		applyMask(i);
+}
+

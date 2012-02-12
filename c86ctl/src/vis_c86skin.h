@@ -41,7 +41,9 @@ public:
 	void drawLogo(IVisBitmap *canvas, int x, int y );
 	void drawDipSw(IVisBitmap *canvas, int x, int y, int sw );
 	void drawCheckBox(IVisBitmap *canvas, int x, int y, int sw );
-	void drawKnob(IVisBitmap *canvas, int x, int y, int val, int numval );
+	void drawKnob(IVisBitmap *canvas, int x, int y, int minval, int maxval, int numval );
+	void drawMuteSw(IVisBitmap *canvas, int x, int y, int sw );
+	void drawSoloSw(IVisBitmap *canvas, int x, int y, int sw );
 	
 	void drawFMAlgorithm(IVisBitmap *canvas, int x, int y, int no );
 	void drawFMSkin(IVisBitmap *canvas, int x, int y, int exmode );

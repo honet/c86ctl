@@ -73,11 +73,15 @@ public:
 	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall getMBInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall getModuleInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+public:
+	// IGimic2
+	virtual int __stdcall getModuleType(enum ChipType *type){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 
 public:
 	// ”ñŒöŠJ
 	virtual UINT getCPS(void){ return 0; };
 	virtual void update(void){ };
+	virtual void directOut(UINT addr, UCHAR data){};
 
 protected:
 	int refcount;

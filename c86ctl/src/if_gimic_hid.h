@@ -49,7 +49,9 @@ public:
 	virtual int __stdcall getMBInfo(struct Devinfo *info);
 	virtual int __stdcall getModuleInfo(struct Devinfo *info);
 	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
-
+public:
+	// IGimic2
+	virtual int __stdcall getModuleType(enum ChipType *type);
 
 public:
 	// IRealChip
@@ -71,6 +73,7 @@ public:
 private:
 	int sendMsg( MSG *data );
 	int transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz );
+	virtual void directOut(UINT addr, UCHAR data);
 	
 private:
 	HANDLE hHandle;

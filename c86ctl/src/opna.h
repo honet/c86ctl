@@ -9,11 +9,16 @@
 
 #pragma once
 #include "chip.h"
+#include "if.h"
 
 // ---------------------------------------------------------------------------------------
 class COPNAFmSlot {
+	friend class COPNAFmCh;
+	friend class COPNAFm;
+	friend class COPNA;
+	
 public:
-	COPNAFmSlot(){ reset(); };
+	COPNAFmSlot(COPNA *parent) : pOPNA(parent){ reset(); };
 	~COPNAFmSlot(){};
 
 	void reset(void){
@@ -23,47 +28,54 @@ public:
 		attackRate = 0;
 		decayRate = 0;
 		sustainRate = 0;
-		releaseRate = 0;
+		releaseRate = 63;
 		ssgegType = 0;
-		sustainLevel = 0;
-		totalLevel = 0;
+		sustainLevel = 63;
+		totalLevel = 127;
 		enable = false;
 		AM = false;
 	};
 	
 public:
-	void setDetune(int dt){ detune = dt&0x07; };
 	int getDetune(){ return detune; };
 	double getDetuneHz();
-	
-	void setMultiple(int mult){ multiple = mult&0x7; };
+
 	int getMultiple(){ return multiple; };
 	double getMultipleRatio();
 	
-	void setKeyscale(int scale){ keyscale = scale&0x3; };
 	int getKeyscale(){ return keyscale; };
-	void setAttackRate(int ar){ attackRate = ar&0x1f; };
 	int getAttackRate(){ return attackRate; };
-	void setDecayRate(int dr){ decayRate = dr&0x1f; };
 	int getDecayRate(){ return decayRate; };
-	void setSustainRate(int sr){ sustainRate = sr&0x1f; };
 	int getSustainRate(){ return sustainRate; };
-	void setReleaseRate(int rr){ releaseRate = rr&0x1f; };
 	int getReleaseRate(){ return releaseRate; };
-	void setSSGEGType(int type){ ssgegType = type&0xf; };
 	int getSSGEGType(){ return ssgegType; };
-	void setSustainLevel(int sl){ sustainLevel = sl&0xf; };
 	int getSustainLevel(){ return sustainLevel; };
-	void setTotalLevel(int tl){ totalLevel = tl&0x7f; };
 	int getTotalLevel(){ return totalLevel; };
 	
+	bool isOn(){ return enable; };
+	bool isAM(){ return AM; };
+
+public:
+	void sendDetune(int dt){
+		setDetune(dt);
+	};
+	
+protected:
+	void setDetune(int dt){ detune = dt&0x07; };
+	void setMultiple(int mult){ multiple = mult&0x7; };
+	void setKeyscale(int scale){ keyscale = scale&0x3; };
+	void setAttackRate(int ar){ attackRate = ar&0x1f; };
+	void setDecayRate(int dr){ decayRate = dr&0x1f; };
+	void setSustainRate(int sr){ sustainRate = sr&0x1f; };
+	void setReleaseRate(int rr){ releaseRate = rr&0x1f; };
+	void setSSGEGType(int type){ ssgegType = type&0xf; };
+	void setSustainLevel(int sl){ sustainLevel = sl&0xf; };
+	void setTotalLevel(int tl){ totalLevel = tl&0x7f; };
 	void on(){ enable = true; };
 	void off(){ enable = false; };
-	bool isOn(){ return enable; };
 	void AMOn(){ AM = true; };
 	void AMOff(){ AM = false; };
-	bool isAM(){ return AM; };
-	
+
 protected:
 	int detune;			// 3bit
 	int multiple;		// 4bit
@@ -79,25 +91,37 @@ protected:
 
 	bool enable;
 	bool AM;
+
+	COPNA *pOPNA;
 };
 
 // ---------------------------------------------------------------------------------------
-class COPNAFm {
+class COPNAFmCh {
+	friend class COPNAFm;
+	friend class COPNA;
+	
 public:
-	COPNAFm(void){ reset(); };
-	virtual ~COPNAFm(void){};
+	COPNAFmCh(COPNA *parent) : pOPNA(parent){
+		for( int i=0; i<4; i++ )
+			slot[i] = new COPNAFmSlot(parent);
+		reset();
+	};
+	virtual ~COPNAFmCh(void){
+		for( int i=0; i<4; i++ )
+			if(slot[i]) delete slot[i];
+	};
 
 	void reset(){
 		for( int i=0; i<4; i++ )
-			slot[i].reset();
+			slot[i]->reset();
 
 		exmode = 0;
 		feedback = 0;
 		algorithm = 0;
 		ams = 0;
 		pms = 0;
-		left = false;
-		right = false;
+		left = true;
+		right = true;
 
 		for( int i=0; i<4; i++ ){
 			fnum[i] = 0;
@@ -106,53 +130,30 @@ public:
 	};
 
 public:
-	void setExMode(int mode){ exmode = mode; };
 	int getExMode(){ return exmode; };
 
 	bool isKeyOn(){
-		for( int i=0; i<4; i++ )
-			if( slot[i].isOn() )
-				return true;
+		if( left || right ){
+			for( int i=0; i<4; i++ )
+				if( slot[i]->isOn() )
+					return true;
+		}
 		return false;
 	};
-	void keyOn( UCHAR slotsw ){
-		for( int i=0; i<4; i++ ){ // D3:4, D2:3, D1:2, D0:1
-			if( slotsw & 0x01 )
-				slot[i].on();
-			else
-				slot[i].off();
-			slotsw >>= 1;
-		}
-	};
-	void setFByRegEx(int slot, UCHAR lo, UCHAR hi ){
-		this->fnum[slot] = (hi<<8 | lo) & 0x7ff;
-		this->fblock[slot] = hi>>3 & 0x7;
-	};
-	void setFByReg( UCHAR lo, UCHAR hi ){
-		setFByRegEx(3, lo, hi);
-	};
-	void setFEx(int slot, int fnum, int fblock){
-		this->fnum[slot] = fnum & 0x7ff;
-		this->fblock[slot] = fblock & 0x7;
-	};
-	void setF(int fnum, int fblock){
-		setFEx(3, fnum, fblock);
-	};
-	
 	int getFNum(){ return fnum[3]; };
-	int getFNumEx(int slot){ 
-		if( !exmode ) slot = 3;
-		return fnum[slot];
+	int getFNumEx(int slotno ){ 
+		if( !exmode ) slotno = 3;
+		return fnum[slotno];
 	};
 	int getFBlock(){ return fblock[3]; };
-	int getFBlockEx(int slot){ 
-		if( !exmode ) slot = 3;
-		return fblock[slot];
+	int getFBlockEx(int slotno){ 
+		if( !exmode ) slotno = 3;
+		return fblock[slotno];
 	};
-	double getFreqEx(int slot){
-		if( !exmode ) slot = 3;
-		int n = getFNumEx(slot);
-		int b = getFBlockEx(slot);
+	double getFreqEx(int slotno){
+		if( !exmode ) slotno = 3;
+		int n = getFNumEx(slotno);
+		int b = getFBlockEx(slotno);
 		b = 0<b ? 1<<(b-1) : 1;
 		double mag = (8*10e6) / (144 * (double)(1<<20));
 		return n*b*mag;
@@ -161,20 +162,15 @@ public:
 
 	
 	int getAMS(){ return ams; };
-	void setAMS(int ams){ this->ams = ams; };
 	int getPMS(){ return pms; };
-	void setPMS(int pms){ this->pms = pms; };
 	int getFeedback(){ return feedback; };
-	void setFeedback(int feedback){ this->feedback = feedback; };
 	int getAlgorithm(){ return algorithm; };
-	void setAlgorithm(int algorithm){ this->algorithm = algorithm; };
 	void getLR( bool &l, bool &r ){ l = left; r = right; };
-	void setLR( bool l, bool r ){ left = l; right = r; };
 	int getPan(){ // ±1
 		if( left&&right ) return 0;
 		else if(left) return -1;
 		else if(right) return 1;
-		else return 0;
+		else return -2;
 	};
 
 	void getNoteEx(int exNo, int &oct, int &note){
@@ -227,13 +223,57 @@ public:
 		//if( !left && !right ) return 0;
 		int level=0;
 		for( int i=0; i<4; i++ ){
-			level+=slot[i].getTotalLevel();
+			level+=slot[i]->getTotalLevel();
 		}
 		return level>>2;
 	};
+
+protected:
+	void setExMode(int mode){ exmode = mode; };
+	void keyOn( UCHAR slotsw ){
+		for( int i=0; i<4; i++ ){ // D3:4, D2:3, D1:2, D0:1
+			if( slotsw & 0x01 )
+				slot[i]->on();
+			else
+				slot[i]->off();
+			slotsw >>= 1;
+		}
+	};
+//	void setFByRegEx(int slotno, UCHAR lo, UCHAR hi ){
+//		this->fnum[slotno] = (hi<<8 | lo) & 0x7ff;
+//		this->fblock[slotno] = hi>>3 & 0x7;
+//	};
+//	void setFByReg( UCHAR lo, UCHAR hi ){
+//		setFByRegEx(3, lo, hi);
+//	};
+//	void setFEx(int slotno, int fnum, int fblock){
+//		this->fnum[slotno] = fnum & 0x7ff;
+//		this->fblock[slotno] = fblock & 0x7;
+//	};
+//	void setF(int fnum, int fblock){
+//		setFEx(3, fnum, fblock);
+//	};
+	void setFExLo(int slotno, UCHAR data){
+		fpacked[slotno] = (fpacked[slotno] & 0xff00) | data;
+		fnum[slotno] = fpacked[slotno] & 0x7ff;
+		fblock[slotno] = fpacked[slotno]>>11 & 0x7;
+	};
+	void setFExHi(int slotno, UCHAR data){
+		fpacked[slotno] = ((int)data<<8) | (fpacked[slotno] & 0xff);
+		fnum[slotno] = fpacked[slotno] & 0x7ff;
+		fblock[slotno] = fpacked[slotno]>>11 & 0x7;
+	};
+	void setFLo(UCHAR data){ setFExLo(3, data); };
+	void setFHi(UCHAR data){ setFExHi(3, data); };
+	
+	void setAMS(int ams){ this->ams = ams; };
+	void setPMS(int pms){ this->pms = pms; };
+	void setFeedback(int feedback){ this->feedback = feedback; };
+	void setAlgorithm(int algorithm){ this->algorithm = algorithm; };
+	void setLR( bool l, bool r ){ left = l; right = r; };
 	
 public:
-	COPNAFmSlot slot[4];
+	COPNAFmSlot *slot[4];
 
 protected:
 	int exmode;
@@ -246,13 +286,57 @@ protected:
 	
 	int fnum[4];	//11bit
 	int fblock[4];	//3bit
+	int fpacked[4];
 	
+	COPNA *pOPNA;
 };
 
 // ---------------------------------------------------------------------------------------
-class COPNASsgCh{
+class COPNAFm{
+	friend class COPNA;
+
 public:
-	COPNASsgCh(){ reset(); };
+	COPNAFm(COPNA *parent) : pOPNA(parent){
+		for( int i=0; i<6; i++ )
+			ch[i] = new COPNAFmCh(parent);
+		reset();
+	};
+	virtual ~COPNAFm(){
+		for( int i=0; i<6; i++ )
+			if(ch[i]) delete ch[i];
+	};
+	
+	void reset(){
+		lfo = 0;
+		lfo_sw = false;
+	};
+	
+public:
+	int getLFO(){ return lfo; };
+	
+protected:
+	bool isLFOOn(){ return lfo_sw; };
+	bool setReg( UCHAR bank, UCHAR addr, UCHAR data );
+	
+
+public:
+	COPNAFmCh *ch[6];
+	
+protected:
+	int lfo; //3bit
+	bool lfo_sw;
+
+	COPNA *pOPNA;
+};
+
+
+// ---------------------------------------------------------------------------------------
+class COPNASsgCh{
+	friend class COPNA;
+	friend class COPNASsg;
+
+public:
+	COPNASsgCh(COPNA *parent) : pOPNA(parent){ reset(); };
 	virtual ~COPNASsgCh(){};
 
 	void reset(){
@@ -266,22 +350,14 @@ public:
 
 public:
 	int getFineTune(){ return fineTune; };
-	void setFineTune(int ft){ fineTune = ft; };
 	int getCoarseTune(){ return coarseTune; };
-	void setCoarseTune(int ct){ coarseTune = ct; };
 	int getTune(){ return (coarseTune<<8 | fineTune); }; // 12bit
 	
 	int getLevel(){ return level; };
-	void setLevel(int l){ level = l; };
-	void setUseEnv( bool use ){ useEnv = use; };
 	bool isUseEnv(){ return useEnv; };
 	
-	void toneOn(){ tone = true; };
-	void toneOff(){ tone = false; };
 	bool isToneOn(){ return tone; };
 	
-	void noiseOn(){ noise = true; };
-	void noiseOff(){ noise = false; };
 	bool isNoiseOn(){ return noise; };
 	bool isOn(){ return (tone|noise); };
 
@@ -327,22 +403,45 @@ public:
 	};
 	
 protected:
+	void setFineTune(int ft){ fineTune = ft; };
+	void setCoarseTune(int ct){ coarseTune = ct; };
+	void setLevel(int l){ level = l; };
+	void setUseEnv( bool use ){ useEnv = use; };
+
+	void toneOn(){ tone = true; };
+	void toneOff(){ tone = false; };
+	void noiseOn(){ noise = true; };
+	void noiseOff(){ noise = false; };
+	
+protected:
 	int fineTune;	// 8bit
 	int coarseTune;	// 4bit
 	int level;		// 4bit
 	bool useEnv;	// M
 	bool tone;
 	bool noise;
+
+	COPNA *pOPNA;
 };
 
+// ---------------------------------------------------------------------------------------
 class COPNASsg{
+	friend class COPNA;
+
 public:
-	COPNASsg(){ reset(); };
-	virtual ~COPNASsg(){};
+	COPNASsg(COPNA *parent) : pOPNA(parent){
+		for( int i=0; i<3; i++ )
+			ch[i] = new COPNASsgCh(parent);
+		reset();
+	};
+	virtual ~COPNASsg(){
+		for( int i=0; i<3; i++ )
+			if( ch[i] ) delete ch[i];
+	};
 
 	void reset(){
 		for( int i=0; i<3; i++ )
-			ch[i].reset();
+			ch[i]->reset();
 		envFineTune=0;
 		envCoarseTune=0;
 		envType=0;
@@ -350,29 +449,37 @@ public:
 	};
 
 public:
-	COPNASsgCh ch[3];
+	COPNASsgCh *ch[3];
 
 public:
 	int getEnvFineTune(){ return envFineTune; };
-	void setEnvFineTune(int ft){ envFineTune = ft; };
 	int getEnvCoarseTune(){ return envCoarseTune; };
-	void setEnvCoarseTune(int ct){ envCoarseTune = ct; };
 	int getEnvType(){ return envType; };
-	void setEnvType(int type){ envType = type&0x7; };
 	int getNoisePeriod(){ return noisePeriod; };
+
+protected:
+	void setEnvFineTune(int ft){ envFineTune = ft; };
+	void setEnvCoarseTune(int ct){ envCoarseTune = ct; };
+	void setEnvType(int type){ envType = type&0x7; };
 	void setNoisePeriod(int np){ noisePeriod = np; };
-		
+	bool setReg( UCHAR addr, UCHAR data );
+	
 protected:
 	int envFineTune;	// 8bit チャネル共通
 	int envCoarseTune;	// 8bit チャネル共通
 	int envType;		// 4bit チャネル共通
 	int noisePeriod;	// 5bit チャネル共通
+	
+	COPNA *pOPNA;
 };
 
 // ---------------------------------------------------------------------------------------
 class COPNARhythmCh{
+	friend class COPNARhythm;
+	friend class COPNA;
+
 public:
-	COPNARhythmCh(){ reset(); };
+	COPNARhythmCh(COPNA *parent) : pOPNA(parent){ reset(); };
 	virtual ~COPNARhythmCh(){};
 
 	void reset(){
@@ -383,17 +490,19 @@ public:
 	};
 	
 public:
-	void setLevel(int l){ level = l; };
 	int getLevel(){ return level; };
-	void on(){ sw = true; limit = 3; };
-	void off(){ sw = false; };
 	bool isOn(){ return sw; };
-	void setLR( bool l, bool r ){ left=l; right=r; };
 	void getLR( bool &l, bool &r ){ l=left; r=right; };
 	void update(){
 		if( 0<limit ) limit--;
 		else sw = false;
 	};
+
+protected:
+	void setLevel(int l){ level = l; };
+	void on(){ sw = true; limit = 3; };
+	void off(){ sw = false; };
+	void setLR( bool l, bool r ){ left=l; right=r; };
 	
 protected:
 	int level;
@@ -401,91 +510,155 @@ protected:
 	bool left;
 	bool right;
 	int limit;
+
+	COPNA *pOPNA;
 };
 
+// ---------------------------------------------------------------------------------------
 class COPNARhythm{
+	friend class COPNA;
+	
 public:
-	COPNARhythm(){ reset(); };
-	virtual ~COPNARhythm(){};
+	COPNARhythm(COPNA *parent) : pOPNA(parent){
+		rim = new COPNARhythmCh(parent);
+		tom = new COPNARhythmCh(parent);
+		hh = new COPNARhythmCh(parent);
+		top = new COPNARhythmCh(parent);
+		sd = new COPNARhythmCh(parent);
+		bd = new COPNARhythmCh(parent);
+		reset();
+	};
+	virtual ~COPNARhythm(){
+		if(rim) delete rim;
+		if(tom) delete tom;
+		if(hh) delete hh;
+		if(top) delete top;
+		if(sd) delete sd;
+		if(bd) delete bd;
+	};
 
 	void reset(){
-		rim.reset();
-		tom.reset();
-		hh.reset();
-		top.reset();
-		sd.reset();
-		bd.reset();
+		rim->reset();
+		tom->reset();
+		hh->reset();
+		top->reset();
+		sd->reset();
+		bd->reset();
 		tl=0;
 	};
 
 public:
-	COPNARhythmCh rim;
-	COPNARhythmCh tom;
-	COPNARhythmCh hh;
-	COPNARhythmCh top;
-	COPNARhythmCh sd;
-	COPNARhythmCh bd;
+	COPNARhythmCh *rim;
+	COPNARhythmCh *tom;
+	COPNARhythmCh *hh;
+	COPNARhythmCh *top;
+	COPNARhythmCh *sd;
+	COPNARhythmCh *bd;
 		
 public:
-	void setTotalLevel(int level){ tl = level; };
 	int getTotalLevel(){ return tl; };
 	void update(){
-		rim.update();
-		tom.update();
-		hh.update();
-		top.update();
-		sd.update();
-		bd.update();
+		rim->update();
+		tom->update();
+		hh->update();
+		top->update();
+		sd->update();
+		bd->update();
 	};
 	
 protected:
+	void setTotalLevel(int level){ tl = level; };
+	bool setReg( UCHAR addr, UCHAR data );
+	
+protected:
 	int tl;
+
+	COPNA *pOPNA;
 };
 
+// ---------------------------------------------------------------------------------------
 class COPNAAdpcm{
+	friend class COPNA;
 	
 public:
-	COPNAAdpcm(){ reset(); };
-	virtual ~COPNAAdpcm(){};
+	COPNAAdpcm(COPNA *parent) : pOPNA(parent){
+		dram = new UCHAR[512*1024];
+		reset();
+	};
+	virtual ~COPNAAdpcm(){
+		if( dram ) delete [] dram;
+	};
 
 	void reset(){
 		startAddr = 0;
 		stopAddr = 0;
 		limitAddr = 0;
+		currentAddr = 0;
 		prescale = 0;
 		deltaN = 0;
 		level = 0;
 	};
-
+public:
+	int getLevel(){ return level; };
+	
 protected:
-	int startAddr;	//16bit
-	int stopAddr;	//16bit
-	int limitAddr;	//16bit
+	bool setReg( UCHAR addr, UCHAR data );
+	
+protected:
+	int startAddr;	//21bit
+	int stopAddr;	//21bit
+	int limitAddr;	//21bit
+	int currentAddr;
 	int prescale;	//16bit
 	int deltaN;		//16bit
 	int level;		//8bit;
 	
+	UCHAR *dram; // not used at the present time...
+
+	COPNA *pOPNA;
 };
 
 // ---------------------------------------------------------------------------------------
 class COPNA : public Chip
 {
 public:
-	COPNA(){ reset(); };
-	virtual ~COPNA(){};
+	COPNA(GimicIF *p) : pIF(p) {
+		fm = new COPNAFm(this);
+		ssg = new COPNASsg(this);
+		adpcm = new COPNAAdpcm(this);
+		rhythm = new COPNARhythm(this);
+		partMask = 0;
+		partSolo = 0;
+		reset();
+	};
+	virtual ~COPNA(){
+		if(fm) delete fm;
+		if(ssg) delete ssg;
+		if(adpcm) delete adpcm;
+		if(rhythm) delete rhythm;
+	};
 
 	void reset(){
-		for( int i=0; i<6; i++ )
-			fm[i].reset();
-		for( int i=0; i<3; i++ )
-			ssg.reset();
-		rhythm.reset();
-		adpcm.reset();
+		fm->reset();
+		ssg->reset();
+		rhythm->reset();
+		adpcm->reset();
 
 		for( int i=0; i<2; i++ ){
 			memset( reg[i], 0, 256 );
 			memset( regATime[i], 0, 256 );
 		}
+
+		for( int i=0x40; i<=0x4e;i++ ) // FM TL=127
+			reg[0][i] = reg[1][i] = 0x7f;
+		for( int i=0x80; i<=0x8e; i++ ) // FM SL,RR
+			reg[0][i] = reg[1][i] = 0xff;
+		for( int i=0xb4; i<0xb6+1; i++) // FM PAN/AMS/PMS
+			reg[0][i] = reg[1][i] = 0xc0;
+		reg[0][0x27] = 0x30; // Timer Control
+		reg[0][0x29] = 0x80; // FM4-6 Enable
+		reg[0][0x07] = 0x38; // SSG ミキサ
+		reg[0][0x10] = 0xBF;
 	};
 	
 	
@@ -498,41 +671,42 @@ public:
 				regATime[j][i] = dc<c? c-dc : 0;
 			}
 		}
-		rhythm.update();
+		rhythm->update();
 	};
 
 public:
-	bool setReg( int addr, UCHAR data );
-	UCHAR getReg( int addr );
-	//void setPartMask(int ch);
+	virtual void filter( int addr, UCHAR *data );
+	virtual bool setReg( int addr, UCHAR data );
+	virtual UCHAR getReg( int addr );
+	
+	void setPartMask(int ch, bool mask);
+	void setPartSolo(int ch, bool mask);
+	bool getPartMask(int ch){ return partMask&(1<<ch) ? true : false; };
+	bool getPartSolo(int ch){ return partSolo&(1<<ch) ? true : false; };
+	bool getMixedMask(int ch){
+		if( partSolo ) return (((~partSolo) | partMask) & (1<<ch)) ? true : false;
+		else return getPartMask(ch);
+	};
 	
 
 	int getTimerA(){ return timerA; };
 	int getTimerB(){ return timerB; };
 	int getFMPrescale(){ return prescale_fm; };
 	int getSSGPrescale(){ return prescale_ssg; };
-	int getLFO(){ return lfo; };
-	bool isLFOOn(){ return lfo_sw; };
 
 
 public:
-	COPNAFm fm[6];
-	COPNASsg ssg;
-	COPNAAdpcm adpcm;
-	COPNARhythm rhythm;
+	COPNAFm *fm;
+	COPNASsg *ssg;
+	COPNAAdpcm *adpcm;
+	COPNARhythm *rhythm;
 	
 	UCHAR reg[2][256];
 	UCHAR regATime[2][256];
 
-	UCHAR *adpcm_data; // not used at the present time...
-
-
 protected:
 	bool fmCommonRegHandling( UCHAR adrs, UCHAR data );
-	bool fmRegHandling( UCHAR bank, UCHAR adrs, UCHAR data );
-	bool adpcmRegHandling( UCHAR adrs, UCHAR data );
-	bool ssgRegHandling( UCHAR adrs, UCHAR data );
-	bool rhythmRegHandling( UCHAR adrs, UCHAR data );
+	void applyMask(int ch);
 	
 protected:
 	int timerA; //10bit
@@ -540,12 +714,15 @@ protected:
 	int prescale_fm;
 	int prescale_ssg;
 	
-	int lfo; //3bit
+//	int lfo; //3bit
 	bool timerA_sw;
 	bool timerB_sw;
-	bool lfo_sw;
+//	bool lfo_sw;
 	//int ch3mode;
-	//bool partmask[14];
+	
+	UINT partMask;
+	UINT partSolo;
+	GimicIF *pIF;
 };
 
 

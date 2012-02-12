@@ -374,7 +374,7 @@ static void draw_knob( HDC hdc, double pos, int cx, int cy )
 	::LineTo( hdc, static_cast<int>(cx+dx), static_cast<int>(cy+dy) );
 };
 
-void vis_draw_fm_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFm *pFM )
+void vis_draw_fm_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFmCh *pFM )
 {
 	int exmode = pFM->getExMode();
 	BMPREG reg = skinreg_view[ exmode?1:0 ];
@@ -407,7 +407,7 @@ void vis_draw_fm_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFm *pFM
 	//slot ON/OFF
 	const int lx[4] = {243, 258, 273, 288};
 	for( int i=0; i<4; i++ ){
-		int idx = pFM->slot[i].isOn() ? 4 : 0;
+		int idx = pFM->slot[i]->isOn() ? 4 : 0;
 		reg = skinreg_tool[7+i+idx];
 		::BitBlt( hdc, x+lx[i], y+56, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
 	}
@@ -605,6 +605,35 @@ void transblt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 		for( int x=0; x<w; x++ ){
 			UINT a = *ts&0xff;
 			*pd = ( (t<=a) ? *ps1 : *ps2 ) | 0xff000000;
+			pd++; ps1++; ps2++; ts++; 
+		}
+	}
+}
+
+// [tmin, tmax)
+void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+			   IVisBitmap *src1, int src1_x, int src1_y,
+			   IVisBitmap *src2, int src2_x, int src2_y,
+			   IVisBitmap *trans, int trans_x, int trans_y, int tmin, int tmax )
+{
+	if( dst_x<0 || dst_y<0 || trans_x<0 || trans_y<0 )
+		return;
+	if( src1_x<0 || src1_y<0 || src2_x<0 || src2_y<0 )
+		return;
+	if( dst_x+w > dst->getWidth() || dst_y+h > dst->getHeight() ||
+		src1_x+w > src1->getWidth() || src1_y+h > src1->getHeight() ||
+		src2_x+w > src2->getWidth() || src2_y+h > src2->getHeight() ||
+		trans_x+w > trans->getWidth() || trans_y+h > trans->getHeight() )
+		return;
+
+	for( int y=0; y<h; y++ ){
+		UINT *pd = (UINT*)dst->getRow0( dst_y+y ) + dst_x;
+		UINT *ps1 = (UINT*)src1->getRow0( src1_y+y ) + src1_x;
+		UINT *ps2 = (UINT*)src2->getRow0( src2_y+y ) + src2_x;
+		UINT *ts = (UINT*)trans->getRow0( trans_y+y ) + trans_x;
+		for( int x=0; x<w; x++ ){
+			UINT a = *ts&0xff;
+			*pd = ( (tmin<=a && a<tmax) ? *ps2 : *ps1 ) | 0xff000000;
 			pd++; ps1++; ps2++; ts++; 
 		}
 	}

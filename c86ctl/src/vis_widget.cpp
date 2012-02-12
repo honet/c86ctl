@@ -31,24 +31,47 @@ void CVisCheckBox::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){
 }
 
 // --------------------------------------------------------
-void CVisDipSw::onPaint(IVisBitmap *canvas){
-	gVisSkin.drawDipSw( canvas, sx, sy, sw );
-};
-	
-void CVisDipSw::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){
+void CVisSwitchBase::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){
 	switch(msg){
 	case WM_LBUTTONDOWN:
-		sw ^= 1;
+		int sw = 0;
+		if( getter ) sw = getter();
+		if( setter ) setter(sw^1);
 		std::for_each( changeEvent.begin(), changeEvent.end(), [this](std::function<void(CVisWidget*)> h){ h(this); } );
 		break;
 	}
 };
 
 // --------------------------------------------------------
+void CVisDipSw::onPaint(IVisBitmap *canvas){
+	int sw = 0;
+	if( getter ) sw = getter();
+	gVisSkin.drawDipSw( canvas, sx, sy, sw );
+};
+
+void CVisMuteSw::onPaint(IVisBitmap *canvas){
+	int sw = 0;
+	if( getter ) sw = getter();
+	gVisSkin.drawMuteSw( canvas, sx, sy, sw );
+};
+
+void CVisSoloSw::onPaint(IVisBitmap *canvas){
+	int sw = 0;
+	if( getter ) sw = getter();
+	gVisSkin.drawSoloSw( canvas, sx, sy, sw );
+};
+
+
+// --------------------------------------------------------
 void CVisKnob::onPaint(IVisBitmap *canvas){
 	int value = 0;
 	if( getter ) value = getter();
-	gVisSkin.drawKnob( canvas, sx, sy, (255*(value-minval))/(maxval-minval), value );
+	int r = maxval-minval;
+	int t1 = minval < 0 ? (255*(-minval))/r : 0;
+	int t2 = (255*(value-minval))/r;
+
+	if(t1<t2) gVisSkin.drawKnob( canvas, sx, sy, t1, t2, value );
+	else      gVisSkin.drawKnob( canvas, sx, sy, t2, t1, value );
 }
 
 void CVisKnob::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)
