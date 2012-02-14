@@ -122,12 +122,17 @@ public:
 		pms = 0;
 		left = true;
 		right = true;
+		keyOnLevel = 0;
 
 		for( int i=0; i<4; i++ ){
 			fnum[i] = 0;
 			fblock[i] = 0;
 		}
 	};
+	void update(){
+		if(keyOnLevel) keyOnLevel--;
+	};
+	int getKeyOnLevel(){ return keyOnLevel; };
 
 public:
 	int getExMode(){ return exmode; };
@@ -238,21 +243,8 @@ protected:
 				slot[i]->off();
 			slotsw >>= 1;
 		}
+		keyOnLevel = (127-getMixLevel())>>2;
 	};
-//	void setFByRegEx(int slotno, UCHAR lo, UCHAR hi ){
-//		this->fnum[slotno] = (hi<<8 | lo) & 0x7ff;
-//		this->fblock[slotno] = hi>>3 & 0x7;
-//	};
-//	void setFByReg( UCHAR lo, UCHAR hi ){
-//		setFByRegEx(3, lo, hi);
-//	};
-//	void setFEx(int slotno, int fnum, int fblock){
-//		this->fnum[slotno] = fnum & 0x7ff;
-//		this->fblock[slotno] = fblock & 0x7;
-//	};
-//	void setF(int fnum, int fblock){
-//		setFEx(3, fnum, fblock);
-//	};
 	void setFExLo(int slotno, UCHAR data){
 		fpacked[slotno] = (fpacked[slotno] & 0xff00) | data;
 		fnum[slotno] = fpacked[slotno] & 0x7ff;
@@ -283,6 +275,7 @@ protected:
 	int pms;		// 3bit
 	bool left;
 	bool right;
+	int keyOnLevel;
 	
 	int fnum[4];	//11bit
 	int fblock[4];	//3bit
@@ -309,6 +302,11 @@ public:
 	void reset(){
 		lfo = 0;
 		lfo_sw = false;
+	};
+	void update(){
+		for( int i=0; i<6; i++ ){
+			ch[i]->update();
+		}
 	};
 	
 public:
@@ -346,7 +344,12 @@ public:
 		useEnv = false;
 		tone = false;
 		noise = false;
+		keyOnLevel = 0;
 	};
+	void update(){
+		if(keyOnLevel) keyOnLevel--;
+	};
+	int getKeyOnLevel(){ return keyOnLevel; };
 
 public:
 	int getFineTune(){ return fineTune; };
@@ -405,12 +408,12 @@ public:
 protected:
 	void setFineTune(int ft){ fineTune = ft; };
 	void setCoarseTune(int ct){ coarseTune = ct; };
-	void setLevel(int l){ level = l; };
+	void setLevel(int l){ level = l; keyOnLevel = (l<<1)|1; };
 	void setUseEnv( bool use ){ useEnv = use; };
 
-	void toneOn(){ tone = true; };
+	void toneOn(){ tone = true; keyOnLevel = (level<<1)|1; };
 	void toneOff(){ tone = false; };
-	void noiseOn(){ noise = true; };
+	void noiseOn(){ noise = true; keyOnLevel = (level<<1)|1; };
 	void noiseOff(){ noise = false; };
 	
 protected:
@@ -420,6 +423,7 @@ protected:
 	bool useEnv;	// M
 	bool tone;
 	bool noise;
+	int keyOnLevel;
 
 	COPNA *pOPNA;
 };
@@ -446,6 +450,10 @@ public:
 		envCoarseTune=0;
 		envType=0;
 		noisePeriod=0;
+	};
+	void update(){
+		for( int i=0; i<3; i++ )
+			ch[i]->update();
 	};
 
 public:
@@ -487,6 +495,7 @@ public:
 		right=false;
 		level=0;
 		sw=false;
+		keyOnLevel=0;
 	};
 	
 public:
@@ -495,12 +504,14 @@ public:
 	void getLR( bool &l, bool &r ){ l=left; r=right; };
 	void update(){
 		if( 0<limit ) limit--;
+		if( 0<keyOnLevel ) keyOnLevel--;
 		else sw = false;
 	};
+	int getKeyOnLevel(){ return keyOnLevel; };
 
 protected:
 	void setLevel(int l){ level = l; };
-	void on(){ sw = true; limit = 3; };
+	void on(){ sw = true; limit = 3; keyOnLevel = level<<2; };
 	void off(){ sw = false; };
 	void setLR( bool l, bool r ){ left=l; right=r; };
 	
@@ -510,6 +521,7 @@ protected:
 	bool left;
 	bool right;
 	int limit;
+	int keyOnLevel;
 
 	COPNA *pOPNA;
 };
@@ -597,7 +609,13 @@ public:
 		prescale = 0;
 		deltaN = 0;
 		level = 0;
+		keyOnLevel = 0;
 	};
+	void update(){
+		if(keyOnLevel) keyOnLevel--;
+	};
+	int getKeyOnLevel(){ return keyOnLevel; };
+	
 public:
 	int getLevel(){ return level; };
 	
@@ -612,6 +630,7 @@ protected:
 	int prescale;	//16bit
 	int deltaN;		//16bit
 	int level;		//8bit;
+	int keyOnLevel;
 	
 	UCHAR *dram; // not used at the present time...
 
@@ -639,11 +658,6 @@ public:
 	};
 
 	void reset(){
-		fm->reset();
-		ssg->reset();
-		rhythm->reset();
-		adpcm->reset();
-
 		for( int i=0; i<2; i++ ){
 			memset( reg[i], 0, 256 );
 			memset( regATime[i], 0, 256 );
@@ -659,6 +673,14 @@ public:
 		reg[0][0x29] = 0x80; // FM4-6 Enable
 		reg[0][0x07] = 0x38; // SSG ƒ~ƒLƒT
 		reg[0][0x10] = 0xBF;
+
+		fm->reset();
+		ssg->reset();
+		rhythm->reset();
+		adpcm->reset();
+
+		for( int i=0; i<14; i++ )
+			applyMask(i);
 	};
 	
 	
@@ -671,6 +693,9 @@ public:
 				regATime[j][i] = dc<c? c-dc : 0;
 			}
 		}
+		fm->update();
+		ssg->update();
+		adpcm->update();
 		rhythm->update();
 	};
 

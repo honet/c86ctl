@@ -109,10 +109,10 @@ const BMPREG skinreg_tick[] = {
 const BMPREG skinreg_tool[] = {
 	{435,385,21,96},	// 0:bar shadow
 	{457,385,21,96},	// 1:bar light
-	{  0,178,59,20},	// 2:keyboard
-	{ 60,178,40,20},	// 3:dark keyboard
-	{113,178,11,20},	// 4:SW OFF
-	{101,178,11,20},	// 5:SW ON
+	{  0,178,54,20},	// 2:keyboard
+	{ 55,178,35,20},	// 3:dark keyboard
+	{103,178,11,20},	// 4:SW OFF
+	{ 91,178,11,20},	// 5:SW ON
 	{  0,199,115,24},	// 6:logo
 	{144,101,13,13},	// 7:(A)
 	{158,101,13,13},	// 8:(B)
@@ -122,9 +122,9 @@ const BMPREG skinreg_tool[] = {
 	{158,115,13,13},	// 12:(B)
 	{172,115,13,13},	// 13:(C)
 	{186,115,13,13},	// 14:(D)
-	{125,178,22,22},	// 15:knob-dark
-	{148,178,22,22},	// 16:knob-light
-	{171,178,22,22},	// 17:knob-trans
+	{116,178,22,22},	// 15:knob-dark
+	{139,178,22,22},	// 16:knob-light
+	{162,178,22,22},	// 17:knob-trans
 	{200,113,7,7},		// 18:check off
 	{200,121,7,7},		// 19:check on
 	{208,105,13,11},	// 20:mute-off
@@ -143,8 +143,8 @@ const int keyW1 = 5;	// îíåÆ
 const int keyH1 = 20;
 const int keyW2 = 3;	// çïåÆ
 const int keyH2 = 10;
-const int keyXOffset[] = { 0,3,5,8,10,15,18,20,23,25,28,30,33,35 };
-const int keyHiXOffset[] = { 40,55,45,55,50,40,55,45,55,45,55,45,55,50 };
+const int keyXOffset[] = { 0,3,5,8,10,15,18,20,23,25,28,30 };
+const int keyHiXOffset[] = { 35,50,40,50,45,35,50,40,50,40,50,45 };
 const int keyHiW[] = { 4,3,4,3,4,4,3,4,3,4,3,4,3,4 };
 const int keyHiH[] = { 20,10,20,10,20,20,10,20,10,20,10,20,10,20 };
 
@@ -290,7 +290,7 @@ void CVisC86Skin::drawKeyboard( IVisBitmap *canvas, int x, int y )
 	int sy = skinreg_tool[ID_KEYBOARD].top;
 	
 	for( int i=0; i<8; i++ ){
-		int w = keyW1*8;
+		int w = keyW1*7;
 		alphablt(canvas, x+w*i, y, w, keyH1, skinbmp, sx, sy );
 	}
 }
@@ -302,7 +302,7 @@ void CVisC86Skin::drawDarkKeyboard( IVisBitmap *canvas, int x, int y )
 	int sy = skinreg_tool[ID_DARK_KEYBOARD].top;
 	
 	for( int i=0; i<8; i++ ){
-		int w = keyW1*8;
+		int w = keyW1*7;
 		alphablt(canvas, x+w*i, y, w, keyH1, skinbmp, sx, sy );
 	}
 }
@@ -312,7 +312,7 @@ void CVisC86Skin::drawHilightKey( IVisBitmap *canvas, int x, int y, int oct, int
 {
 	int srcx = skinreg_tool[ID_KEYBOARD].left + keyHiXOffset[note];
 	int srcy = skinreg_tool[ID_KEYBOARD].top;
-	int dstx = keyW1*8*oct + keyXOffset[note];
+	int dstx = keyW1*7*oct + keyXOffset[note];
 	int w = keyHiW[note];
 	int h = keyHiH[note];
 	alphablt(canvas, x+dstx, y, w, h, skinbmp, srcx, srcy );

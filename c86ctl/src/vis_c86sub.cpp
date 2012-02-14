@@ -13,11 +13,13 @@
 #include "module.h"
 #include "resource.h"
 #include "vis_c86sub.h"
+#include "vis_c86skin.h"
 
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+#if 0
 #define PI 3.14159265358979
 
 #define col_light	RGB(199,200,255)
@@ -153,8 +155,8 @@ const int keyW1 = 5;	// ”’Œ®
 const int keyH1 = 20;
 const int keyW2 = 3;	// •Œ®
 const int keyH2 = 10;
-const int keyXOffset[] = { 0,3,5,8,10,15,18,20,23,25,28,30,33,35 };
-const int keyHiXOffset[] = { 40,55,45,55,50,40,55,45,55,45,55,45,55,50 };
+const int keyXOffset[] = { 0,3,5,8,10,15,18,20,23,25,28,30 };
+const int keyHiXOffset[] = { 35,50,40,50,45,35,50,40,50,40,50,45 };
 const int keyHiW[] = { 4,3,4,3,4,4,3,4,3,4,3,4,3,4 };
 const int keyHiH[] = { 20,10,20,10,20,20,10,20,10,20,10,20,10,20 };
 
@@ -531,7 +533,9 @@ void vis_draw_fmslot_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFmS
 
 
 }
+#endif
 
+// --------------------------------------------------------------------------------------
 void blt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 		  IVisBitmap *src, int src_x, int src_y )
 {
@@ -603,7 +607,7 @@ void transblt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 		UINT *ps2 = (UINT*)src2->getRow0( src2_y+y ) + src2_x;
 		UINT *ts = (UINT*)trans->getRow0( trans_y+y ) + trans_x;
 		for( int x=0; x<w; x++ ){
-			UINT a = *ts&0xff;
+			int a = *ts&0xff;
 			*pd = ( (t<=a) ? *ps1 : *ps2 ) | 0xff000000;
 			pd++; ps1++; ps2++; ts++; 
 		}
@@ -632,7 +636,7 @@ void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 		UINT *ps2 = (UINT*)src2->getRow0( src2_y+y ) + src2_x;
 		UINT *ts = (UINT*)trans->getRow0( trans_y+y ) + trans_x;
 		for( int x=0; x<w; x++ ){
-			UINT a = *ts&0xff;
+			int a = *ts&0xff;
 			*pd = ( (tmin<=a && a<tmax) ? *ps2 : *ps1 ) | 0xff000000;
 			pd++; ps1++; ps2++; ts++; 
 		}
@@ -727,4 +731,30 @@ void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col )
 	}
 }
 
+void visDrawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak )
+{
+	UINT *pd = (UINT*)bmp->getRow0(ys) + xs;
+	UINT step = bmp->getStep()>>2;
 
+	UINT *pd2 = pd;
+	for( int y=0; y<20; y++ ){
+		*pd2 = col_mid;
+		pd2 += step;
+	}
+	pd+=2;
+	for( int x=1; x<32; x++ ){
+		pd2 = pd;
+		if( x<=level || x == peak ){
+			for( int y=0; y<20; y++ ){
+				*pd2 = col_high;
+				pd2 += step;
+			}
+		}else{
+			for( int y=0; y<20; y++ ){
+				*pd2 = col_shadow;
+				pd2 += step;
+			}
+		}
+		pd+=2;
+	}
+}

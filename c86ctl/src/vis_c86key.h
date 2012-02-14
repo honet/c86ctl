@@ -20,7 +20,7 @@ public:
 		: CVisWnd()
 		, id(idx)
 	{
-		windowWidth = 334;
+		windowWidth = 290+64+3+4;// 334;
 		windowHeight = 530;
 	};
 	~CVisC86Key(){};

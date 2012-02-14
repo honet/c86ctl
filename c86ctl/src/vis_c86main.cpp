@@ -86,6 +86,7 @@ bool CVisC86Main::create(void)
 			} );
 		widgets.push_back(info[i].checkReg);
 
+		// TODO: OPNAˆÈŠO‚ğ‘‚­B
 		if( info[i].chiptype == CHIP_OPNA ){
 			info[i].checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
 			info[i].checkKey->changeEvent.push_back(
