@@ -395,11 +395,16 @@ void C86winDlg::OnBnClickedButtonMbinfo()
 		struct Devinfo info;
 		pGimicModule->getMBInfo(&info);
 
-		CString str, devname, rev, serial;
+		CString str, devname, rev, serial, dump0, dump1;
 		devname = info.Devname;
 		rev = info.Rev;
 		serial = info.Serial;
-		str = devname + _T("\r\n") + rev + _T("\r\n") + serial;
+		for( int i=0; i<16; i++ ){
+			dump1.Format(_T("0x%02x, "), info.Devname[i]);
+			dump0 += dump1;
+		}
+
+		str = devname + _T("\r\n") + rev + _T("\r\n") + serial + _T("\r\n") + dump0;
 		m_editMessage.SetWindowText(str);
 		pGimicModule->Release();
 	}

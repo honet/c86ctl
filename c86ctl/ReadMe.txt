@@ -54,8 +54,11 @@ For further information please contact.
  ChangeLog
 ============
 
-1.3.0.10				・GUI復活（GUIルーチン全書換）
+1.3.0.11				・GUI復活（GUIルーチン全書換）
 						・OPMのアドレスフィルタ処理に問題があったのを修正
+						・IGimic::getMBInfo/getModuleInfo において
+						　文字列終端が０にならない場合があるバグを修正
+						　（1.2.0.8で直ってませんでした。すいません。）
 						・その他沢山変更。
 
 1.2.0.8					・CreateInstance関数の呼び出し規約をWINAPIに変更
@@ -76,3 +79,16 @@ For further information please contact.
 1.2.0.6					HID通信の仕様を大幅変更。gimic-r158以降用
 1.1.0.3					バージョンリソース追加
 
+
+
+
+::TODO::
+・skinにカラーテーブルを入れる
+・adpcmバースト転送
+・pan直す
+・nanoフォントにマイナス
+・N台時のデバッグ
+・ウインドウ位置保存コード
+・writefile/readfileをタイムアウトできるように
+・try/catchコードを全ルーチンに
+・

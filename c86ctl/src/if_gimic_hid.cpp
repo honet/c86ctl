@@ -294,9 +294,9 @@ int GimicHID::getMBInfo( struct Devinfo *info )
 	MSG d = { 3, { 0xfd, 0x91, 0xff } };
 	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
 		char *p = &info->Devname[15];
-		while(*p==0||*p==0xff) *p--=0;
+		while( *p==0 || *p==-1 ) *p--=0;
 		p = &info->Serial[14];
-		while(*p==0||*p==0xff) *p--=0;
+		while(*p==0||*p==-1) *p--=0;
 	}
 	return ret;
 }
@@ -311,9 +311,9 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 	MSG d = { 3, { 0xfd, 0x91, 0 } };
 	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
 		char *p = &info->Devname[15];
-		while(*p==0||*p==0xff) *p--=0;
+		while(*p==0||*p==-1) *p--=0;
 		p = &info->Serial[14];
-		while(*p==0||*p==0xff) *p--=0;
+		while(*p==0||*p==-1) *p--=0;
 	}
 	return ret;
 }
