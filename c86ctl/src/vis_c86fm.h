@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -83,19 +83,7 @@ protected:
 	CVisKnobPtr knobMUL[4];
 	CVisKnobPtr knobDET[4];
 	CVisDipSwPtr dipswAM[4];
-	
 
-
-//public:
-//	virtual bool create( HWND parent = 0 );
-//	virtual void close(void);
-//	void setExMode(bool ex){ exmode = ex; };
-	
-//protected:
-//	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);
-//	void OnPaint();
-
-//	bool exmode;
 };
 
 // --------------------------------------------------------

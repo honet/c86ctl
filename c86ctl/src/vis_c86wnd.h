@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -68,14 +68,11 @@ protected:
 
 protected:
 	HWND hWnd;
-	//CComQIPtr<ID2D1HwndRenderTarget> d2dTarget;
 	
 	tstring windowClass;
 	tstring windowTitle;
 	int windowWidth;
 	int windowHeight;
-//	TCHAR className[64];
-//	TCHAR clientClassName[64];
 
 	CVisManager *manager;
 	CVisBitmap *canvas;
@@ -92,13 +89,5 @@ private: // CVisWndÇ∆HWNDÇÃëŒâûïtÇØóp
 	static std::map< HWND, CVisWnd* > wndMap;
 	static CVisWnd* creatingWnd;
 	static HANDLE hCreatingMutex;
-
-
-protected:
-	// å„Ç≈è¡Ç∑
-	HBITMAP hSkinBMP, hSkinOldBMP;
-	HBITMAP hSkinMaskBMP, hSkinMaskOldBMP;
-	HDC hSkinDC;
-	HDC hSkinMaskDC;
 };
 

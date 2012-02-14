@@ -118,20 +118,3 @@ CVisBitmap* CVisBitmap::LoadFromResource(UINT pResourceID, LPCTSTR pResourceType
 }
 
 
-/*
-void CVisBitmap::createD2DBitmap()
-{
-	if(!bitmap)
-		return;
-
-	BitmapData data;
-	if( Ok != bitmap->LockBits( Rect(0, 0, bitmap->GetWidth(), bitmap->GetHeight()),
-		Gdiplus::ImageLockModeRead, PixelFormat32bppPARGB, &data ) )
-			return;
-
-	D2D1_PIXEL_FORMAT format = D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED );
-
-		
-	}
-}
-*/

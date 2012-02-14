@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -293,3 +293,4 @@ CVisC86FmPtr visC86FmViewFactory(Chip *pchip, int id, int ch)
 	}
 	return 0;
 }
+

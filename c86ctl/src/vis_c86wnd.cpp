@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -15,8 +15,6 @@
 #include <map>
 #include <assert.h>
 #include <tchar.h>
-
-//#pragma comment(lib, "d2d1.lib")
 
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
@@ -82,16 +80,6 @@ void CVisWnd::onPaint()
 		DIB_RGB_COLORS, SRCCOPY );
 	
 	::EndPaint(hWnd, &ps);
-
-/*
-	if( !(d2dTarget->CheckWindowState() & D2D1_WINDOW_STATE_OCCLUDED) ){
-		d2dTarget->BeginDraw();
-		d2dTarget->Clear( D2D1::ColorF(D2D1::ColorF::Red) );
-		if( d2dTarget->EndDraw() == D2DERR_RECREATE_TARGET ){
-			;
-		}
-	}
-*/
 }
 
 
@@ -267,12 +255,6 @@ bool CVisWnd::create( int left, int top, int width, int height, DWORD exstyle, D
 	creatingWnd = NULL;
 	::ReleaseMutex( hCreatingMutex );
 	if(!hWnd) return false;
-
-
-//	visManager.getD2DFactory()->CreateHwndRenderTarget( 
-//		D2D1::RenderTargetProperties(),
-//		D2D1::HwndRenderTargetProperties( hFrameWnd, D2D1::Size( static_cast<UINT>(width), static_cast<UINT>(height) ), D2D1_PRESENT_OPTIONS_IMMEDIATELY ), 
-//		&d2dTarget );
 
 	return true;
 }

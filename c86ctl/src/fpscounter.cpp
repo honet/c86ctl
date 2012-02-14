@@ -34,9 +34,6 @@ double FPSCounter::getFPS()
 	UINT d = ::timeGetTime();
 	double fps = update( d-lastcount );
 
-//	char buff[64];
-//	sprintf(buff,"%d\n", d-lastcount);
-//	::OutputDebugStringA(buff);
 	lastcount = d;	
 	return fps;
 }

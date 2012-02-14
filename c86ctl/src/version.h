@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -11,9 +11,9 @@
 #define VERSION_MAJOR      1
 #define VERSION_MINOR      3
 #define VERSION_REVISION   0
-#define VERSION_BUILD      9
-#define VERSION_STRING     "1, 3, 0, 9"
-#define VERSION_MESSAGE    "VER 1.3.0.9(DBG-ONLY)"
+#define VERSION_BUILD      10
+#define VERSION_STRING     "1, 3, 0, 10"
+#define VERSION_MESSAGE    "VER 1.3.0.10(DBG-ONLY)"
 
 
 // 以下はDLLリソース用定義につき変更禁止

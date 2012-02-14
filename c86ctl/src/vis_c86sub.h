@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -31,22 +31,6 @@
 #define BUTTON_ADPCM	17
 
 
-//void vis_draw_str( HDC hdc, HDC hskin, HDC hmask, int type, int x, int y, const char *str );
-//void vis_draw_vstr( HDC hdc, HDC hskin, HDC hmask, int type, int x, int y, const char *str );
-//void vis_draw_numstr1( HDC hdc, HDC hskin, HDC hmask, int x, int y, const char *str );
-//void vis_draw_keyboard( HDC hdc, HDC hskin, HDC hmask, int x, int y );
-//void vis_draw_dark_keyboard( HDC hdc, HDC hskin, HDC hmask, int x, int y );
-//void vis_draw_hilight_key( HDC hdc, HDC hskin, HDC hmask, int x, int y, int oct, int note );
-//void vis_draw_tickcircle( HDC hdc, HDC hskin, HDC hmask, int x, int y, int tick );
-//void vis_draw_logo(HDC hdc, HDC hskin, HDC hmask, int x, int y );
-//void vis_draw_button(HDC hdc, HDC hskin, HDC hmask, int x, int y, int id, int sw );
-//bool vis_hittest_button(int x, int y, int id, int mx, int my );
-//void vis_draw_frame(HWND hwnd, HDC hdc, HDC hskin, HDC hmask, CHAR *title );
-//void vis_fill_rect(HDC hdc, COLORREF col, RECT *rc);
-
-//void vis_draw_fm_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFm *pFM );
-//void vis_draw_fmslot_view( HDC hdc, HDC hskin, HDC hmask, int x, int y, COPNAFmSlot *pFM, int slotidx );
-
 // bitmap operations ------------------------------------------------
 void blt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 		  IVisBitmap *src, int src_x, int src_y );
@@ -63,5 +47,7 @@ void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 
 void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col );
 void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col );
+
+// graph -----------------------------------------------------------
 void visDrawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak );
 

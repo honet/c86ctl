@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -183,7 +183,7 @@ void CVisC86Main::onPaintClient()
 	tick++;
 
 	int y=40;
-	for( int i=0; i<gimic.size(); i++ ){
+	for( size_t i=0; i<gimic.size(); i++ ){
 		// ˜gü
 		visFillRect( clientCanvas, 5, y-2, 5, 58, col_mid );
 		visFillRect( clientCanvas, 5, y+54, 320, 2, col_mid );
@@ -210,115 +210,5 @@ void CVisC86Main::onPaintClient()
 	skin->drawStr( clientCanvas, 0, 260, ch-12, str );
 	
 }
-
-
-#if 0
-LRESULT CALLBACK CVisC86Main::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
-{
-	switch (msg) {
-	case WM_CREATE:
-		{
-#if 0
-			const int offsetx=20, offsety=20;
-			TCHAR cname[128], wname[128];
-			int left, top, enable;
-			RECT rc;
-
-//			regWnd.attach( chip );
-//			keyWnd.attach( chip );
-//			for( int i=0; i<6; i++ )
-//				fmWnd[i].attach(&chip->fm[i]);
-			if( typeid(chip) == typeid(COPNA*) ){
-			::GetWindowRect(hWnd, &rc);
-			left = gConfig.getInt( INISC_KEY, INIKEY_WNDLEFT, rc.left+offsetx );
-			top  = gConfig.getInt( INISC_KEY, INIKEY_WNDTOP, rc.top+offsety );
-			enable = gConfig.getInt( INISC_KEY, INIKEY_WNDVISIBLE, TRUE );
-			keyWnd.create( TEXT("C86KEY"), TEXT("C86 KEYBOARD VIEW"), left, top, hWnd );
-			if( enable )
-				::ShowWindow( keyWnd.getFrameHWND(), SW_SHOWNOACTIVATE );
-			
-			left = gConfig.getInt( INISC_REG, INIKEY_WNDLEFT, left+offsetx );
-			top  = gConfig.getInt( INISC_REG, INIKEY_WNDTOP,  top+offsety  );
-			enable = gConfig.getInt( INISC_REG, INIKEY_WNDVISIBLE, TRUE );
-			regWnd.create( TEXT("C86REG"), TEXT("C86 REGISTER VIEW"), left, top, hWnd );
-			if( enable )
-				::ShowWindow( regWnd.getFrameHWND(), SW_SHOWNOACTIVATE );
-
-			for( int i=0; i<6; i++ ){
-				_stprintf( cname, INISC_FMx, i+1 );
-				left = gConfig.getInt( cname, INIKEY_WNDLEFT, left+offsetx );
-				top  = gConfig.getInt( cname, INIKEY_WNDTOP,  top+offsety  );
-				enable = gConfig.getInt( cname, INIKEY_WNDVISIBLE, TRUE );
-				_stprintf( cname, TEXT("C86FM%d"), i+1 );
-				_stprintf( wname, TEXT("C86 FM PARAMETER VIEW CH%d"), i+1 );
-				fmWnd[i].create( cname, wname, left, top, hWnd );
-				if(i==2) fmWnd[i].setExMode(true);
-				if( enable )
-					::ShowWindow( fmWnd[i].getFrameHWND(), SW_SHOWNOACTIVATE );
-			}
-			}
-//			::SetTimer( hWnd, 0, 50, NULL );
-#endif
-		}
-		break;
-		
-	case WM_CLOSE:
-		{
-#if 0
-			detach();
-			
-			RECT rc;
-			TCHAR cname[128];
-			::GetWindowRect( getFrameHWND(), &rc );
-			gConfig.writeInt( INISC_MAIN, INIKEY_WNDLEFT, rc.left );
-			gConfig.writeInt( INISC_MAIN, INIKEY_WNDTOP, rc.top );
-			gConfig.writeInt( INISC_MAIN, INIKEY_WNDVISIBLE, ::IsWindowVisible(getFrameHWND())?1:0 );
-
-			::GetWindowRect( keyWnd.getFrameHWND(), &rc );
-			gConfig.writeInt( INISC_KEY, INIKEY_WNDLEFT, rc.left );
-			gConfig.writeInt( INISC_KEY, INIKEY_WNDTOP, rc.top );
-			gConfig.writeInt( INISC_KEY, INIKEY_WNDVISIBLE, ::IsWindowVisible(keyWnd.getFrameHWND())?1:0 );
-
-			::GetWindowRect( regWnd.getFrameHWND(), &rc );
-			gConfig.writeInt( INISC_REG, INIKEY_WNDLEFT, rc.left );
-			gConfig.writeInt( INISC_REG, INIKEY_WNDTOP, rc.top );
-			gConfig.writeInt( INISC_REG, INIKEY_WNDVISIBLE, ::IsWindowVisible(regWnd.getFrameHWND())?1:0 );
-
-			for( int i=0; i<6; i++ ){
-				::GetWindowRect( fmWnd[i].getFrameHWND(), &rc );
-				_stprintf( cname, INISC_FMx, i+1 );
-				gConfig.writeInt( cname, INIKEY_WNDLEFT, rc.left );
-				gConfig.writeInt( cname, INIKEY_WNDTOP,  rc.top  );
-				gConfig.writeInt( cname, INIKEY_WNDVISIBLE, ::IsWindowVisible(fmWnd[i].getFrameHWND())?1:0 );
-			}
-#endif
-		}
-		return DefWindowProc(hWnd , msg , wp , lp);
-
-	case WM_TIMER:
-#if 0
-		tick++;
-		if(chip) chip->update();
-		::InvalidateRect( hWnd, NULL, FALSE );
-		regWnd.update();
-		keyWnd.update();
-		for( int i=0; i<6; i++ )
-			fmWnd[i].update();
-		break;
-#endif
-	case WM_PAINT:
-		OnPaint();
-		break;
-
-	case WM_LBUTTONUP:
-		OnLButtonUp( wp, LOWORD(lp), HIWORD(lp) );
-
-	default:
-		return DefWindowProc(hWnd , msg , wp , lp);
-	}
-	return 0;
-}
-
-#endif
 
 

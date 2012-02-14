@@ -70,11 +70,9 @@ public:
 protected:
 	void createDIB(int width, int height);
 	void deleteDIB();
-	//void createD2DBitmap();
 
 protected:
 	std::shared_ptr<Gdiplus::Bitmap> bitmap;
-//	CComQIPtr<ID2D1Bitmap> d2dBitmap;
 	
 	HBITMAP hbmp;
 	BITMAPINFO bmpinfo;
@@ -91,7 +89,7 @@ class CVisChildBitmap : public IVisBitmap
 public:
 	// constructor & destructor
 	CVisChildBitmap( CVisBitmap *p, int x, int y, int w, int h )
-		: parent(p), xs(x), ys(y), width(w), height(h)		
+		: parent(p), xs(x), ys(y), width(w), height(h)
 	{
 	};
 	

@@ -18,9 +18,6 @@
 #endif
 
 
-#define PI 3.14159265358979
-
-
 static HBITMAP hSkinBMP = NULL;
 static HDC hSkinDC = NULL;
 

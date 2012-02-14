@@ -11,10 +11,6 @@
 #include "vis_manager.h"
 #include "vis_c86wnd.h"
 
-#pragma comment(lib, "d2d1.lib")
-//#include <mmsystem.h>
-//#pragma comment(lib, "winmm.lib")
-
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
@@ -34,6 +30,7 @@ void CVisManager::del( CVisWnd *wnd )
 
 void CVisManager::draw(void)
 {
+	// TODO: FIXME: 描画ウィンドウ数が増えるとなぜか描画が行われなくなる。原因不明。
 	std::for_each( clients.begin(), clients.end(),
 			  [](CVisWnd* x){ ::InvalidateRect(x->getHWND(), NULL, FALSE); } );
 //		[](CVisWnd* x){ ::RedrawWindow(x->getHWND(), NULL, NULL, RDW_INVALIDATE|RDW_INTERNALPAINT); } );

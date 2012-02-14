@@ -53,7 +53,11 @@ For further information please contact.
 ============
  ChangeLog
 ============
-1.3.0.9					
+
+1.3.0.10				・GUI復活（GUIルーチン全書換）
+						・OPMのアドレスフィルタ処理に問題があったのを修正
+						・その他沢山変更。
+
 1.2.0.8					・CreateInstance関数の呼び出し規約をWINAPIに変更
 						　（1.2.0.6で付け忘れました。ごめんなさい。）
 						・IRealChipBaseのGUID変更

@@ -174,13 +174,6 @@ protected:
 
 typedef std::shared_ptr<CVisKnob> CVisKnobPtr;
 
-// ---------------------------------------------------------------------------
-// keyboard
-//class CVisKeyboard : public CVisWidget{
-//};
-
-
-
 
 
 // ---------------------------------------------------------------------------

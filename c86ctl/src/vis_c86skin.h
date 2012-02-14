@@ -50,19 +50,6 @@ public:
 	void drawFMSlotSkin(IVisBitmap *canvas, int x, int y );
 	void drawFMSlotLight(IVisBitmap *canvas, int x, int y, int no, int sw );
 	
-/*
-	bool hittestButton(int x, int y, int id, int mx, int my );
-	void drawFrame(HWND hwnd, CHAR *title );
-	void fillRect(HDC hdc, COLORREF col, RECT *rc);
-*/
-//	void drawFMView( IVisBitmap &canvas, int x, int y, COPNAFm *pFM );
-//	void drawFMSlotView( IVisBitmap &canvas, int x, int y, COPNAFmSlot *pFM, int slotidx );
-/*
-protected:
-	HBITMAP hSkinBMP, hSkinOldBMP;
-	HBITMAP hSkinMaskBMP, hSkinMaskOldBMP;
-*/
-	
 protected:
 	CVisBitmap *skinbmp;
 };

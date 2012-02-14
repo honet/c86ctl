@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -38,13 +38,14 @@
 #pragma managed(push, off)
 #endif
 
+// ------------------------------------------------------------------
+// ÉOÉçÅ[ÉoÉãïœêî
 ULONG_PTR gdiToken = 0;
 Gdiplus::GdiplusStartupInput gdiInput;
 
-// ------------------------------------------------------------------
-
 
 // ------------------------------------------------------------------
+// DLL Main
 BOOL APIENTRY DllMain(
 	HMODULE hModule,
 	DWORD  ul_reason_for_call,
@@ -70,6 +71,7 @@ BOOL APIENTRY DllMain(
 #ifdef _MANAGED
 #pragma managed(pop)
 #endif
+
 
 // -----------------------------------------------------------------------
 class C86Ctl : public IRealChipBase
@@ -234,6 +236,7 @@ unsigned int WINAPI C86Ctl::threadSender(LPVOID param)
 }
 
 
+// ---------------------------------------------------------
 HRESULT C86Ctl::QueryInterface( REFIID riid, LPVOID *ppvObj )
 {
 	if( ::IsEqualGUID( riid, IID_IRealChipBase ) ){

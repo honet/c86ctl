@@ -1,7 +1,7 @@
 /***
 	c86ctl
 	
-	Copyright (c) 2009-2010, honet. All rights reserved.
+	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
@@ -17,7 +17,12 @@ public:
 	COPN3L(){ reset(); };
 	virtual ~COPN3L(){};
 
-	void reset(){};
+	void reset(){
+		for( int i=0; i<2; i++ ){
+			memset( reg[i], 0, 256 );
+			memset( regATime[i], 0, 256 );
+		}
+	};
 	void update(){
 		int dc = 8;
 		for( int j=0; j<2; j++ ){
@@ -32,23 +37,28 @@ public:
 	bool setReg( int addr, UCHAR data ){
 		if( addr <= 0x0d ) // SSG
 			reg[0][addr] = data;
+			regATime[0][addr] = 255;
 			return true;
 		if( 0x10<=addr && addr<=0x1d ) // Rhythm
 			reg[0][addr] = data;
+			regATime[0][addr] = 255;
 			return true;
 		if( 0x20<=addr && addr<=0x29 ){ // FM
 			if( addr == 0x21 ||		// Test
 				addr == 0x26 )		// Timer-B
 				return false;
 			reg[0][addr] = data;
+			regATime[0][addr] = 255;
 			return true;
 		}
 		if( 0x30<=addr && addr<=0xb6 ) // FM param 1-3
 			reg[0][addr] = data;
+			regATime[0][addr] = 255;
 			return true;
 		//if( 0x110==addr ) return true; // flag control
 		if( 0x130<=addr && addr<=0x1b6 ) // FM param 4-6
 			reg[1][addr] = data;
+			regATime[1][addr] = 255;
 			return true;
 		
 		return false;

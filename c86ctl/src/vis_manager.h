@@ -22,12 +22,10 @@ class CVisManager
 public:
 	CVisManager(void) : fps(0) {
 		gVisSkin.init();
-//		::D2D1CreateFactory( D2D1_FACTORY_TYPE_MULTI_THREADED, &d2dFactory );
 	};
 	
 	virtual ~CVisManager(void){
 		gVisSkin.deinit();
-//		d2dFactory.Release();
 	};
 
 	void draw(void);
@@ -38,11 +36,7 @@ public:
 		return fps;
 	};
 
-//	CComQIPtr<ID2D1Factory> getD2DFactory() { return d2dFactory; };
-//	std::shared_ptr<CVisC86Skin> getSkin(){ return skin; };
-
 protected:
-//	CComQIPtr<ID2D1Factory> d2dFactory;
 	std::vector<CVisWnd*> clients;
 	
 	FPSCounter counter;
