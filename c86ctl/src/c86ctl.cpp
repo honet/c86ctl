@@ -364,9 +364,6 @@ UCHAR C86Ctl::in( UINT addr )
 		return 0;
 }
 
-//getModuleType()
-
-
 // ----------------------------------------------------------------------
 // 外部インターフェイス
 HRESULT WINAPI CreateInstance( REFIID riid, void** ppi )

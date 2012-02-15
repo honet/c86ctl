@@ -135,7 +135,7 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 			HANDLE hHID = CreateFile(
 				dev_det->DevicePath,
 				GENERIC_READ|GENERIC_WRITE,
-				FILE_SHARE_READ|FILE_SHARE_WRITE,
+				0/*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
 				NULL,
 				OPEN_EXISTING,
 				0,//FILE_FLAG_NO_BUFFERING,
@@ -150,6 +150,14 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 			HidD_GetAttributes(hHID, &attr);
 
 			if(attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID){
+				COMMTIMEOUTS commTimeOuts;
+				commTimeOuts.ReadIntervalTimeout = 0;
+				commTimeOuts.ReadTotalTimeoutConstant = 1000;
+				commTimeOuts.ReadTotalTimeoutMultiplier = 0;
+				commTimeOuts.WriteTotalTimeoutConstant = 1000;
+				commTimeOuts.WriteTotalTimeoutMultiplier = 0;
+				::SetCommTimeouts( hHID, &commTimeOuts );
+
 				instances.push_back( GimicIFPtr(new GimicHID(hHID)) );
 			}else{
 				CloseHandle(hHID);
@@ -196,6 +204,9 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 	UCHAR buff[66];
 	buff[0] = 0; // HID interface id.
 	DWORD len = 0;
+
+	if( !hHandle )
+		return C86CTL_ERR_NODEVICE;
 
 	::EnterCriticalSection(&csection);
 	{

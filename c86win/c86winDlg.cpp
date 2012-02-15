@@ -299,9 +299,13 @@ void C86winDlg::OnBnClickedCancel()
 void C86winDlg::OnBnClickedButtonPlay()
 {
 	if( hThread == 0 ){
-		terminateFlag = 0;
-		hThread = (HANDLE)_beginthreadex( NULL, 0, C86winDlg::PlayerThread, this, 0, &threadID );
-		SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
+		C86winApp *pApp = (C86winApp*)AfxGetApp();
+		int nchip = pApp->pChipBase->getNumberOfChip();
+		if( 0<nchip ){
+			terminateFlag = 0;
+			hThread = (HANDLE)_beginthreadex( NULL, 0, C86winDlg::PlayerThread, this, 0, &threadID );
+			SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
+		}
 	}
 	SetTimer(0, 100, NULL);
 }

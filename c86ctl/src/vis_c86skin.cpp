@@ -307,6 +307,7 @@ void CVisC86Skin::drawDarkKeyboard( IVisBitmap *canvas, int x, int y )
 // î≠âπíÜÉLÅ[ï\é¶
 void CVisC86Skin::drawHilightKey( IVisBitmap *canvas, int x, int y, int oct, int note )
 {
+	if( oct < 0 || 8 <= oct ) return;
 	int srcx = skinreg_tool[ID_KEYBOARD].left + keyHiXOffset[note];
 	int srcy = skinreg_tool[ID_KEYBOARD].top;
 	int dstx = keyW1*7*oct + keyXOffset[note];
