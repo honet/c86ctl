@@ -64,7 +64,9 @@ bool COPNA::setReg( int addr, UCHAR data ){
 		idx = 1;
 	}
 	reg[idx][addr] = data;
-	regATime[idx][addr] = 255;
+	INT c = regATime[idx][addr];
+	c+=64;
+	regATime[idx][addr] = 255<c ? 255 : c;
 
 	if( idx == 0 ){
 		if( ssg->setReg( addr, data ) )

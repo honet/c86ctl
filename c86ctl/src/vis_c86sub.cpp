@@ -213,30 +213,3 @@ void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col )
 	}
 }
 
-void visDrawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak )
-{
-	UINT *pd = (UINT*)bmp->getRow0(ys) + xs;
-	UINT step = bmp->getStep()>>2;
-
-	UINT *pd2 = pd;
-	for( int y=0; y<20; y++ ){
-		*pd2 = col_mid;
-		pd2 += step;
-	}
-	pd+=2;
-	for( int x=1; x<32; x++ ){
-		pd2 = pd;
-		if( x<=level || x == peak ){
-			for( int y=0; y<20; y++ ){
-				*pd2 = col_high;
-				pd2 += step;
-			}
-		}else{
-			for( int y=0; y<20; y++ ){
-				*pd2 = col_shadow;
-				pd2 += step;
-			}
-		}
-		pd+=2;
-	}
-}

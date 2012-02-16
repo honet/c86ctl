@@ -185,8 +185,8 @@ void CVisC86Main::onPaintClient()
 	int y=40;
 	for( size_t i=0; i<gimic.size(); i++ ){
 		// 枠線
-		visFillRect( clientCanvas, 5, y-2, 5, 58, col_mid );
-		visFillRect( clientCanvas, 5, y+54, 320, 2, col_mid );
+		visFillRect( clientCanvas, 5, y-2, 5, 58, skin->getPal(CVisC86Skin::IDCOL_MID) );
+		visFillRect( clientCanvas, 5, y+54, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
 		// デバイス名
 		sprintf(str, "MODULE%d: %s Rev.%c", i, &info[i].mbinfo.Devname[0], info[i].mbinfo.Rev );
 		skin->drawStr( clientCanvas, 1, 15, y, str );

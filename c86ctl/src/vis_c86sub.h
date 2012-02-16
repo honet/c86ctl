@@ -48,6 +48,4 @@ void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col );
 void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col );
 
-// graph -----------------------------------------------------------
-void visDrawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak );
 

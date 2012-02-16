@@ -9,14 +9,15 @@
 #pragma once
 
 #include "vis_bitmap.h"
+#include <vector>
 
 //#define RGBtoBGRA(x) 
 #define ARGB(a,r,g,b)  ( (UINT)(b) | (UINT)(g) << 8 | (UINT)(r) << 16 | (UINT)(a) << 24 )
 
-#define col_light	ARGB(0,199,200,255)
-#define col_shadow	ARGB(0,43,44,75)
-#define col_mid		ARGB(0,68,68,119)
-#define col_high	ARGB(0,128,128,255)
+//#define col_light	ARGB(0,199,200,255)
+//#define col_shadow	ARGB(0,43,44,75)
+//#define col_mid		ARGB(0,68,68,119)
+//#define col_high	ARGB(0,128,128,255)
 
 class CVisC86Skin
 {
@@ -49,9 +50,26 @@ public:
 	void drawFMSkin(IVisBitmap *canvas, int x, int y, int exmode );
 	void drawFMSlotSkin(IVisBitmap *canvas, int x, int y );
 	void drawFMSlotLight(IVisBitmap *canvas, int x, int y, int no, int sw );
+	void drawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak );
+
+	enum  PalletID{
+		IDCOL_HIGH = 0,
+		IDCOL_MID = 1,
+		IDCOL_SHADOW = 2,
+		IDCOL_LIGHT = 3,
+	};
+
+	UINT getPal( enum PalletID id ){
+		return pallet[id];
+	};
+	UINT getColTbl( int idx ){
+		return coltbl[idx];
+	}
 	
 protected:
 	CVisBitmap *skinbmp;
+	std::vector<UINT> pallet;
+	std::vector<UINT> coltbl;
 };
 
 extern CVisC86Skin gVisSkin;

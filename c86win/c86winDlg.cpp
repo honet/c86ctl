@@ -267,6 +267,8 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 					//c86ctl_out(addr, data);
 					pRC->out( addr, data );
 					last_is_adpcm = ( addr == 0x108 );
+				}else if( pr->cmd == 0xfd ){ // end / loop
+					//if( pThis->s98data.
 				}
 				if( ++idx >= prow->size() )
 					break;
@@ -465,11 +467,11 @@ void C86winDlg::OnBnClickedButtonGetPllclock()
 
 void C86winDlg::OnDestroy()
 {
-	CDialogEx::OnDestroy();
-
+	OnBnClickedButtonStop();
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
 	pApp->pChipBase->deinitialize();
 
+	CDialogEx::OnDestroy();
 }
 
 

@@ -117,10 +117,10 @@ void CVisC86OPNAKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 			pFMCh->getNote( oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
 		}
-		visDrawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
-		visDrawHBar( canvas, 290, lty+sy+15, 0, 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}
 }
 
@@ -151,10 +151,10 @@ void CVisC86OPNAKey::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 			pFMCh->getNoteEx( exNo, oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
 		}
-		visDrawHBar( canvas, 290, lty+sy+15, 0, 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
-		visDrawHBar( canvas, 290, lty+sy+15, 0, 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}
 }
 
@@ -183,10 +183,10 @@ void CVisC86OPNAKey::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty, int
 			pSsgCh->getNote( oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
 		}
-		visDrawHBar( canvas, 290, lty+sy+15, pSsgCh->getKeyOnLevel(), 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, pSsgCh->getKeyOnLevel(), 0 );
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
-		visDrawHBar( canvas, 290, lty+sy+15, 0, 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}
 }
 
@@ -206,7 +206,7 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
 	}
-	visDrawHBar( canvas, 290, lty+sy+15, 0, 0 );
+	skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 }
 
 void CVisC86OPNAKey::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo )
@@ -215,6 +215,8 @@ void CVisC86OPNAKey::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, 
 	int cx=6, cy=8;
 	char str[64];
 	CVisC86Skin *skin = &gVisSkin;
+
+	UINT col_mid = skin->getPal(CVisC86Skin::IDCOL_MID);
 	
 	sprintf( str, "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
@@ -240,7 +242,7 @@ void CVisC86OPNAKey::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, 
 		if( pOPNA->rhythm->bd->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*34, lty+sy+5+18, "BD");
 	}
-	visDrawHBar( canvas, 290, lty+sy+16, 0, 0 );
+	skin->drawHBar( canvas, 290, lty+sy+16, 0, 0 );
 }
 
 // --------------------------------------------------------

@@ -151,6 +151,8 @@ CVisC86Skin gVisSkin;
 
 CVisC86Skin::CVisC86Skin() : skinbmp(0)
 {
+	pallet.resize(4);
+	coltbl.resize(256);
 }
 
 CVisC86Skin::~CVisC86Skin(){
@@ -159,6 +161,14 @@ CVisC86Skin::~CVisC86Skin(){
 
 void CVisC86Skin::init(void){
 	skinbmp = CVisBitmap::LoadFromResource( IDB_PNGSKIN1, _T("PNG"), getModuleHandle() );
+	UINT *p = (UINT*)skinbmp->getPtr(639,511);
+	for( int i=0; i<4; i++ ){
+		pallet[i] = *p--;
+	}
+	p = (UINT*)skinbmp->getPtr(639,510);
+	for( int i=0; i<256; i++ ){
+		coltbl[i] = *p--;
+	}
 }
 
 void CVisC86Skin::deinit(void){
@@ -173,6 +183,10 @@ void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
 {
 	int xe = canvas->getWidth() - 1;
 	int ye = canvas->getHeight() - 1;
+
+	UINT col_light = pallet[IDCOL_LIGHT];
+	UINT col_shadow = pallet[IDCOL_SHADOW];
+	UINT col_mid = pallet[IDCOL_SHADOW];
 
 	// frame
 	visDrawLine( canvas, 0, 0, xe, 0, col_light );
@@ -407,3 +421,34 @@ void CVisC86Skin::drawSoloSw(IVisBitmap *canvas, int x, int y, int sw )
 }
 
 
+// horizontal bar graph
+void CVisC86Skin::drawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak )
+{
+	UINT *pd = (UINT*)bmp->getRow0(ys) + xs;
+	UINT step = bmp->getStep()>>2;
+	UINT mid = pallet[IDCOL_MID];
+	UINT high = pallet[IDCOL_HIGH];
+	UINT shadow = pallet[IDCOL_SHADOW];
+
+	UINT *pd2 = pd;
+	for( int y=0; y<20; y++ ){
+		*pd2 = mid;
+		pd2 += step;
+	}
+	pd+=2;
+	for( int x=1; x<32; x++ ){
+		pd2 = pd;
+		if( x<=level || x == peak ){
+			for( int y=0; y<20; y++ ){
+				*pd2 = high;;
+				pd2 += step;
+			}
+		}else{
+			for( int y=0; y<20; y++ ){
+				*pd2 = shadow;
+				pd2 += step;
+			}
+		}
+		pd+=2;
+	}
+}

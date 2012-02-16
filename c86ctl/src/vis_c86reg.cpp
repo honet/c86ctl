@@ -53,8 +53,8 @@ void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 			int sx = ltx+ox+(cx*2+4)*x;
 			int sy = lty+oy+cy*y;
 			
-			visFillRect( canvas, sx, sy, cx*2, cy, ARGB(255,c,c,0) );
-			skin->drawStr( canvas, 1, sx, sy, str );
+			visFillRect( canvas, sx, sy, cx*2, cy-1, skin->getColTbl(c) );
+			skin->drawStr( canvas, 2, sx, sy, str );
 		}
 	}
 }
