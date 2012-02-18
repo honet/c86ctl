@@ -59,7 +59,7 @@ void CVisC86OPNAKey::onPaintClient(void)
 			sy+=35; tr++;
 		}
 		for( int i=0; i<3; i++ ){
-			drawFM3EXTrackView( clientCanvas, sx, sy, tr, 2, i );
+			drawFM3EXTrackView( clientCanvas, sx, sy, tr, 2, 1+i );
 			sy+=35; tr++;
 		}
 		for( int i=3; i<6; i++ ){
@@ -102,18 +102,33 @@ void CVisC86OPNAKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 		}
 		skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5, str );
 
-		int fblock = pFMCh->getFBlock();
-		int fnum = pFMCh->getFNum();
-		sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
-		skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
-		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
+		if( !pFMCh->getExMode() ){
+			int fblock = pFMCh->getFBlock();
+			int fnum = pFMCh->getFNum();
+			sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
+			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
-		if( pFMCh->isKeyOn() && pFMCh->getMixLevel() ){
-			int oct, note;
-			pFMCh->getNote( oct, note );
-			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+			if( pFMCh->isKeyOn() && pFMCh->getMixLevel() ){
+				int oct, note;
+				pFMCh->getNote( oct, note );
+				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+			}
+			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
+		}else{
+			int fblock = pFMCh->getFBlockEx(0);
+			int fnum = pFMCh->getFNumEx(0);
+			sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
+			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
+
+			if( pFMCh->slot[0]->isOn() && pFMCh->slot[0]->getTotalLevel() ){
+				int oct, note;
+				pFMCh->getNoteEx( 0, oct, note );
+				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+			}
+			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevelEx(0), 0 );
 		}
-		skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
 		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
@@ -142,7 +157,7 @@ void CVisC86OPNAKey::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 		skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 
 		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
-		if( pFMCh->slot[exNo]->isOn() && pFMCh->getMixLevel() ){
+		if( pFMCh->slot[exNo]->isOn() && pFMCh->slot[exNo]->getTotalLevel() ){
 			int oct, note;
 			pFMCh->getNoteEx( exNo, oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
