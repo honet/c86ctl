@@ -195,7 +195,8 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	int sy = 0;
 	char str[64];
 	CVisC86Skin *skin = &gVisSkin;
-	
+
+	COPNAAdpcm *adpcm = pOPNA->adpcm;
 	sprintf( str, "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
 	sprintf( str, "ADPCM" );
@@ -206,7 +207,7 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
 	}
-	skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
+	skin->drawHBar( canvas, 290, lty+sy+15, adpcm->getKeyOnLevel(), 0 );
 }
 
 void CVisC86OPNAKey::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo )

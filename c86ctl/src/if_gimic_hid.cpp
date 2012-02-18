@@ -80,7 +80,7 @@ extern "C" {
 	コンストラクタ
 ----------------------------------------------------------------------------*/
 GimicHID::GimicHID( HANDLE h )
-	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0), cps(0), cal(0)
+	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0), cps(0), cal(0), calcount(0)
 {
 	rbuff.alloc( 128 );
 	::InitializeCriticalSection(&csection);
@@ -498,8 +498,11 @@ void GimicHID::update(void)
 	if( chip )
 		chip->update();
 
-	cps = cal;
-	cal=0;
+	if( 1 <= calcount++ ){
+		cps = cal;
+		cal = 0;
+		calcount = 0;
+	}
 };
 
 #endif

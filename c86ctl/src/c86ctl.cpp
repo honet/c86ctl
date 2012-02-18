@@ -206,7 +206,7 @@ unsigned int WINAPI C86Ctl::threadSender(LPVOID param)
 		const UINT period = 1;
 		UINT now = ::timeGetTime();
 		UINT next = now + period;
-		UINT nextSec10 = now + 100;
+		UINT nextSec10 = now + 50;
 		C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
 
 		while(1){
@@ -225,7 +225,7 @@ unsigned int WINAPI C86Ctl::threadSender(LPVOID param)
 			std::for_each( pThis->gGIMIC.begin(), pThis->gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->tick(); } );
 			
 			if( nextSec10 < now ){
-				nextSec10 += 100;
+				nextSec10 += 50;
 				std::for_each( pThis->gGIMIC.begin(), pThis->gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->update(); } );
 			}
 		}

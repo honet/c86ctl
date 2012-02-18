@@ -592,10 +592,11 @@ protected:
 // ---------------------------------------------------------------------------------------
 class COPNAAdpcm{
 	friend class COPNA;
-	
+
+	static const size_t ramsize = 256*1024;
 public:
 	COPNAAdpcm(COPNA *parent) : pOPNA(parent){
-		dram = new UCHAR[512*1024];
+		dram = new UCHAR[ramsize];
 		reset();
 	};
 	virtual ~COPNAAdpcm(){
@@ -615,6 +616,15 @@ public:
 	void update(){
 		if(keyOnLevel) keyOnLevel--;
 	};
+
+	void getLR( bool &l, bool &r ){ l = left; r = right; };
+	int getPan(){ // Å}1
+		if( left&&right ) return 0;
+		else if(left) return -1;
+		else if(right) return 1;
+		else return -2;
+	};
+
 	int getKeyOnLevel(){ return keyOnLevel; };
 	
 public:
@@ -622,18 +632,25 @@ public:
 	
 protected:
 	bool setReg( UCHAR addr, UCHAR data );
-	
+	void setLR( bool l, bool r ){ left = l; right = r; };
+
 protected:
 	int startAddr;	//21bit
 	int stopAddr;	//21bit
 	int limitAddr;	//21bit
-	int currentAddr;
+	int currentAddr;//21bit (write pointer)
 	int prescale;	//16bit
 	int deltaN;		//16bit
 	int level;		//8bit;
 	int keyOnLevel;
 	
-	UCHAR *dram; // not used at the present time...
+	UCHAR control1;
+	UCHAR control2;
+	
+	bool left;
+	bool right;
+	
+	UCHAR *dram;
 
 	COPNA *pOPNA;
 };
@@ -687,11 +704,9 @@ public:
 	
 public:
 	void update(){
-		int dc = 1;
+		int dc = 4;
 		for( int j=0; j<2; j++ ){
 			for( int i=0; i<256; i++ ){
-//				UCHAR c=regATime[j][i];
-//				regATime[j][i] = dc<c? c-dc : 0;
 				UCHAR c=regATime[j][i];
 				if( 64<c ){
 					c-=dc;

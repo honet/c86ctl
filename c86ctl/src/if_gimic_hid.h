@@ -80,7 +80,7 @@ private:
 	CRITICAL_SECTION csection;
 	CRingBuff<MSG> rbuff;
 	uint32_t seqno;
-	UINT cps, cal;
+	UINT cps, cal, calcount;
 
 	Chip *chip;
 	ChipType chiptype;

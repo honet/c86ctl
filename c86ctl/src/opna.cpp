@@ -101,6 +101,15 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 	bool handled = true;
 	
 	switch(adrs){
+	case 0x10:	// STATUS MASK
+		//data&0x80; // IRQ RESET
+		//data&0x10; // MASK ZERO (ADPCM)
+		//data&0x08; // MASK BRDY (ADPCM)
+		//data&0x04; // MASK EOS (ADPCM)
+		//data&0x02; // MASK TIMER-B
+		//data&0x01; // MASK TIMER-A
+		break;
+		
 	// prescaler
 	case 0x2d:
 		prescale_fm = 6;
@@ -114,7 +123,7 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 		prescale_fm = 2;
 		prescale_ssg = 1;
 		break;
-		
+
 	case 0x24:	// Timer-A Corse
 	case 0x25:	// Timer-A Fine
 	//case 0x26:	// Timer-B
@@ -431,16 +440,36 @@ bool COPNARhythm::setReg( UCHAR adrs, UCHAR data )
 
 bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 {
-//	if(adrs<=0x10)
-//		return true;
-//
-//	return false;
-
 	bool handled = true;
 
 	switch(adrs){
 	case 0x00: // control 1
-	case 0x01: // control 2 
+		control1 = data;
+		
+		if((data&0xa0) == 0xa0){	// start & mem
+			keyOnLevel = level>>3;
+		}
+		if(data&0x01){		// reset
+			keyOnLevel = 0;
+		}
+		//(data&0x80) // start
+		//(data&0x40) // rec
+		//(data&0x20);// mem/data
+		//(data&0x10);// repeat
+		//(data&0x08);// sp off
+		//(data&0x01);// reset
+		break;
+		
+	case 0x01: // control 2
+		control2 = data;
+		if( data & 0xc0 )
+			setLR( ((data&0x80)?true:false), ((data&0x40)?true:false) );
+		//data&0x80; // L
+		//data&0x40; // R
+		//data&0x08; // SAMPLE
+		//data&0x04; // DA/AD
+		//data&0x02; // RAM TYPE
+		//data&0x01; // ROM/DRAM
 		break;
 		
 	case 0x02: /// start addr (L)
@@ -467,6 +496,17 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		break;
 		
 	case 0x08: // adpcm data.
+		if( control1 & 0x60 ){
+			if( 0<currentAddr && currentAddr < ramsize ) // ”O‚Ì‚½‚ß
+				dram[currentAddr] = data;
+			if( stopAddr > currentAddr ){
+				if( limitAddr > currentAddr ){
+					currentAddr++;
+				}else{
+					currentAddr=0;
+				}
+			}
+		}
 		break;
 		
 	case 0x09: // delta-N(L)
@@ -488,24 +528,7 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 	case 0x0e: // dac data.
 	case 0x0f: // pcm data.
 		break;
-		
-	case 0x10: // flag
-		break;
 
-/*	case 0x08:
-		if( reg[1][0] & 0x40 ){
-			adpcm_data[adpcmCurrentAddr] = data;
-			if( adpcmStopAddr > adpcmCurrentAddr ){
-				if( adpcmLimitAddr > adpcmCurrentAddr ){
-					adpcmCurrentAddr++;
-				}else{
-					adpcmCurrentAddr=0;
-				}
-			}
-		}
-		break;
-*/
-		
 	default:
 		handled = false;
 	}
