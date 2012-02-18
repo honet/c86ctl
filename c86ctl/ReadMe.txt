@@ -86,4 +86,5 @@ For further information please contact.
 ・adpcmバースト転送
 ・ウインドウ位置保存コード
 ・try/catchコードを全ルーチンに
+・実装見送りのIF削る。
 

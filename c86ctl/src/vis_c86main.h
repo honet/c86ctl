@@ -37,9 +37,7 @@ public:
 	void detach( void );
 	void updateInfo(void);
 
-	bool create(void);
-	void close(void);
-	void saveConfig(void);
+	virtual bool create(void);
 
 protected:
 	// message handler
@@ -52,7 +50,8 @@ protected:
 		Devinfo chipinfo;
 		ChipType chiptype;
 		UINT major, minor, rev, build;
-		UINT clock;
+		//UINT clock;
+		//UCHAR ssgvol;
 
 		CVisCheckBoxPtr checkKey;
 		CVisCheckBoxPtr checkReg;

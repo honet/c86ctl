@@ -27,6 +27,7 @@ public:
 	virtual int init(void){ return 0; };
 	virtual void tick(void){};
 	virtual Chip* getChip(){ return 0; };
+	virtual const GimicParam* getParam(){ return 0; };
 
 public:
 	// IUnknown

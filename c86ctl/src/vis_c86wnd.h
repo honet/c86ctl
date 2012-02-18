@@ -26,9 +26,9 @@ public:
 	virtual ~CVisWnd();
 	
 public:
-	virtual bool create( int left, int top, int width, int height, 
-						 DWORD exstyle = 0, DWORD style = (WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN), HWND hParent = 0 );
+	virtual bool create( DWORD exstyle = 0, DWORD style = (WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN), HWND hParent = 0 );
 	virtual void close(void);
+	virtual void saveConfig(void);
 	
 public:
 	void setManager(CVisManager *m){ manager = m; };
@@ -57,10 +57,10 @@ public:
 	
 protected:
 	// message handler
-	virtual void onCreate(){};
-	virtual void onDestroy(){};
+	virtual void onCreate();
+	virtual void onDestroy();
 	virtual void onPaint();
-	virtual void onPaintClient(){};
+	virtual void onPaintClient();
 	
 protected:
 	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);

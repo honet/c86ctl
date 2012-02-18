@@ -32,6 +32,7 @@ public:
 	virtual int init(void);
 	virtual void tick(void);
 	virtual Chip* getChip(){ return chip; };
+	virtual const GimicParam* getParam(){ return &gimicParam; };
 
 public:
 	// IGimic
@@ -66,6 +67,7 @@ private:
 
 	Chip *chip;
 	ChipType chiptype;
+	GimicParam gimicParam;
 
 public:
 	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);

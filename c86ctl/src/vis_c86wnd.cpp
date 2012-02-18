@@ -7,14 +7,16 @@
 	honet.kk(at)gmail.com
  */
 #include "stdafx.h"
+#include <map>
+#include <assert.h>
+#include <tchar.h>
+
 #include "module.h"
+#include "config.h"
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86wnd.h"
 #include "vis_manager.h"
-#include <map>
-#include <assert.h>
-#include <tchar.h>
 
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
@@ -211,21 +213,22 @@ LRESULT CALLBACK CVisWnd::wndProcDispatcher(HWND hWnd , UINT msg , WPARAM wp , L
 
 
 
-bool CVisWnd::create( int left, int top, int width, int height, DWORD exstyle, DWORD style, HWND hParent )
+bool CVisWnd::create( DWORD exstyle, DWORD style, HWND hParent )
 {
 	WNDCLASS winc;
 
-	windowWidth = width;
-	windowHeight = height;
+	int left = gConfig.getInt( windowClass.c_str(), INIKEY_WNDLEFT, INT_MIN );
+	int top  = gConfig.getInt( windowClass.c_str(), INIKEY_WNDTOP,  INT_MIN );
+
 	if( left == INT_MIN || top == INT_MIN ){
 		int wx = GetSystemMetrics(SM_CXSCREEN);
 		int wy = GetSystemMetrics(SM_CYSCREEN);
-		left = (wx - width) / 2;
-		top  = (wy - height) / 2;
+		left = (wx - windowWidth) / 2;
+		top  = (wy - windowHeight) / 2;
 	}
 
-	canvas = new CVisBitmap( width, height );
-	clientCanvas = new CVisChildBitmap( canvas, 2, 17, width-4, height-19 );
+	canvas = new CVisBitmap( windowWidth, windowHeight );
+	clientCanvas = new CVisChildBitmap( canvas, 2, 17, windowWidth-4, windowHeight-19 );
 
 	HINSTANCE hinst = getModuleHandle();
 
@@ -248,7 +251,7 @@ bool CVisWnd::create( int left, int top, int width, int height, DWORD exstyle, D
 		exstyle,
 		windowClass.c_str(), windowTitle.c_str(),
 		(style&~WS_VISIBLE),
-		left, top, width, height,
+		left, top, windowWidth, windowHeight,
 		hParent, NULL, hinst, NULL
 	);
 
@@ -257,6 +260,18 @@ bool CVisWnd::create( int left, int top, int width, int height, DWORD exstyle, D
 	if(!hWnd) return false;
 
 	return true;
+}
+
+void CVisWnd::onCreate()
+{
+}
+
+void CVisWnd::onDestroy()
+{
+	saveConfig();
+}
+void CVisWnd::onPaintClient()
+{
 }
 
 void CVisWnd::close()
@@ -275,5 +290,18 @@ void CVisWnd::close()
 		canvas = NULL;
 	}
 	::UnregisterClass( windowClass.c_str(), getModuleHandle() );
+}
+
+void CVisWnd::saveConfig(void)
+{
+	RECT rc;
+	HWND hwnd = getHWND();
+	if( hwnd ){
+		if( ::GetWindowRect( hwnd, &rc ) ){
+			gConfig.writeInt( windowClass.c_str(), INIKEY_WNDLEFT, rc.left );
+			gConfig.writeInt( windowClass.c_str(), INIKEY_WNDTOP, rc.top );
+		}
+		//gConfig.writeInt( windowClass.c_str(), INIKEY_WNDVISIBLE, 1 );
+	}
 }
 

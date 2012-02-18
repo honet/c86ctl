@@ -17,11 +17,7 @@
 
 bool CVisC86OPNAKey::create( HWND parent )
 {
-	int left = INT_MIN;
-	int top = INT_MIN;
-	
 	if( !CVisWnd::create(
-		left, top, windowWidth, windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
@@ -170,8 +166,13 @@ void CVisC86OPNAKey::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty, int
 	sprintf( str, "SSG-CH%d", ssgNo+1 );
 	skin->drawStr( canvas, 0, ltx+5+cx*10, lty+sy+5, str );
 
+	int period = pOPNA->ssg->getNoisePeriod();
 	COPNASsgCh *pSsgCh = pOPNA->ssg->ch[ssgNo];
+	
 	if( !pOPNA->getMixedMask(trNo) ){
+		sprintf( str, "NOISE:%04d", period );
+		skin->drawStr( canvas, 0, ltx+5+cx*30, lty+sy+5, str );
+		
 		int tune = pSsgCh->getTune();
 		sprintf( str, "TUNE:%04d", tune );
 		skin->drawStr( canvas, 0, ltx+5+cx*42, lty+sy+5, str );
@@ -204,10 +205,12 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 
 	if( !pOPNA->getMixedMask(trNo) ){
 		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
+		skin->drawHBar( canvas, 290, lty+sy+15, adpcm->getKeyOnLevel(), 0 );
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
+		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}
-	skin->drawHBar( canvas, 290, lty+sy+15, adpcm->getKeyOnLevel(), 0 );
+	
 }
 
 void CVisC86OPNAKey::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo )

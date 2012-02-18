@@ -22,11 +22,7 @@
 
 bool CVisC86OPNAFm::create( HWND parent )
 {
-	int left = INT_MIN;
-	int top = INT_MIN;
-	
 	if( !CVisWnd::create(
-		left, top, windowWidth, windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
@@ -126,7 +122,6 @@ bool CVisC86OPNAFm::create( HWND parent )
 
 void CVisC86OPNAFm::close()
 {
-	// TODO: delete widgets.
 	widgets.clear();
 	
 	CVisWnd::close();
@@ -183,6 +178,11 @@ void CVisC86OPNAFm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlo
 {
 	CVisC86Skin *skin = &gVisSkin;
 	skin->drawFMSlotSkin( canvas, x, y );
+
+	// index
+	char str[10];
+	sprintf(str, "%d", slotidx+1);
+	skin->drawVStr( canvas, 0, x+8, y+20, str );
 #if 0
 	double ar = pSlot->getAttackRate();
 	double dr = pSlot->getDecayRate();

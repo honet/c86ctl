@@ -252,6 +252,11 @@ int GimicHID::init(void)
 		chiptype = CHIP_OPNA;
 		chip = new COPNA(this);
 	}
+	
+	UCHAR vol;
+	getSSGVolume(&vol);
+	UINT clock;
+	getPLLClock(&clock);
 	return C86CTL_ERR_NONE;
 }
 
@@ -273,6 +278,7 @@ int GimicHID::reset(void)
 
 int GimicHID::setSSGVolume(UCHAR vol)
 {
+	gimicParam.ssgVol = vol;
 	MSG d = { 3, { 0xfd, 0x84, vol } };
 	return sendMsg( &d );
 }
@@ -283,11 +289,15 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	MSG d = { 2, { 0xfd, 0x86 } };
-	return transaction( &d, (uint8_t*)vol, 1 );
+	int ret = transaction( &d, (uint8_t*)vol, 1 );
+	
+	gimicParam.ssgVol = *vol;
+	return ret;
 }
 
 int GimicHID::setPLLClock(UINT clock)
 {
+	gimicParam.clock = clock;
 	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
 	return sendMsg( &d );
 }
@@ -298,7 +308,10 @@ int GimicHID::getPLLClock(UINT *clock)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	MSG d = { 2, { 0xfd, 0x85 } };
-	return transaction( &d, (uint8_t*)clock, 4 );
+	int ret = transaction( &d, (uint8_t*)clock, 4 );
+	
+	gimicParam.clock = *clock;
+	return ret;
 }
 
 int GimicHID::getMBInfo( struct Devinfo *info )

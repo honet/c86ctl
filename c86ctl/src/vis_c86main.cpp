@@ -43,7 +43,6 @@ void CVisC86Main::updateInfo(void)
 		gimic[i]->getMBInfo(&info[i].mbinfo);
 		gimic[i]->getFWVer(&info[i].major, &info[i].minor, &info[i].rev, &info[i].build);
 		gimic[i]->getModuleInfo(&info[i].chipinfo);
-		gimic[i]->getPLLClock(&info[i].clock);
 		gimic[i]->getModuleType(&info[i].chiptype);
 	}
 }
@@ -51,18 +50,14 @@ void CVisC86Main::updateInfo(void)
 
 bool CVisC86Main::create(void)
 {
-	int left = gConfig.getInt( INISC_MAIN, INIKEY_WNDLEFT, INT_MIN );
-	int top  = gConfig.getInt( INISC_MAIN, INIKEY_WNDTOP,  INT_MIN );
-
 	// CHECKME: createの前にattachされてないといけない。
 	size_t sz = info.size();
 
-	// frame=19 + topinfo=40 + module=64*N + bottominfo=10
-	windowHeight = 19+40+64*sz+10;
+	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
+	windowHeight = 19+40+74*sz+10;
 	windowWidth = 334;
 	
-	if ( !CVisWnd::create( left, top, windowWidth, windowHeight,
-						   0, WS_POPUP | WS_CLIPCHILDREN ) ){
+	if ( !CVisWnd::create( 0, WS_POPUP | WS_CLIPCHILDREN ) ){
 		return false;
 	}
 
@@ -121,7 +116,7 @@ bool CVisC86Main::create(void)
 					} );
 				widgets.push_back(info[i].checkFM[ch]);
 			}
-
+			/*
 			info[i].checkSSG = CVisCheckBoxPtr(new CVisCheckBox(this,180,y+42, "SSG"));
 			widgets.push_back(info[i].checkSSG);
 
@@ -130,26 +125,12 @@ bool CVisC86Main::create(void)
 
 			info[i].checkADPCM = CVisCheckBoxPtr(new CVisCheckBox(this,280,y+42, "ADPCM"));
 			widgets.push_back(info[i].checkADPCM);
+			*/
 		}
 		y+=64;
 	}
 
 	return true;
-}
-
-void CVisC86Main::close(void)
-{
-	saveConfig();
-	::SendMessage( hWnd, WM_CLOSE, 0, 0 );
-}
-
-void CVisC86Main::saveConfig(void)
-{
-	RECT rc;
-	::GetWindowRect( getHWND(), &rc );
-	gConfig.writeInt( INISC_MAIN, INIKEY_WNDLEFT, rc.left );
-	gConfig.writeInt( INISC_MAIN, INIKEY_WNDTOP, rc.top );
-	gConfig.writeInt( INISC_MAIN, INIKEY_WNDVISIBLE, ::IsWindowVisible(getHWND())?1:0 );
 }
 
 void CVisC86Main::onPaintClient()
@@ -184,25 +165,31 @@ void CVisC86Main::onPaintClient()
 
 	int y=40;
 	for( size_t i=0; i<gimic.size(); i++ ){
+		const GimicParam* param = gimic[i]->getParam();
+		
+		int dy=0;
 		// 枠線
-		visFillRect( clientCanvas, 5, y-2, 5, 58, skin->getPal(CVisC86Skin::IDCOL_MID) );
-		visFillRect( clientCanvas, 5, y+54, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
+		visFillRect( clientCanvas, 5, y-2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID) );
+		visFillRect( clientCanvas, 5, y+64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
 		// デバイス名
 		sprintf(str, "MODULE%d: %s Rev.%c", i, &info[i].mbinfo.Devname[0], info[i].mbinfo.Rev );
-		skin->drawStr( clientCanvas, 1, 15, y, str );
+		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		// Firmware version
 		sprintf( str, "FW-VER : %d.%d.%d.%d", info[i].major, info[i].minor, info[i].rev, info[i].build );
-		skin->drawStr( clientCanvas, 1, 15, y+10, str );
+		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		// MODULE名
 		sprintf(str, "CHIP   : %s Rev.%c", &info[i].chipinfo.Devname[0], info[i].chipinfo.Rev );
-		skin->drawStr( clientCanvas, 1, 15, y+20, str );
+		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		// PLL Clock
-		sprintf(str, "CLOCK  : %d Hz", info[i].clock );
-		skin->drawStr( clientCanvas, 1, 15, y+30, str );
+		sprintf(str, "CLOCK  : %d Hz", param->clock );
+		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+		// SSG-Volume
+		sprintf(str, "SSG-VOL: %d", param->ssgVol );
+		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		// カロリー(w
 		sprintf(str, "CALORIE: %d CPS", gimic[i]->getCPS() );
-		skin->drawStr( clientCanvas, 1, 15, y+40, str );
-		y+=64;
+		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+		y+=74;
 	}
 
 	// FPS

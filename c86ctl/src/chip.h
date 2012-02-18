@@ -25,3 +25,13 @@ public:
 
 };
 
+class GimicParam
+{
+public:
+	GimicParam() : ssgVol(0), clock(0) {
+	};
+
+	UCHAR ssgVol;
+	UINT clock;
+};
+
