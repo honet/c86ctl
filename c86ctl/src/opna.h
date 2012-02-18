@@ -392,7 +392,7 @@ public:
 		const int minlim = 246; // B4<->C5
 		int n;
 
-		oct = 5;
+		oct = 3;
 		note = 0;
 		n = getTune();
 		// c, c#, d, d#, e, f, f#, g, g#, a, a#, b, c

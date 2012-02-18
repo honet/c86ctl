@@ -74,14 +74,14 @@ protected:
 	CVisKnobPtr knobPAN;
 	
 	CVisKnobPtr knobAR[4];
-	CVisKnobPtr knobDR1[4];
-	CVisKnobPtr knobDR2[4];
+	CVisKnobPtr knobDR[4];
 	CVisKnobPtr knobSR[4];
 	CVisKnobPtr knobRR[4];
 	CVisKnobPtr knobSL[4];
 	CVisKnobPtr knobTL[4];
 	CVisKnobPtr knobMUL[4];
 	CVisKnobPtr knobDET[4];
+	CVisKnobPtr knobDET2[4];
 	CVisDipSwPtr dipswAM[4];
 
 };

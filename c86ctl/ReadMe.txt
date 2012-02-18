@@ -83,12 +83,7 @@ For further information please contact.
 
 
 ::TODO::
-・skinにカラーテーブルを入れる
 ・adpcmバースト転送
-・pan直す
-・nanoフォントにマイナス
-・N台時のデバッグ
 ・ウインドウ位置保存コード
-・writefile/readfileをタイムアウトできるように
 ・try/catchコードを全ルーチンに
-・
+

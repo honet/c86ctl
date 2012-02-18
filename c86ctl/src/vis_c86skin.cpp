@@ -271,7 +271,15 @@ void CVisC86Skin::drawNanoNumStr( IVisBitmap *canvas, int x, int y, const char *
 	int cy = skinreg_fonts[8].height;
 	int len = (int)strlen(str);
 	for( int i=0; i<len; i++ ){
-		char c = str[i] - '0';
+		char c = str[i];
+		if( '0' <= c && c <= '9' )
+			c = c - '0';
+		else if( c == '-' )
+			c = 14;
+		else if( c == '+' )
+			c = 15;
+		else 
+			continue;
 		int srcx = left + cx * c;
 		int srcy = top;
 		alphablt(canvas, x+cx*i, y, cx, cy, skinbmp, srcx, srcy );

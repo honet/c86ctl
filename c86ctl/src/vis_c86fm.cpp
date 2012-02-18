@@ -39,7 +39,7 @@ bool CVisC86OPNAFm::create( HWND parent )
 	widgets.push_back(knobAMS);
 
 	// PMS
-	knobPMS = CVisKnobPtr( new CVisKnob(this, 158-11, 25-10));
+	knobPMS = CVisKnobPtr( new CVisKnob(this, 161-11, 25-10));
 	knobPMS->setRange(0,7);
 	knobPMS->getter = [pFmCh]() -> int{ return pFmCh->getPMS(); };
 	widgets.push_back(knobPMS);
@@ -51,7 +51,7 @@ bool CVisC86OPNAFm::create( HWND parent )
 	widgets.push_back(knobFB);
 
 	// PAN
-	knobPAN = CVisKnobPtr( new CVisKnob(this, 158-11, 59-10));
+	knobPAN = CVisKnobPtr( new CVisKnob(this, 161-11, 59-10));
 	knobPAN->setRange(-1,1);
 	knobPAN->getter = [pFmCh]() -> int{ return pFmCh->getPan(); };
 	widgets.push_back(knobPAN);
@@ -60,60 +60,60 @@ bool CVisC86OPNAFm::create( HWND parent )
 	for(int i=0; i<4; i++){
 		COPNAFmSlot *slot = pFmCh->slot[i];
 		// AR
-		knobAR[i] = CVisKnobPtr( new CVisKnob(this, x+165-11, y+27-10));
+		knobAR[i] = CVisKnobPtr( new CVisKnob(this, x+161, y+17));
 		knobAR[i]->setRange(0,31);
 		knobAR[i]->getter = [slot, i]() -> int{ return slot->getAttackRate(); };
 		widgets.push_back(knobAR[i]);
 		
-		// DR1
-		knobDR1[i] = CVisKnobPtr( new CVisKnob(this, x+190-11, y+27-10));
-		knobDR1[i]->setRange(0,31);
-		knobDR1[i]->getter = [slot, i]() -> int{ return slot->getDecayRate(); };
-		widgets.push_back(knobDR1[i]);
-
-		// DR2 - OPNAでは使えない。
-		knobDR2[i] = CVisKnobPtr( new CVisKnob(this, x+215-11, y+27-10));
-		knobDR2[i]->setRange(0,31);
-		widgets.push_back(knobDR2[i]);
+		// DR
+		knobDR[i] = CVisKnobPtr( new CVisKnob(this, x+189, y+17));
+		knobDR[i]->setRange(0,31);
+		knobDR[i]->getter = [slot, i]() -> int{ return slot->getDecayRate(); };
+		widgets.push_back(knobDR[i]);
 
 		// SR
-		knobSR[i] = CVisKnobPtr( new CVisKnob(this, x+240-11, y+27-10));
+		knobSR[i] = CVisKnobPtr( new CVisKnob(this, x+216, y+17));
 		knobSR[i]->setRange(0,31);
 		knobSR[i]->getter = [slot, i]() -> int{ return slot->getSustainRate(); };
 		widgets.push_back(knobSR[i]);
 
 		// RR
-		knobRR[i] = CVisKnobPtr( new CVisKnob(this, x+265-11, y+27-10));
+		knobRR[i] = CVisKnobPtr( new CVisKnob(this, x+243, y+17));
 		knobRR[i]->setRange(0,31);
 		knobRR[i]->getter = [slot, i]() -> int{ return slot->getReleaseRate(); };
 		widgets.push_back(knobRR[i]);
 
 		// SL
-		knobSL[i] = CVisKnobPtr( new CVisKnob(this, x+290-11, y+27-10));
+		knobSL[i] = CVisKnobPtr( new CVisKnob(this, x+270, y+17));
 		knobSL[i]->setRange(0,15);
 		knobSL[i]->getter = [slot, i]() -> int{ return slot->getSustainLevel(); };
 		widgets.push_back(knobSL[i]);
 
 		// TL
-		knobTL[i] = CVisKnobPtr( new CVisKnob(this, x+315-11, y+27-10));
+		knobTL[i] = CVisKnobPtr( new CVisKnob(this, x+297, y+17));
 		knobTL[i]->setRange(0,127);
 		knobTL[i]->getter = [slot, i]() -> int{ return slot->getTotalLevel(); };
 		widgets.push_back(knobTL[i]);
 		
 		// MUL
-		knobMUL[i] = CVisKnobPtr( new CVisKnob(this, x+165-11, y+60-10));
+		knobMUL[i] = CVisKnobPtr( new CVisKnob(this, x+161, y+50));
 		knobMUL[i]->setRange(0,15);
 		knobMUL[i]->getter = [slot, i]() -> int{ return slot->getMultiple(); };
 		widgets.push_back(knobMUL[i]);
 
 		// DET
-		knobDET[i] = CVisKnobPtr( new CVisKnob(this, x+190-11, y+60-10));
+		knobDET[i] = CVisKnobPtr( new CVisKnob(this, x+189, y+50));
 		knobDET[i]->setRange(0,7);
 		knobDET[i]->getter = [slot, i]() -> int{ return slot->getDetune(); };
 		widgets.push_back(knobDET[i]);
 
+		// DET2 - OPNAでは使えない。
+		knobDET2[i] = CVisKnobPtr( new CVisKnob(this, x+216, y+50));
+		knobDET2[i]->setRange(0,31);
+		widgets.push_back(knobDET2[i]);
+
 		// AM
-		dipswAM[i] = CVisDipSwPtr( new CVisDipSw(this, x+216, y+50));
+		dipswAM[i] = CVisDipSwPtr( new CVisDipSw(this, x+248, y+50));
 		dipswAM[i]->getter = [slot, i]() -> int{ return slot->isAM(); };
 		widgets.push_back(dipswAM[i]);
 		y+=75;
@@ -156,7 +156,7 @@ void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFm
 	skin->drawFMAlgorithm( canvas, x+20, y+7, algno );
 	
 	//slot ON/OFF
-	const int lx[4] = {243, 258, 273, 288};
+	const int lx[4] = {248, 263, 278, 293};
 	for( int i=0; i<4; i++ ){
 		skin->drawFMSlotLight( canvas, x+lx[i], y+56, i, pFmCh->slot[i]->isOn() );
 	}
@@ -166,15 +166,15 @@ void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFm
 	char str[128];
 	if( !exmode ){
 		sprintf( str, "% 11.1fHz", freq );
-		skin->drawStr( canvas, 0, 211, 10, str );
+		skin->drawStr( canvas, 0, 216, 10, str );
 	}else{
 		const char *modestr[] = { "CSM", "EFF", "???" };
-		skin->drawStr( canvas, 0, 183, 59, modestr[exmode-1] );
+		skin->drawStr( canvas, 0, 188, 59, modestr[exmode-1] );
 		
 		for( int i=0; i<4; i++ ){
 			freq = pFmCh->getFreqEx(i);
 			sprintf( str, "% 11.1fHz", freq );
-			skin->drawStr( canvas, 0, 211, 6+12*i, str );
+			skin->drawStr( canvas, 0, 216, 6+12*i, str );
 		}
 	}
 }
