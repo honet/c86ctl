@@ -229,21 +229,22 @@ void CVisC86OPNAKey::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, 
 	visDrawLine( canvas, ltx+280, lty+sy+5+30, ltx    , lty+sy+5+30, col_mid );
 	visDrawLine( canvas, ltx    , lty+sy+5+30, ltx    , lty+sy+5+10, col_mid );
 
+	COPNARhythm *rhythm = pOPNA->rhythm;
 	if( !pOPNA->getMixedMask(trNo) ){
-		if( pOPNA->rhythm->rim->isOn() )
+		if( rhythm->rim->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*9, lty+sy+5+18, "RIM" );
-		if( pOPNA->rhythm->tom->isOn() )
+		if( rhythm->tom->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*14, lty+sy+5+18, "TOM" );
-		if( pOPNA->rhythm->hh->isOn() )
+		if( rhythm->hh->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*19, lty+sy+5+18, "HH" );
-		if( pOPNA->rhythm->top->isOn() )
+		if( rhythm->top->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5+18, "TOP" );
-		if( pOPNA->rhythm->sd->isOn() )
+		if( rhythm->sd->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*29, lty+sy+5+18, "SD" );
-		if( pOPNA->rhythm->bd->isOn() )
+		if( rhythm->bd->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*34, lty+sy+5+18, "BD");
 	}
-	skin->drawHBar( canvas, 290, lty+sy+16, 0, 0 );
+	skin->drawHBar( canvas, 290, lty+sy+16, rhythm->getKeyOnLevel(), 0 );
 }
 
 // --------------------------------------------------------

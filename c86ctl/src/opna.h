@@ -512,7 +512,7 @@ public:
 
 protected:
 	void setLevel(int l){ level = l; };
-	void on(){ sw = true; limit = 3; keyOnLevel = level<<2; };
+	void on(){ sw = true; limit = 3; keyOnLevel = level; };
 	void off(){ sw = false; };
 	void setLR( bool l, bool r ){ left=l; right=r; };
 	
@@ -559,17 +559,6 @@ public:
 		bd->reset();
 		tl=0;
 	};
-
-public:
-	COPNARhythmCh *rim;
-	COPNARhythmCh *tom;
-	COPNARhythmCh *hh;
-	COPNARhythmCh *top;
-	COPNARhythmCh *sd;
-	COPNARhythmCh *bd;
-		
-public:
-	int getTotalLevel(){ return tl; };
 	void update(){
 		rim->update();
 		tom->update();
@@ -579,6 +568,26 @@ public:
 		bd->update();
 	};
 	
+	int getTotalLevel(){ return tl; };
+	int getKeyOnLevel(){
+		int level, x;
+		level = rim->getKeyOnLevel();
+		x = tom->getKeyOnLevel(); if(level<x) level=x;
+		x = hh->getKeyOnLevel();  if(level<x) level=x;
+		x = top->getKeyOnLevel(); if(level<x) level=x;
+		x = sd->getKeyOnLevel();  if(level<x) level=x;
+		x = bd->getKeyOnLevel();  if(level<x) level=x;
+		return level;
+	};
+
+public:
+	COPNARhythmCh *rim;
+	COPNARhythmCh *tom;
+	COPNARhythmCh *hh;
+	COPNARhythmCh *top;
+	COPNARhythmCh *sd;
+	COPNARhythmCh *bd;
+		
 protected:
 	void setTotalLevel(int level){ tl = level; };
 	bool setReg( UCHAR addr, UCHAR data );
