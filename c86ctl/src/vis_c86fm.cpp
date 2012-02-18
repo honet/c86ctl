@@ -183,101 +183,62 @@ void CVisC86OPNAFm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlo
 {
 	CVisC86Skin *skin = &gVisSkin;
 	skin->drawFMSlotSkin( canvas, x, y );
-	
 #if 0
-	BMPREG reg = skinreg_view[2];
-	::BitBlt( hdc, x, y, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
-
-	// index
-	char str[32];
-	sprintf(str, "%d", slotidx+1);
-	vis_draw_vstr( hdc, hskin, hmask, 0, x+8, y+20, str );
-		
-
-	HPEN mypen = ::CreatePen( PS_SOLID, 2, col_high);
-	HPEN oldpen = (HPEN)::SelectObject( hdc, mypen );
-
-	int cx,cy;
-
 	double ar = pSlot->getAttackRate();
-	cx=x+173; cy=y+27;
-	draw_knob( hdc, ar/31.0, cx, cy ); // AR
-
 	double dr = pSlot->getDecayRate();
-	cx=x+198; cy=y+27;
-	draw_knob( hdc, dr/31.0, cx, cy ); // DR
-
 	double sr = pSlot->getSustainRate();
-	cx=x+223; cy=y+27;
-	draw_knob( hdc, sr/31.0, cx, cy ); // SR
-
 	double rr = pSlot->getReleaseRate();
-	cx=x+248; cy=y+27;
-	draw_knob( hdc, rr/31.0, cx, cy ); // RR
-
 	double sl = pSlot->getSustainLevel();
-	cx=x+273; cy=y+27;
-	draw_knob( hdc, sl/15.0, cx, cy ); // SL
-
 	double tl = pSlot->getTotalLevel();
-	cx=x+298; cy=y+27;
-	draw_knob( hdc, tl/127.0, cx, cy ); // TL
-
 	double mul = pSlot->getMultiple();
-	cx=x+173; cy=y+60;
-	draw_knob( hdc, mul/15.0, cx, cy ); // MUL
-
 	double det = pSlot->getDetune();
-	cx=x+198; cy=y+60;
-	draw_knob( hdc, det/7.0, cx, cy ); // DET
+
+	double ax, ay, d1x, d1y, d2x, d2y, rx, ry;
 	
-	::SelectObject( hdc, oldpen );
-	::DeleteObject( mypen );
-
-	// envelope graph
-	// TODO:ここは仕様が理解出来ていないので相当適当。
-	//      それっぽく見せてるだけ。後で書き直す。
-	if ( 0 < ar ){
-		mypen = ::CreatePen( PS_SOLID, 2, col_high);
-		oldpen = (HPEN)::SelectObject( hdc, mypen );
-		// note on = 0
-		// note off = 32*3
-		int gh = 64;
-		int gw = 128;
-		int at, dt1, dt2, rt;
-		int al, dl1, dl2;
-		al = (int)(tl*gh/127.0);
-		dl1 = (dr==0) ? al : (int)(tl*sl*gh/(127.0*15.0)); // (tl/127.0)*(sl/15.0)*gh
-		dl2 = (ar==0) ? dl1 : dl1*0.5;
-		double ar2 = 31-ar;
-		at = (ar2*gw)/(2*30);
-		dt1 = at + 2 + (dr*(32*3-2)/31.0) ; // at=0で( dr=0のときdt1=32*3, dr==31のときdt1=ar+2 )になるように。
-		dt2 = 32*3;
-		if( dt2<dt1 ) dt1 = dt2;
-		rt = dt2 + ((15-rr)*32/15.0);
-
-		cx=x+27; cy=y+6;
-		// 351, 156
-		::MoveToEx( hdc, cx, cy+gh-1, NULL );
-		::LineTo( hdc, cx+at, cy+gh-1-al );
-		::LineTo( hdc, cx+dt1, cy+gh-1-dl1 );
-		::LineTo( hdc, cx+dt2, cy+gh-1-dl2 );
-		::LineTo( hdc, cx+rt, cy+gh-1 );
+	if(ar==0 || tl==127){
+		// 無音
+	}else{
+		// attack ----
+		ay = tl;
+		ax = (127.0-tl) / (5.0*ar);
 		
-		::SelectObject( hdc, oldpen );
-		::DeleteObject( mypen );
+		// decay1 ----
+		if( (sl*4)>tl ){
+			if( 0<dr ){
+				d1y = 4.0*sl;
+				d1x = (d1y-ay)/dr + ax;
+			}else{
+				d1y = ay;
+				d1x = 3.0*127.0/4.0;
+			}
+		}else{
+			d1x = ax;
+			d1y = ay;
+		}
+
+		// decay2 ----
+		d2x = 3.0*127/4.0;
+		if( 0<dr ){
+			d2y = sr * (d2x-d1x) + d1y;
+		}else{
+			d2y = d1y;
+		}
+		
+		// release ----
+		if( 0<rr ){
+			rx = (127.0-d2y) / (2.0*rr) + d2x;
+			ry = 127.0;
+		}else{
+			rx = 127.0;
+			ry = d2y;
+		}
+
+		int sx=x+23, sy=y+6+64;
+		visDrawLine( canvas, sx         , sy         , sx+(int)ax , sy-(int)ay , 0xffffffff );
+		visDrawLine( canvas, sx+(int)ax , sy-(int)ay , sx+(int)d1x, sy-(int)d1y, 0xffffffff );
+		visDrawLine( canvas, sx+(int)d1x, sy-(int)d1y, sx+(int)d2x, sy-(int)d2y, 0xffffffff );
+		visDrawLine( canvas, sx+(int)d2x, sy-(int)d2y, sx+(int)rx , sy-(int)ry, 0xffffffff );
 	}
-
-	// AM
-	int idx = pSlot->isAM() ? 1 : 0;
-	reg = skinreg_tool[4+idx];
-	::BitBlt( hdc, x+216, y+49, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
-
-	// SSGEG
-	idx = pSlot->getSSGEGType();
-	reg = skinreg_alg[8+idx];
-	cx=x+255; cy=y+58;
-	::BitBlt( hdc, cx, cy, reg.width, reg.height, hskin, reg.left, reg.top, SRCCOPY );
 #endif
 }
 

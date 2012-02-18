@@ -139,15 +139,14 @@ void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col 
 	if( xe<0 || ye<0 || bmp->getWidth()<=xe || bmp->getHeight()<=ye )
 		return;
 	
-	int step = bmp->getStep();
+	int step = bmp->getStep()>>2;
 
 	if( xs == xe ){	// êÇíºê¸
 		if( ye<ys ) SWAP(ys,ye);
 		UINT *p = ((UINT*)bmp->getRow0(ys)) + xs;
-		UINT s4 = step>>2;
 		for( int y=ys; y<=ye; y++ ){
 			*p = col;
-			p += s4;
+			p += step;
 		}
 	}else if( ys == ye ){ //êÖïΩê¸
 		if( xe<xs ) SWAP(xs,xe);

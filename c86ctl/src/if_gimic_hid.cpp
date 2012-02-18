@@ -257,12 +257,18 @@ int GimicHID::init(void)
 
 int GimicHID::reset(void)
 {
-	if( chip )
-		chip->reset();
-	
+	int ret;
 	// リセットコマンド送信
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
-	return sendMsg( &d );
+	ret =  sendMsg( &d );
+
+	// 各ステータス値リセット
+	//   マスクの適用をreset内でする（送信処理が発生する）ので
+	//   リセット後に処理しないとダメ。
+	if( chip )
+		chip->reset();
+
+	return ret;
 }
 
 int GimicHID::setSSGVolume(UCHAR vol)

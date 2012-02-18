@@ -139,7 +139,7 @@ void CVisC86OPNAKey::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 	skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
 	COPNAFmCh *pFMCh = pOPNA->fm->ch[fmNo];
-	if( pFMCh->getExMode() ){
+	if( pFMCh->getExMode() && !pOPNA->getMixedMask(trNo) ){
 		int fblock = pFMCh->getFBlockEx(exNo);
 		int fnum = pFMCh->getFNumEx(exNo);
 		sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
@@ -151,7 +151,7 @@ void CVisC86OPNAKey::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 			pFMCh->getNoteEx( exNo, oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
 		}
-		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
+		skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevelEx(exNo), 0 );
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
 		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );

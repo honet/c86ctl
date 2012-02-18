@@ -122,17 +122,19 @@ public:
 		pms = 0;
 		left = true;
 		right = true;
-		keyOnLevel = 0;
 
 		for( int i=0; i<4; i++ ){
 			fnum[i] = 0;
 			fblock[i] = 0;
+			keyOnLevel[i] = 0;
 		}
 	};
 	void update(){
-		if(keyOnLevel) keyOnLevel--;
+		for( int i=0; i<4; i++ )
+			if(keyOnLevel[i]) keyOnLevel[i]--;
 	};
-	int getKeyOnLevel(){ return keyOnLevel; };
+	int getKeyOnLevel(){ return keyOnLevel[3]; };
+	int getKeyOnLevelEx(int idx){ return keyOnLevel[idx]; };
 
 public:
 	int getExMode(){ return exmode; };
@@ -237,13 +239,17 @@ protected:
 	void setExMode(int mode){ exmode = mode; };
 	void keyOn( UCHAR slotsw ){
 		for( int i=0; i<4; i++ ){ // D3:4, D2:3, D1:2, D0:1
-			if( slotsw & 0x01 )
+			if( slotsw & 0x01 ){
 				slot[i]->on();
-			else
+				if( exmode )
+					keyOnLevel[i] = (127-slot[i]->getTotalLevel())>>2;
+			}else
 				slot[i]->off();
 			slotsw >>= 1;
 		}
-		keyOnLevel = (127-getMixLevel())>>2;
+		if( !exmode ){
+			keyOnLevel[3] = (127-getMixLevel())>>2;
+		}
 	};
 	void setFExLo(int slotno, UCHAR data){
 		fpacked[slotno] = (fpacked[slotno] & 0xff00) | data;
@@ -275,7 +281,7 @@ protected:
 	int pms;		// 3bit
 	bool left;
 	bool right;
-	int keyOnLevel;
+	int keyOnLevel[4];
 	
 	int fnum[4];	//11bit
 	int fblock[4];	//3bit
@@ -705,6 +711,10 @@ public:
 		ssg->reset();
 		rhythm->reset();
 		adpcm->reset();
+
+		// ‹­§“I‚ÉOPNAƒ‚[ƒh‚ÉØ‚è‘Ö‚¦
+		pIF->directOut( 0x29, 0x9f );
+		reg[0][0x29] = 0x9f;
 
 		for( int i=0; i<14; i++ )
 			applyMask(i);
