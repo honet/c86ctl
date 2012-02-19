@@ -117,6 +117,7 @@
     <ClInclude Include="..\..\src\if_gimic_hid.h" />
     <ClInclude Include="..\..\src\if_gimic_midi.h" />
     <ClInclude Include="..\..\src\if_gimic_winusb.h" />
+    <ClInclude Include="..\..\src\opl3.h" />
     <ClInclude Include="..\..\src\opm.h" />
     <ClInclude Include="..\..\src\opn3l.h" />
     <ClInclude Include="..\..\src\opnx.h" />

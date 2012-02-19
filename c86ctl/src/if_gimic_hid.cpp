@@ -60,6 +60,7 @@
 #include "opm.h"
 #include "opna.h"
 #include "opn3l.h"
+#include "opl3.h"
 
 extern "C" {
 #include "hidsdi.h"
@@ -251,7 +252,11 @@ int GimicHID::init(void)
 	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
 		chiptype = CHIP_OPNA;
 		chip = new COPNA(this);
+	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
+		chiptype = CHIP_OPL3;
+		chip = new COPL3();
 	}
+	
 	
 	UCHAR vol;
 	getSSGVolume(&vol);
@@ -302,7 +307,7 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 
 int GimicHID::setPLLClock(UINT clock)
 {
-	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM )
+	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3  )
 		return C86CTL_ERR_UNSUPPORTED;
 
 	gimicParam.clock = clock;
@@ -312,7 +317,7 @@ int GimicHID::setPLLClock(UINT clock)
 
 int GimicHID::getPLLClock(UINT *clock)
 {
-	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM )
+	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3 )
 		return C86CTL_ERR_UNSUPPORTED;
 
 	if( !clock )

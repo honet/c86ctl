@@ -26,7 +26,7 @@ public:
 		int dc = 8;
 		for( int i=0; i<256; i++ ){
 			UCHAR c=regATime[i];
-			regATime[i] = dc<c? c-dc : 0;
+			regATime[i] = dc<c? c-dc : 64;
 		}
 	};
 

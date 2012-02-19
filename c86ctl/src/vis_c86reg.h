@@ -11,6 +11,7 @@
 #include "opna.h"
 #include "opm.h"
 #include "opn3l.h"
+#include "opl3.h"
 #include "vis_c86wnd.h"
 
 // --------------------------------------------------------
@@ -101,6 +102,26 @@ protected:
 	
 private:
 	COPN3L *pOPN3L;
+};
+
+// --------------------------------------------------------
+class CVisC86OPL3Reg : public CVisC86Reg
+{
+public:
+	CVisC86OPL3Reg(COPL3 *pchip, int id) : CVisC86Reg(id), pOPL3(pchip){
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86OPL3REG%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] OPL3 REGISTER VIEW"), id);
+		windowTitle = str;
+	};
+	~CVisC86OPL3Reg(){};
+
+protected:
+	virtual void onPaintClient(void);
+	
+private:
+	COPL3 *pOPL3;
 };
 
 // --------------------------------------------------------

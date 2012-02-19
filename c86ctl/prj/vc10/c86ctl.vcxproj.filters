@@ -167,6 +167,9 @@
     <ClInclude Include="..\..\src\opnx.h">
       <Filter>module</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\opl3.h">
+      <Filter>module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\c86ctl.def">

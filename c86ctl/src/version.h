@@ -10,10 +10,10 @@
 // ＤＬＬのバージョン定義
 #define VERSION_MAJOR      1
 #define VERSION_MINOR      3
-#define VERSION_REVISION   1
+#define VERSION_REVISION   2
 #define VERSION_BUILD      21
-#define VERSION_STRING     "1, 3, 1, 21"
-#define VERSION_MESSAGE    "VER 1.3.1.21(RC2)"
+#define VERSION_STRING     "1, 3, 2, 22"
+#define VERSION_MESSAGE    "VER 1.3.2.22(DBG-ONLY)"
 
 
 // 以下はDLLリソース用定義につき変更禁止
