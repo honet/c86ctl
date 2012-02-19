@@ -9,6 +9,8 @@
 #pragma once
 
 #include "opna.h"
+#include "opn3l.h"
+#include "opm.h"
 #include "vis_c86wnd.h"
 
 
@@ -29,7 +31,13 @@ public:
 	virtual bool create( HWND parent = 0 ){ return false; };
 	virtual void close(){};
 	virtual int getId(void){ return id; };
-
+	
+protected:
+	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int fmNo, bool isMute, COPNFmCh *pFMCh );
+	void drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, bool isMute, COPNFmCh *pFMCh );
+	void drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int ssgNo, bool isMute, COPNSsg *pSsg );
+	void drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, bool isMute, COPNRhythm *rhythm );
+	
 protected:
 	int id;
 };
@@ -55,21 +63,65 @@ public:
 
 protected:
 	virtual bool create( HWND parent = 0 );
-	virtual void close();
 	virtual void onPaintClient(void);
 	
 protected:
-	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int fmNo );
-	void drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int fmNo, int exNo );
-	void drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int ssgNo );
 	void drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
-	void drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
 
 protected:
 	CVisMuteSwPtr muteSw[14];
 	CVisSoloSwPtr soloSw[14];
 	
 	COPNA *pOPNA;
+};
+
+// --------------------------------------------------------
+class CVisC86OPN3LKey : public CVisC86Key
+{
+public:
+	CVisC86OPN3LKey(COPN3L *pchip, int id)
+		: CVisC86Key(id)
+		, pOPN3L(pchip)
+	{
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86OPN3LKEY%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] OPN3L KEYBOARD VIEW"), id);
+		windowTitle = str;
+		
+		windowHeight = 495;
+	};
+	~CVisC86OPN3LKey(){};
+
+protected:
+	virtual bool create( HWND parent = 0 );
+	virtual void onPaintClient(void);
+
+protected:
+	CVisMuteSwPtr muteSw[13];
+	CVisSoloSwPtr soloSw[13];
+protected:
+	COPN3L *pOPN3L;
+};
+
+// --------------------------------------------------------
+class CVisC86OPMKey : public CVisC86Key
+{
+public:
+	CVisC86OPMKey(COPM *pchip, int id)
+		: CVisC86Key(id)
+		, pOPM(pchip)
+	{
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86OPMKEY%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] OPM KEYBOARD VIEW"), id);
+		windowTitle = str;
+	};
+	~CVisC86OPMKey(){};
+
+protected:
+	COPM *pOPM;
 };
 
 // --------------------------------------------------------

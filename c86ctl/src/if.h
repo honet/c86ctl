@@ -61,10 +61,13 @@ public:
 public:
 	// IRealChip2
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall adpcmZeroClear(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual void __stdcall directOut(UINT addr, UCHAR data){};
 
+public:
+	//virtual int __stdcall adpcmZeroClear(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	//virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	//virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	
 public:
 	// IGimic
 	virtual int __stdcall setSSGVolume(UCHAR vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
@@ -82,7 +85,6 @@ public:
 	// ”ñŒöŠJ
 	virtual UINT getCPS(void){ return 0; };
 	virtual void update(void){ };
-	virtual void directOut(UINT addr, UCHAR data){};
 
 protected:
 	int refcount;

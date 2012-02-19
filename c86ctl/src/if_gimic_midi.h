@@ -54,9 +54,11 @@ public:
 public:
 	// IRealChip2
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
-	virtual int __stdcall adpcmZeroClear(void);
-	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
-	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
+	virtual void __stdcall directOut(UINT addr, UCHAR data){};
+
+//	virtual int __stdcall adpcmZeroClear(void);
+//	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
+//	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
 
 private:
 	void sendSysEx( uint8_t *data, uint32_t sz );

@@ -517,7 +517,7 @@ void C86winDlg::OnBnClickedButtonAdpcmZeroreset()
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
 	IRealChip2 *pchip;
 	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IRealChip2, (void**)&pchip ) ){
-		pchip->adpcmZeroClear();
+		//pchip->adpcmZeroClear();
 		pchip->Release();
 	}
 }

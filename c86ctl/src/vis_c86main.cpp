@@ -81,8 +81,7 @@ bool CVisC86Main::create(void)
 			} );
 		widgets.push_back(info[i].checkReg);
 
-		// TODO: OPNAˆÈŠO‚ð‘‚­B
-		if( info[i].chiptype == CHIP_OPNA ){
+		if( info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_OPN3L ){
 			info[i].checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
 			info[i].checkKey->changeEvent.push_back(
 				[this, i](CVisWidget* w){
@@ -125,7 +124,7 @@ bool CVisC86Main::create(void)
 
 			info[i].checkADPCM = CVisCheckBoxPtr(new CVisCheckBox(this,280,y+42, "ADPCM"));
 			widgets.push_back(info[i].checkADPCM);
-			*/
+			 */
 		}
 		y+=64;
 	}

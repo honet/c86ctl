@@ -24,8 +24,9 @@ extern "C" {
 #define C86CTL_ERR_NONE						0
 #define C86CTL_ERR_UNKNOWN					-1
 #define C86CTL_ERR_INVALID_PARAM			-2
-#define C86CTL_ERR_NOT_IMPLEMENTED			-9999
+#define C86CTL_ERR_UNSUPPORTED				-3
 #define C86CTL_ERR_NODEVICE					-1000
+#define C86CTL_ERR_NOT_IMPLEMENTED			-9999
 
 enum ChipType {
 	CHIP_UNKNOWN = 0,
@@ -69,7 +70,6 @@ public:
 	virtual int __stdcall reset(void) = 0;
 	virtual void __stdcall out( UINT addr, UCHAR data ) = 0;
 	virtual UCHAR __stdcall in( UINT addr ) = 0;
-	//virtual __stdcall getModuleType() = 0;
 };
 
 // IRealChip2 {BEFA830A-0DF3-46E4-A79E-FABB78E80357}
@@ -79,9 +79,7 @@ static const GUID IID_IRealChip2 =
 interface IRealChip2 : public IRealChip
 {
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status ) = 0;
-	virtual int __stdcall adpcmZeroClear(void) = 0;
-	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ) = 0;
-	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ) = 0;
+	virtual void __stdcall directOut(UINT addr, UCHAR data) = 0;
 };
 
 // IGimic {175C7DA0-8AA5-4173-96DA-BB43B8EB8F17}

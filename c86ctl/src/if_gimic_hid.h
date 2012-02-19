@@ -63,9 +63,13 @@ public:
 public:
 	// IRealChip2
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
-	virtual int __stdcall adpcmZeroClear(void);
-	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
-	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
+	virtual void __stdcall directOut(UINT addr, UCHAR data);
+
+public:
+//	virtual int __stdcall adpcmZeroClear(void);
+//	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
+//	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
+
 
 public:
 	virtual UINT getCPS(void){ return cps; };
@@ -74,7 +78,7 @@ public:
 private:
 	int sendMsg( MSG *data );
 	int transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz );
-	virtual void directOut(UINT addr, UCHAR data);
+	
 	
 private:
 	HANDLE hHandle;

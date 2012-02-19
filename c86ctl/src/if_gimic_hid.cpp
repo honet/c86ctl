@@ -244,7 +244,7 @@ int GimicHID::init(void)
 	getModuleInfo(&info);
 	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
 		chiptype = CHIP_OPN3L;
-		chip = new COPN3L();
+		chip = new COPN3L(this);
 	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
 		chiptype = CHIP_OPM;
 		chip = new COPM();
@@ -278,6 +278,9 @@ int GimicHID::reset(void)
 
 int GimicHID::setSSGVolume(UCHAR vol)
 {
+	if( chiptype != CHIP_OPNA )
+		return C86CTL_ERR_UNSUPPORTED;
+
 	gimicParam.ssgVol = vol;
 	MSG d = { 3, { 0xfd, 0x84, vol } };
 	return sendMsg( &d );
@@ -285,6 +288,8 @@ int GimicHID::setSSGVolume(UCHAR vol)
 
 int GimicHID::getSSGVolume(UCHAR *vol)
 {
+	if( chiptype != CHIP_OPNA )
+		return C86CTL_ERR_UNSUPPORTED;
 	if( !vol )
 		return C86CTL_ERR_INVALID_PARAM;
 
@@ -297,6 +302,9 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 
 int GimicHID::setPLLClock(UINT clock)
 {
+	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM )
+		return C86CTL_ERR_UNSUPPORTED;
+
 	gimicParam.clock = clock;
 	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
 	return sendMsg( &d );
@@ -304,6 +312,9 @@ int GimicHID::setPLLClock(UINT clock)
 
 int GimicHID::getPLLClock(UINT *clock)
 {
+	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM )
+		return C86CTL_ERR_UNSUPPORTED;
+
 	if( !clock )
 		return C86CTL_ERR_INVALID_PARAM;
 
@@ -387,6 +398,7 @@ int GimicHID::getChipStatus( UINT addr, UCHAR *status )
 	return ret;
 }
 
+/*
 int GimicHID::adpcmZeroClear(void)
 {
 	uint8_t rx[1];
@@ -406,7 +418,7 @@ int GimicHID::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
-
+*/
 
 void GimicHID::directOut(UINT addr, UCHAR data)
 {

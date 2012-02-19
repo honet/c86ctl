@@ -9,74 +9,120 @@
 
 #pragma once
 #include "chip.h"
+#include "if.h"
+#include "opnx.h"
+
+
 
 // ---------------------------------------------------------------------------------------
 class COPN3L : public Chip
 {
 public:
-	COPN3L(){ reset(); };
-	virtual ~COPN3L(){};
+	COPN3L(IRealChip2 *p) : pIF(p) {
+		fm = new COPNFm(p);
+		ssg = new COPNSsg(p);
+		rhythm = new COPNRhythm(p);
+		partMask = 0;
+		partSolo = 0;
+		reset();
+	};
+	virtual ~COPN3L(){
+		if(fm) delete fm;
+		if(ssg) delete ssg;
+		if(rhythm) delete rhythm;
+	};
 
 	void reset(){
 		for( int i=0; i<2; i++ ){
 			memset( reg[i], 0, 256 );
 			memset( regATime[i], 0, 256 );
 		}
+
+		for( int i=0x40; i<=0x4e;i++ ) // FM TL=127
+			reg[0][i] = reg[1][i] = 0x7f;
+		for( int i=0x80; i<=0x8e; i++ ) // FM SL,RR
+			reg[0][i] = reg[1][i] = 0xff;
+		for( int i=0xb4; i<0xb6+1; i++) // FM PAN/AMS/PMS
+			reg[0][i] = reg[1][i] = 0xc0;
+		reg[0][0x27] = 0x30; // Timer Control
+		reg[0][0x29] = 0x80; // FM4-6 Enable
+		reg[0][0x07] = 0x38; // SSG ミキサ
+		reg[0][0x10] = 0xBF;
+
+		fm->reset();
+		ssg->reset();
+		rhythm->reset();
+
+		// 強制的にOPNAモードに切り替え
+		pIF->directOut( 0x29, 0x9f );
+		reg[0][0x29] = 0x9f;
+
+		for( int i=0; i<13; i++ )
+			applyMask(i);
 	};
+	
+	
+public:
 	void update(){
-		int dc = 8;
+		int dc = 4;
 		for( int j=0; j<2; j++ ){
 			for( int i=0; i<256; i++ ){
 				UCHAR c=regATime[j][i];
-				regATime[j][i] = dc<c? c-dc : 0;
+				if( 64<c ){
+					c-=dc;
+					regATime[j][i] = 64<c ? c : 64;
+				}
 			}
 		}
+		fm->update();
+		ssg->update();
+		rhythm->update();
 	};
 
 public:
-	bool setReg( int addr, UCHAR data ){
-		if( addr <= 0x0d ) // SSG
-			reg[0][addr] = data;
-			regATime[0][addr] = 255;
-			return true;
-		if( 0x10<=addr && addr<=0x1d ) // Rhythm
-			reg[0][addr] = data;
-			regATime[0][addr] = 255;
-			return true;
-		if( 0x20<=addr && addr<=0x29 ){ // FM
-			if( addr == 0x21 ||		// Test
-				addr == 0x26 )		// Timer-B
-				return false;
-			reg[0][addr] = data;
-			regATime[0][addr] = 255;
-			return true;
-		}
-		if( 0x30<=addr && addr<=0xb6 ) // FM param 1-3
-			reg[0][addr] = data;
-			regATime[0][addr] = 255;
-			return true;
-		//if( 0x110==addr ) return true; // flag control
-		if( 0x130<=addr && addr<=0x1b6 ) // FM param 4-6
-			reg[1][addr] = data;
-			regATime[1][addr] = 255;
-			return true;
-		
-		return false;
+	virtual void filter( int addr, UCHAR *data );
+	virtual bool setReg( int addr, UCHAR data );
+	virtual UCHAR getReg( int addr );
+	
+	void setPartMask(int ch, bool mask);
+	void setPartSolo(int ch, bool mask);
+	bool getPartMask(int ch){ return partMask&(1<<ch) ? true : false; };
+	bool getPartSolo(int ch){ return partSolo&(1<<ch) ? true : false; };
+	bool getMixedMask(int ch){
+		if( partSolo ) return (((~partSolo) | partMask) & (1<<ch)) ? true : false;
+		else return getPartMask(ch);
 	};
+	
 
-	UCHAR getReg( int addr ){
-		
-		if( addr < 0x100 ){
-			return reg[0][addr];
-		}else if( addr < 0x200 ){
-			return reg[1][addr];
-		}
-		return 0;
-	};
+	int getTimerA(){ return timerA; };
+	int getTimerB(){ return timerB; };
+
 
 public:
+	COPNFm *fm;
+	COPNSsg *ssg;
+	COPNRhythm *rhythm;
+	
 	UCHAR reg[2][256];
 	UCHAR regATime[2][256];
+
+protected:
+	bool fmCommonRegHandling( UCHAR adrs, UCHAR data );
+	void applyMask(int ch);
+	
+protected:
+	int timerA; //10bit
+	int timerB; //8bit
+	
+//	int lfo; //3bit
+	bool timerA_sw;
+	bool timerB_sw;
+//	bool lfo_sw;
+	//int ch3mode;
+	
+	UINT partMask;
+	UINT partSolo;
+	IRealChip2 *pIF;
 };
 
 

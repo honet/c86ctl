@@ -88,6 +88,8 @@
     <ClCompile Include="..\..\src\if_gimic_hid.cpp" />
     <ClCompile Include="..\..\src\if_gimic_midi.cpp" />
     <ClCompile Include="..\..\src\if_gimic_winsub.cpp" />
+    <ClCompile Include="..\..\src\opn3l.cpp" />
+    <ClCompile Include="..\..\src\opnx.cpp" />
     <ClCompile Include="..\..\src\vis_bitmap.cpp" />
     <ClCompile Include="..\..\src\vis_c86fm.cpp" />
     <ClCompile Include="..\..\src\vis_c86key.cpp" />
@@ -117,6 +119,7 @@
     <ClInclude Include="..\..\src\if_gimic_winusb.h" />
     <ClInclude Include="..\..\src\opm.h" />
     <ClInclude Include="..\..\src\opn3l.h" />
+    <ClInclude Include="..\..\src\opnx.h" />
     <ClInclude Include="..\..\src\version.h" />
     <ClInclude Include="..\..\src\vis_bitmap.h" />
     <ClInclude Include="..\..\src\vis_c86fm.h" />

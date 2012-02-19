@@ -19,14 +19,8 @@
 #define WINDOW_WIDTH  (316+4)
 #define WINDOW_HEIGHT (75*5+4+15)
 
-
-bool CVisC86OPNAFm::create( HWND parent )
+bool CVisC86Fm::createFmView( COPNFmCh *pFmCh )
 {
-	if( !CVisWnd::create(
-		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
-		return false;
-
-	COPNAFmCh *pFmCh = pOPNA->fm->ch[this->ch];
 	// AMS
 	knobAMS = CVisKnobPtr( new CVisKnob(this, 134-11, 25-10));
 	knobAMS->setRange(0,3);
@@ -54,7 +48,7 @@ bool CVisC86OPNAFm::create( HWND parent )
 
 	int x=0, y=75;
 	for(int i=0; i<4; i++){
-		COPNAFmSlot *slot = pFmCh->slot[i];
+		COPNFmSlot *slot = pFmCh->slot[i];
 		// AR
 		knobAR[i] = CVisKnobPtr( new CVisKnob(this, x+161, y+17));
 		knobAR[i]->setRange(0,31);
@@ -115,33 +109,10 @@ bool CVisC86OPNAFm::create( HWND parent )
 		y+=75;
 	}
 	
-	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
-	
 	return true;
 }
 
-void CVisC86OPNAFm::close()
-{
-	widgets.clear();
-	
-	CVisWnd::close();
-}
-
-
-void CVisC86OPNAFm::onPaintClient()
-{
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
-
-	// slot view
-	if( pOPNA ){
-		int sx=5, sy=5, cx=6, cy=8;
-		drawFMView( clientCanvas, 0, 0, pOPNA->fm->ch[ch] );
-		for( int i=0; i<4; i++ )
-			drawFMSlotView( clientCanvas, 0, 75*(1+i), pOPNA->fm->ch[ch]->slot[i], i );
-	}
-}
-
-void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFmCh )
+void CVisC86Fm::drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh )
 {
 	int exmode = pFmCh->getExMode();
 	CVisC86Skin *skin = &gVisSkin;
@@ -163,7 +134,7 @@ void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFm
 		sprintf( str, "% 11.1fHz", freq );
 		skin->drawStr( canvas, 0, 216, 10, str );
 	}else{
-		const char *modestr[] = { "CSM", "EFF", "???" };
+		const char *modestr[] = { "EFF", "CSM", "EFF" };
 		skin->drawStr( canvas, 0, 188, 59, modestr[exmode-1] );
 		
 		for( int i=0; i<4; i++ ){
@@ -174,7 +145,7 @@ void CVisC86OPNAFm::drawFMView( IVisBitmap *canvas, int x, int y, COPNAFmCh *pFm
 	}
 }
 
-void CVisC86OPNAFm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlot *pSlot, int slotidx )
+void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNFmSlot *pSlot, int slotidx )
 {
 	CVisC86Skin *skin = &gVisSkin;
 	skin->drawFMSlotSkin( canvas, x, y );
@@ -242,15 +213,90 @@ void CVisC86OPNAFm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNAFmSlo
 #endif
 }
 
+bool CVisC86OPNAFm::create( HWND parent )
+{
+	if( !CVisWnd::create(
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
+		return false;
+
+	createFmView(pOPNA->fm->ch[this->ch]);
+	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+	
+	return true;
+}
+
+void CVisC86OPNAFm::onPaintClient()
+{
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+
+	// slot view
+	if( pOPNA ){
+		int sx=5, sy=5, cx=6, cy=8;
+		drawFMView( clientCanvas, 0, 0, pOPNA->fm->ch[ch] );
+		for( int i=0; i<4; i++ )
+			drawFMSlotView( clientCanvas, 0, 75*(1+i), pOPNA->fm->ch[ch]->slot[i], i );
+	}
+}
+
+bool CVisC86OPN3LFm::create( HWND parent )
+{
+	if( !CVisWnd::create(
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
+		return false;
+
+	createFmView(pOPN3L->fm->ch[this->ch]);
+	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+	
+	return true;
+}
+
+void CVisC86OPN3LFm::onPaintClient()
+{
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+
+	// slot view
+	if( pOPN3L ){
+		int sx=5, sy=5, cx=6, cy=8;
+		drawFMView( clientCanvas, 0, 0, pOPN3L->fm->ch[ch] );
+		for( int i=0; i<4; i++ )
+			drawFMSlotView( clientCanvas, 0, 75*(1+i), pOPN3L->fm->ch[ch]->slot[i], i );
+	}
+}
+
+bool CVisC86OPMFm::create( HWND parent )
+{
+	if( !CVisWnd::create(
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
+		return false;
+
+	//createFmView(pOPM->fm->ch[this->ch]);
+	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+	
+	return true;
+}
+
+void CVisC86OPMFm::onPaintClient()
+{
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+
+	// slot view
+	if( pOPM ){
+		int sx=5, sy=5, cx=6, cy=8;
+		//drawFMView( clientCanvas, 0, 0, pOPM->fm->ch[ch] );
+		//for( int i=0; i<4; i++ )
+		//	drawFMSlotView( clientCanvas, 0, 75*(1+i), pOPM->fm->ch[ch]->slot[i], i );
+	}
+}
+
 // --------------------------------------------------------
 CVisC86FmPtr visC86FmViewFactory(Chip *pchip, int id, int ch)
 {
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86FmPtr( new CVisC86OPNAFm(dynamic_cast<COPNA*>(pchip), id, ch ) );
-//	}else if( typeid(*pchip) == typeid(COPN3L) ){
-//		return CVisC86RegPtr( new CVisC86OPN3LKey(dynamic_cast<COPN3L*>(pchip), id) );
-//	}else if( typeid(*pchip) == typeid(COPM) ){
-//		return CVisC86RegPtr( new CVisC86OPMKey(dynamic_cast<COPM*>(pchip), id) );
+	}else if( typeid(*pchip) == typeid(COPN3L) ){
+		return CVisC86FmPtr( new CVisC86OPN3LFm(dynamic_cast<COPN3L*>(pchip), id, ch) );
+	}else if( typeid(*pchip) == typeid(COPM) ){
+		return CVisC86FmPtr( new CVisC86OPMFm(dynamic_cast<COPM*>(pchip), id, ch) );
 	}
 	return 0;
 }

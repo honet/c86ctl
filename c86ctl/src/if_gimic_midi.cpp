@@ -196,7 +196,7 @@ int GimicMIDI::getChipStatus( UINT addr, UCHAR *status )
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
-
+/*
 int GimicMIDI::adpcmZeroClear(void)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
@@ -211,7 +211,7 @@ int GimicMIDI::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
-
+*/
 void GimicMIDI::tick(void)
 {
 	UCHAR buff[150];

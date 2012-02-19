@@ -276,6 +276,8 @@ void CVisWnd::onPaintClient()
 
 void CVisWnd::close()
 {
+	widgets.clear();
+	
 	if(hWnd){
 		DestroyWindow( hWnd );
 		wndMap.erase( hWnd );
