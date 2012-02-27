@@ -126,7 +126,7 @@ bool CVisC86Main::create(void)
 			widgets.push_back(info[i].checkADPCM);
 			 */
 		}
-		y+=64;
+		y+=74;
 	}
 
 	return true;

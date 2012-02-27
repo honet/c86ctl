@@ -11,6 +11,7 @@
 #include "chip.h"
 #include "if.h"
 #include "opnx.h"
+#include "opl3.h"
 
 
 

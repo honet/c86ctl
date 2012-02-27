@@ -9,8 +9,10 @@
 
 #pragma once
 #include "chip.h"
+#include "opx.h"
 
 // ---------------------------------------------------------------------------------------
+#if 0
 class COPM : public Chip
 {
 public:
@@ -26,7 +28,10 @@ public:
 		int dc = 8;
 		for( int i=0; i<256; i++ ){
 			UCHAR c=regATime[i];
-			regATime[i] = dc<c? c-dc : 64;
+			if( 64<c ){
+				c-=dc;
+				regATime[i] = 64<c? c : 64;
+			}
 		}
 	};
 
@@ -68,5 +73,115 @@ public:
 public:
 	UCHAR reg[256];
 	UCHAR regATime[256];
+};
+#endif
+
+
+// ---------------------------------------------------------------------------------------
+
+class COPMFm{
+	friend class COPM;
+
+public:
+	COPMFm(IRealChip2 *p) : pIF(p){
+		for( int i=0; i<9; i++ )
+			ch[i] = new COPXFmCh(p);
+		reset();
+	};
+	virtual ~COPMFm(){
+		for( int i=0; i<9; i++ )
+			if(ch[i]) delete ch[i];
+	};
+	
+	void reset(){
+		lfo = 0;
+		lfo_sw = false;
+		for( int i=0; i<9; i++ )
+			ch[i]->reset();
+	};
+	
+	void update(){
+		for( int i=0; i<9; i++ )
+			ch[i]->update();
+	};
+	
+public:
+	int getLFO(){ return lfo; };
+	
+protected:
+	bool isLFOOn(){ return lfo_sw; };
+	bool setReg( UCHAR bank, UCHAR addr, UCHAR data );
+	
+
+public:
+	COPXFmCh *ch[9];
+	
+protected:
+	int lfo; //3bit
+	bool lfo_sw;
+
+	IRealChip2 *pIF;
+};
+
+
+// ---------------------------------------------------------------------------------------
+
+class COPM : public Chip
+{
+public:
+	COPM(IRealChip2 *p) : pIF(p) {
+		reset();
+		fm = new COPMFm(p);
+	};
+	virtual ~COPM(){
+		if(fm) delete fm;
+	};
+	
+	void reset(){
+		memset( reg, 0, 256 );
+		memset( regATime, 0, 256 );
+	}
+
+public:
+	virtual void filter( int addr, UCHAR *data ){};
+	virtual bool setReg( int addr, UCHAR data ){ return false; };
+	virtual UCHAR getReg( int addr ){ return 0;};
+	
+	void setPartMask(int ch, bool mask);
+	void setPartSolo(int ch, bool mask);
+	bool getPartMask(int ch){ return partMask&(1<<ch) ? true : false; };
+	bool getPartSolo(int ch){ return partSolo&(1<<ch) ? true : false; };
+	bool getMixedMask(int ch){
+		if( partSolo ) return (((~partSolo) | partMask) & (1<<ch)) ? true : false;
+		else return getPartMask(ch);
+	};
+	
+public:
+	void update(){
+		int dc = 4;
+		for( int i=0; i<256; i++ ){
+			UCHAR c=regATime[i];
+			if( 64<c ){
+				c-=dc;
+				regATime[i] = 64<c ? c : 64;
+			}
+		}
+	};
+
+public:
+	UCHAR reg[256];
+	UCHAR regATime[256];
+	
+public:
+	COPMFm *fm;
+	
+protected:
+	bool fmCommonRegHandling( UCHAR adrs, UCHAR data );
+	void applyMask(int ch);
+	
+protected:
+	UINT partMask;
+	UINT partSolo;
+	IRealChip2 *pIF;
 };
 

@@ -35,7 +35,7 @@ public:
 protected:
 	bool createFmView(COPNFmCh *pFmCh);
 	void drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh );
-	void drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNFmSlot *pSlot, int slotidx );
+	void drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pSlot, int slotidx );
 	
 protected:
 	int id;

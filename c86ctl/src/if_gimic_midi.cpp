@@ -115,7 +115,7 @@ int GimicMIDI::init(void)
 	//chiptype = CHIP_OPNA;
 	//chip = new COPNA();
 	chiptype=CHIP_OPM;
-	chip = new COPM();
+	chip = new COPM(static_cast<IRealChip2*>(this));
 	return C86CTL_ERR_NONE;
 }
 

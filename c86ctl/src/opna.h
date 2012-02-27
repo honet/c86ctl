@@ -188,11 +188,8 @@ protected:
 	int prescale_fm;
 	int prescale_ssg;
 	
-//	int lfo; //3bit
 	bool timerA_sw;
 	bool timerB_sw;
-//	bool lfo_sw;
-	//int ch3mode;
 	
 	UINT partMask;
 	UINT partSolo;

@@ -248,7 +248,7 @@ int GimicHID::init(void)
 		chip = new COPN3L(this);
 	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
 		chiptype = CHIP_OPM;
-		chip = new COPM();
+		chip = new COPM(this);
 	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
 		chiptype = CHIP_OPNA;
 		chip = new COPNA(this);
@@ -513,6 +513,9 @@ void GimicHID::tick(void)
 	if( sz<64 )
 		memset( &buff[1+sz], 0xff, 64-sz );
 
+	// WriteFileがスレッドセーフかどうかよく分からないので
+	// 念のため保護しているが、いらないかも。
+	// (directOut()と重なる可能性がある)
 	DWORD len;
 	::EnterCriticalSection(&csection);
 	int ret = WriteFile(hHandle, buff, 65, &len, NULL);

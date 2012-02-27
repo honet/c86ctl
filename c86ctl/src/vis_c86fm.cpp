@@ -48,7 +48,7 @@ bool CVisC86Fm::createFmView( COPNFmCh *pFmCh )
 
 	int x=0, y=75;
 	for(int i=0; i<4; i++){
-		COPNFmSlot *slot = pFmCh->slot[i];
+		COPXFmSlot *slot = pFmCh->slot[i];
 		// AR
 		knobAR[i] = CVisKnobPtr( new CVisKnob(this, x+161, y+17));
 		knobAR[i]->setRange(0,31);
@@ -145,7 +145,7 @@ void CVisC86Fm::drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh )
 	}
 }
 
-void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPNFmSlot *pSlot, int slotidx )
+void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pSlot, int slotidx )
 {
 	CVisC86Skin *skin = &gVisSkin;
 	skin->drawFMSlotSkin( canvas, x, y );
