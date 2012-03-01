@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <assert.h>
 #include "chip.h"
 #include "if.h"
 #include "opx.h"
@@ -25,15 +26,19 @@ class COPNFmCh : public COPXFmCh {
 	
 public:
 	COPNFmCh(IRealChip2 *p) : COPXFmCh(p){
+		reset();
 	};
 	virtual ~COPNFmCh(void){
 	};
 
 	virtual void reset(){
 		COPXFmCh::reset();
+		mclk = 8000000ULL;
+		exmode = 0;
 		for( int i=0; i<4; i++ ){
 			fnum[i] = 0;
 			fblock[i] = 0;
+			fpacked[i] = 0;
 		}
 	};
 
@@ -63,34 +68,36 @@ public:
 public:
 #if 0
 	void getNoteEx(int exNo, int &oct, int &note){
-		if( !exmode ) exNo = 3;
-		// note(hz) = (fno * 2^(block-1) * mclock) / (144 * 2^20)
-		const int lim[12] = {
-			      // B3 <->C4  : 254.1775933119Hz   ,  fno: 599.680179190393 
-			635,  // C4 <->C4# : 269.291779527024Hz ,  fno: 635.33901827099
-			673,  // C4#<->D4  : 285.304702023222Hz ,  fno: 673.11824226458
-			713,  // D4 <->D4# : 302.26980244078Hz  ,  fno: 713.143935819322
-			756,  // D4#<->E4  : 320.243700225281Hz ,  fno: 755.549680966705
-			800,  // E4 <->F4  : 339.286381589747Hz ,  fno: 800.477002939164
-			848,  // F4 <->F4# : 359.461399713042Hz ,  fno: 848.075842497381
-			899,  // F4#<->G4  : 380.836086842703Hz ,  fno: 898.505056343642
-			952,  // G4 <->G4# : 403.481779010055Hz ,  fno: 951.932947291307
-			1009, // G4#<->A4  : 427.474054107587Hz ,  fno: 1008.53782595981
-			1069, // A4 <->A4# : 452.892984123137Hz ,  fno: 1068.50860586978
-			1132, // A4#<->B4  : 479.823402372713Hz ,  fno: 1132.04543392433
-			      // B4 <->C5  : 508.3551866238Hz   ,  fno: 1199.36035838079
-			0x7fffffff
+		// NOTE: k.kotajima 2012/02/29
+		// mclkに依存しないテーブルにしたかったので64bit値テーブルにした。
+		// fno = (144 * (440*(2**((2*x+1)/24.0))) * (1<<20)) / (1<<(block-1)) :: x=-9~2, block=4
+		const uint64_t lim[12] = {
+			                // B3<->C4   : 254.1775933119Hz ,  fno: 4797441433.52314
+			5082712146ULL,  // C <->C#  : 269.291779527024Hz ,  fno: 5082712146.16792
+			5384945938ULL,  // C#<->D   : 285.304702023222Hz ,  fno: 5384945938.11664
+			5705151486ULL,  // D <->D#  : 302.26980244078Hz ,  fno: 5705151486.55457
+			6044397447ULL,  // D#<->E   : 320.243700225281Hz ,  fno: 6044397447.73364
+			6403816023ULL,  // E <->F   : 339.286381589747Hz ,  fno: 6403816023.51331
+			6784606739ULL,  // F <->F#  : 359.461399713042Hz ,  fno: 6784606739.97905
+			7188040450ULL,  // F#<->G   : 380.836086842703Hz ,  fno: 7188040450.74913
+			7615463578ULL,  // G <->G#  : 403.481779010055Hz ,  fno: 7615463578.33046
+			8068302607ULL,  // G#<->A   : 427.474054107587Hz ,  fno: 8068302607.6785
+			8548068846ULL,  // A <->A#  : 452.892984123137Hz ,  fno: 8548068846.95824
+			9056363471ULL,  // A#<->B   : 479.823402372713Hz ,  fno: 9056363471.39466
+			                // B4 <->C5   : 508.3551866238Hz ,  fno: 9594882867.04628
+			0xffffffffffffffffULL // stopper
 		};
-		const int minlim =  599; // B3<->C4
-		const int maxlim = 1199; // B4<->C5
-		int n;
+		const uint64_t minlim = 4797441433ULL;  // B3<->C4   : 254.1775933119Hz ,  fno: 4797441433.52314
+		const uint64_t maxlim = minlim*2;
 		
 		oct = fblock[exNo];
-		note = 0;
-		n = fnum[exNo];
-		// c, c#, d, d#, e, f, f#, g, g#, a, a#, b, c
-
-		if( !n ) return;
+		uint64_t n = static_cast<uint64_t>(fnum[exNo])*mclk;
+		if( !n ){
+			oct = 0;
+			note = 0;
+			return;
+		}
+		
 		while( n<minlim ){
 			oct--;
 			n<<=1;
@@ -99,34 +106,45 @@ public:
 			oct++;
 			n>>=1;
 		}
-		
 		int i;
 		for( i=0; lim[i]<=n; i++ );
 		note = i;
 	};
 #else
 	void getNoteEx(int exNo, int &oct, int &note){
-		// fno = (144*f*2**20)/ (mclk * 2**(block-1))
-		// (fno <<(block-1)) * mclk = f* 144*(1<<20)
-		if( !exmode ) exNo = 3;
+		const uint32_t lim[12] = {
+			         // C#<->C   : 254.1775933119Hz
+			269291,  // C <->C#  : 269.291779527024Hz
+			285304,  // C#<->D   : 285.304702023222Hz
+			302269,  // D <->D#  : 302.26980244078Hz
+			320243,  // D#<->E   : 320.243700225281Hz
+			339286,  // E <->F   : 339.286381589747Hz
+			359461,  // F <->F#  : 359.461399713042Hz
+			380836,  // F#<->G   : 380.836086842703Hz
+			403481,  // G <->G#  : 403.481779010055Hz
+			427474,  // G#<->A   : 427.474054107587Hz
+			452892,  // A <->A#  : 452.892984123137Hz
+			479823,  // A#<->B   : 479.823402372713Hz
+			         // B <->C   : 508.3551866238Hz
+			0xffffffff // stopper
+			};
+		const uint32_t minlim = 254177;  // C#<->C   : 254.1775933119Hz
+		const uint32_t maxlim = minlim*2;
 		
-		uint64_t mclk = 80000000;
-		
-		uint64_t f = fnum[exNo];
 		uint64_t b = fblock[exNo];
-		uint64_t n = b ? f<<(b-1) : f>>1;
+		uint64_t n;
+		if( oct )
+			n = static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1))*1000ULL / (144ULL*(1ULL<<20));
+		else
+			n = static_cast<uint64_t>(fnum[exNo])*mclk*1000ULL / (288ULL*(1ULL<<20));
 		
-		n *= mclk;
-
-		// (144<<10) * 440
-		const uint64_t oneoct = 64880640ULL;
-		// (144<<10) * (440-(440/24))
-		const uint64_t minlim = 62177280ULL; // B3<->C4
-		// (144<<10) * (880-(440/24))
-		const uint64_t maxlim = minlim + oneoct; // B4<->C5
+		if( !n ){
+			oct = 0;
+			note = 0;
+			return;
+		}
 		
 		oct = 4;
-		
 		while( n<minlim ){
 			oct--;
 			n<<=1;
@@ -135,9 +153,12 @@ public:
 			oct++;
 			n>>=1;
 		}
-		note = static_cast<int>( (n-minlim)/12 );
+		int i;
+		for( i=0; lim[i]<=n; i++ );
+		note = i;
 	};
-#endif
+#endif	
+
 	void getNote(int &oct, int &note){
 		getNoteEx(3, oct, note);
 	};
@@ -159,6 +180,7 @@ protected:
 	
 
 protected:
+	uint64_t mclk;
 	int exmode;
 	int fnum[4];	//11bit
 	int fblock[4];	//3bit

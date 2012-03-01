@@ -143,9 +143,9 @@ public:
 	}
 
 public:
-	virtual void filter( int addr, UCHAR *data ){};
-	virtual bool setReg( int addr, UCHAR data ){ return false; };
-	virtual UCHAR getReg( int addr ){ return 0;};
+	virtual void filter( int addr, UCHAR *data );
+	virtual bool setReg( int addr, UCHAR data );
+	virtual UCHAR getReg( int addr );
 	
 	void setPartMask(int ch, bool mask);
 	void setPartSolo(int ch, bool mask);

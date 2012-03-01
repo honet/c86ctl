@@ -17,7 +17,7 @@
 #define SUPPORT_MIDI
 #define SUPPORT_HID
 
-class GimicIF : public IRealChip2, public IGimic
+class GimicIF : public IRealChip2, public IGimic2
 {
 public:
 	GimicIF() : refcount(0){ };
@@ -43,6 +43,9 @@ public:
 			return NOERROR;
 		}else if( ::IsEqualIID( riid, IID_IGimic ) ){
 			*ppvObj = static_cast<IGimic*>(this);
+			return NOERROR;
+		}else if( ::IsEqualIID( riid, IID_IGimic2 ) ){
+			*ppvObj = static_cast<IGimic2*>(this);
 			return NOERROR;
 		}
 		*ppvObj = NULL;

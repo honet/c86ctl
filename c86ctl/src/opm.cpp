@@ -113,3 +113,18 @@ bool COPMFm::setReg( UCHAR bank, UCHAR addr, UCHAR data )
 	return handled;
 }
 
+void COPM::filter( int addr, UCHAR *data )
+{
+	return;
+}
+
+bool COPM::setReg( int addr, UCHAR data )
+{
+	return true;
+}
+
+UCHAR COPM::getReg( int addr )
+{
+	return 0;
+}
+
