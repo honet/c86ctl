@@ -66,77 +66,32 @@ public:
 	double getFreq(){ return getFreqEx(3); };
 
 public:
-#if 0
-	void getNoteEx(int exNo, int &oct, int &note){
-		// NOTE: k.kotajima 2012/02/29
-		// mclkに依存しないテーブルにしたかったので64bit値テーブルにした。
-		// fno = (144 * (440*(2**((2*x+1)/24.0))) * (1<<20)) / (1<<(block-1)) :: x=-9~2, block=4
-		const uint64_t lim[12] = {
-			                // B3<->C4   : 254.1775933119Hz ,  fno: 4797441433.52314
-			5082712146ULL,  // C <->C#  : 269.291779527024Hz ,  fno: 5082712146.16792
-			5384945938ULL,  // C#<->D   : 285.304702023222Hz ,  fno: 5384945938.11664
-			5705151486ULL,  // D <->D#  : 302.26980244078Hz ,  fno: 5705151486.55457
-			6044397447ULL,  // D#<->E   : 320.243700225281Hz ,  fno: 6044397447.73364
-			6403816023ULL,  // E <->F   : 339.286381589747Hz ,  fno: 6403816023.51331
-			6784606739ULL,  // F <->F#  : 359.461399713042Hz ,  fno: 6784606739.97905
-			7188040450ULL,  // F#<->G   : 380.836086842703Hz ,  fno: 7188040450.74913
-			7615463578ULL,  // G <->G#  : 403.481779010055Hz ,  fno: 7615463578.33046
-			8068302607ULL,  // G#<->A   : 427.474054107587Hz ,  fno: 8068302607.6785
-			8548068846ULL,  // A <->A#  : 452.892984123137Hz ,  fno: 8548068846.95824
-			9056363471ULL,  // A#<->B   : 479.823402372713Hz ,  fno: 9056363471.39466
-			                // B4 <->C5   : 508.3551866238Hz ,  fno: 9594882867.04628
-			0xffffffffffffffffULL // stopper
-		};
-		const uint64_t minlim = 4797441433ULL;  // B3<->C4   : 254.1775933119Hz ,  fno: 4797441433.52314
-		const uint64_t maxlim = minlim*2;
-		
-		oct = fblock[exNo];
-		uint64_t n = static_cast<uint64_t>(fnum[exNo])*mclk;
-		if( !n ){
-			oct = 0;
-			note = 0;
-			return;
-		}
-		
-		while( n<minlim ){
-			oct--;
-			n<<=1;
-		}
-		while( maxlim<n ){
-			oct++;
-			n>>=1;
-		}
-		int i;
-		for( i=0; lim[i]<=n; i++ );
-		note = i;
-	};
-#else
 	void getNoteEx(int exNo, int &oct, int &note){
 		const uint32_t lim[12] = {
-			         // C#<->C   : 254.1775933119Hz
-			269291,  // C <->C#  : 269.291779527024Hz
-			285304,  // C#<->D   : 285.304702023222Hz
-			302269,  // D <->D#  : 302.26980244078Hz
-			320243,  // D#<->E   : 320.243700225281Hz
-			339286,  // E <->F   : 339.286381589747Hz
-			359461,  // F <->F#  : 359.461399713042Hz
-			380836,  // F#<->G   : 380.836086842703Hz
-			403481,  // G <->G#  : 403.481779010055Hz
-			427474,  // G#<->A   : 427.474054107587Hz
-			452892,  // A <->A#  : 452.892984123137Hz
-			479823,  // A#<->B   : 479.823402372713Hz
-			         // B <->C   : 508.3551866238Hz
+			/*260277,*/  // C#<->C   : 254.1775933119Hz
+			275754,  // C <->C#  : 269.291779527024Hz
+			292152,  // C#<->D   : 285.304702023222Hz
+			309524,  // D <->D#  : 302.26980244078Hz
+			327929,  // D#<->E   : 320.243700225281Hz
+			347429,  // E <->F   : 339.286381589747Hz
+			368088,  // F <->F#  : 359.461399713042Hz
+			389976,  // F#<->G   : 380.836086842703Hz
+			413165,  // G <->G#  : 403.481779010055Hz
+			437733,  // G#<->A   : 427.474054107587Hz
+			463762,  // A <->A#  : 452.892984123137Hz
+			491339,  // A#<->B   : 479.823402372713Hz
+			/*520555,*/  // B <->C   : 508.3551866238Hz
 			0xffffffff // stopper
 			};
-		const uint32_t minlim = 254177;  // C#<->C   : 254.1775933119Hz
+		const uint32_t minlim = 260277;//254177;  // C#<->C   : 254.1775933119Hz
 		const uint32_t maxlim = minlim*2;
 		
 		uint64_t b = fblock[exNo];
 		uint64_t n;
 		if( oct )
-			n = static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1))*1000ULL / (144ULL*(1ULL<<20));
+			n = static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1)) / (144ULL*(1ULL<<10));
 		else
-			n = static_cast<uint64_t>(fnum[exNo])*mclk*1000ULL / (288ULL*(1ULL<<20));
+			n = static_cast<uint64_t>(fnum[exNo])*mclk / (288ULL*(1ULL<<10));
 		
 		if( !n ){
 			oct = 0;
@@ -157,7 +112,6 @@ public:
 		for( i=0; lim[i]<=n; i++ );
 		note = i;
 	};
-#endif	
 
 	void getNote(int &oct, int &note){
 		getNoteEx(3, oct, note);
