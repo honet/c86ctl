@@ -67,6 +67,7 @@ public:
 
 public:
 	void getNoteEx(int exNo, int &oct, int &note){
+#if 0
 		const uint32_t lim[12] = {
 			/*260277,*/  // C#<->C   : 254.1775933119Hz
 			275754,  // C <->C#  : 269.291779527024Hz
@@ -85,7 +86,7 @@ public:
 			};
 		const uint32_t minlim = 260277;//254177;  // C#<->C   : 254.1775933119Hz
 		const uint32_t maxlim = minlim*2;
-		
+#endif
 		uint64_t b = fblock[exNo];
 		uint64_t n;
 		if( oct )
@@ -100,16 +101,16 @@ public:
 		}
 		
 		oct = 4;
-		while( n<minlim ){
+		while( n<fmin ){
 			oct--;
 			n<<=1;
 		}
-		while( maxlim<n ){
+		while( fmax<n ){
 			oct++;
 			n>>=1;
 		}
 		int i;
-		for( i=0; lim[i]<=n; i++ );
+		for( i=0; ftable[i]<=n; i++ );
 		note = i;
 	};
 
