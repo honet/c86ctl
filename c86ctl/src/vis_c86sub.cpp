@@ -20,8 +20,9 @@
 #endif
 
 // --------------------------------------------------------------------------------------
-void blt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
-		  IVisBitmap *src, int src_x, int src_y )
+void c86ctl::vis::blt(
+	IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+	IVisBitmap *src, int src_x, int src_y )
 {
 	if( dst_x<0 || dst_y<0 || src_x<0 || src_y<0 )
 		return;
@@ -38,8 +39,9 @@ void blt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 	}
 }
 
-void alphablt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
-			   IVisBitmap *src, int src_x, int src_y )
+void c86ctl::vis::alphablt(
+	IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+	IVisBitmap *src, int src_x, int src_y )
 {
 	if( dst_x<0 || dst_y<0 || src_x<0 || src_y<0 )
 		return;
@@ -70,10 +72,11 @@ void alphablt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 	}
 }
 
-void transblt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
-			   IVisBitmap *src1, int src1_x, int src1_y,
-			   IVisBitmap *src2, int src2_x, int src2_y,
-			   IVisBitmap *trans, int trans_x, int trans_y, int t )
+void c86ctl::vis::transblt(
+	IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+	IVisBitmap *src1, int src1_x, int src1_y,
+	IVisBitmap *src2, int src2_x, int src2_y,
+	IVisBitmap *trans, int trans_x, int trans_y, int t )
 {
 	if( dst_x<0 || dst_y<0 || trans_x<0 || trans_y<0 )
 		return;
@@ -99,10 +102,11 @@ void transblt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 }
 
 // [tmin, tmax)
-void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
-			   IVisBitmap *src1, int src1_x, int src1_y,
-			   IVisBitmap *src2, int src2_x, int src2_y,
-			   IVisBitmap *trans, int trans_x, int trans_y, int tmin, int tmax )
+void c86ctl::vis::transblt2(
+	IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
+	IVisBitmap *src1, int src1_x, int src1_y,
+	IVisBitmap *src2, int src2_x, int src2_y,
+	IVisBitmap *trans, int trans_x, int trans_y, int tmin, int tmax )
 {
 	if( dst_x<0 || dst_y<0 || trans_x<0 || trans_y<0 )
 		return;
@@ -129,7 +133,8 @@ void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 
 
 
-void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col )
+void c86ctl::vis::visDrawLine(
+	IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col )
 {
 	// note: めんどくさがって bpp==4専用コードで書いてるので注意
 	if( !bmp )
@@ -197,7 +202,8 @@ void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col 
 	}
 }
 
-void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col )
+void c86ctl::vis::visFillRect(
+	IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col )
 {
 	if( !bmp )
 		return;

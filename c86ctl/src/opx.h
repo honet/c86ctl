@@ -11,6 +11,8 @@
 #include "chip.h"
 #include "if.h"
 
+namespace c86ctl{
+
 class OPNA;
 class OPN3L;
 class OPM;
@@ -237,3 +239,4 @@ protected:
 	IRealChip2 *pIF;
 };
 
+};

@@ -23,6 +23,10 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+using namespace c86ctl;
+using namespace c86ctl::vis;
+
+static const int modHeight = 74;
 
 void CVisC86Main::attach( std::vector< std::shared_ptr<GimicIF> > &g )
 {
@@ -54,7 +58,7 @@ bool CVisC86Main::create(void)
 	size_t sz = info.size();
 
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
-	windowHeight = 19+40+74*sz+10;
+	windowHeight = 19+40+modHeight*sz+10;
 	windowWidth = 334;
 	
 	if ( !CVisWnd::create( 0, WS_POPUP | WS_CLIPCHILDREN ) ){
@@ -126,7 +130,7 @@ bool CVisC86Main::create(void)
 			widgets.push_back(info[i].checkADPCM);
 			 */
 		}
-		y+=74;
+		y+=modHeight;
 	}
 
 	return true;
@@ -188,7 +192,7 @@ void CVisC86Main::onPaintClient()
 		// ƒJƒƒŠ[(w
 		sprintf(str, "CALORIE: %d CPS", gimic[i]->getCPS() );
 		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		y+=74;
+		y+=modHeight;
 	}
 
 	// FPS

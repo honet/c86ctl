@@ -14,6 +14,8 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+using namespace c86ctl;
+
 bool COPNFm::setReg( UCHAR bank, UCHAR adrs, UCHAR data )
 {
 	INT idx, slot, tmp, idxoffset = bank*3;

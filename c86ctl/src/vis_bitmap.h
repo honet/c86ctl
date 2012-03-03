@@ -9,6 +9,9 @@
 
 #pragma once
 
+namespace c86ctl{
+namespace vis {
+
 class CVisChildBitmap;
 
 interface IVisBitmap
@@ -114,4 +117,5 @@ protected:
 };
 
 
-
+};
+};

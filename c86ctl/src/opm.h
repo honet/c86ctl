@@ -11,6 +11,8 @@
 #include "chip.h"
 #include "opx.h"
 
+namespace c86ctl{
+
 // ---------------------------------------------------------------------------------------
 #if 0
 class COPM : public Chip
@@ -185,3 +187,4 @@ protected:
 	IRealChip2 *pIF;
 };
 
+};

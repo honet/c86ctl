@@ -16,6 +16,8 @@
 #define BORDER			2
 #define BORDER_TITLE	15
 
+namespace c86ctl{
+namespace vis {
 
 class CVisManager;
 
@@ -91,3 +93,5 @@ private: // CVisWnd‚ÆHWND‚Ì‘Î‰ž•t‚¯—p
 	static HANDLE hCreatingMutex;
 };
 
+};
+};

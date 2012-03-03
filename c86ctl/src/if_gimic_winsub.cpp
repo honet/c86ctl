@@ -28,6 +28,7 @@
 #pragma comment(lib, "setupapi.lib")
 #pragma comment(lib, "winusb.lib")
 
+using namespace c86ctl;
 
 // デバイスドライバのinf内で定義したGUID
 // (WinUSB.sys使用デバイスに対する識別子）

@@ -13,6 +13,8 @@
 #include "vis_c86skin.h"
 #include "vis_c86wnd.h"
 
+namespace c86ctl{
+namespace vis {
 
 // ---------------------------------------------------------------------------
 class CVisWidget
@@ -174,10 +176,14 @@ protected:
 
 typedef std::shared_ptr<CVisKnob> CVisKnobPtr;
 
+}; // namespace vis
+}; // namespace c86ctl
 
 
 // ---------------------------------------------------------------------------
 // support macro.
-#define HANDLER_DELEGATE( method )  [this](CVisWidget* s){ this-> ## method (s); }
-#define ADD_HANDLER( e, method )  e ## .push_back( [this](CVisWidget* s){ this-> ## method (s); } );
+#define HANDLER_DELEGATE( method )  [this](c86ctl::vis::CVisWidget* s){ this-> ## method (s); }
+#define ADD_HANDLER( e, method )  e ## .push_back( [this](c86ctl::vis::CVisWidget* s){ this-> ## method (s); } );
+
+
 

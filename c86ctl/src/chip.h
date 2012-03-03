@@ -8,6 +8,8 @@
  */
 #pragma once
 
+namespace c86ctl{
+
 class Chip
 {
 public:
@@ -33,5 +35,7 @@ public:
 
 	UCHAR ssgVol;
 	UINT clock;
+};
+
 };
 

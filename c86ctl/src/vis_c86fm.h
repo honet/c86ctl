@@ -14,6 +14,9 @@
 #include "vis_c86wnd.h"
 
 
+namespace c86ctl{
+namespace vis {
+
 // --------------------------------------------------------
 class CVisC86Fm : public CVisWnd
 {
@@ -148,3 +151,5 @@ private:
 // factory
 CVisC86FmPtr visC86FmViewFactory(Chip *pchip, int id, int ch);
 
+};
+};

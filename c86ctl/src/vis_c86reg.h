@@ -14,6 +14,9 @@
 #include "opl3.h"
 #include "vis_c86wnd.h"
 
+namespace c86ctl{
+namespace vis {
+
 // --------------------------------------------------------
 class CVisC86Reg : public CVisWnd
 {
@@ -128,4 +131,7 @@ private:
 // factory
 CVisC86RegPtr visC86RegViewFactory(Chip *pchip, int id);
 
+
+};
+};
 

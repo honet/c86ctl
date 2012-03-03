@@ -12,6 +12,7 @@
 #include "if.h"
 #include "opnx.h"
 
+namespace c86ctl{
 
 // ---------------------------------------------------------------------------------------
 class COPNAAdpcm{
@@ -196,4 +197,5 @@ protected:
 	IRealChip2 *pIF;
 };
 
+};
 

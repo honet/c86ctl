@@ -15,6 +15,9 @@
 #include "vis_c86skin.h"
 #include "fpscounter.h"
 
+namespace c86ctl{
+namespace vis {
+
 class CVisWnd;
 
 class CVisManager
@@ -43,4 +46,5 @@ protected:
 	double fps;
 };
 
-
+};
+};

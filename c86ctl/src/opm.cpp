@@ -14,6 +14,7 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+using namespace c86ctl;
 
 bool COPMFm::setReg( UCHAR bank, UCHAR addr, UCHAR data )
 {

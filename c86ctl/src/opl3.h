@@ -10,6 +10,8 @@
 #pragma once
 #include "chip.h"
 
+namespace c86ctl{
+
 // ---------------------------------------------------------------------------------------
 class COPL3 : public Chip
 {
@@ -56,5 +58,7 @@ public:
 public:
 	UCHAR reg[2][256];
 	UCHAR regATime[2][256];
+};
+
 };
 

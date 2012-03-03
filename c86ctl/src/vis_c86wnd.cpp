@@ -25,6 +25,8 @@
 
 #define MUTEX_NAME TEXT("C86WINDOW_MANAGER_MUTEX")
 
+using namespace c86ctl;
+using namespace c86ctl::vis;
 
 std::map< HWND, CVisWnd* > CVisWnd::wndMap;
 CVisWnd* CVisWnd::creatingWnd;

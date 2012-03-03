@@ -38,6 +38,9 @@
 #pragma managed(push, off)
 #endif
 
+using namespace c86ctl;
+using namespace c86ctl::vis;
+
 // ------------------------------------------------------------------
 // グローバル変数
 ULONG_PTR gdiToken = 0;
@@ -74,6 +77,7 @@ BOOL APIENTRY DllMain(
 
 
 // -----------------------------------------------------------------------
+namespace c86ctl{
 class C86Ctl : public IRealChipBase
 {
 public:
@@ -125,6 +129,7 @@ protected:
 	bool isInitialized;
 protected:
 	UINT refCount;
+};
 };
 
 
@@ -303,7 +308,7 @@ int C86Ctl::deinitialize(void)
 	if( !isInitialized )
 		return C86CTL_ERR_UNKNOWN;
 
-	c86ctl_reset();
+	reset();
 
 	// 各種スレッド終了
 	terminateFlag = true;

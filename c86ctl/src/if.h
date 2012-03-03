@@ -17,6 +17,8 @@
 #define SUPPORT_MIDI
 #define SUPPORT_HID
 
+namespace c86ctl{
+
 class GimicIF : public IRealChip2, public IGimic2
 {
 public:
@@ -94,3 +96,5 @@ protected:
 };
 
 typedef std::shared_ptr<GimicIF> GimicIFPtr;
+
+};

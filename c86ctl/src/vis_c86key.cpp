@@ -16,6 +16,9 @@
 #endif
 
 
+using namespace c86ctl;
+using namespace c86ctl::vis;
+
 void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 								  int trNo, int fmNo, bool isMute, COPNFmCh *pFMCh )
 {
@@ -330,7 +333,7 @@ void CVisC86OPN3LKey::onPaintClient(void)
 
 
 // --------------------------------------------------------
-CVisC86KeyPtr visC86KeyViewFactory(Chip *pchip, int id)
+CVisC86KeyPtr c86ctl::vis::visC86KeyViewFactory(Chip *pchip, int id)
 {
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86KeyPtr( new CVisC86OPNAKey(dynamic_cast<COPNA*>(pchip), id ) );

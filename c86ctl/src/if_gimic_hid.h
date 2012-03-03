@@ -19,6 +19,7 @@
 #include "ringbuff.h"
 #include "chip.h"
 
+namespace c86ctl{
 
 class GimicHID : public GimicIF
 {
@@ -96,6 +97,8 @@ public:
 };
 
 typedef std::shared_ptr<GimicHID> GimicHIDPtr;
+
+};
 
 #endif
 

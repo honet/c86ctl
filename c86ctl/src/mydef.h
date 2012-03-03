@@ -14,8 +14,8 @@
 
 typedef std::basic_string<TCHAR> tstring;
 
-#define MIN(a,b)   ((a)<(b)?(a):(b))
 #define PI         3.14159265358979
+#define MIN(a,b)   ((a)<(b)?(a):(b))
 #define SWAP(a,b)  do{ int t=(a); (a)=(b); (b)=t; }while(0)
 
 

@@ -19,6 +19,7 @@
 #include "ringbuff.h"
 #include "chip.h"
 
+namespace c86ctl{
 
 class GimicMIDI : public GimicIF
 {
@@ -76,6 +77,8 @@ public:
 };
 
 typedef std::shared_ptr<GimicMIDI> GimicMIDIPtr;
+
+};
 
 #endif
 

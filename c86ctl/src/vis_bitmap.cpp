@@ -20,6 +20,8 @@
 //#endif
 
 using namespace Gdiplus;
+using namespace c86ctl;
+using namespace c86ctl::vis;
 
 void CVisBitmap::createDIB(int w, int h)
 {

@@ -16,6 +16,7 @@
 #define new DEBUG_NEW
 #endif
 
+using namespace c86ctl;
 
 // アプリケーションのバージョン情報に使われる CAboutDlg ダイアログ
 

@@ -30,6 +30,8 @@
 #define INIKEY_GIMICIFTYPE	TEXT("gimic_iftype")
 
 
+namespace c86ctl{
+
 class CC86CtlConfig
 {
 protected:
@@ -63,6 +65,7 @@ public:
 	BOOL writeInt( LPCTSTR section, LPCTSTR key, INT val );
 };
 
+}; // namespace c86ctl
 
-extern class CC86CtlConfig gConfig;
+extern class c86ctl::CC86CtlConfig gConfig;
 

@@ -13,6 +13,9 @@
 #include "opm.h"
 #include "vis_c86wnd.h"
 
+namespace c86ctl{
+namespace vis {
+
 
 // --------------------------------------------------------
 class CVisC86Key : public CVisWnd
@@ -127,4 +130,7 @@ protected:
 // --------------------------------------------------------
 // factory
 CVisC86KeyPtr visC86KeyViewFactory(Chip *pchip, int id);
+
+};
+};
 

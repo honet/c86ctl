@@ -10,6 +10,8 @@
 #pragma once
 #include <list>
 
+namespace c86ctl{
+
 class FPSCounter{
 public:
 	FPSCounter();
@@ -31,5 +33,7 @@ private:
 	std::list<double> sample;
 	int nsamples;
 	double dsum;
+};
+
 };
 

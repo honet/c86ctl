@@ -10,26 +10,8 @@
 #include "opna.h"
 #include "vis_bitmap.h"
 
-
-#define BUTTON_PLAY		0
-#define BUTTON_STOP		1
-#define BUTTON_PAUSE	2
-#define BUTTON_FADE		3
-#define BUTTON_BUSY		4
-#define BUTTON_KEY		5
-#define BUTTON_REG		6
-#define BUTTON_LEVEL	7
-#define BUTTON_FM1		8
-#define BUTTON_FM2		9
-#define BUTTON_FM3		10
-#define BUTTON_FM4		11
-#define BUTTON_FM5		12
-#define BUTTON_FM6		13
-#define BUTTON_SSG1		14
-#define BUTTON_SSG2		15
-#define BUTTON_SSG3		16
-#define BUTTON_ADPCM	17
-
+namespace c86ctl{
+namespace vis {
 
 // bitmap operations ------------------------------------------------
 void blt( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
@@ -48,4 +30,7 @@ void transblt2( IVisBitmap *dst, int dst_x, int dst_y, int w, int h,
 void visDrawLine( IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col );
 void visFillRect( IVisBitmap *bmp, int xs, int ys, int w, int h, COLORREF col );
 
+
+};
+};
 

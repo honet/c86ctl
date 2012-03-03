@@ -16,6 +16,9 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+using namespace c86ctl;
+using namespace c86ctl::vis;
+
 #define WINDOW_WIDTH  (316+4)
 #define WINDOW_HEIGHT (75*5+4+15)
 
@@ -289,7 +292,7 @@ void CVisC86OPMFm::onPaintClient()
 }
 
 // --------------------------------------------------------
-CVisC86FmPtr visC86FmViewFactory(Chip *pchip, int id, int ch)
+CVisC86FmPtr c86ctl::vis::visC86FmViewFactory(Chip *pchip, int id, int ch)
 {
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86FmPtr( new CVisC86OPNAFm(dynamic_cast<COPNA*>(pchip), id, ch ) );

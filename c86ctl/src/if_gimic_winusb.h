@@ -15,6 +15,8 @@
 #include <winusb.h>
 #include	"if.h"
 
+namespace c86ctl{
+
 class GIMICWinUSB : public IGIMICIF
 {
 private:
@@ -35,6 +37,8 @@ private:
 	void Close(void);
 	void Reset(void);
 	BOOL Write(UCHAR*,int);
+};
+
 };
 
 #endif

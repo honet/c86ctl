@@ -13,6 +13,8 @@
 #include "if.h"
 #include "opx.h"
 
+namespace c86ctl{
+
 class OPNA;
 class OPN3L;
 class OPM;
@@ -67,26 +69,6 @@ public:
 
 public:
 	void getNoteEx(int exNo, int &oct, int &note){
-#if 0
-		const uint32_t lim[12] = {
-			/*260277,*/  // C#<->C   : 254.1775933119Hz
-			275754,  // C <->C#  : 269.291779527024Hz
-			292152,  // C#<->D   : 285.304702023222Hz
-			309524,  // D <->D#  : 302.26980244078Hz
-			327929,  // D#<->E   : 320.243700225281Hz
-			347429,  // E <->F   : 339.286381589747Hz
-			368088,  // F <->F#  : 359.461399713042Hz
-			389976,  // F#<->G   : 380.836086842703Hz
-			413165,  // G <->G#  : 403.481779010055Hz
-			437733,  // G#<->A   : 427.474054107587Hz
-			463762,  // A <->A#  : 452.892984123137Hz
-			491339,  // A#<->B   : 479.823402372713Hz
-			/*520555,*/  // B <->C   : 508.3551866238Hz
-			0xffffffff // stopper
-			};
-		const uint32_t minlim = 260277;//254177;  // C#<->C   : 254.1775933119Hz
-		const uint32_t maxlim = minlim*2;
-#endif
 		uint64_t b = fblock[exNo];
 		uint64_t n;
 		if( oct )
@@ -463,3 +445,4 @@ protected:
 	IRealChip2 *pIF;
 };
 
+};

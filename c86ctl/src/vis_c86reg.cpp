@@ -16,6 +16,9 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+using namespace c86ctl;
+using namespace c86ctl::vis;
+
 // --------------------------------------------------------
 void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 							  const UCHAR *regval, const UCHAR *regatime )
@@ -127,7 +130,7 @@ void CVisC86OPL3Reg::onPaintClient()
 }
 
 // --------------------------------------------------------
-CVisC86RegPtr visC86RegViewFactory(Chip *pchip, int id)
+CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
 {
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86RegPtr( new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id ) );

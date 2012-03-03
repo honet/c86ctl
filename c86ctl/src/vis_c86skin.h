@@ -14,10 +14,8 @@
 //#define RGBtoBGRA(x) 
 #define ARGB(a,r,g,b)  ( (UINT)(b) | (UINT)(g) << 8 | (UINT)(r) << 16 | (UINT)(a) << 24 )
 
-//#define col_light	ARGB(0,199,200,255)
-//#define col_shadow	ARGB(0,43,44,75)
-//#define col_mid		ARGB(0,68,68,119)
-//#define col_high	ARGB(0,128,128,255)
+namespace c86ctl{
+namespace vis {
 
 class CVisC86Skin
 {
@@ -72,5 +70,7 @@ protected:
 	std::vector<UINT> coltbl;
 };
 
-extern CVisC86Skin gVisSkin;
+};
+};
 
+extern c86ctl::vis::CVisC86Skin gVisSkin;

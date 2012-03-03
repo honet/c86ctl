@@ -19,6 +19,9 @@
 #include "if_gimic_hid.h"
 #include "if_gimic_midi.h"
 
+namespace c86ctl{
+namespace vis {
+
 
 class CVisC86Main : public CVisWnd
 {
@@ -50,8 +53,6 @@ protected:
 		Devinfo chipinfo;
 		ChipType chiptype;
 		UINT major, minor, rev, build;
-		//UINT clock;
-		//UCHAR ssgvol;
 
 		CVisCheckBoxPtr checkKey;
 		CVisCheckBoxPtr checkReg;
@@ -67,5 +68,8 @@ protected:
 	std::vector<hwinfo> info;
 
 	UINT tick;
+};
+
+};
 };
 

@@ -14,9 +14,8 @@
 #include <ObjBase.h>
 
 #ifdef __cplusplus
-extern "C" {
+namespace c86ctl{
 #endif
-
 
 /*----------------------------------------------------------------------------*/
 /*  ’è”’è‹`                                                                  */
@@ -111,6 +110,10 @@ interface IGimic2 : public IGimic
 /*----------------------------------------------------------------------------*/
 /*  ŒöŠJŠÖ”’è‹`                                                              */
 /*----------------------------------------------------------------------------*/
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 HRESULT WINAPI CreateInstance( REFIID riid, void** ppi );
 
 
@@ -123,7 +126,8 @@ UCHAR WINAPI c86ctl_in( UINT addr );				// DEPRECATED
 
 
 #ifdef __cplusplus
-}
+};
+};
 #endif
 
 #endif
