@@ -222,12 +222,12 @@ bool COPNSsg::setReg( UCHAR adrs, UCHAR data )
 		setNoisePeriod( data&0x1f );
 		break;
 	case 0x07: // keyon
-		if( data&0x01 ){ ch[0]->toneOn(); }else{ ch[0]->toneOff(); };
-		if( data&0x02 ){ ch[1]->toneOn(); }else{ ch[1]->toneOff(); };
-		if( data&0x04 ){ ch[2]->toneOn(); }else{ ch[2]->toneOff(); };
-		if( data&0x08 ){ ch[0]->noiseOn(); }else{ ch[0]->noiseOff(); };
-		if( data&0x10 ){ ch[1]->noiseOn(); }else{ ch[1]->noiseOff(); };
-		if( data&0x20 ){ ch[2]->noiseOn(); }else{ ch[2]->noiseOff(); };
+		if( data&0x01 ){ ch[0]->toneOff(); }else{ ch[0]->toneOn(); };
+		if( data&0x02 ){ ch[1]->toneOff(); }else{ ch[1]->toneOn(); };
+		if( data&0x04 ){ ch[2]->toneOff(); }else{ ch[2]->toneOn(); };
+		if( data&0x08 ){ ch[0]->noiseOff(); }else{ ch[0]->noiseOn(); };
+		if( data&0x10 ){ ch[1]->noiseOff(); }else{ ch[1]->noiseOn(); };
+		if( data&0x20 ){ ch[2]->noiseOff(); }else{ ch[2]->noiseOn(); };
 		break;
 		
 	case 0x08: // amp level

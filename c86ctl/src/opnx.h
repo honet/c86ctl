@@ -69,12 +69,12 @@ public:
 public:
 	void getNoteEx(int exNo, int &oct, int &note){
 		uint64_t b = fblock[exNo];
-		uint64_t n;
+		uint32_t n;
 		
 		// fno = (144*f*2**20)/ (mclk * 2**(block-1)) ‚æ‚è
 		// f*1024 = fno * mclk * (2**(block-1)) / (144*(2**20)) * 1024
-		if( b ) n = static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1)) / 147456ULL;
-		else    n = static_cast<uint64_t>(fnum[exNo])*mclk / 294912ULL;
+		if( b ) n = static_cast<uint32_t>( static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1)) / 147456ULL );
+		else    n = static_cast<uint32_t>( static_cast<uint64_t>(fnum[exNo])*mclk / 294912ULL );
 
 		if( !n ){
 			oct = 0;
@@ -201,7 +201,7 @@ class COPNSsgCh{
 	friend class COPNSsg;
 
 public:
-	COPNSsgCh(IRealChip2 *p) : pIF(p){ reset(); };
+	COPNSsgCh(IRealChip2 *p) : pIF(p), mclk(7987200ULL) { reset(); };
 	virtual ~COPNSsgCh(){};
 
 	void reset(){
@@ -232,47 +232,32 @@ public:
 	bool isOn(){ return (tone|noise); };
 
 	void getNote(int &oct, int &note){
-		const int lim[12] = {
-			     // B3 <->C4  : 254.1775933119Hz   ,  TP: 491.782136935309
-			464, // C4 <->C4# : 269.291779527024Hz ,  TP: 464.180526488949
-			438, // C4#<->D4  : 285.304702023222Hz ,  TP: 438.128075399983
-			413, // D4 <->D4# : 302.26980244078Hz  ,  TP: 413.537836034712
-			390, // D4#<->E4  : 320.243700225281Hz ,  TP: 390.327740755139
-			368, // E4 <->F4  : 339.286381589747Hz ,  TP: 368.420328025855
-			347, // F4 <->F4# : 359.461399713042Hz ,  TP: 347.742483893368
-			328, // F4#<->G4  : 380.836086842703Hz ,  TP: 328.225197975078
-			309, // G4 <->G4# : 403.481779010055Hz ,  TP: 309.803333143539
-			292, // G4#<->A4  : 427.474054107587Hz ,  TP: 292.415408137356
-			276, // A4 <->A4# : 452.892984123137Hz ,  TP: 276.003392373183
-			260, // A4#<->B4  : 479.823402372713Hz ,  TP: 260.512512274054
-			     // B4 <->C5  : 508.3551866238Hz   ,  TP: 245.891068467654
-			0
-		};
-		const int maxlim = 492; // B3<->C4
-		const int minlim = 246; // B4<->C5
-		int n;
+		// tp = M/(f*64) ‚æ‚è
+		// f*1024 = (M*1024) / (tune*64)
+		uint32_t n = static_cast<uint32_t>( (mclk*16ULL)/getTune() );
 
+		if( !n ){
+			oct = 0;
+			note = 0;
+			return;
+		}
 		oct = 4;
-		note = 0;
-		n = getTune();
-		// c, c#, d, d#, e, f, f#, g, g#, a, a#, b, c
-
-		if( !n ) return;
-		while( n<minlim ){
-			oct++;
+		while( n<fmin ){
+			oct--;
 			n<<=1;
 		}
-		while( maxlim<n ){
-			oct--;
+		while( fmax<n ){
+			oct++;
 			n>>=1;
 		}
 
 		int i;
-		for( i=0; n<lim[i]; i++ );
+		for( i=0; ftable[i]<=n; i++ );
 		note = i;
 	};
 	
 	void setMasterClock( UINT clock ){
+		mclk = clock;
 	};
 	
 protected:
@@ -287,6 +272,7 @@ protected:
 	void noiseOff(){ noise = false; };
 	
 protected:
+	uint64_t mclk;
 	int fineTune;	// 8bit
 	int coarseTune;	// 4bit
 	int level;		// 4bit

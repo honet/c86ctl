@@ -134,19 +134,27 @@ void CVisC86Key::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty,
 	COPNSsgCh *pSsgCh = pSsg->ch[ssgNo];
 	
 	if( !isMute ){
-		sprintf( str, "NOISE:%04d", period );
-		skin->drawStr( canvas, 0, ltx+5+cx*30, lty+sy+5, str );
-		
-		int tune = pSsgCh->getTune();
-		sprintf( str, "TUNE:%04d", tune );
-		skin->drawStr( canvas, 0, ltx+5+cx*42, lty+sy+5, str );
-
 		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
+		skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5, "NOISE:" );
+		skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, "TONE:" );
+		skin->drawStr( canvas, 0, ltx+5+cx*47, lty+sy+5, "NOTE:" );
+		
+		if( pSsgCh->isNoiseOn() ){
+			sprintf( str, "%04d", period );
+			skin->drawStr( canvas, 0, ltx+5+cx*30, lty+sy+5, str );
+		}
+		if( pSsgCh->isToneOn() ){
+			int tune = pSsgCh->getTune();
+			sprintf( str, "%04d", tune );
+			skin->drawStr( canvas, 0, ltx+5+cx*40, lty+sy+5, str );
+		}
 		if( pSsgCh->isOn() && pSsgCh->getLevel()!=0 ){
 			int oct, note;
 			pSsgCh->getNote( oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+			sprintf( str, "O%d%s", oct, noteStr[note] );
+			skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 		}
 		skin->drawHBar( canvas, 290, lty+sy+15, pSsgCh->getKeyOnLevel(), 0 );
 	}else{
