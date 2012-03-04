@@ -62,7 +62,8 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 		}else{
 			int fblock = pFMCh->getFBlockEx(0);
 			int fnum = pFMCh->getFNumEx(0);
-			sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
@@ -70,6 +71,8 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 				int oct, note;
 				pFMCh->getNoteEx( 0, oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+				sprintf( str, "O%d%s", oct, noteStr[note] );
+				skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 			}
 			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevelEx(0), 0 );
 		}
@@ -100,7 +103,8 @@ void CVisC86Key::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 		if( pFMCh->getExMode() && !isMute ){
 			int fblock = pFMCh->getFBlockEx(exNo);
 			int fnum = pFMCh->getFNumEx(exNo);
-			sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
@@ -108,6 +112,8 @@ void CVisC86Key::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 				int oct, note;
 				pFMCh->getNoteEx( exNo, oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+				sprintf( str, "O%d%s", oct, noteStr[note] );
+				skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 			}
 			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevelEx(exNo), 0 );
 		}else{
@@ -218,8 +224,11 @@ void CVisC86Key::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty,
 			skin->drawStr( canvas, 0, ltx+5+cx*29, lty+sy+5+18, "SD" );
 		if( rhythm->bd->isOn() )
 			skin->drawStr( canvas, 0, ltx+5+cx*34, lty+sy+5+18, "BD");
+		
+		skin->drawHBar( canvas, 290, lty+sy+16, rhythm->getKeyOnLevel(), 0 );
+	}else{
+		skin->drawHBar( canvas, 290, lty+sy+16, 0, 0 );
 	}
-	skin->drawHBar( canvas, 290, lty+sy+16, rhythm->getKeyOnLevel(), 0 );
 }
 
 // --------------------------------------------------------

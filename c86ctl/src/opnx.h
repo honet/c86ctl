@@ -234,13 +234,14 @@ public:
 	void getNote(int &oct, int &note){
 		// tp = M/(f*64) ‚æ‚è
 		// f*1024 = (M*1024) / (tune*64)
-		uint32_t n = static_cast<uint32_t>( (mclk*16ULL)/getTune() );
-
-		if( !n ){
+		uint64_t t = getTune();
+		if( !t ){
 			oct = 0;
 			note = 0;
 			return;
 		}
+		uint32_t n = static_cast<uint32_t>( (mclk*16ULL)/t );
+
 		oct = 4;
 		while( n<fmin ){
 			oct--;
