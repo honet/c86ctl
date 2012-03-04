@@ -169,6 +169,7 @@ public:
 	};
 	int getKeyOnLevel(){ return keyOnLevel[3]; };
 	int getKeyOnLevelEx(int idx){ return keyOnLevel[idx]; };
+	virtual void getNote(int &oct, int &note){};
 
 public:
 	bool isKeyOn(){
@@ -203,20 +204,7 @@ public:
 	};
 
 protected:
-	void keyOn( UCHAR slotsw ){
-		for( int i=0; i<4; i++ ){ // D3:4, D2:3, D1:2, D0:1
-			if( slotsw & 0x01 ){
-				slot[i]->on();
-				//if( exmode )
-				keyOnLevel[i] = (127-slot[i]->getTotalLevel())>>2;
-			}else
-				slot[i]->off();
-			slotsw >>= 1;
-		}
-		//if( !exmode ){
-			keyOnLevel[3] = (127-getMixLevel())>>2;
-		//}
-	};
+	virtual void keyOn( UCHAR slotsw ){};
 
 	void setAMS(int ams){ this->ams = ams; };
 	void setPMS(int pms){ this->pms = pms; };

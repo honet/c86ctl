@@ -153,6 +153,10 @@ public:
 	virtual void filter( int addr, UCHAR *data );
 	virtual bool setReg( int addr, UCHAR data );
 	virtual UCHAR getReg( int addr );
+	virtual void setMasterClock( UINT clock ){
+		fm->setMasterClock(clock);
+		ssg->setMasterClock(clock);
+	};
 	
 	void setPartMask(int ch, bool mask);
 	void setPartSolo(int ch, bool mask);

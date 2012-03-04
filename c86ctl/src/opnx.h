@@ -27,7 +27,7 @@ class COPNFmCh : public COPXFmCh {
 	friend class COPM;
 	
 public:
-	COPNFmCh(IRealChip2 *p) : COPXFmCh(p){
+	COPNFmCh(IRealChip2 *p) : COPXFmCh(p), mclk(7987200ULL) {
 		reset();
 	};
 	virtual ~COPNFmCh(void){
@@ -35,7 +35,6 @@ public:
 
 	virtual void reset(){
 		COPXFmCh::reset();
-		mclk = 8000000ULL;
 		exmode = 0;
 		for( int i=0; i<4; i++ ){
 			fnum[i] = 0;
@@ -71,11 +70,12 @@ public:
 	void getNoteEx(int exNo, int &oct, int &note){
 		uint64_t b = fblock[exNo];
 		uint64_t n;
-		if( oct )
-			n = static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1)) / (144ULL*(1ULL<<10));
-		else
-			n = static_cast<uint64_t>(fnum[exNo])*mclk / (288ULL*(1ULL<<10));
 		
+		// fno = (144*f*2**20)/ (mclk * 2**(block-1)) ‚æ‚è
+		// f*1024 = fno * mclk * (2**(block-1)) / (144*(2**20)) * 1024
+		if( b ) n = static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1)) / 147456ULL;
+		else    n = static_cast<uint64_t>(fnum[exNo])*mclk / 294912ULL;
+
 		if( !n ){
 			oct = 0;
 			note = 0;
@@ -96,11 +96,29 @@ public:
 		note = i;
 	};
 
-	void getNote(int &oct, int &note){
+	virtual void getNote(int &oct, int &note){
 		getNoteEx(3, oct, note);
 	};
 
+	void setMasterClock( UINT clock ){
+		mclk = clock;
+	};
+	
 protected:
+	virtual void keyOn( UCHAR slotsw ){
+		for( int i=0; i<4; i++ ){ // D3:4, D2:3, D1:2, D0:1
+			if( slotsw & 0x01 ){
+				slot[i]->on();
+				if( exmode )
+					keyOnLevel[i] = (127-slot[i]->getTotalLevel())>>2;
+			}else
+				slot[i]->off();
+			slotsw >>= 1;
+		}
+		if( !exmode ){
+			keyOnLevel[3] = (127-getMixLevel())>>2;
+		}
+	};
 	void setExMode(int mode){ exmode = mode; };
 	void setFExLo(int slotno, UCHAR data){
 		fpacked[slotno] = (fpacked[slotno] & 0xff00) | data;
@@ -155,6 +173,10 @@ public:
 	
 public:
 	int getLFO(){ return lfo; };
+	void setMasterClock( UINT clock ){
+		for( int i=0; i<6; i++ )
+			ch[i]->setMasterClock(clock);
+	};
 	
 protected:
 	bool isLFOOn(){ return lfo_sw; };
@@ -250,6 +272,9 @@ public:
 		note = i;
 	};
 	
+	void setMasterClock( UINT clock ){
+	};
+	
 protected:
 	void setFineTune(int ft){ fineTune = ft; };
 	void setCoarseTune(int ct){ coarseTune = ct; };
@@ -310,6 +335,11 @@ public:
 	int getEnvCoarseTune(){ return envCoarseTune; };
 	int getEnvType(){ return envType; };
 	int getNoisePeriod(){ return noisePeriod; };
+	
+	void setMasterClock( UINT clock ){
+		for( int i=0; i<3; i++ )
+			ch[i]->setMasterClock(clock);
+	};
 
 protected:
 	void setEnvFineTune(int ft){ envFineTune = ft; };

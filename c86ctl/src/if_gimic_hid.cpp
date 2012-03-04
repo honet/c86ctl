@@ -259,11 +259,12 @@ int GimicHID::init(void)
 		chip = new COPL3();
 	}
 	
-	
+	// 値をキャッシュさせるためのダミー呼び出し
 	UCHAR vol;
 	getSSGVolume(&vol);
 	UINT clock;
 	getPLLClock(&clock);
+	
 	return C86CTL_ERR_NONE;
 }
 
@@ -314,7 +315,13 @@ int GimicHID::setPLLClock(UINT clock)
 
 	gimicParam.clock = clock;
 	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
-	return sendMsg( &d );
+	int ret = sendMsg( &d );
+
+	if( ret == C86CTL_ERR_NONE ){
+		if( chip )
+			chip->setMasterClock(clock);
+	}
+	return ret;
 }
 
 int GimicHID::getPLLClock(UINT *clock)
@@ -327,8 +334,12 @@ int GimicHID::getPLLClock(UINT *clock)
 
 	MSG d = { 2, { 0xfd, 0x85 } };
 	int ret = transaction( &d, (uint8_t*)clock, 4 );
-	
-	gimicParam.clock = *clock;
+
+	if( gimicParam.clock != *clock ){
+		gimicParam.clock = *clock;
+		if( chip )
+			chip->setMasterClock(*clock);
+	}
 	return ret;
 }
 

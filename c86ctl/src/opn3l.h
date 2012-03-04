@@ -85,6 +85,10 @@ public:
 	virtual void filter( int addr, UCHAR *data );
 	virtual bool setReg( int addr, UCHAR data );
 	virtual UCHAR getReg( int addr );
+	virtual void setMasterClock( UINT clock ){
+		fm->setMasterClock(clock);
+		ssg->setMasterClock(clock);
+	};
 	
 	void setPartMask(int ch, bool mask);
 	void setPartSolo(int ch, bool mask);
@@ -116,11 +120,8 @@ protected:
 	int timerA; //10bit
 	int timerB; //8bit
 	
-//	int lfo; //3bit
 	bool timerA_sw;
 	bool timerB_sw;
-//	bool lfo_sw;
-	//int ch3mode;
 	
 	UINT partMask;
 	UINT partSolo;

@@ -54,6 +54,7 @@ public:
 			return reg[addr>>8][addr&0xff];
 		return 0;
 	};
+	virtual void setMasterClock( UINT clock ){};
 
 public:
 	UCHAR reg[2][256];

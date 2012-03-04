@@ -19,6 +19,7 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
+const char *noteStr[12] = { "C ", "C+", "D ", "D+", "E ", "F ", "F+", "G ", "G+", "A ", "A+", "B " };
 void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 								  int trNo, int fmNo, bool isMute, COPNFmCh *pFMCh )
 {
@@ -45,7 +46,8 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 		if( !pFMCh->getExMode() ){
 			int fblock = pFMCh->getFBlock();
 			int fnum = pFMCh->getFNum();
-			sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+			sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
@@ -53,6 +55,8 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 				int oct, note;
 				pFMCh->getNote( oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+				sprintf( str, "O%d%s", oct, noteStr[note] );
+				skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 			}
 			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
 		}else{
