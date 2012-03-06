@@ -414,13 +414,13 @@ void CVisC86OPMKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 			if( sw ) strncat( str, tmp, 64 );
 			else  strncat( str, "_", 64 );
 		}
-		skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5, str );
+		skin->drawStr( canvas, 0, ltx+5+cx*18, lty+sy+5, str );
 
-//		int fblock = pFMCh->getFBlock();
-	//	int fnum = pFMCh->getFNum();
-		//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
-//		sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
-//		skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
+		int kcoct = pFMCh->getKeyCodeOct();
+		int kcnote = pFMCh->getKeyCodeNote();
+		int kf = pFMCh->getKeyFraction();
+		sprintf( str, "KC:%02d-%02d KF:%02d     NOTE:", kcoct, kcnote, kf );
+		skin->drawStr( canvas, 0, ltx+5+cx*28, lty+sy+5, str );
 		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
 		if( pFMCh->isKeyOn() && pFMCh->getMixLevel()!=127 ){

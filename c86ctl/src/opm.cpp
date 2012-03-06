@@ -26,7 +26,6 @@ void COPMFmCh::setMasterClock( UINT clock ){
 void COPMFmCh::getNote(int &oct, int &note){
 	//                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14
 	const uint32_t ntbl[15] = { 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 9,10,11,12 }; 
-	//const uint32_t ntbl[15] = { 3, 4, 5, 5, 6, 7, 8, 8, 9,10,11,11,12,13,14 };
 	uint32_t cent = kcoct*1200 + ntbl[kcnote]*100 + (100*kfcent/63) + dcent + 50;
 	oct = cent / 1200;
 	note = (cent%1200) / 100;

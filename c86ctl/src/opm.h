@@ -14,72 +14,6 @@
 namespace c86ctl{
 
 // ---------------------------------------------------------------------------------------
-#if 0
-class COPM : public Chip
-{
-public:
-	COPM(){ reset(); };
-	virtual ~COPM(){};
-
-	void reset(){
-		memset( reg, 0, 256 );
-		memset( regATime, 0, 256 );
-	};
-	
-	void update(){
-		int dc = 8;
-		for( int i=0; i<256; i++ ){
-			UCHAR c=regATime[i];
-			if( 64<c ){
-				c-=dc;
-				regATime[i] = 64<c? c : 64;
-			}
-		}
-	};
-
-public:
-	bool setReg( int addr, UCHAR data ){
-		if( 0x20 <= addr ){
-			reg[addr] = data;
-			regATime[addr] = 255;
-			return true;
-		}
-		switch( addr ){
-		case 0x01:
-			data &= 0x02; // LFO RESET
-			reg[addr] = data;
-			regATime[addr] = 255;
-			return true;
-		case 0x08:
-		case 0x0f:
-		case 0x10:
-		case 0x11:
-		case 0x12:
-		case 0x14:
-		case 0x18:
-		case 0x19:
-		case 0x1b:
-			reg[addr] = data;
-			regATime[addr] = 255;
-			return true;
-		}
-		
-		return false;
-	}
-	UCHAR getReg( int addr ){
-		if( addr < 0x100 )
-			return reg[addr];
-		return 0;
-	};
-
-public:
-	UCHAR reg[256];
-	UCHAR regATime[256];
-};
-#endif
-
-
-// ---------------------------------------------------------------------------------------
 class COPMFmCh : public COPXFmCh {
 	friend class COPM;
 	friend class COPMFm;
@@ -94,24 +28,17 @@ public:
 
 	virtual void reset(){
 		COPXFmCh::reset();
-		for( int i=0; i<4; i++ ){
-		}
+		kcoct = 0;
+		kcnote = 0;
+		kfcent = 0;
 	};
 
 public:
-/*	double getFreqEx(int slotno){
-		if( !exmode ) slotno = 3;
-		int n = getFNumEx(slotno);
-		int b = getFBlockEx(slotno);
-		b = 0<b ? 1<<(b-1) : 1;
-		double mag = (8*10e6) / (144 * (double)(1<<20));
-		return n*b*mag;
-	};
-	double getFreq(){ return getFreqEx(3); };
-*/
-public:
 	virtual void getNote(int &oct, int &note);
 	void setMasterClock( UINT clock );
+	UCHAR getKeyCodeOct(){ return kcoct; };
+	UCHAR getKeyCodeNote(){ return kcnote; };
+	UCHAR getKeyFraction(){ return kfcent; };
 	
 protected:
 	virtual void keyOn( UCHAR slotsw ){
@@ -210,6 +137,7 @@ public:
 	void reset(){
 		memset( reg, 0, 256 );
 		memset( regATime, 0, 256 );
+		fm->reset();
 	}
 
 public:
