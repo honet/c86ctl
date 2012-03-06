@@ -85,7 +85,9 @@ bool CVisC86Main::create(void)
 			} );
 		widgets.push_back(info[i].checkReg);
 
-		if( info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_OPN3L ){
+		if( info[i].chiptype == CHIP_OPNA ||
+			info[i].chiptype == CHIP_OPN3L ||
+			info[i].chiptype == CHIP_OPM ){
 			info[i].checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
 			info[i].checkKey->changeEvent.push_back(
 				[this, i](CVisWidget* w){
@@ -101,7 +103,11 @@ bool CVisC86Main::create(void)
 				} );
 			widgets.push_back(info[i].checkKey);
 
-			for( int ch=0; ch<6; ch++ ){
+			int nch = 6;
+			if( info[i].chiptype == CHIP_OPM )
+				nch = 8;
+			
+			for( int ch=0; ch<nch; ch++ ){
 				char str[10];
 				sprintf(str, "FM%d", ch+1);
 				info[i].checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this,180 + 40*(ch%3), y+((ch/3)+1)*14, str));
@@ -119,17 +125,19 @@ bool CVisC86Main::create(void)
 					} );
 				widgets.push_back(info[i].checkFM[ch]);
 			}
-			/*
-			info[i].checkSSG = CVisCheckBoxPtr(new CVisCheckBox(this,180,y+42, "SSG"));
-			widgets.push_back(info[i].checkSSG);
-
-			info[i].checkRHYTHM = CVisCheckBoxPtr(new CVisCheckBox(this,220,y+42, "RHYTHM"));
-			widgets.push_back(info[i].checkRHYTHM);
-
-			info[i].checkADPCM = CVisCheckBoxPtr(new CVisCheckBox(this,280,y+42, "ADPCM"));
-			widgets.push_back(info[i].checkADPCM);
-			 */
 		}
+
+		/*
+		info[i].checkSSG = CVisCheckBoxPtr(new CVisCheckBox(this,180,y+42, "SSG"));
+		widgets.push_back(info[i].checkSSG);
+
+		info[i].checkRHYTHM = CVisCheckBoxPtr(new CVisCheckBox(this,220,y+42, "RHYTHM"));
+		widgets.push_back(info[i].checkRHYTHM);
+
+		info[i].checkADPCM = CVisCheckBoxPtr(new CVisCheckBox(this,280,y+42, "ADPCM"));
+		widgets.push_back(info[i].checkADPCM);
+		 */
+
 		y+=modHeight;
 	}
 

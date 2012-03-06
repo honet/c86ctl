@@ -80,6 +80,72 @@ public:
 
 
 // ---------------------------------------------------------------------------------------
+class COPMFmCh : public COPXFmCh {
+	friend class COPM;
+	friend class COPMFm;
+	
+public:
+	COPMFmCh(IRealChip2 *p) : COPXFmCh(p) {
+		setMasterClock(4000000);
+		reset();
+	};
+	virtual ~COPMFmCh(void){
+	};
+
+	virtual void reset(){
+		COPXFmCh::reset();
+		for( int i=0; i<4; i++ ){
+		}
+	};
+
+public:
+/*	double getFreqEx(int slotno){
+		if( !exmode ) slotno = 3;
+		int n = getFNumEx(slotno);
+		int b = getFBlockEx(slotno);
+		b = 0<b ? 1<<(b-1) : 1;
+		double mag = (8*10e6) / (144 * (double)(1<<20));
+		return n*b*mag;
+	};
+	double getFreq(){ return getFreqEx(3); };
+*/
+public:
+	virtual void getNote(int &oct, int &note);
+	void setMasterClock( UINT clock );
+	
+protected:
+	virtual void keyOn( UCHAR slotsw ){
+		for( int i=0; i<4; i++ ){ // D3:4, D2:3, D1:2, D0:1
+			if( slotsw & 0x01 ){
+				slot[i]->on();
+				keyOnLevel[i] = (127-slot[i]->getTotalLevel())>>2;
+			}else{
+				slot[i]->off();
+			}
+			slotsw >>= 1;
+		}
+	};
+
+	void setKeyCode( UCHAR kc ){
+		kcoct = (kc>>4)&0x7;
+		kcnote = kc&0xf;
+	};
+	void setKeyFraction( UCHAR kf ){
+		kfcent = (kf >> 2);
+	};
+
+protected:
+	uint32_t mclk;
+	uint32_t dcent;
+	
+	uint32_t kcoct;
+	uint32_t kcnote;
+	uint32_t kfcent;
+	
+	IRealChip2 *pIF;
+};
+
+// ---------------------------------------------------------------------------------------
 
 class COPMFm{
 	friend class COPM;
@@ -87,7 +153,7 @@ class COPMFm{
 public:
 	COPMFm(IRealChip2 *p) : pIF(p){
 		for( int i=0; i<9; i++ )
-			ch[i] = new COPXFmCh(p);
+			ch[i] = new COPMFmCh(p);
 		reset();
 	};
 	virtual ~COPMFm(){
@@ -112,11 +178,11 @@ public:
 	
 protected:
 	bool isLFOOn(){ return lfo_sw; };
-	bool setReg( UCHAR bank, UCHAR addr, UCHAR data );
+	bool setReg( UCHAR addr, UCHAR data );
 	
 
 public:
-	COPXFmCh *ch[9];
+	COPMFmCh *ch[9];
 	
 protected:
 	int lfo; //3bit
@@ -132,8 +198,10 @@ class COPM : public Chip
 {
 public:
 	COPM(IRealChip2 *p) : pIF(p) {
-		reset();
 		fm = new COPMFm(p);
+		partMask = 0;
+		partSolo = 0;
+		reset();
 	};
 	virtual ~COPM(){
 		if(fm) delete fm;
@@ -169,6 +237,7 @@ public:
 				regATime[i] = 64<c ? c : 64;
 			}
 		}
+		fm->update();
 	};
 
 public:

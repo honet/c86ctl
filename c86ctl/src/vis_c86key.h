@@ -120,9 +120,21 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPM KEYBOARD VIEW"), id);
 		windowTitle = str;
+
+		windowHeight = 315;
 	};
 	~CVisC86OPMKey(){};
+	
+protected:
+	virtual bool create( HWND parent = 0 );
+	virtual void onPaintClient(void);
 
+protected:
+	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
+						  int trNo, int fmNo, bool isMute, COPMFmCh *pFMCh );
+protected:
+	CVisMuteSwPtr muteSw[8];
+	CVisSoloSwPtr soloSw[8];
 protected:
 	COPM *pOPM;
 };

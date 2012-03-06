@@ -44,6 +44,7 @@ class COPXFmSlot {
 	friend class COPNFm;
 	friend class COPNA;
 	friend class COPN3L;
+	friend class COPMFmCh;
 	friend class COPMFm;
 	friend class COPM;
 	

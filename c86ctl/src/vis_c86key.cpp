@@ -20,6 +20,7 @@ using namespace c86ctl;
 using namespace c86ctl::vis;
 
 const char *noteStr[12] = { "C ", "C+", "D ", "D+", "E ", "F ", "F+", "G ", "G+", "A ", "A+", "B " };
+
 void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 								  int trNo, int fmNo, bool isMute, COPNFmCh *pFMCh )
 {
@@ -51,7 +52,7 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
-			if( pFMCh->isKeyOn() && pFMCh->getMixLevel() ){
+			if( pFMCh->isKeyOn() && pFMCh->getMixLevel() != 127 ){
 				int oct, note;
 				pFMCh->getNote( oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
@@ -67,7 +68,7 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
-			if( pFMCh->slot[0]->isOn() && pFMCh->slot[0]->getTotalLevel() ){
+			if( pFMCh->slot[0]->isOn() && pFMCh->slot[0]->getTotalLevel() != 127 ){
 				int oct, note;
 				pFMCh->getNoteEx( 0, oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
@@ -108,7 +109,7 @@ void CVisC86Key::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
-			if( pFMCh->slot[exNo]->isOn() && pFMCh->slot[exNo]->getTotalLevel() ){
+			if( pFMCh->slot[exNo]->isOn() && pFMCh->slot[exNo]->getTotalLevel() != 127 ){
 				int oct, note;
 				pFMCh->getNoteEx( exNo, oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
@@ -349,6 +350,90 @@ void CVisC86OPN3LKey::onPaintClient(void)
 		}
 		drawRhythmTrackView( clientCanvas, sx, sy, tr,
 							 pOPN3L->getMixedMask(tr), pOPN3L->rhythm );
+	}
+}
+
+// --------------------------------------------------------
+bool CVisC86OPMKey::create( HWND parent )
+{
+	if( !CVisWnd::create(
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
+		return false;
+
+	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+
+	for( int i=0; i<8; i++ ){
+		muteSw[i] = CVisMuteSwPtr( new CVisMuteSw( this, 5+28, 7+i*35 ) );
+//		muteSw[i]->getter = [this, i]()-> int { return this->pOPN3L->getPartMask(i);};
+//		muteSw[i]->setter = [this, i](int mask) { this->pOPN3L->setPartMask(i, mask ? true : false); };
+		widgets.push_back(muteSw[i]);
+
+		soloSw[i] = CVisSoloSwPtr( new CVisSoloSw( this, 5+28+16, 7+i*35 ) );
+//		soloSw[i]->getter = [this, i]()-> int { return this->pOPN3L->getPartSolo(i);};
+//		soloSw[i]->setter = [this, i](int mask) { this->pOPN3L->setPartSolo(i, mask ? true : false); };
+		widgets.push_back(soloSw[i]);
+	}
+	
+	
+	return true;
+}
+
+void CVisC86OPMKey::onPaintClient(void)
+{
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	
+	if( pOPM ){
+		int sx=5, sy=5, cx=6, cy=8;
+		int tr=0;
+		for( int i=0; i<8; i++ ){
+			drawFMTrackView( clientCanvas, sx, sy, tr, i,
+							 pOPM->getMixedMask(tr), pOPM->fm->ch[i] );
+			sy+=35; tr++;
+		}
+	}
+}
+
+void CVisC86OPMKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
+								  int trNo, int fmNo, bool isMute, COPMFmCh *pFMCh )
+{
+	int sy = 0;
+	char str[64], tmp[64];
+	int cx=6, cy=8;
+	CVisC86Skin *skin = &gVisSkin;
+
+	sprintf( str, "%02d", trNo+1 );
+	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
+	sprintf( str, "FM-CH%d", fmNo+1 );
+	skin->drawStr( canvas, 0, ltx+5+cx*10, lty+sy+5, str );
+
+	if( !isMute ){
+		strcpy(str, "SLOT:");
+		for( int i=0; i<4; i++ ){
+			int sw = pFMCh->slot[i]->isOn();
+			sprintf( tmp, "%d", i );
+			if( sw ) strncat( str, tmp, 64 );
+			else  strncat( str, "_", 64 );
+		}
+		skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5, str );
+
+//		int fblock = pFMCh->getFBlock();
+	//	int fnum = pFMCh->getFNum();
+		//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
+//		sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
+//		skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
+		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
+
+		if( pFMCh->isKeyOn() && pFMCh->getMixLevel()!=127 ){
+			int oct=0, note=0;
+			pFMCh->getNote( oct, note );
+			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
+			sprintf( str, "O%d%s", oct, noteStr[note] );
+			skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
+		}
+		skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
+	}else{
+		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
+		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}
 }
 
