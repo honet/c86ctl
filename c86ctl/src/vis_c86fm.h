@@ -131,7 +131,7 @@ public:
 		TCHAR str[40];
 		_stprintf_s(str, _T("C86OPMFM%d%d"), id,ch);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPNM FM CH%d PARAMETER VIEW"), id, ch+1);
+		_stprintf_s(str, _T("[%d] OPM FM CH%d PARAMETER VIEW"), id, ch+1);
 		windowTitle = str;
 	};
 	~CVisC86OPMFm(){};

@@ -286,6 +286,8 @@ void COPNA::applyMask(int ch)
 
 void COPNA::setPartMask(int ch, bool mask)
 {
+	if( ch<0 || 14<=ch ) return;
+
 	if( mask ){
 		partMask |= 1<<ch;
 	}else{
@@ -296,6 +298,8 @@ void COPNA::setPartMask(int ch, bool mask)
 
 void COPNA::setPartSolo(int ch, bool mask)
 {
+	if( ch<0 || 14<=ch ) return;
+	
 	if( mask )	partSolo |= 1<<ch;
 	else		partSolo &= ~(1<<ch);
 	

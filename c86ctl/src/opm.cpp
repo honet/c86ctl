@@ -129,6 +129,15 @@ bool COPMFm::setReg( UCHAR addr, UCHAR data )
 
 void COPM::filter( int addr, UCHAR *data )
 {
+	int ch;
+	if( 0x100 <= addr ) return;
+
+	if( 0x20<=addr && addr<=0x27 ){
+		ch = addr-0x20;
+		if( getMixedMask( ch ) ){
+			*data &= 0x3f;
+		}
+	}
 	return;
 }
 
@@ -149,5 +158,45 @@ UCHAR COPM::getReg( int addr )
 	if( addr < 0x100 )
 		return reg[addr];
 	return 0;
+}
+
+void COPM::applyMask(int ch)
+{
+	UCHAR data;
+	bool mask = getMixedMask(ch);
+	
+	if( 0<=ch && ch<=7 ){ // FM 1~8
+		int fmNo = ch;
+		data = fm->ch[fmNo]->getAlgorithm() | (fm->ch[fmNo]->getFeedback()<<3);
+		if( !mask ){
+			bool l,r;
+			fm->ch[fmNo]->getLR( l,r );
+			data |= (l?0x80:0) | (r?0x40:0);
+		}
+		pIF->directOut( 0x20+ch, data );
+	}
+}
+
+void COPM::setPartMask(int ch, bool mask)
+{
+	if( ch<0 || 8<=ch ) return;
+
+	if( mask ){
+		partMask |= 1<<ch;
+	}else{
+		partMask &= ~(1<<ch);
+	}
+	applyMask(ch);
+}
+
+void COPM::setPartSolo(int ch, bool mask)
+{
+	if( ch<0 || 8<=ch ) return;
+	
+	if( mask )	partSolo |= 1<<ch;
+	else		partSolo &= ~(1<<ch);
+	
+	for( int i=0; i<8; i++ )
+		applyMask(i);
 }
 

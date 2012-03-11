@@ -168,6 +168,8 @@ void COPN3L::applyMask(int ch)
 
 void COPN3L::setPartMask(int ch, bool mask)
 {
+	if( ch<0 || 13<=ch ) return;
+
 	if( mask ){
 		partMask |= 1<<ch;
 	}else{
@@ -178,6 +180,8 @@ void COPN3L::setPartMask(int ch, bool mask)
 
 void COPN3L::setPartSolo(int ch, bool mask)
 {
+	if( ch<0 || 13<=ch ) return;
+	
 	if( mask )	partSolo |= 1<<ch;
 	else		partSolo &= ~(1<<ch);
 	

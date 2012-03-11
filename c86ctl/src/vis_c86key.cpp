@@ -364,13 +364,13 @@ bool CVisC86OPMKey::create( HWND parent )
 
 	for( int i=0; i<8; i++ ){
 		muteSw[i] = CVisMuteSwPtr( new CVisMuteSw( this, 5+28, 7+i*35 ) );
-//		muteSw[i]->getter = [this, i]()-> int { return this->pOPN3L->getPartMask(i);};
-//		muteSw[i]->setter = [this, i](int mask) { this->pOPN3L->setPartMask(i, mask ? true : false); };
+		muteSw[i]->getter = [this, i]()-> int { return this->pOPM->getPartMask(i);};
+		muteSw[i]->setter = [this, i](int mask) { this->pOPM->setPartMask(i, mask ? true : false); };
 		widgets.push_back(muteSw[i]);
 
 		soloSw[i] = CVisSoloSwPtr( new CVisSoloSw( this, 5+28+16, 7+i*35 ) );
-//		soloSw[i]->getter = [this, i]()-> int { return this->pOPN3L->getPartSolo(i);};
-//		soloSw[i]->setter = [this, i](int mask) { this->pOPN3L->setPartSolo(i, mask ? true : false); };
+		soloSw[i]->getter = [this, i]()-> int { return this->pOPM->getPartSolo(i);};
+		soloSw[i]->setter = [this, i](int mask) { this->pOPM->setPartSolo(i, mask ? true : false); };
 		widgets.push_back(soloSw[i]);
 	}
 	
