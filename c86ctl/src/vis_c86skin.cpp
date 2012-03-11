@@ -400,7 +400,7 @@ void CVisC86Skin::drawFMAlgorithm(IVisBitmap *canvas, int x, int y, int no )
 // FM•””wŒi
 void CVisC86Skin::drawFMSkin(IVisBitmap *canvas, int x, int y, int exmode )
 {
-	BMPREG reg = skinreg_view[ exmode?1:0 ];
+	BMPREG reg = skinreg_view[ 1 ];
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 

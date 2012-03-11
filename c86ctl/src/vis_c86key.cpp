@@ -19,8 +19,6 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
-const char *noteStr[12] = { "C ", "C+", "D ", "D+", "E ", "F ", "F+", "G ", "G+", "A ", "A+", "B " };
-
 void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 								  int trNo, int fmNo, bool isMute, COPNFmCh *pFMCh )
 {

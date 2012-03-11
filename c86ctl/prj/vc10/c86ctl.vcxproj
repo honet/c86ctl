@@ -95,6 +95,7 @@ c:\ruby\bin\ruby verup.rb</Command>
     <ClCompile Include="..\..\src\opm.cpp" />
     <ClCompile Include="..\..\src\opn3l.cpp" />
     <ClCompile Include="..\..\src\opnx.cpp" />
+    <ClCompile Include="..\..\src\opx.cpp" />
     <ClCompile Include="..\..\src\vis_bitmap.cpp" />
     <ClCompile Include="..\..\src\vis_c86fm.cpp" />
     <ClCompile Include="..\..\src\vis_c86key.cpp" />

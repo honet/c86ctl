@@ -37,6 +37,7 @@ public:
 
 protected:
 	bool createFmView(COPNFmCh *pFmCh);
+	bool createFmSlotView( COPXFmSlot *slot, int i, int x, int y );
 	void drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh );
 	void drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pSlot, int slotidx );
 	
@@ -141,6 +142,8 @@ public:
 	
 protected:
 	virtual void onPaintClient(void);
+	bool createFmView(COPMFmCh *pFmCh);
+	void drawFMView( IVisBitmap *canvas, int x, int y, COPMFmCh *pFmCh );
 	
 private:
 	COPM *pOPM;
