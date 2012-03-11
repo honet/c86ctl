@@ -174,7 +174,9 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 	sprintf(str, "%d", slotidx+1);
 	skin->drawVStr( canvas, 0, x+8, y+20, str );
 	
-#if 0
+#if 1
+	// VOPMのアルゴリズムをぱくった。
+	// 意味が理解出来てないのでバグ有るかも・・・
 	double ar = pSlot->getAttackRate();
 	double dr = pSlot->getDecayRate();
 	double sr = pSlot->getSustainRate();
@@ -183,6 +185,8 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 	double tl = pSlot->getTotalLevel();
 	double mul = pSlot->getMultiple();
 	double det = pSlot->getDetune();
+	double dx = 127.0;
+	double dy = 63.0;
 
 	double ax, ay, d1x, d1y, d2x, d2y, rx, ry;
 	
@@ -223,12 +227,23 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 			rx = 127.0;
 			ry = d2y;
 		}
+		if( d1y>127.0 ) d1y = 127.0;
+		if( d2y>127.0 ) d2y = 127.0;
+		if( ry>127.0 ) ry = 127.0;
+		if( d2x<d1x ) d2x = d1x;
+		if( rx<d2x ) rx = d2x;
+		
+		// scaling
+		ay = ay*dy/127.0;
+		d1y = d1y*dy/127.0;
+		d2y = d2y*dy/127.0;
+		ry = ry*dy/127.0;
 
-		int sx=x+23, sy=y+6+64;
-		visDrawLine( canvas, sx         , sy         , sx+(int)ax , sy-(int)ay , 0xffffffff );
-		visDrawLine( canvas, sx+(int)ax , sy-(int)ay , sx+(int)d1x, sy-(int)d1y, 0xffffffff );
-		visDrawLine( canvas, sx+(int)d1x, sy-(int)d1y, sx+(int)d2x, sy-(int)d2y, 0xffffffff );
-		visDrawLine( canvas, sx+(int)d2x, sy-(int)d2y, sx+(int)rx , sy-(int)ry, 0xffffffff );
+		int sx=x+23, sy=y+6;
+		visDrawLine( canvas, sx         , sy+63      , sx+(int)ax , sy+(int)ay , 0xffffffff );
+		visDrawLine( canvas, sx+(int)ax , sy+(int)ay , sx+(int)d1x, sy+(int)d1y, 0xffffffff );
+		visDrawLine( canvas, sx+(int)d1x, sy+(int)d1y, sx+(int)d2x, sy+(int)d2y, 0xffffffff );
+		visDrawLine( canvas, sx+(int)d2x, sy+(int)d2y, sx+(int)rx , sy+(int)ry, 0xffffffff );
 	}
 #endif
 }
