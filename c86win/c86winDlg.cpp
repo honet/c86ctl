@@ -207,6 +207,7 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 	CString str;
 	UINT tpus; // tick per micro second
 	UINT last_is_adpcm=0;
+	UINT loopidx = pThis->s98data.loopidx;
 
 	IRealChip *pRC = NULL;
 
@@ -269,7 +270,10 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 					pRC->out( addr, data );
 					last_is_adpcm = ( addr == 0x108 );
 				}else if( pr->cmd == 0xfd ){ // end / loop
-					//if( pThis->s98data.
+					if( loopidx != 0 ){
+						idx = loopidx;
+						tick = prow->at(loopidx).gtick;
+					}
 				}
 				if( ++idx >= prow->size() )
 					break;

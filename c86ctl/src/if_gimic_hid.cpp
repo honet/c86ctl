@@ -123,9 +123,11 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 	if( devinf ){
 		for(int i = 0; ;i++) {
 			ZeroMemory(&spid, sizeof(spid));
-			spid.cbSize = sizeof(spid);
-			if(!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid))
+			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+			if(!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid)){
+				//DWORD err = GetLastError();
 				break;
+			}
 
 			unsigned long sz;
 			SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, 0);

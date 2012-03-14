@@ -325,5 +325,6 @@ public:
 	std::vector<char> songinfo;
 	std::vector<DeviceInfo> devinfo;
 	std::vector<CDumpRow> row;
+	UINT loopidx;
 };
 
