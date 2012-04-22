@@ -220,6 +220,20 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 	}
 	pRC->reset();
 	// -----------------------------------------------------------------
+	if( 0 < pThis->s98data.devinfo.size() ){
+		IGimic2 *pIGimic;
+		if( S_OK == pRC->QueryInterface( IID_IGimic2, (void**)&pIGimic ) ){
+			UINT cclock;
+			pIGimic->getPLLClock(&cclock);
+			UINT mclock = pThis->s98data.devinfo.front().first.clock;
+			if( mclock != cclock ){
+				pIGimic->setPLLClock(mclock);
+				pIGimic->Release();
+			}
+		}
+	}
+
+		
 
 	tpus = (INT)(pThis->s98data.getTimerPrec() * 1000.0);
 	if(tpus==0) tpus = 1;

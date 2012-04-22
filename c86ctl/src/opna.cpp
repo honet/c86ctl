@@ -125,6 +125,7 @@ void COPNA::filter( int addr, UCHAR *data )
 	switch( addr ){
 	case 0x29: // SCH/IRQ ENABLE
 		*data |= 0x80;
+		break;
 	case 0xb4: // FM -- LR, AMS, PMS
 	case 0xb5:
 	case 0xb6:

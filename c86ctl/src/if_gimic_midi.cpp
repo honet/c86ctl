@@ -123,7 +123,7 @@ int GimicMIDI::init(void)
 int GimicMIDI::reset( void )
 {
 	// “]‘—Š®—¹‘Ò‚¿
-	while(rbuff.get_length()){
+	while(rbuff.length()){
 		Sleep(10);
 	}
 
@@ -141,7 +141,7 @@ void GimicMIDI::out(UINT addr, UCHAR data)
 	if( flag ){
 		// data packing.
 		UCHAR d[3] = { (addr>>6)&0x0f, (addr&0x3f)<<1 | (data>>7), (data&0x7f) };
-		rbuff.write(d,3);
+		rbuff.push(d,3);
 	}
 }
 
@@ -223,10 +223,10 @@ void GimicMIDI::tick(void)
 	// “]‘—”z—ñ€”õ
 	buff[0] = 0xf0;		// start of sysex
 	buff[1] = 0x7d;		// device id
-	UINT msz = rbuff.get_length();
+	UINT msz = rbuff.length();
 	UINT sz = msz / 3;
 	if( 0 < sz ){
-		rbuff.read( &buff[2], MIN(sz*3,144) );
+		rbuff.pop( &buff[2], MIN(sz*3,144) );
 		buff[sz*3+2] = 0xf7;		// end of sysex
 		sendSysEx( &buff[0], sz*3+3 );
 	}

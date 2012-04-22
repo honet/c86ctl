@@ -202,7 +202,7 @@ unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 
 // ---------------------------------------------------------
 // 演奏処理スレッド
-// mm-timerによる1ms単位処理
+// mm-timerによる(だいたい)1ms単位処理
 // note: timeSetEvent()だと転送処理がタイマ周期より遅いときに
 //       再入されるのが怖かったので自前ループにした
 unsigned int WINAPI C86Ctl::threadSender(LPVOID param)

@@ -106,3 +106,10 @@ void CVisKnob::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
+// --------------------------------------------------------
+void CVisSSGEGGraph::onPaint(IVisBitmap *canvas){
+	int no = 0;
+	if( getter ) no = getter();
+	gVisSkin.drawSSGEG( canvas, sx, sy, no );
+}
+

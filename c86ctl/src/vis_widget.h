@@ -173,8 +173,31 @@ protected:
 	POINT spos;
 	int svalue;
 };
-
 typedef std::shared_ptr<CVisKnob> CVisKnobPtr;
+
+// ---------------------------------------------------------------------------
+// SSG-EG
+class CVisSSGEGGraph : public CVisWidget
+{
+public:
+	CVisSSGEGGraph( CVisWnd *parentWnd, int x, int y )
+		: CVisWidget(parentWnd){
+			sx=x;
+			sy=y;
+			ex=x+52;
+			ey=11;
+		};
+	~CVisSSGEGGraph(){};
+	
+public:
+	virtual void onPaint(IVisBitmap *canvas);
+
+public:
+	std::list< std::function< void(CVisWidget*) > > changeEvent;
+	std::function< int() > getter;
+	std::function< void(int) > setter;
+};
+typedef std::shared_ptr<CVisSSGEGGraph> CVisSSGEGGraphPtr;
 
 }; // namespace vis
 }; // namespace c86ctl

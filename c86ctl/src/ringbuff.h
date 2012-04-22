@@ -62,6 +62,7 @@ public:
 		ridx = 0;
 	};
 
+	// 残りバッファ量を返す
 	UINT remain(VOID){
 		if( !p ) return 0;
 		UINT cridx = ridx & mask;
@@ -73,7 +74,8 @@ public:
 		}
 	};
 
-	UINT get_length(VOID){
+	// 格納済みデータ量を返す
+	UINT length(VOID){
 		if( !p ) return 0;
 		UINT cridx = ridx & mask;
 		UINT cwidx = widx & mask;
@@ -84,19 +86,25 @@ public:
 		}
 	};
 
+	// 格納されているデータが無いかどうか
 	BOOL isempty(void){
 		if( !p ) return 0;
-		return ( get_length() == 0 );
-	}
+		return ( length() == 0 );
+	};
 
-	T* query_read_ptr(void){
+	void flush(void){
+		while( 0<length() )
+			::InterlockedIncrement(&ridx);
+	};
+
+	T* front(void){
 		if( !p )
 			return 0;
 		
 		return p + (ridx&mask);
 	};
 	
-	BOOL read1( T *data ){
+	BOOL pop( T *data ){
 		if( !p )
 			return FALSE;
 
@@ -105,9 +113,9 @@ public:
 		return TRUE;
 	};
 
-	BOOL read( T *data, UINT sz ){
+	BOOL pop( T *data, UINT sz ){
 		if( !p ) return FALSE;
-		if( get_length() < sz ) return FALSE;
+		if( length() < sz ) return FALSE;
 
 		for( UINT i=0; i<sz; i++ ){
 			T *pd = p + (ridx&mask);
@@ -117,7 +125,7 @@ public:
 		return TRUE;
 	};
 
-	VOID write1( T data ){
+	VOID push( T data ){
 		if( !p ) return;
 		while( remain() < 1 ){
 			Sleep(1);
@@ -128,7 +136,7 @@ public:
 		::InterlockedIncrement(&widx);
 	};
 
-	BOOL write( const T *data, UINT sz ){
+	BOOL push( const T *data, UINT sz ){
 
 		if( !p ) return FALSE;
 		while( remain() < sz ){

@@ -60,6 +60,7 @@ protected:
 	CVisKnobPtr knobDET[4];
 	CVisKnobPtr knobDET2[4];
 	CVisDipSwPtr dipswAM[4];
+	CVisSSGEGGraphPtr graphSSGEG[4];
 };
 
 typedef std::shared_ptr<CVisC86Fm> CVisC86FmPtr;

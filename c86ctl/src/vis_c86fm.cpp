@@ -82,6 +82,11 @@ bool CVisC86Fm::createFmSlotView( COPXFmSlot *slot, int i, int x, int y )
 	dipswAM[i]->getter = [slot, i]() -> int{ return slot->isAM(); };
 	widgets.push_back(dipswAM[i]);
 	
+	// SSG-EG
+	graphSSGEG[i] = CVisSSGEGGraphPtr( new CVisSSGEGGraph(this, x+271, y+59) );
+	graphSSGEG[i]->getter = [slot, i]() -> int{ return slot->getSSGEGType(); };
+	widgets.push_back(graphSSGEG[i]);
+	
 	return true;
 }
 

@@ -44,6 +44,7 @@ public:
 	void drawMuteSw(IVisBitmap *canvas, int x, int y, int sw );
 	void drawSoloSw(IVisBitmap *canvas, int x, int y, int sw );
 	
+	void drawSSGEG(IVisBitmap *canvas, int x, int y, int no );
 	void drawFMAlgorithm(IVisBitmap *canvas, int x, int y, int no );
 	void drawFMSkin(IVisBitmap *canvas, int x, int y, int exmode );
 	void drawFMSlotSkin(IVisBitmap *canvas, int x, int y );

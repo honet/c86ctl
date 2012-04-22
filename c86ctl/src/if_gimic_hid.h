@@ -30,6 +30,13 @@ public:
 		UCHAR dat[7];	// 最大メッセージ長は今のところ6byte.
 	};
 	
+	struct REQ{
+		UINT t;
+		USHORT addr;
+		UCHAR dat;
+		UCHAR dummy;
+	};
+	
 private:
 	GimicHID(HANDLE h);
 
@@ -70,6 +77,8 @@ public:
 //	virtual int __stdcall adpcmZeroClear(void);
 //	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
 //	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
+	virtual int __stdcall setDelay(int delay);
+	virtual int __stdcall getDelay(int *delay);
 
 
 public:
@@ -79,15 +88,18 @@ public:
 private:
 	int sendMsg( MSG *data );
 	int transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz );
+	void out2buf(UINT addr, UCHAR data);
 	
 	
 private:
 	HANDLE hHandle;
 	CRITICAL_SECTION csection;
 	CRingBuff<MSG> rbuff;
-	uint32_t seqno;
 	UINT cps, cal, calcount;
 
+	int delay;
+	CRingBuff<REQ> dqueue;
+	
 	Chip *chip;
 	ChipType chiptype;
 	GimicParam gimicParam;

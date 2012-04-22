@@ -83,9 +83,10 @@ using namespace c86ctl;
 	コンストラクタ
 ----------------------------------------------------------------------------*/
 GimicHID::GimicHID( HANDLE h )
-	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), seqno(0), cps(0), cal(0), calcount(0)
+	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(1000)
 {
 	rbuff.alloc( 128 );
+	dqueue.alloc(1024*16);
 	::InitializeCriticalSection(&csection);
 }
 
@@ -259,6 +260,7 @@ int GimicHID::init(void)
 	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
 		chiptype = CHIP_OPL3;
 		chip = new COPL3();
+//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	
 	// 値をキャッシュさせるためのダミー呼び出し
@@ -272,6 +274,9 @@ int GimicHID::init(void)
 
 int GimicHID::reset(void)
 {
+	// ディレイキューの廃棄
+	dqueue.flush();
+
 	int ret;
 	// リセットコマンド送信
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
@@ -462,7 +467,7 @@ void GimicHID::directOut(UINT addr, UCHAR data)
 	}
 }
 
-void GimicHID::out(UINT addr, UCHAR data)
+void GimicHID::out2buf(UINT addr, UCHAR data)
 {
 	bool flag = true;
 	if( chip ){
@@ -483,12 +488,26 @@ void GimicHID::out(UINT addr, UCHAR data)
 		}
 		if( addr < 0xfc ){
 			MSG d = { 2, { addr&0xff, data } };
-			rbuff.write1(d);
+			rbuff.push(d);
 		}else if( 0x100 <= addr && addr <= 0x1fb ){
 			MSG d = { 3, { 0xfe, addr&0xff, data } };
-			rbuff.write1(d);
+			rbuff.push(d);
 		}
 	}
+}
+void GimicHID::out(UINT addr, UCHAR data)
+{
+	if( 0<delay ){
+		REQ r = { ::timeGetTime()+delay, addr, data };
+		dqueue.push(r);
+		return;
+	}
+	if(delay==0){
+		if( dqueue.isempty() )
+			delay = -1;
+	}
+
+	out2buf(addr, data);
 }
 
 UCHAR GimicHID::in(UINT addr)
@@ -503,46 +522,56 @@ void GimicHID::tick(void)
 {
 	if( !hHandle )
 		return;
-	if( rbuff.isempty() )
-		return;
 
-	UCHAR buff[128];
-	UINT sz=0, i=1;
-	MSG d;
-
-	buff[0] = 0; // HID interface id.
-
-	for(;;){
-		UINT l = rbuff.query_read_ptr()->len;
-		if( 64<(sz+l) )
-			break;
-		if( !rbuff.read1(&d) )
-			break;
-		sz += d.len;
-		for( UINT j=0; j<d.len; j++ )
-			buff[i++] = d.dat[j];
-		if( rbuff.isempty() )
-			break;
+	if( 0<=delay && !dqueue.isempty() ){
+		UINT t = timeGetTime();
+		while( !dqueue.isempty() && t>=dqueue.front()->t ){
+			if( rbuff.remain()<4 ) break;
+			REQ req;
+			dqueue.pop(&req);
+			out2buf( req.addr, req.dat );
+		}
 	}
+	
+	if( !rbuff.isempty() ){
+		UCHAR buff[128];
+		UINT sz=0, i=1;
+		MSG d;
 
-	if( sz<64 )
-		memset( &buff[1+sz], 0xff, 64-sz );
+		buff[0] = 0; // HID interface id.
 
-	// WriteFileがスレッドセーフかどうかよく分からないので
-	// 念のため保護しているが、いらないかも。
-	// (directOut()と重なる可能性がある)
-	DWORD len;
-	::EnterCriticalSection(&csection);
-	int ret = WriteFile(hHandle, buff, 65, &len, NULL);
-	::LeaveCriticalSection(&csection);
+		for(;;){
+			UINT l = rbuff.front()->len;
+			if( 64<(sz+l) )
+				break;
+			if( !rbuff.pop(&d) )
+				break;
+			sz += d.len;
+			for( UINT j=0; j<d.len; j++ )
+				buff[i++] = d.dat[j];
+			if( rbuff.isempty() )
+				break;
+		}
 
-	if(ret == 0 || 65 != len){
-		CloseHandle(hHandle);
-		hHandle = NULL;
-		// なんかthrowする？
-		return;
+		if( sz<64 )
+			memset( &buff[1+sz], 0xff, 64-sz );
+
+		// WriteFileがスレッドセーフかどうかよく分からないので
+		// 念のため保護しているが、いらないかも。
+		// (directOut()と重なる可能性がある)
+		DWORD len;
+		::EnterCriticalSection(&csection);
+		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
+		::LeaveCriticalSection(&csection);
+
+		if(ret == 0 || 65 != len){
+			CloseHandle(hHandle);
+			hHandle = NULL;
+			// なんかthrowする？
+			return;
+		}
+		cal+=64;
 	}
-	cal+=64;
 
 	return;
 }
@@ -558,5 +587,15 @@ void GimicHID::update(void)
 		calcount = 0;
 	}
 };
+
+int GimicHID::setDelay(int delay)
+{
+	return C86CTL_ERR_NONE;
+}
+
+int GimicHID::getDelay(int *delay)
+{
+	return C86CTL_ERR_NONE;
+}
 
 #endif

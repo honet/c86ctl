@@ -57,6 +57,8 @@ const BMPREG skinreg_alg[] = {
 	{191,386,94,62},	// ALG5
 	{  1,449,94,62},	// ALG6
 	{ 96,449,94,62},	// ALG7
+};
+const BMPREG skinreg_ssgeg[] = {
 	{ 45,231,52,11},	// SSG EG0
 	{ 45,241,52,11},	// SSG EG0
 	{ 45,251,52,11},	// SSG EG1
@@ -388,6 +390,13 @@ void CVisC86Skin::drawKnob(IVisBitmap *canvas, int x, int y, int minval, int max
 	else if( numval < 100 ) x+=7;
 	else if( numval < 300 ) x+=3;
 	drawNanoNumStr( canvas, x, y+8, buff );
+}
+
+// SSG-EG
+void CVisC86Skin::drawSSGEG(IVisBitmap *canvas, int x, int y, int no )
+{
+	BMPREG reg = skinreg_ssgeg[no];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
 // FMƒAƒ‹ƒSƒŠƒYƒ€
