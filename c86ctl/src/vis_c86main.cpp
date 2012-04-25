@@ -55,7 +55,7 @@ void CVisC86Main::updateInfo(void)
 bool CVisC86Main::create(void)
 {
 	// CHECKME: createÇÃëOÇ…attachÇ≥ÇÍÇƒÇ»Ç¢Ç∆Ç¢ÇØÇ»Ç¢ÅB
-	size_t sz = info.size();
+	int sz = static_cast<int>(info.size());
 
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
 	windowHeight = 19+40+modHeight*sz+10;
@@ -69,7 +69,7 @@ bool CVisC86Main::create(void)
 	
 	int y=40;
 	
-	for( size_t i=0; i<sz; i++ ){
+	for( int i=0; i<sz; i++ ){
 		info[i].checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
 		info[i].checkReg->changeEvent.push_back(
 			[this, i](CVisWidget* w){

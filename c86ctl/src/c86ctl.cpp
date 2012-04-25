@@ -343,7 +343,7 @@ int C86Ctl::reset(void)
 
 int C86Ctl::getNumberOfChip(void)
 {
-	return gGIMIC.size();
+	return static_cast<int>(gGIMIC.size());
 }
 
 HRESULT C86Ctl::getChipInterface( int id, REFIID riid, void** ppi )

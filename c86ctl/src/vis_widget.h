@@ -50,7 +50,7 @@ public:
 		: CVisWidget(parentWnd), sw(0), str(title){
 		sx = x;
 		sy = y;
-		ex = x + 10 + 6*str.length();
+		ex = x + 10 + 6*static_cast<int>(str.length());
 		ey = y + 8;
 	};
 	~CVisCheckBox(){};

@@ -24,7 +24,7 @@ class c86ctl::CC86CtlConfig gConfig;
 BOOL CC86CtlConfig::writeInt( LPCTSTR section, LPCTSTR key, INT val )
 {
 	TCHAR cfg[128];
-	_stprintf( cfg, TEXT("%d"), val );
+	_stprintf_s( cfg, TEXT("%d"), val );
 	return ::WritePrivateProfileString( section, key, cfg, inipath );
 }
 
