@@ -116,7 +116,7 @@ c:\ruby\bin\ruby verup.rb</Command>
     </Link>
     <PreBuildEvent>
       <Command>cd $(SolutionDir)c86ctl\src
-c:\ruby\bin\ruby verup.rb</Command>
+c:\ruby193\bin\ruby verup.rb</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -155,6 +155,11 @@ c:\ruby\bin\ruby verup.rb</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
+    <PreBuildEvent>
+      <Command>cd $(SolutionDir)c86ctl\src
+c:\ruby193\bin\ruby verup.rb
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\fpscounter.cpp" />
