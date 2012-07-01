@@ -20,7 +20,7 @@ class COPMFmCh : public COPXFmCh {
 	
 public:
 	COPMFmCh(IRealChip2 *p) : COPXFmCh(p) {
-		setMasterClock(4000000);
+		setMasterClock(3579545);
 		reset();
 	};
 	virtual ~COPMFmCh(void){
