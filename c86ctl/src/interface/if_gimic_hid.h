@@ -23,32 +23,11 @@ namespace c86ctl{
 
 class GimicHID : public GimicIF
 {
+// ファクトリ -------------------------------------------------------
 public:
-	struct MSG{
-		// なんとなく合計2-DWORDになるようにしてみた。
-		UCHAR len;
-		UCHAR dat[7];	// 最大メッセージ長は今のところ6byte.
-	};
-	
-	struct REQ{
-		UINT t;
-		USHORT addr;
-		UCHAR dat;
-		UCHAR dummy;
-	};
-	
-private:
-	GimicHID(HANDLE h);
+	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
 
-public:
-	~GimicHID(void);
-
-public:
-	virtual int init(void);
-	virtual void tick(void);
-	virtual Chip* getChip(void){ return chip; };
-	virtual const GimicParam* getParam(){ return &gimicParam; };
-	
+// 公開インタフェイス -----------------------------------------------
 public:
 	// IGimic
 	virtual int __stdcall setSSGVolume(UCHAR vol);
@@ -73,6 +52,7 @@ public:
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
 	virtual void __stdcall directOut(UINT addr, UCHAR data);
 
+// 実験中 -----------------------------------------------
 public:
 //	virtual int __stdcall adpcmZeroClear(void);
 //	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
@@ -81,18 +61,79 @@ public:
 	virtual int __stdcall getDelay(int *delay);
 
 
+// C86CTL内部利用 ---------------------------------------------------
+private:
+	GimicHID(HANDLE h);
+
+public:
+	~GimicHID(void);
+
+public:
+	virtual int init(void);
+	virtual void tick(void);
+	virtual Chip* getChip(void){ return chip; };
+	virtual const GimicParam* getParam(){ return &gimicParam; };
+
 public:
 	virtual UINT getCPS(void){ return cps; };
 	virtual void update(void);
+
+
+// プライベート -----------------------------------------------------
+private:
+	struct MSG{
+		// なんとなく合計2-DWORDになるようにしてみた。
+		UCHAR len;
+		UCHAR dat[7];	// 最大メッセージ長は今のところ6byte.
+	};
 	
+	struct REQ{
+		UINT t;
+		USHORT addr;
+		UCHAR dat;
+		UCHAR dummy;
+	};
+
 private:
 	int sendMsg( MSG *data );
 	int transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz );
 	void out2buf(UINT addr, UCHAR data);
 	
+	int devWrite( LPCVOID data )
+	{
+		if(!hHandle)
+			return C86CTL_ERR_NODEVICE;
+		
+		DWORD len;
+		int ret = WriteFile(hHandle, data, 65, &len, NULL);
+		
+		if(ret == 0 || 65 != len){
+			CloseHandle(hHandle);
+			hHandle = NULL;
+			return C86CTL_ERR_UNKNOWN;
+		}
+		return C86CTL_ERR_NONE;
+	};
 	
+	int devRead( LPVOID data )
+	{
+		if(!hHandle)
+			return C86CTL_ERR_NODEVICE;
+		
+		DWORD len;
+		if( !ReadFile( hHandle, data, 65, &len, NULL) ){
+			CloseHandle(hHandle);
+			hHandle = NULL;
+			return C86CTL_ERR_UNKNOWN;
+		}
+		return C86CTL_ERR_NONE;
+	}
+
+
 private:
 	HANDLE hHandle;
+	std::basic_string<TCHAR> devPath;
+
 	CRITICAL_SECTION csection;
 	CRingBuff<MSG> rbuff;
 	UINT cps, cal, calcount;
@@ -103,9 +144,6 @@ private:
 	Chip *chip;
 	ChipType chiptype;
 	GimicParam gimicParam;
-	
-public:
-	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
 };
 
 typedef std::shared_ptr<GimicHID> GimicHIDPtr;

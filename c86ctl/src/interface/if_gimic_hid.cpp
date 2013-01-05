@@ -39,11 +39,11 @@
 	  ポートリマップ仕様
 		YM2608 & YMF288
 		  実アドレス      通信時のアドレス
-		  100~110     →  C0~D0
+		  100~110     ->  C0~D0
 		
 		YM2151
 		  実アドレス      通信時のアドレス
-		  FC~FF       →  1C~1F
+		  FC~FF       ->  1C~1F
 		  
  */
 #include "stdafx.h"
@@ -53,6 +53,8 @@
 
 #define GIMIC_USBVID 0x16c0
 #define GIMIC_USBPID 0x05e4
+#define C86USB_USBVID 0x0525 // TEST
+#define C86USB_USBPID 0xa4ac // TEST
 
 #include <setupapi.h>
 #include <algorithm>
@@ -131,13 +133,18 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 			}
 
 			unsigned long sz;
+			// 必要なバッファサイズ取得
 			SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, 0);
-
-			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det =
-				(PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
+			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
 			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
-			SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0);
 
+			// デバイスノード取得
+			if(!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0)){
+				free(dev_det);
+				break;
+			}
+
+			// デバイスオープン
 			HANDLE hHID = CreateFile(
 				dev_det->DevicePath,
 				GENERIC_READ|GENERIC_WRITE,
@@ -146,29 +153,41 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 				OPEN_EXISTING,
 				0,//FILE_FLAG_NO_BUFFERING,
 				NULL);
-			free(dev_det);
-			dev_det = NULL;
 
-			if(hHID == INVALID_HANDLE_VALUE)
+			if(hHID == INVALID_HANDLE_VALUE){
+				free(dev_det);
 				continue;
+			}
 
+			// VID, PID, version 取得
 			HIDD_ATTRIBUTES attr;
-			HidD_GetAttributes(hHID, &attr);
+			if( !HidD_GetAttributes(hHID, &attr) ){
+				free(dev_det);
+				continue;
+			}
 
 			if((attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID)||
-				(attr.VendorID == 0x0525 && attr.ProductID == 0xa4ac)){
+				(attr.VendorID == C86USB_USBVID && attr.ProductID == C86USB_USBPID)){
+				// タイムアウト設定
 				COMMTIMEOUTS commTimeOuts;
 				commTimeOuts.ReadIntervalTimeout = 0;
-				commTimeOuts.ReadTotalTimeoutConstant = 1000;
+				commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
 				commTimeOuts.ReadTotalTimeoutMultiplier = 0;
-				commTimeOuts.WriteTotalTimeoutConstant = 1000;
+				commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
 				commTimeOuts.WriteTotalTimeoutMultiplier = 0;
 				::SetCommTimeouts( hHID, &commTimeOuts );
 
-				instances.push_back( GimicIFPtr(new GimicHID(hHID)) );
+				// インスタンス生成
+				GimicHID *gimicHid = new GimicHID(hHID);
+				if( gimicHid ){
+					gimicHid->devPath = dev_det->DevicePath;
+					instances.push_back( GimicIFPtr(gimicHid) );
+				}
 			}else{
 				CloseHandle(hHID);
 			}
+
+			free(dev_det);
 		}
 	}
 
@@ -179,9 +198,7 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 int GimicHID::sendMsg( MSG *data )
 {
 	UCHAR buff[66];
-
-	if( !hHandle )
-		return C86CTL_ERR_NODEVICE;
+	int ret = C86CTL_ERR_UNKNOWN;
 
 	buff[0] = 0; // HID interface id.
 
@@ -191,19 +208,12 @@ int GimicHID::sendMsg( MSG *data )
 		if( sz<64 )
 			memset( &buff[1+sz], 0xff, 64-sz );
 
-		DWORD len;
 		::EnterCriticalSection(&csection);
-		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
+		int ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);
-		
-		if(ret == 0 || 65 != len){
-			CloseHandle(hHandle);
-			hHandle = NULL;
-			return C86CTL_ERR_UNKNOWN;
-		}
 	}
 
-	return C86CTL_ERR_NONE;
+	return ret;
 }
 
 int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
@@ -211,9 +221,7 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 	UCHAR buff[66];
 	buff[0] = 0; // HID interface id.
 	DWORD len = 0;
-
-	if( !hHandle )
-		return C86CTL_ERR_NODEVICE;
+	int ret = C86CTL_ERR_UNKNOWN;
 
 	::EnterCriticalSection(&csection);
 	{
@@ -223,23 +231,19 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 			if( sz<64 )
 				memset( &buff[1+sz], 0xff, 64-sz );
 
-			int ret = WriteFile(hHandle, buff, 65, &len, NULL);
-			if(ret == 0 || 65 != len){
-				CloseHandle(hHandle);
-				hHandle = NULL;
-				return C86CTL_ERR_UNKNOWN;
-			}
+			ret = devWrite(buff);
 		}
 
-		len = 0;
-		if( !ReadFile( hHandle, buff, 65, &len, NULL) ){
-			return C86CTL_ERR_UNKNOWN;
+		if( C86CTL_ERR_NONE==ret ){
+			len = 0;
+			ret = devRead(buff);
+			if( C86CTL_ERR_NONE == ret )
+				memcpy( rxdata, &buff[1], rxsz ); // 1byte目はUSBのInterfaceNo.なので飛ばす
 		}
-		memcpy( rxdata, &buff[1], rxsz ); // 1byte目はUSBのInterfaceNo.なので飛ばす
 	}
 	::LeaveCriticalSection(&csection);
 
-	return C86CTL_ERR_NONE;
+	return ret;
 }
 
 /*----------------------------------------------------------------------------
@@ -275,19 +279,22 @@ int GimicHID::init(void)
 
 int GimicHID::reset(void)
 {
+	int ret;
+	
 	// ディレイキューの廃棄
 	dqueue.flush();
 
-	int ret;
 	// リセットコマンド送信
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
 	ret =  sendMsg( &d );
-
-	// 各ステータス値リセット
-	//   マスクの適用をreset内でする（送信処理が発生する）ので
-	//   リセット後に処理しないとダメ。
-	if( chip )
-		chip->reset();
+	
+	if( C86CTL_ERR_NONE == ret ){
+		// 各ステータス値リセット
+		//   マスクの適用をreset内でする（送信処理が発生する）ので
+		//   リセット後に処理しないとダメ。
+		if( chip )
+			chip->reset();
+	}
 
 	return ret;
 }
@@ -312,7 +319,9 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 	MSG d = { 2, { 0xfd, 0x86 } };
 	int ret = transaction( &d, (uint8_t*)vol, 1 );
 	
-	gimicParam.ssgVol = *vol;
+	if( C86CTL_ERR_NONE == ret )
+		gimicParam.ssgVol = *vol;
+	
 	return ret;
 }
 
@@ -343,10 +352,12 @@ int GimicHID::getPLLClock(UINT *clock)
 	MSG d = { 2, { 0xfd, 0x85 } };
 	int ret = transaction( &d, (uint8_t*)clock, 4 );
 
-	if( gimicParam.clock != *clock ){
-		gimicParam.clock = *clock;
-		if( chip )
-			chip->setMasterClock(*clock);
+	if( ret == C86CTL_ERR_NONE ){
+		if( gimicParam.clock != *clock ){
+			gimicParam.clock = *clock;
+			if( chip )
+				chip->setMasterClock(*clock);
+		}
 	}
 	return ret;
 }
@@ -521,9 +532,8 @@ UCHAR GimicHID::in(UINT addr)
 
 void GimicHID::tick(void)
 {
-	if( !hHandle )
-		return;
-
+	int ret;
+	
 	if( 0<=delay && !dqueue.isempty() ){
 		UINT t = timeGetTime();
 		while( !dqueue.isempty() && t>=dqueue.front()->t ){
@@ -562,16 +572,11 @@ void GimicHID::tick(void)
 		// (directOut()と重なる可能性がある)
 		DWORD len;
 		::EnterCriticalSection(&csection);
-		int ret = WriteFile(hHandle, buff, 65, &len, NULL);
+		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);
 
-		if(ret == 0 || 65 != len){
-			CloseHandle(hHandle);
-			hHandle = NULL;
-			// なんかthrowする？
-			return;
-		}
-		cal+=64;
+		if( ret == C86CTL_ERR_NONE )
+			cal+=64;
 	}
 
 	return;

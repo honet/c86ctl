@@ -35,6 +35,7 @@ public:
 public:
 	void setManager(CVisManager *m){ manager = m; };
 	HWND getHWND(void){ return hWnd; };
+	void redraw(){ onPaint(); };
 
 public:
 	void windowToClient( POINT &pt ){

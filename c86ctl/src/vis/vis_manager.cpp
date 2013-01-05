@@ -36,7 +36,7 @@ void CVisManager::draw(void)
 	std::for_each( clients.begin(), clients.end(),
 			  [](CVisWnd* x){ ::InvalidateRect(x->getHWND(), NULL, FALSE); } );
 //		[](CVisWnd* x){ ::RedrawWindow(x->getHWND(), NULL, NULL, RDW_INVALIDATE|RDW_INTERNALPAINT); } );
-//		[](CVisWnd* x){ x->onPaint(); } );
+//		[](CVisWnd* x){ x->redraw(); } );
 	fps = counter.getFPS();
 }
 
