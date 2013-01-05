@@ -41,6 +41,8 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
+#define WM_THREADEXIT (WM_APP+10)
+
 // ------------------------------------------------------------------
 // グローバル変数
 ULONG_PTR gdiToken = 0;
@@ -83,9 +85,9 @@ class C86Ctl : public IRealChipBase
 public:
 	C86Ctl() : 
 	  isInitialized(false),
-		  gMainThread(0),
+		  hMainThread(0),
 		  mainThreadID(0),
-		  gSenderThread(0),
+		  hSenderThread(0),
 		  senderThreadID(0),
 		  timerPeriod(0),
 		  terminateFlag(false),
@@ -118,11 +120,12 @@ protected:
 
 protected:
 	static unsigned int WINAPI threadMain(LPVOID param);
+	static unsigned int WINAPI threadVis(LPVOID param);
 	static unsigned int WINAPI threadSender(LPVOID param);
 	
 protected:
-	HANDLE gMainThread;
-	HANDLE gSenderThread;
+	HANDLE hMainThread;
+	HANDLE hSenderThread;
 	UINT mainThreadID;
 	UINT senderThreadID;
 	DWORD timerPeriod;
@@ -135,17 +138,21 @@ protected:
 
 C86Ctl gc86ctl;
 
-
 // ---------------------------------------------------------
-// 描画処理スレッド
-// mm-timerによる60fps生成
+// UIメッセージ処理スレッド
+// note: 描画処理を本スレッド内で行うとドラッグなど
+//       システムメッセージ処理時に描画が固まってしまうので分けている
 unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 {
+	HANDLE hVisThread;
+	UINT visThreadID;
 	MSG msg;
+	BOOL b;
+
 	ZeroMemory(&msg, sizeof(msg));
+	C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
 
 	try{
-		C86Ctl *pThis = reinterpret_cast<C86Ctl*>(param);
 		if( Gdiplus::Ok != Gdiplus::GdiplusStartup(&gdiToken, &gdiInput, NULL) )
 			throw "failed to initialize GDI+";
 
@@ -159,33 +166,22 @@ unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 		wm->add( mainWnd );
 		mainWnd->create();
 
-		DWORD next = ::timeGetTime()*6 + 100;
-		while(1){
-			if( pThis->terminateFlag )
-				break;
-		
-			// message proc
-			if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
+		hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, wm, 0, &visThreadID );
+		if( hVisThread ){
+			while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
+				if( b==-1 ) break;
+				if( msg.message == WM_THREADEXIT ) 
+					break;
 				::TranslateMessage(&msg);
 				::DispatchMessage(&msg);
 			}
 
-			// fps management
-			DWORD now = ::timeGetTime() * 6;
-			if(now < next){
-				if( pThis->terminateFlag ) break;
-				Sleep(1);
-				continue;
-			}
-			next += 100;
-			if( next < now ){
-				//next = now;
-				while(next<now) next += 100;
-			}
-
-			//update
-			wm->draw();
+			::PostThreadMessage( visThreadID, WM_THREADEXIT, 0, 0 );
+			::WaitForSingleObject( hVisThread, INFINITE );
+			hVisThread = NULL;
+			visThreadID = 0;
 		}
+
 		wm->del( mainWnd );
 		mainWnd->close();
 
@@ -197,6 +193,46 @@ unsigned int WINAPI C86Ctl::threadMain(LPVOID param)
 	}
 	
 	return (DWORD)msg.wParam;
+}
+
+
+// ---------------------------------------------------------
+// 描画処理スレッド
+// mm-timerによる60fps生成
+unsigned int WINAPI C86Ctl::threadVis(LPVOID param)
+{
+	MSG msg;
+
+	ZeroMemory(&msg, sizeof(msg));
+	::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+
+	CVisManager *pwm = reinterpret_cast<CVisManager*>(param);
+
+	DWORD next = ::timeGetTime()*6 + 100;
+	while(1){
+		// message proc
+		if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
+			if( msg.message == WM_THREADEXIT )
+				break;
+		}else{
+			// fps management
+			DWORD now = ::timeGetTime() * 6;
+			if(now < next){
+				Sleep(1);
+				continue;
+			}
+			next += 100;
+			if( next < now ){
+				//next = now;
+				while(next<now) next += 100;
+			}
+
+			//update
+			pwm->draw();
+		}
+	}
+	
+	return 0;
 }
 
 
@@ -283,19 +319,19 @@ int C86Ctl::initialize(void)
 		timerPeriod = timeCaps.wPeriodMin;
 	}
 
-	// 描画スレッド開始
+	// 描画/UIスレッド開始
 	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) ){
-		gMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, this, 0, &mainThreadID );
-		if( !gMainThread )
+		hMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, this, 0, &mainThreadID );
+		if( !hMainThread )
 			return C86CTL_ERR_UNKNOWN;
 	}
 
 	// 演奏スレッド開始
-	gSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
-	if( !gSenderThread ){
-		SetThreadPriority( gSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
+	hSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
+	if( !hSenderThread ){
+		SetThreadPriority( hSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
 		terminateFlag = true;
-		::WaitForSingleObject( gMainThread, INFINITE );
+		::WaitForSingleObject( hMainThread, INFINITE );
 		return C86CTL_ERR_UNKNOWN;
 	}
 	isInitialized = true;
@@ -311,15 +347,21 @@ int C86Ctl::deinitialize(void)
 	reset();
 
 	// 各種スレッド終了
-	terminateFlag = true;
-	if( gMainThread ){
-		::WaitForSingleObject( gMainThread, INFINITE );
-		gMainThread = NULL;
+
+//	HANDLE handles[3] = { gMainThread, gVisThread, gSenderThread };
+//	::WaitForMultipleObjects(3, handles, TRUE, INFINITE );
+
+	if( hMainThread ){
+		::PostThreadMessage( mainThreadID, WM_THREADEXIT, 0, 0 );
+		::WaitForSingleObject( hMainThread, INFINITE );
+		hMainThread = NULL;
 		mainThreadID = 0;
 	}
-	if( gSenderThread ){
-		::WaitForSingleObject( gSenderThread, INFINITE );
-		gSenderThread = NULL;
+
+	if( hSenderThread ){
+		terminateFlag = true;
+		::WaitForSingleObject( hSenderThread, INFINITE );
+		hSenderThread = NULL;
 		senderThreadID = 0;
 	}
 	terminateFlag = false;

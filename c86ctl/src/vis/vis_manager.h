@@ -24,10 +24,12 @@ class CVisManager
 {
 public:
 	CVisManager(void) : fps(0) {
+		InitializeCriticalSection(&cs);
 		gVisSkin.init();
 	};
 	
 	virtual ~CVisManager(void){
+		DeleteCriticalSection(&cs);
 		gVisSkin.deinit();
 	};
 
@@ -41,7 +43,8 @@ public:
 
 protected:
 	std::vector<CVisWnd*> clients;
-	
+	CRITICAL_SECTION cs;
+
 	FPSCounter counter;
 	double fps;
 };

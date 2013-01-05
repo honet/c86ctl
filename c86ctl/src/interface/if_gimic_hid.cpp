@@ -570,7 +570,6 @@ void GimicHID::tick(void)
 		// WriteFileがスレッドセーフかどうかよく分からないので
 		// 念のため保護しているが、いらないかも。
 		// (directOut()と重なる可能性がある)
-		DWORD len;
 		::EnterCriticalSection(&csection);
 		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);

@@ -20,23 +20,26 @@ using namespace c86ctl::vis;
 
 void CVisManager::add( CVisWnd *wnd )
 {
+	::EnterCriticalSection(&cs);
 	clients.push_back(wnd);
 	wnd->setManager(this);
+	::LeaveCriticalSection(&cs);
 }
 
 void CVisManager::del( CVisWnd *wnd )
 {
+	::EnterCriticalSection(&cs);
 	auto ei = std::remove(clients.begin(), clients.end(), wnd);
 	clients.erase(ei, clients.end());
+	::LeaveCriticalSection(&cs);
 }
 
 void CVisManager::draw(void)
 {
-	// TODO: FIXME: 描画ウィンドウ数が増えるとなぜか描画が行われなくなる。原因不明。
-	std::for_each( clients.begin(), clients.end(),
-			  [](CVisWnd* x){ ::InvalidateRect(x->getHWND(), NULL, FALSE); } );
-//		[](CVisWnd* x){ ::RedrawWindow(x->getHWND(), NULL, NULL, RDW_INVALIDATE|RDW_INTERNALPAINT); } );
-//		[](CVisWnd* x){ x->redraw(); } );
+	::EnterCriticalSection(&cs);
+	std::for_each( clients.begin(), clients.end(), [](CVisWnd* x){ x->redraw(); } );
+	::LeaveCriticalSection(&cs);
+
 	fps = counter.getFPS();
 }
 

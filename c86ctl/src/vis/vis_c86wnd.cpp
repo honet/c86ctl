@@ -67,11 +67,12 @@ void CVisWnd::onPaint()
 	const int maxlen = 256;
 	char str[maxlen];
 	
-	PAINTSTRUCT ps;
-	HDC hdc = ::BeginPaint(hWnd, &ps);
+	HDC hdc = ::GetDC(hWnd);
 
-	::GetWindowTextA(hWnd, str, maxlen);
-	gVisSkin.drawFrame( canvas, str);
+	int l = ::WideCharToMultiByte(CP_THREAD_ACP, 0, windowTitle.c_str(), windowTitle.size(), str, maxlen, NULL, NULL);
+	if( 0<l ){ str[l] = 0; }else{ str[0] = 0; };
+
+	gVisSkin.drawFrame( canvas, str );
 
 	onPaintClient();
 	std::for_each( widgets.begin(), widgets.end(),
@@ -83,14 +84,15 @@ void CVisWnd::onPaint()
 		canvas->getRow0(0), canvas->getBMPINFO(),
 		DIB_RGB_COLORS, SRCCOPY );
 	
-	::EndPaint(hWnd, &ps);
+	::ReleaseDC(hWnd, hdc);
 }
 
 
 LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 {
+	PAINTSTRUCT ps;
 	bool handled = false;
-	
+
 	switch (msg) {
 	case WM_DESTROY:
 		onDestroy();
@@ -130,7 +132,9 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 		break;
 
 	case WM_PAINT:
-		onPaint();
+		// 画面描画はタイマ駆動で行われるので描画領域更新だけして終わる
+		::BeginPaint(hWnd, &ps);
+		::EndPaint(hWnd, &ps);
 		return 0;
 	case WM_ERASEBKGND:
 		return 0;
