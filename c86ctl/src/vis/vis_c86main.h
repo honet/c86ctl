@@ -8,16 +8,16 @@
  */
 #pragma once
 
-#include "opna.h"
+#include "chip/opna.h"
 #include "vis_c86wnd.h"
 #include "vis_c86key.h"
 #include "vis_c86reg.h"
 #include "vis_c86fm.h"
 #include "vis_widget.h"
 
-#include "if.h"
-#include "if_gimic_hid.h"
-#include "if_gimic_midi.h"
+#include "interface/if.h"
+#include "interface/if_gimic_hid.h"
+#include "interface/if_gimic_midi.h"
 
 namespace c86ctl{
 namespace vis {

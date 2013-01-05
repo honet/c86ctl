@@ -10,7 +10,7 @@
 #pragma once
 #include <assert.h>
 #include "chip.h"
-#include "if.h"
+#include "interface/if.h"
 #include "opx.h"
 
 namespace c86ctl{

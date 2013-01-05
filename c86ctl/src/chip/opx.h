@@ -9,7 +9,7 @@
 
 #pragma once
 #include "chip.h"
-#include "if.h"
+#include "interface/if.h"
 
 namespace c86ctl{
 

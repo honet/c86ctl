@@ -23,11 +23,11 @@
 #include "c86ctl.h"
 #include "module.h"
 #include "config.h"
-#include "vis_c86main.h"
+#include "vis/vis_c86main.h"
 #include "ringbuff.h"
-#include "if.h"
-#include "if_gimic_hid.h"
-#include "if_gimic_midi.h"
+#include "interface/if.h"
+#include "interface/if_gimic_hid.h"
+#include "interface/if_gimic_midi.h"
 
 
 #ifdef _DEBUG

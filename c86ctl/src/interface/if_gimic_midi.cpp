@@ -34,10 +34,10 @@
 #include <algorithm>
 #include "if_gimic_midi.h"
 #include "config.h"
-#include "chip.h"
-#include "opm.h"
-#include "opna.h"
-#include "opn3l.h"
+#include "chip/chip.h"
+#include "chip/opm.h"
+#include "chip/opna.h"
+#include "chip/opn3l.h"
 
 
 #ifdef _DEBUG

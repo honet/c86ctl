@@ -56,11 +56,11 @@
 
 #include <setupapi.h>
 #include <algorithm>
-#include "chip.h"
-#include "opm.h"
-#include "opna.h"
-#include "opn3l.h"
-#include "opl3.h"
+#include "chip/chip.h"
+#include "chip/opm.h"
+#include "chip/opna.h"
+#include "chip/opn3l.h"
+#include "chip/opl3.h"
 
 extern "C" {
 #include "hidsdi.h"
@@ -155,7 +155,8 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 			HIDD_ATTRIBUTES attr;
 			HidD_GetAttributes(hHID, &attr);
 
-			if(attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID){
+			if((attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID)||
+				(attr.VendorID == 0x0525 && attr.ProductID == 0xa4ac)){
 				COMMTIMEOUTS commTimeOuts;
 				commTimeOuts.ReadIntervalTimeout = 0;
 				commTimeOuts.ReadTotalTimeoutConstant = 1000;

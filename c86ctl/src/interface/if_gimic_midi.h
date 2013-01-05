@@ -1,6 +1,6 @@
 /***
 	c86ctl
-	gimic コントロール HID版(実験コード)
+	gimic コントロール MIDI版(実験コード)
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -12,43 +12,29 @@
 
 #include "if.h"
 
-#ifdef SUPPORT_HID
+#ifdef SUPPORT_MIDI
 
 #include <mmsystem.h>
 #include <vector>
 #include "ringbuff.h"
-#include "chip.h"
+#include "chip/chip.h"
 
 namespace c86ctl{
 
-class GimicHID : public GimicIF
+class GimicMIDI : public GimicIF
 {
-public:
-	struct MSG{
-		// なんとなく合計2-DWORDになるようにしてみた。
-		UCHAR len;
-		UCHAR dat[7];	// 最大メッセージ長は今のところ6byte.
-	};
-	
-	struct REQ{
-		UINT t;
-		USHORT addr;
-		UCHAR dat;
-		UCHAR dummy;
-	};
-	
 private:
-	GimicHID(HANDLE h);
+	GimicMIDI(HMIDIOUT h);
 
 public:
-	~GimicHID(void);
+	~GimicMIDI(void);
 
 public:
 	virtual int init(void);
 	virtual void tick(void);
-	virtual Chip* getChip(void){ return chip; };
+	virtual Chip* getChip(){ return chip; };
 	virtual const GimicParam* getParam(){ return &gimicParam; };
-	
+
 public:
 	// IGimic
 	virtual int __stdcall setSSGVolume(UCHAR vol);
@@ -58,9 +44,7 @@ public:
 	virtual int __stdcall getMBInfo(struct Devinfo *info);
 	virtual int __stdcall getModuleInfo(struct Devinfo *info);
 	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
-public:
-	// IGimic2
-	virtual int __stdcall getModuleType(enum ChipType *type);
+
 
 public:
 	// IRealChip
@@ -71,44 +55,28 @@ public:
 public:
 	// IRealChip2
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
-	virtual void __stdcall directOut(UINT addr, UCHAR data);
+	virtual void __stdcall directOut(UINT addr, UCHAR data){};
 
-public:
 //	virtual int __stdcall adpcmZeroClear(void);
 //	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
 //	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
-	virtual int __stdcall setDelay(int delay);
-	virtual int __stdcall getDelay(int *delay);
 
-
-public:
-	virtual UINT getCPS(void){ return cps; };
-	virtual void update(void);
+private:
+	void sendSysEx( uint8_t *data, uint32_t sz );
 	
 private:
-	int sendMsg( MSG *data );
-	int transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz );
-	void out2buf(UINT addr, UCHAR data);
-	
-	
-private:
-	HANDLE hHandle;
-	CRITICAL_SECTION csection;
-	CRingBuff<MSG> rbuff;
-	UINT cps, cal, calcount;
+	HMIDIOUT hHandle;
+	CRingBuff<UCHAR> rbuff;
 
-	int delay;
-	CRingBuff<REQ> dqueue;
-	
 	Chip *chip;
 	ChipType chiptype;
 	GimicParam gimicParam;
-	
+
 public:
 	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
 };
 
-typedef std::shared_ptr<GimicHID> GimicHIDPtr;
+typedef std::shared_ptr<GimicMIDI> GimicMIDIPtr;
 
 };
 

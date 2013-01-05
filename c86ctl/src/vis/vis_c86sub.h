@@ -7,7 +7,7 @@
 	honet.kk(at)gmail.com
  */
 #pragma once
-#include "opna.h"
+#include "chip/opna.h"
 #include "vis_bitmap.h"
 
 namespace c86ctl{

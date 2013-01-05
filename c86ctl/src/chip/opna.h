@@ -9,28 +9,94 @@
 
 #pragma once
 #include "chip.h"
-#include "if.h"
+#include "interface/if.h"
 #include "opnx.h"
-#include "opl3.h"
 
 namespace c86ctl{
 
+// ---------------------------------------------------------------------------------------
+class COPNAAdpcm{
+	friend class COPNA;
+
+	static const size_t ramsize = 256*1024;
+public:
+	COPNAAdpcm(IRealChip2 *p) : pIF(p){
+		dram = new UCHAR[ramsize];
+		reset();
+	};
+	virtual ~COPNAAdpcm(){
+		if( dram ) delete [] dram;
+	};
+
+	void reset(){
+		startAddr = 0;
+		stopAddr = 0;
+		limitAddr = 0;
+		currentAddr = 0;
+		prescale = 0;
+		deltaN = 0;
+		level = 0;
+		keyOnLevel = 0;
+	};
+	void update(){
+		if(keyOnLevel) keyOnLevel--;
+	};
+
+	void getLR( bool &l, bool &r ){ l = left; r = right; };
+	int getPan(){ // }1
+		if( left&&right ) return 0;
+		else if(left) return -1;
+		else if(right) return 1;
+		else return -2;
+	};
+
+	int getKeyOnLevel(){ return keyOnLevel; };
+	
+public:
+	int getLevel(){ return level; };
+	
+protected:
+	bool setReg( UCHAR addr, UCHAR data );
+	void setLR( bool l, bool r ){ left = l; right = r; };
+
+protected:
+	int startAddr;	//21bit
+	int stopAddr;	//21bit
+	int limitAddr;	//21bit
+	int currentAddr;//21bit (write pointer)
+	int prescale;	//16bit
+	int deltaN;		//16bit
+	int level;		//8bit;
+	int keyOnLevel;
+	
+	UCHAR control1;
+	UCHAR control2;
+	
+	bool left;
+	bool right;
+	
+	UCHAR *dram;
+
+	IRealChip2 *pIF;
+};
 
 // ---------------------------------------------------------------------------------------
-class COPN3L : public Chip
+class COPNA : public Chip
 {
 public:
-	COPN3L(IRealChip2 *p) : pIF(p) {
+	COPNA(IRealChip2 *p) : pIF(p) {
 		fm = new COPNFm(p);
 		ssg = new COPNSsg(p);
+		adpcm = new COPNAAdpcm(p);
 		rhythm = new COPNRhythm(p);
 		partMask = 0;
 		partSolo = 0;
 		reset();
 	};
-	virtual ~COPN3L(){
+	virtual ~COPNA(){
 		if(fm) delete fm;
 		if(ssg) delete ssg;
+		if(adpcm) delete adpcm;
 		if(rhythm) delete rhythm;
 	};
 
@@ -54,12 +120,13 @@ public:
 		fm->reset();
 		ssg->reset();
 		rhythm->reset();
+		adpcm->reset();
 
 		// ‹­§“I‚ÉOPNAƒ‚[ƒh‚ÉØ‚è‘Ö‚¦
 		pIF->directOut( 0x29, 0x9f );
 		reg[0][0x29] = 0x9f;
 
-		for( int i=0; i<13; i++ )
+		for( int i=0; i<14; i++ )
 			applyMask(i);
 	};
 	
@@ -78,6 +145,7 @@ public:
 		}
 		fm->update();
 		ssg->update();
+		adpcm->update();
 		rhythm->update();
 	};
 
@@ -102,12 +170,15 @@ public:
 
 	int getTimerA(){ return timerA; };
 	int getTimerB(){ return timerB; };
+	int getFMPrescale(){ return prescale_fm; };
+	int getSSGPrescale(){ return prescale_ssg; };
 
 
 public:
 	COPNFm *fm;
 	COPNSsg *ssg;
 	COPNRhythm *rhythm;
+	COPNAAdpcm *adpcm;
 	
 	UCHAR reg[2][256];
 	UCHAR regATime[2][256];
@@ -119,6 +190,8 @@ protected:
 protected:
 	int timerA; //10bit
 	int timerB; //8bit
+	int prescale_fm;
+	int prescale_ssg;
 	
 	bool timerA_sw;
 	bool timerB_sw;
@@ -128,5 +201,5 @@ protected:
 	IRealChip2 *pIF;
 };
 
-
 };
+

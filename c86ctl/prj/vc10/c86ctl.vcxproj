@@ -76,25 +76,25 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src;..\..\import\ddk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\src\win;..\..\src\common;..\..\import\ddk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>C86CTL_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\import\ddk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>..\..\src\c86ctl.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>..\..\src\win\c86ctl.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PreBuildEvent>
       <Command>cd $(SolutionDir)c86ctl\src
-c:\ruby\bin\ruby verup.rb</Command>
+c:\ruby193\bin\ruby verup.rb</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,7 +121,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\src;..\..\import\ddk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;..\..\src\win;..\..\src\common;..\..\import\ddk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>C86CTL_EXPORTS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -130,7 +130,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\import\ddk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>..\..\src\c86ctl.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>..\..\src\win\c86ctl.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -162,75 +162,69 @@ c:\ruby193\bin\ruby verup.rb
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\fpscounter.cpp" />
-    <ClCompile Include="..\..\src\if_gimic_hid.cpp" />
-    <ClCompile Include="..\..\src\if_gimic_midi.cpp" />
-    <ClCompile Include="..\..\src\if_gimic_winsub.cpp" />
-    <ClCompile Include="..\..\src\opm.cpp" />
-    <ClCompile Include="..\..\src\opn3l.cpp" />
-    <ClCompile Include="..\..\src\opnx.cpp" />
-    <ClCompile Include="..\..\src\opx.cpp" />
-    <ClCompile Include="..\..\src\vis_bitmap.cpp" />
-    <ClCompile Include="..\..\src\vis_c86fm.cpp" />
-    <ClCompile Include="..\..\src\vis_c86key.cpp" />
-    <ClCompile Include="..\..\src\vis_c86main.cpp" />
-    <ClCompile Include="..\..\src\vis_c86reg.cpp" />
-    <ClCompile Include="..\..\src\vis_c86skin.cpp" />
-    <ClCompile Include="..\..\src\vis_c86sub.cpp" />
-    <ClCompile Include="..\..\src\vis_c86wnd.cpp" />
-    <ClCompile Include="..\..\src\module.cpp" />
-    <ClCompile Include="..\..\src\opna.cpp" />
-    <ClCompile Include="..\..\src\c86ctl.cpp" />
-    <ClCompile Include="..\..\src\config.cpp" />
-    <ClCompile Include="..\..\src\ringbuff.cpp" />
-    <ClCompile Include="..\..\src\stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vis_manager.cpp" />
-    <ClCompile Include="..\..\src\vis_widget.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\chip.h" />
-    <ClInclude Include="..\..\src\fpscounter.h" />
-    <ClInclude Include="..\..\src\if.h" />
-    <ClInclude Include="..\..\src\if_gimic_hid.h" />
-    <ClInclude Include="..\..\src\if_gimic_midi.h" />
-    <ClInclude Include="..\..\src\if_gimic_winusb.h" />
-    <ClInclude Include="..\..\src\opl3.h" />
-    <ClInclude Include="..\..\src\opm.h" />
-    <ClInclude Include="..\..\src\opn3l.h" />
-    <ClInclude Include="..\..\src\opnx.h" />
-    <ClInclude Include="..\..\src\opx.h" />
-    <ClInclude Include="..\..\src\version.h" />
-    <ClInclude Include="..\..\src\vis_bitmap.h" />
-    <ClInclude Include="..\..\src\vis_c86fm.h" />
-    <ClInclude Include="..\..\src\vis_c86key.h" />
-    <ClInclude Include="..\..\src\vis_c86main.h" />
-    <ClInclude Include="..\..\src\vis_c86reg.h" />
-    <ClInclude Include="..\..\src\vis_c86skin.h" />
-    <ClInclude Include="..\..\src\vis_c86sub.h" />
-    <ClInclude Include="..\..\src\vis_c86wnd.h" />
-    <ClInclude Include="..\..\src\module.h" />
-    <ClInclude Include="..\..\src\opna.h" />
-    <ClInclude Include="..\..\src\c86ctl.h" />
-    <ClInclude Include="..\..\src\config.h" />
-    <ClInclude Include="..\..\src\resource.h" />
-    <ClInclude Include="..\..\src\ringbuff.h" />
-    <ClInclude Include="..\..\src\stdafx.h" />
-    <ClInclude Include="..\..\src\vis_manager.h" />
-    <ClInclude Include="..\..\src\vis_widget.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\c86ctl.def" />
     <None Include="..\..\ReadMe.txt" />
-    <None Include="..\..\src\res\skin.png" />
-    <None Include="res\skin.png" />
+    <None Include="..\..\src\win\c86ctl.def" />
+    <None Include="..\..\src\win\res\c86ctl.rc2" />
+    <None Include="..\..\src\win\res\skin.png" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\src\c86ctl.rc" />
+    <ClCompile Include="..\..\src\chip\opm.cpp" />
+    <ClCompile Include="..\..\src\chip\opn3l.cpp" />
+    <ClCompile Include="..\..\src\chip\opna.cpp" />
+    <ClCompile Include="..\..\src\chip\opnx.cpp" />
+    <ClCompile Include="..\..\src\chip\opx.cpp" />
+    <ClCompile Include="..\..\src\common\ringbuff.cpp" />
+    <ClCompile Include="..\..\src\interface\if_gimic_hid.cpp" />
+    <ClCompile Include="..\..\src\interface\if_gimic_midi.cpp" />
+    <ClCompile Include="..\..\src\interface\if_gimic_winsub.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_bitmap.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86fm.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86key.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86main.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86reg.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86skin.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86sub.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_c86wnd.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_manager.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_widget.cpp" />
+    <ClCompile Include="..\..\src\win\c86ctl.cpp" />
+    <ClCompile Include="..\..\src\win\config.cpp" />
+    <ClCompile Include="..\..\src\win\fpscounter.cpp" />
+    <ClCompile Include="..\..\src\win\module.cpp" />
+    <ClCompile Include="..\..\src\win\stdafx.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\chip\chip.h" />
+    <ClInclude Include="..\..\src\chip\opl3.h" />
+    <ClInclude Include="..\..\src\chip\opm.h" />
+    <ClInclude Include="..\..\src\chip\opn3l.h" />
+    <ClInclude Include="..\..\src\chip\opna.h" />
+    <ClInclude Include="..\..\src\chip\opnx.h" />
+    <ClInclude Include="..\..\src\chip\opx.h" />
+    <ClInclude Include="..\..\src\common\mydef.h" />
+    <ClInclude Include="..\..\src\common\ringbuff.h" />
+    <ClInclude Include="..\..\src\interface\if.h" />
+    <ClInclude Include="..\..\src\interface\if_gimic_hid.h" />
+    <ClInclude Include="..\..\src\interface\if_gimic_midi.h" />
+    <ClInclude Include="..\..\src\interface\if_gimic_winusb.h" />
+    <ClInclude Include="..\..\src\vis\vis_bitmap.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86fm.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86key.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86main.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86reg.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86skin.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86sub.h" />
+    <ClInclude Include="..\..\src\vis\vis_c86wnd.h" />
+    <ClInclude Include="..\..\src\vis\vis_manager.h" />
+    <ClInclude Include="..\..\src\vis\vis_widget.h" />
+    <ClInclude Include="..\..\src\win\config.h" />
+    <ClInclude Include="..\..\src\win\fpscounter.h" />
+    <ClInclude Include="..\..\src\win\module.h" />
+    <ClInclude Include="..\..\src\win\resource.h" />
+    <ClInclude Include="..\..\src\win\stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\win\c86ctl.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

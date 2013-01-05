@@ -97,6 +97,7 @@ BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_GET_FWVER, &C86winDlg::OnBnClickedButtonGetFwver)
 	ON_BN_CLICKED(IDC_BUTTON_TEST1, &C86winDlg::OnBnClickedButtonTest1)
 	ON_BN_CLICKED(IDC_BUTTON_ADPCM_ZERORESET, &C86winDlg::OnBnClickedButtonAdpcmZeroreset)
+	ON_BN_CLICKED(IDC_BUTTON_SWRESET, &C86winDlg::OnBnClickedButtonSwreset)
 END_MESSAGE_MAP()
 
 
@@ -519,9 +520,12 @@ void C86winDlg::OnBnClickedButtonTest1()
 		IRealChip *pchip=NULL;
 		if( S_OK == pGimicModule->QueryInterface( IID_IRealChip, (void**)&pchip ) ){
 			//pchip->out( 0x28, 0 );
-			for( int i=0x38; i<=0x3f; i++ ){
-				pchip->out( i, 0x73 );
+			for( int i=0; i<100000; i++ ){
+				pchip->out(0x38,0x5a);
 			}
+//			for( int i=0x38; i<=0x3f; i++ ){
+//				pchip->out( i, 0x73 );
+//			}
 
 			pchip->Release();
 		}
@@ -540,3 +544,20 @@ void C86winDlg::OnBnClickedButtonAdpcmZeroreset()
 		pchip->Release();
 	}
 }
+
+
+void C86winDlg::OnBnClickedButtonSwreset()
+{
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		IRealChip *pchip=NULL;
+		if( S_OK == pGimicModule->QueryInterface( IID_IRealChip, (void**)&pchip ) ){
+			pchip->reset();
+			pchip->Release();
+		}
+		pGimicModule->Release();
+	}
+}
+
+

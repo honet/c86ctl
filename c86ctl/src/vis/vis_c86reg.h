@@ -8,10 +8,10 @@
  */
 #pragma once
 
-#include "opna.h"
-#include "opm.h"
-#include "opn3l.h"
-#include "opl3.h"
+#include "chip/opna.h"
+#include "chip/opm.h"
+#include "chip/opn3l.h"
+#include "chip/opl3.h"
 #include "vis_c86wnd.h"
 
 namespace c86ctl{

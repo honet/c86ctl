@@ -8,7 +8,7 @@
  */
 
 #include "stdafx.h"
-#include "opna.h"
+#include "chip/opna.h"
 #include "vis_c86fm.h"
 #include "vis_c86sub.h"
 
