@@ -9,6 +9,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "c86ctlmain.h"
 #include "vis_c86skin.h"
 #include "vis_c86sub.h"
 #include "module.h"
@@ -164,7 +165,7 @@ CVisC86Skin::~CVisC86Skin(){
 }
 
 void CVisC86Skin::init(void){
-	skinbmp = CVisBitmap::LoadFromResource( IDB_PNGSKIN1, _T("PNG"), getModuleHandle() );
+	skinbmp = CVisBitmap::LoadFromResource( IDB_PNGSKIN1, _T("PNG"), C86CtlMain::getInstanceHandle() );
 	UINT *p = (UINT*)skinbmp->getPtr(639,511);
 	for( int i=0; i<4; i++ ){
 		pallet[i] = *p--;

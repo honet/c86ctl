@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <tchar.h>
 
+#include "c86ctlmain.h"
 #include "module.h"
 #include "config.h"
 #include "resource.h"
@@ -236,13 +237,13 @@ bool CVisWnd::create( DWORD exstyle, DWORD style, HWND hParent )
 	canvas = new CVisBitmap( windowWidth, windowHeight );
 	clientCanvas = new CVisChildBitmap( canvas, 2, 17, windowWidth-4, windowHeight-19 );
 
-	HINSTANCE hinst = getModuleHandle();
+	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
 
 	winc.style			= CS_HREDRAW | CS_VREDRAW;
 	winc.lpfnWndProc	= wndProcDispatcher;
 	winc.cbClsExtra		= winc.cbWndExtra = 0;
 	winc.hInstance		= hinst;
-	winc.hIcon			= LoadIcon(NULL , IDI_APPLICATION);
+	winc.hIcon			= LoadIcon(hinst, MAKEINTRESOURCE(IDI_ICON_C86CTL));
 	winc.hCursor		= LoadCursor(NULL , IDC_ARROW);
 	winc.hbrBackground	= (HBRUSH)GetStockObject(BLACK_BRUSH);
 	winc.lpszMenuName	= NULL;
@@ -297,7 +298,7 @@ void CVisWnd::close()
 		delete canvas;
 		canvas = NULL;
 	}
-	::UnregisterClass( windowClass.c_str(), getModuleHandle() );
+	::UnregisterClass( windowClass.c_str(), C86CtlMain::getInstanceHandle() );
 }
 
 void CVisWnd::saveConfig(void)

@@ -1,5 +1,6 @@
 c86ctl/import/ddk/*.h
-c86ctl/import/ddk/*.lib
+c86ctl/import/ddk/x64/*.lib
+c86ctl/import/ddk/ia32/*.lib
 c86ctl/prj/vc8/Debug
 c86ctl/prj/vc8/Release
 c86ctl/prj/vc10/Debug

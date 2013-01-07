@@ -8,7 +8,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-#include "res\c86ctl.rc2"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -19,6 +18,45 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,3,2,237
+ PRODUCTVERSION 1,3,2,237
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40000L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "Comments", "C86CTL"
+            VALUE "CompanyName", "honet"
+            VALUE "FileDescription", "C86CTL dynamic link library"
+            VALUE "FileVersion", "1, 3, 2, 237"
+            VALUE "InternalName", "C86CTL"
+            VALUE "LegalCopyright", "Copyright (C) 2011 honet"
+            VALUE "ProductName", "C86CTL dynamic link library"
+            VALUE "ProductVersion", "1, 3, 2, 237"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -52,6 +90,31 @@ END
 //
 
 IDB_PNGSKIN1            PNG                     "res\\skin.png"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON_C86CTL         ICON                    "res\\c86ctl.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_SYSPOPUP MENU
+BEGIN
+    POPUP "POPUP"
+    BEGIN
+        MENUITEM "Configuration",               ID_POPUP_CONFIG
+        MENUITEM SEPARATOR
+        MENUITEM "Show Visualizer",             ID_POPUP_SHOWVIS
+    END
+END
+
 #endif    // “ú–{Œê (“ú–{) resources
 /////////////////////////////////////////////////////////////////////////////
 

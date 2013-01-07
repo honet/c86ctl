@@ -86,7 +86,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\import\ddk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\import\ddk\ia32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>..\..\src\win\c86ctl.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +129,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\import\ddk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\import\ddk\ia32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>..\..\src\win\c86ctl.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -148,7 +148,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\import\ddk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\import\ddk\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>..\..\src\c86ctl.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -164,8 +164,10 @@ c:\ruby193\bin\ruby verup.rb
   <ItemGroup>
     <None Include="..\..\ReadMe.txt" />
     <None Include="..\..\src\win\c86ctl.def" />
+    <None Include="..\..\src\win\res\c86ctl.ico" />
     <None Include="..\..\src\win\res\c86ctl.rc2" />
     <None Include="..\..\src\win\res\skin.png" />
+    <None Include="res\c86ctl.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\chip\opm.cpp" />
@@ -188,9 +190,10 @@ c:\ruby193\bin\ruby verup.rb
     <ClCompile Include="..\..\src\vis\vis_manager.cpp" />
     <ClCompile Include="..\..\src\vis\vis_widget.cpp" />
     <ClCompile Include="..\..\src\win\c86ctl.cpp" />
+    <ClCompile Include="..\..\src\win\c86ctlmain.cpp" />
+    <ClCompile Include="..\..\src\win\c86ctlmainwnd.cpp" />
     <ClCompile Include="..\..\src\win\config.cpp" />
     <ClCompile Include="..\..\src\win\fpscounter.cpp" />
-    <ClCompile Include="..\..\src\win\module.cpp" />
     <ClCompile Include="..\..\src\win\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -217,9 +220,10 @@ c:\ruby193\bin\ruby verup.rb
     <ClInclude Include="..\..\src\vis\vis_c86wnd.h" />
     <ClInclude Include="..\..\src\vis\vis_manager.h" />
     <ClInclude Include="..\..\src\vis\vis_widget.h" />
+    <ClInclude Include="..\..\src\win\c86ctlmain.h" />
+    <ClInclude Include="..\..\src\win\c86ctlmainwnd.h" />
     <ClInclude Include="..\..\src\win\config.h" />
     <ClInclude Include="..\..\src\win\fpscounter.h" />
-    <ClInclude Include="..\..\src\win\module.h" />
     <ClInclude Include="..\..\src\win\resource.h" />
     <ClInclude Include="..\..\src\win\stdafx.h" />
   </ItemGroup>

@@ -206,6 +206,10 @@ void CVisC86Main::onPaintClient()
 	// FPS
 	sprintf(str, "FPS: %0.1f", manager->getCurrentFPS() );
 	skin->drawStr( clientCanvas, 0, 260, ch-12, str );
+
+	if( gimic.size() == 0 ){
+		skin->drawStr( clientCanvas, 0, 5, ch-12, "NO DEVICE!" );
+	}
 	
 }
 

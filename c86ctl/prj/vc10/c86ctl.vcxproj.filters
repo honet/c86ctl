@@ -28,6 +28,10 @@
     <None Include="..\..\src\win\res\skin.png">
       <Filter>resource</Filter>
     </None>
+    <None Include="..\..\src\win\res\c86ctl.ico">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="res\c86ctl.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\win\c86ctl.cpp">
@@ -37,9 +41,6 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\win\fpscounter.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\win\module.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\win\stdafx.cpp">
@@ -102,15 +103,18 @@
     <ClCompile Include="..\..\src\chip\opx.cpp">
       <Filter>module</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\win\c86ctlmain.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\win\c86ctlmainwnd.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\win\config.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\win\fpscounter.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\win\module.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\win\resource.h">
@@ -187,6 +191,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\chip\opx.h">
       <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\win\c86ctlmain.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\win\c86ctlmainwnd.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

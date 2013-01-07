@@ -9,7 +9,7 @@
 
 #pragma once
 
-extern HINSTANCE gModule;
+//extern HINSTANCE gModule;
 
-HINSTANCE getModuleHandle();
+//HINSTANCE getModuleHandle();
 
