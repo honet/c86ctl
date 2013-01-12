@@ -67,18 +67,8 @@ public:
 	
 private:
 	static unsigned int WINAPI threadMain(LPVOID param);
-//	static unsigned int WINAPI threadVis(LPVOID param);
 	static unsigned int WINAPI threadSender(LPVOID param);
 
-private:
-//	static int createMainWnd(LPVOID param);
-//	static int closeMainWnd(LPVOID param);
-//	static LRESULT CALLBACK wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-	
-//private:
-//	HWND hwnd;
-//	NOTIFYICONDATA notifyIcon;
-	
 private:
 	HANDLE hMainThread;
 	UINT mainThreadID;

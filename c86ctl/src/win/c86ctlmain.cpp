@@ -110,19 +110,18 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 
 		pwnd->createMainWnd(param);
 
-		
 		// メッセージループ
 		while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
 			if( b==-1 ) break;
-			if( msg.message == WM_THREADEXIT )
-				break;
+			if( msg.message == WM_THREADEXIT ){
+				pwnd->destroyMainWnd(param);
+			}
 
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
 
-		pwnd->destroyMainWnd(param);
-
+		C86CtlMainWnd::shutdown();
 		Gdiplus::GdiplusShutdown(gdiToken);
 	}
 	catch(...){
@@ -244,9 +243,6 @@ int C86CtlMain::deinitialize(void)
 	reset();
 
 	// 各種スレッド終了
-
-//	HANDLE handles[3] = { gMainThread, gVisThread, gSenderThread };
-//	::WaitForMultipleObjects(3, handles, TRUE, INFINITE );
 
 	if( hMainThread ){
 		::PostThreadMessage( mainThreadID, WM_THREADEXIT, 0, 0 );

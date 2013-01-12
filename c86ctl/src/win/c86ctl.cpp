@@ -29,11 +29,9 @@ BOOL APIENTRY DllMain(
 	switch (ul_reason_for_call){
 	case DLL_PROCESS_ATTACH:
 		c86ctl::GetC86CtlMain()->init(hModule);
-//		gModule = hModule;
 		gConfig.init(hModule);
 		break;
 	case DLL_PROCESS_DETACH:
-		//gModule = NULL;
 		c86ctl::GetC86CtlMain()->deinit();
 		break;
 	case DLL_THREAD_ATTACH:

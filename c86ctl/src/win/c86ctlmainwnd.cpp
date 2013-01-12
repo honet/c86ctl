@@ -42,9 +42,10 @@ extern "C" {
 
 #pragma comment(lib,"hidclass.lib")
 
-#ifdef _DEBUG
-#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
-#endif
+//#define _CRTDBG_MAP_ALLOC
+//#ifdef _DEBUG
+//#define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+//#endif
 
 using namespace c86ctl;
 using namespace c86ctl::vis;
@@ -61,7 +62,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 {
 	const TCHAR szAppName[] = _T("msg-receiver");
 	WNDCLASSEX  wndclass;
-	NOTIFYICONDATA notifyIcon;
+	//NOTIFYICONDATA notifyIcon;
 
 	HANDLE hNotifyDevNode;
 	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
@@ -120,8 +121,9 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 int C86CtlMainWnd::destroyMainWnd(LPVOID param)
 {
 	if(hwnd){
-		::DestroyWindow(hwnd);
 		::Shell_NotifyIcon( NIM_DELETE, &notifyIcon );
+		::DestroyWindow(hwnd);
+		//::SendMessage(hwnd, WM_CLOSE, 0, 0);
 	}
 	
 	return 0;
@@ -144,8 +146,9 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 
 	case WM_DESTROY:
 		pThis->stopVis();
+		::PostQuitMessage(0);
 		break;
-		
+
 	case WM_DEVICECHANGE:
 		OutputDebugString(_T("CAHNGE\r\n"));
 		break;

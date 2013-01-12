@@ -20,11 +20,7 @@ private:
 		  hVisThread(0),
 		  visThreadID(0)
 	{};
-	virtual ~C86CtlMainWnd(){
-		if( pthis ){
-			delete pthis;
-		}
-	};
+	virtual ~C86CtlMainWnd(){};
 
 public:
 	static C86CtlMainWnd* getInstance(){
@@ -33,11 +29,19 @@ public:
 		}
 		return pthis;
 	};
+
+	static void shutdown(){
+		if( pthis ){
+			delete pthis;
+			pthis = NULL;
+		}
+	};
 	
 public:
 	int createMainWnd(LPVOID param);
 	int destroyMainWnd(LPVOID param);
-	
+	HWND getHWND(void){ return hwnd; };
+
 private:
 	static unsigned int WINAPI threadVis(LPVOID param);
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
