@@ -64,7 +64,7 @@ void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 
 bool CVisC86Reg::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 

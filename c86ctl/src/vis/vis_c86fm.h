@@ -25,8 +25,8 @@ public:
 		: CVisWnd()
 		, id(idx)
 	{
-		windowWidth = 330+4;
-		windowHeight = 75*5+4+15;
+		_windowWidth = 330+4;
+		_windowHeight = 75*5+4+15;
 	};
 	~CVisC86Fm(){};
 
@@ -43,6 +43,8 @@ protected:
 	
 protected:
 	int id;
+	int _windowWidth;
+	int _windowHeight;
 	
 protected:
 	CVisKnobPtr knobAMS;

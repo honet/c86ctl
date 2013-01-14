@@ -107,6 +107,7 @@ GimicHID::~GimicHID(void)
 /*----------------------------------------------------------------------------
 	HIDIF factory
 ----------------------------------------------------------------------------*/
+#if 0
 std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 {
 	std::vector< std::shared_ptr<GimicIF> > instances;
@@ -194,7 +195,110 @@ std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
 	std::for_each( instances.begin(), instances.end(), [](std::shared_ptr<GimicIF> x){ x->init(); } );
 	return instances;
 }
+#endif
 
+int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics)
+{
+	GUID hidGuid;
+	HDEVINFO devinf;
+	SP_DEVICE_INTERFACE_DATA spid;
+	SP_DEVICE_INTERFACE_DETAIL_DATA* fc_data = NULL;
+
+	HidD_GetHidGuid(&hidGuid);
+	devinf = SetupDiGetClassDevs(
+		&hidGuid,
+		NULL,
+		0,
+		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+
+	if( devinf ){
+		for(int i = 0; ;i++) {
+			ZeroMemory(&spid, sizeof(spid));
+			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+			if(!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid)){
+				//DWORD err = GetLastError();
+				break;
+			}
+
+			unsigned long sz;
+			std::basic_string<TCHAR> devpath;
+
+			// 必要なバッファサイズ取得
+			SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, 0);
+			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
+			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
+
+			// デバイスノード取得
+			if(!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0)){
+				free(dev_det);
+				break;
+			}
+
+			// デバイスオープン
+			HANDLE hHID = CreateFile(
+				dev_det->DevicePath,
+				GENERIC_READ|GENERIC_WRITE,
+				0/*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
+				NULL,
+				OPEN_EXISTING,
+				0,//FILE_FLAG_NO_BUFFERING,
+				NULL);
+
+			if(hHID == INVALID_HANDLE_VALUE){
+				free(dev_det);
+				continue;
+			}
+			devpath = dev_det->DevicePath;
+			free(dev_det);
+			dev_det = NULL;
+
+			// VID, PID, version 取得
+			HIDD_ATTRIBUTES attr;
+			if( !HidD_GetAttributes(hHID, &attr) )
+				continue;
+
+			if((attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID)||
+				(attr.VendorID == C86USB_USBVID && attr.ProductID == C86USB_USBPID)){
+				
+				auto it = std::find_if( gimics.begin(), gimics.end(),
+					[devpath](std::shared_ptr<GimicIF> x) -> bool {
+						GimicHID *ghid = dynamic_cast<GimicHID*>(x.get());
+						if(!ghid) return false;
+						if(ghid->devPath != devpath ) return false;
+						if(!ghid->isValid()) return false;
+						return true;
+					}
+				);
+				if( it == gimics.end() ){
+					// タイムアウト設定
+					COMMTIMEOUTS commTimeOuts;
+					commTimeOuts.ReadIntervalTimeout = 0;
+					commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
+					commTimeOuts.ReadTotalTimeoutMultiplier = 0;
+					commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
+					commTimeOuts.WriteTotalTimeoutMultiplier = 0;
+					::SetCommTimeouts( hHID, &commTimeOuts );
+
+					// インスタンス生成
+					GimicHID *gimicHid = new GimicHID(hHID);
+					if( gimicHid ){
+						gimicHid->devPath = devpath;
+						gimics.push_back( GimicIFPtr(gimicHid) );
+						gimicHid->init();
+					}
+				}
+			}else{
+				CloseHandle(hHID);
+			}
+		}
+	}
+
+	return 0;
+}
+
+/*----------------------------------------------------------------------------
+	internal.
+----------------------------------------------------------------------------*/
 int GimicHID::sendMsg( MSG *data )
 {
 	UCHAR buff[66];
@@ -249,6 +353,7 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 /*----------------------------------------------------------------------------
 	実装
 ----------------------------------------------------------------------------*/
+
 int GimicHID::init(void)
 {
 	Devinfo info;
@@ -297,6 +402,11 @@ int GimicHID::reset(void)
 	}
 
 	return ret;
+}
+
+int GimicHID::isValid(void)
+{
+	return (hHandle == 0) ? FALSE : TRUE;
 }
 
 int GimicHID::setSSGVolume(UCHAR vol)
@@ -568,7 +678,7 @@ void GimicHID::tick(void)
 			memset( &buff[1+sz], 0xff, 64-sz );
 
 		// WriteFileがスレッドセーフかどうかよく分からないので
-		// 念のため保護しているが、いらないかも。
+		// 念のため保護しているが、たぶんいらない。
 		// (directOut()と重なる可能性がある)
 		::EnterCriticalSection(&csection);
 		ret = devWrite(buff);

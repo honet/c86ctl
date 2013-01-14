@@ -233,7 +233,7 @@ void CVisC86Key::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty,
 // --------------------------------------------------------
 bool CVisC86OPNAKey::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
@@ -296,7 +296,7 @@ void CVisC86OPNAKey::onPaintClient(void)
 // --------------------------------------------------------
 bool CVisC86OPN3LKey::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
@@ -354,7 +354,7 @@ void CVisC86OPN3LKey::onPaintClient(void)
 // --------------------------------------------------------
 bool CVisC86OPMKey::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 

@@ -28,7 +28,8 @@ public:
 	virtual ~CVisWnd();
 	
 public:
-	virtual bool create( DWORD exstyle = 0, DWORD style = (WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN), HWND hParent = 0 );
+	virtual bool create( int width, int height, DWORD exstyle = 0, DWORD style = (WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN), HWND hParent = 0 );
+	virtual bool resize( int width, int height );
 	virtual void close(void);
 	virtual void saveConfig(void);
 	
@@ -69,14 +70,16 @@ protected:
 	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);
 	bool isClose( int a, int b ) const;
 
+private:
+	int wndWidth;
+	int wndHeight;
+
 protected:
 	HWND hWnd;
-	
 	tstring windowClass;
 	tstring windowTitle;
-	int windowWidth;
-	int windowHeight;
 
+protected:
 	CVisManager *manager;
 	CVisBitmap *canvas;
 	CVisChildBitmap *clientCanvas;

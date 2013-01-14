@@ -8,15 +8,19 @@
  */
 
 #include <vector>
-//#include <WinUser.h>
-#include <Dbt.h>
-#include <ShellAPI.h>
 
 #include "c86ctl.h"
+#include "withlock.h"
 #include "interface/if.h"
 
 
+#define WM_THREADEXIT       (WM_APP+10)
+#define WM_TASKTRAY_EVENT   (WM_APP+11)
+#define WM_MYDEVCHANGE      (WM_APP+12)
+#define WM_MYDEVUPDATED     (WM_APP+13)
 
+
+// ------------------------------------------------------------------
 namespace c86ctl{
 
 class C86CtlMain : public IRealChipBase
@@ -60,10 +64,11 @@ public:
 	
 private:
 	bool terminateFlag;
-	std::vector< std::shared_ptr<GimicIF> > gGIMIC;
+	withlock< std::vector< std::shared_ptr<GimicIF> > > gGIMIC;
+
 
 public:
-	std::vector< std::shared_ptr<GimicIF> > &getGimics();
+	withlock< std::vector< std::shared_ptr<GimicIF> > > &getGimics();
 	
 private:
 	static unsigned int WINAPI threadMain(LPVOID param);
@@ -78,6 +83,7 @@ private:
 	static HINSTANCE hInstance;
 	static ULONG_PTR gdiToken;
 	static Gdiplus::GdiplusStartupInput gdiInput;
+	//HANDLE hNotifyDevNode;
 	
 	DWORD timerPeriod;
 	bool isInitialized;

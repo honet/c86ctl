@@ -198,6 +198,9 @@
     <ClInclude Include="..\..\src\win\c86ctlmainwnd.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\common\withlock.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\win\c86ctl.rc">

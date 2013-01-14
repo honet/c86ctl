@@ -1,6 +1,6 @@
 /***
 	c86ctl
-	gimic コントロール HID版(実験コード)
+	gimic コントロール HID版
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -17,7 +17,9 @@
 #include <mmsystem.h>
 #include <vector>
 #include "ringbuff.h"
+#include "withlock.h"
 #include "chip/chip.h"
+
 
 namespace c86ctl{
 
@@ -25,7 +27,8 @@ class GimicHID : public GimicIF
 {
 // ファクトリ -------------------------------------------------------
 public:
-	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
+	//static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
+	static int UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics);
 
 // 公開インタフェイス -----------------------------------------------
 public:
@@ -59,7 +62,7 @@ public:
 //	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
 	virtual int __stdcall setDelay(int delay);
 	virtual int __stdcall getDelay(int *delay);
-
+	virtual int __stdcall isValid(void);
 
 // C86CTL内部利用 ---------------------------------------------------
 private:

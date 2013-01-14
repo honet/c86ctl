@@ -25,8 +25,8 @@ public:
 		: CVisWnd()
 		, id(idx)
 	{
-		windowWidth = 284;
-		windowHeight = 350;
+		_windowWidth = 284;
+		_windowHeight = 350;
 	};
 	~CVisC86Reg(void){};
 
@@ -40,6 +40,8 @@ protected:
 
 protected:
 	int id;
+	int _windowWidth;
+	int _windowHeight;
 };
 
 typedef std::shared_ptr<CVisC86Reg> CVisC86RegPtr;
@@ -76,7 +78,7 @@ public:
 		_stprintf_s(str, _T("[%d] OPM REGISTER VIEW"), id);
 		windowTitle = str;
 		
-		windowHeight = 180;
+		_windowHeight = 180;
 	};
 	~CVisC86OPMReg(void){};
 

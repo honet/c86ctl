@@ -39,8 +39,8 @@ CVisWnd::CVisWnd()
 	, canvas(0)
 	, clientCanvas(0)
 	, wcapture(0)
-	, windowWidth(0)
-	, windowHeight(0)
+	, wndWidth(0)
+	, wndHeight(0)
 	, windowClass(_T("C86CTL"))
 	, windowTitle(_T("C86CTL"))
 {
@@ -49,7 +49,6 @@ CVisWnd::CVisWnd()
 
 CVisWnd::~CVisWnd()
 {
-	//d2dTarget.Release();
 	close();
 	
 	if( hCreatingMutex ){
@@ -220,22 +219,25 @@ LRESULT CALLBACK CVisWnd::wndProcDispatcher(HWND hWnd , UINT msg , WPARAM wp , L
 
 
 
-bool CVisWnd::create( DWORD exstyle, DWORD style, HWND hParent )
+bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND hParent )
 {
 	WNDCLASS winc;
 
 	int left = gConfig.getInt( windowClass.c_str(), INIKEY_WNDLEFT, INT_MIN );
 	int top  = gConfig.getInt( windowClass.c_str(), INIKEY_WNDTOP,  INT_MIN );
 
+	wndWidth = width;
+	wndHeight = height;
+
 	if( left == INT_MIN || top == INT_MIN ){
 		int wx = GetSystemMetrics(SM_CXSCREEN);
 		int wy = GetSystemMetrics(SM_CYSCREEN);
-		left = (wx - windowWidth) / 2;
-		top  = (wy - windowHeight) / 2;
+		left = (wx - width) / 2;
+		top  = (wy - height) / 2;
 	}
 
-	canvas = new CVisBitmap( windowWidth, windowHeight );
-	clientCanvas = new CVisChildBitmap( canvas, 2, 17, windowWidth-4, windowHeight-19 );
+	canvas = new CVisBitmap( width, height );
+	clientCanvas = new CVisChildBitmap( canvas, 2, 17, width-4, height-19 );
 
 	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
 
@@ -258,13 +260,35 @@ bool CVisWnd::create( DWORD exstyle, DWORD style, HWND hParent )
 		exstyle,
 		windowClass.c_str(), windowTitle.c_str(),
 		(style&~WS_VISIBLE),
-		left, top, windowWidth, windowHeight,
+		left, top, width, height,
 		hParent, NULL, hinst, NULL
 	);
 
 	creatingWnd = NULL;
 	::ReleaseMutex( hCreatingMutex );
 	if(!hWnd) return false;
+
+	return true;
+}
+bool CVisWnd::resize(int width, int height)
+{
+	if( wndWidth == width && wndHeight == height )
+		return true;
+
+	RECT rc;
+	::GetWindowRect(hWnd, &rc);
+	::MoveWindow(hWnd, rc.left, rc.top, width, height, FALSE);
+
+	if( canvas ){
+		delete canvas;
+		canvas = new CVisBitmap( width, height );
+	}
+	if( clientCanvas ){
+		delete clientCanvas;
+		clientCanvas = new CVisChildBitmap( canvas, 2, 17, width-4, height-19 );
+	}
+	wndWidth = width;
+	wndHeight = height;
 
 	return true;
 }

@@ -206,6 +206,7 @@ c:\ruby193\bin\ruby verup.rb
     <ClInclude Include="..\..\src\chip\opx.h" />
     <ClInclude Include="..\..\src\common\mydef.h" />
     <ClInclude Include="..\..\src\common\ringbuff.h" />
+    <ClInclude Include="..\..\src\common\withlock.h" />
     <ClInclude Include="..\..\src\interface\if.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_hid.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_midi.h" />

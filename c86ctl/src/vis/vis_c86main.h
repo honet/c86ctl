@@ -36,18 +36,15 @@ public:
 	~CVisC86Main(){};
 
 public:
-	void attach( std::vector< std::shared_ptr<GimicIF> > &g );
-	void detach( void );
-	void updateInfo(void);
-
 	virtual bool create(void);
+	bool update(void);
 
 protected:
 	// message handler
 	virtual void onPaintClient();
 	
 protected:
-	std::vector< std::shared_ptr<GimicIF> > gimic;
+	//std::vector< std::shared_ptr<GimicIF> > gimic;
 	struct hwinfo{
 		Devinfo mbinfo;
 		Devinfo chipinfo;

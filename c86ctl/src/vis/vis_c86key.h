@@ -25,8 +25,8 @@ public:
 		: CVisWnd()
 		, id(idx)
 	{
-		windowWidth = 290+64+3+4;// 334;
-		windowHeight = 530;
+		_windowWidth = 290+64+3+4;// 334;
+		_windowHeight = 530;
 	};
 	~CVisC86Key(){};
 
@@ -43,6 +43,8 @@ protected:
 	
 protected:
 	int id;
+	int _windowWidth;
+	int _windowHeight;
 };
 
 typedef std::shared_ptr<CVisC86Key> CVisC86KeyPtr;
@@ -92,7 +94,7 @@ public:
 		_stprintf_s(str, _T("[%d] OPN3L KEYBOARD VIEW"), id);
 		windowTitle = str;
 		
-		windowHeight = 495;
+		_windowHeight = 495;
 	};
 	~CVisC86OPN3LKey(){};
 
@@ -121,7 +123,7 @@ public:
 		_stprintf_s(str, _T("[%d] OPM KEYBOARD VIEW"), id);
 		windowTitle = str;
 
-		windowHeight = 315;
+		_windowHeight = 315;
 	};
 	~CVisC86OPMKey(){};
 	

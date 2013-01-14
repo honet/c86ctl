@@ -50,10 +50,6 @@ using namespace c86ctl::vis;
 
 
 // ------------------------------------------------------------------
-#define WM_THREADEXIT       (WM_APP+10)
-#define WM_TASKTRAY_EVENT   (WM_APP+11)
-
-// ------------------------------------------------------------------
 // グローバル変数
 C86CtlMain theC86CtlMain;
 
@@ -86,7 +82,7 @@ HINSTANCE C86CtlMain::getInstanceHandle()
 	return hInstance;
 }
 
-std::vector< std::shared_ptr<GimicIF> > &C86CtlMain::getGimics()
+withlock< std::vector< std::shared_ptr<GimicIF> > > &C86CtlMain::getGimics()
 {
 	return gGIMIC;
 }
@@ -113,9 +109,18 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		// メッセージループ
 		while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
 			if( b==-1 ) break;
-			if( msg.message == WM_THREADEXIT ){
+			switch( msg.message ){
+			case WM_THREADEXIT:
 				pwnd->destroyMainWnd(param);
+				break;
+
+			case WM_MYDEVCHANGE:
+				::OutputDebugString(L"YEAH!\r\n");
+				GimicHID::UpdateInstances(pThis->gGIMIC); // NOTE: 追加しかしない。
+				pwnd->deviceUpdate();
+				break;
 			}
+
 
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
@@ -159,12 +164,16 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			}
 			next += period;
 
+			// ここでループ内サイズ確定。
+			// 別スレッドでサイズ拡張される事があるので注意。
+			size_t sz = pThis->gGIMIC.size(); 
+
 			// update
-			std::for_each( pThis->gGIMIC.begin(), pThis->gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->tick(); } );
+			for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->tick(); };
 			
 			if( nextSec10 < now ){
 				nextSec10 += 50;
-				std::for_each( pThis->gGIMIC.begin(), pThis->gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->update(); } );
+				for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->update(); };
 			}
 		}
 	}catch(...){
@@ -204,9 +213,10 @@ int C86CtlMain::initialize(void)
 	// インスタンス生成
 	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
 	if( type==0 ){
-		gGIMIC = GimicHID::CreateInstances();
+		//gGIMIC = GimicHID::CreateInstances();
+		GimicHID::UpdateInstances(gGIMIC);
 	}else if( type==1 ){
-		gGIMIC = GimicMIDI::CreateInstances();
+		//gGIMIC = GimicMIDI::CreateInstances(); // TODO!!
 	}
 	
 	// タイマ分解能設定
@@ -261,6 +271,7 @@ int C86CtlMain::deinitialize(void)
 
 	// インスタンス削除
 	// note: このタイミングで終了処理が行われる。
+	//       gGIMICを参照する演奏・描画スレッドは終了していなければならない。
 	gGIMIC.clear();
 
 	// タイマ分解能設定解除
@@ -272,7 +283,10 @@ int C86CtlMain::deinitialize(void)
 
 int C86CtlMain::reset(void)
 {
+	gGIMIC.lock();
 	std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->reset(); } );
+	gGIMIC.unlock();
+
 	return 0;
 }
 

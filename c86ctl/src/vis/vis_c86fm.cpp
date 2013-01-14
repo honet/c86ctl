@@ -256,7 +256,7 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 // ---------------------------------------------------------------
 bool CVisC86OPNAFm::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
@@ -282,7 +282,7 @@ void CVisC86OPNAFm::onPaintClient()
 // ---------------------------------------------------------------
 bool CVisC86OPN3LFm::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 
@@ -307,7 +307,7 @@ void CVisC86OPN3LFm::onPaintClient()
 // -----------------------------------------------------------
 bool CVisC86OPMFm::create( HWND parent )
 {
-	if( !CVisWnd::create(
+	if( !CVisWnd::create( _windowWidth, _windowHeight,
 		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
 		return false;
 

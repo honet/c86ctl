@@ -40,6 +40,7 @@ public:
 public:
 	int createMainWnd(LPVOID param);
 	int destroyMainWnd(LPVOID param);
+	int deviceUpdate(void);
 	HWND getHWND(void){ return hwnd; };
 
 private:
@@ -49,6 +50,7 @@ private:
 private:
 	int startVis();
 	int stopVis();
+	int updateVis();
 
 private:
 	HWND hwnd;
@@ -58,6 +60,7 @@ private:
 	c86ctl::vis::CVisC86Main *mainVisWnd;
 	HANDLE hVisThread;
 	UINT visThreadID;
+	HANDLE hNotifyDevNode;
 
 private:
 	static C86CtlMainWnd *pthis;

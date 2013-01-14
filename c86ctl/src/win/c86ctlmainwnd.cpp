@@ -62,9 +62,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 {
 	const TCHAR szAppName[] = _T("msg-receiver");
 	WNDCLASSEX  wndclass;
-	//NOTIFYICONDATA notifyIcon;
 
-	HANDLE hNotifyDevNode;
 	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
 
 	// メッセージ処理用ウィンドウ生成
@@ -102,6 +100,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 	lstrcpy( notifyIcon.szTip, _T("C86CTL") );
 	::Shell_NotifyIcon( NIM_ADD, &notifyIcon );
 
+
 	// デバイス挿抜監視登録
 	DEV_BROADCAST_DEVICEINTERFACE *pFilterData = (DEV_BROADCAST_DEVICEINTERFACE*)_alloca(sizeof(DEV_BROADCAST_DEVICEINTERFACE));
 	if( pFilterData ){
@@ -111,24 +110,31 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		pFilterData->dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 		HidD_GetHidGuid(&pFilterData->dbcc_classguid);
 
-		hNotifyDevNode = RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+		hNotifyDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 	}
 
 	return 0;
 }
 
+int C86CtlMainWnd::deviceUpdate()
+{
+	if( mainVisWnd ){
+		mainVisWnd->update();
+	}
+	return 0;
+}
 
 int C86CtlMainWnd::destroyMainWnd(LPVOID param)
 {
+	if(hNotifyDevNode){
+		::UnregisterDeviceNotification(hNotifyDevNode);
+	}
 	if(hwnd){
 		::Shell_NotifyIcon( NIM_DELETE, &notifyIcon );
 		::DestroyWindow(hwnd);
-		//::SendMessage(hwnd, WM_CLOSE, 0, 0);
 	}
-	
 	return 0;
 }
-
 
 LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -150,7 +156,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 		break;
 
 	case WM_DEVICECHANGE:
-		OutputDebugString(_T("CAHNGE\r\n"));
+		::PostThreadMessage( ::GetCurrentThreadId(), WM_MYDEVCHANGE, wParam, lParam );
 		break;
 
 	case WM_TASKTRAY_EVENT:
@@ -206,14 +212,20 @@ int C86CtlMainWnd::startVis()
 	wm = new CVisManager();
 	mainVisWnd = new CVisC86Main();
 
-	mainVisWnd->attach( GetC86CtlMain()->getGimics() );
+	//mainVisWnd->updateInfo();
 	wm->add( mainVisWnd );
 	mainVisWnd->create();
 
 	// 描画スレッド開始
 	hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, wm, 0, &visThreadID );
 	if( !hVisThread ){
+		stopVis();
 	}
+	return 0;
+}
+
+int C86CtlMainWnd::updateVis()
+{
 	return 0;
 }
 

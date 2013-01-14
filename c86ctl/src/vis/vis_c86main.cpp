@@ -18,6 +18,7 @@
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86main.h"
+#include "c86ctlmain.h"
 
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
@@ -28,54 +29,42 @@ using namespace c86ctl::vis;
 
 static const int modHeight = 74;
 
-void CVisC86Main::attach( std::vector< std::shared_ptr<GimicIF> > &g )
+bool CVisC86Main::update()
 {
-	gimic = g;
-	updateInfo();
-}
+	// CHECKME: この時点でattachされてないといけない。
+	auto gimics = GetC86CtlMain()->getGimics();
+	int sz = static_cast<int>(info.size());
+	int st = sz;
 
-void CVisC86Main::detach( void )
-{
-	gimic.clear();
-}
+	if( sz == gimics.size() )
+		return true;
 
-void CVisC86Main::updateInfo(void)
-{
-	size_t sz = gimic.size();
+	sz = gimics.size();
 	info.resize(sz);
 	for( size_t i=0; i<sz; i++ ){
-		gimic[i]->getMBInfo(&info[i].mbinfo);
-		gimic[i]->getFWVer(&info[i].major, &info[i].minor, &info[i].rev, &info[i].build);
-		gimic[i]->getModuleInfo(&info[i].chipinfo);
-		gimic[i]->getModuleType(&info[i].chiptype);
+		gimics[i]->getMBInfo(&info[i].mbinfo);
+		gimics[i]->getFWVer(&info[i].major, &info[i].minor, &info[i].rev, &info[i].build);
+		gimics[i]->getModuleInfo(&info[i].chipinfo);
+		gimics[i]->getModuleType(&info[i].chiptype);
 	}
-}
-
-
-bool CVisC86Main::create(void)
-{
-	// CHECKME: createの前にattachされてないといけない。
-	int sz = static_cast<int>(info.size());
 
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
-	windowHeight = 19+40+modHeight*sz+10;
-	windowWidth = 334;
-	
-	if ( !CVisWnd::create( 0, WS_POPUP | WS_CLIPCHILDREN ) ){
-		return false;
-	}
+	int windowHeight = 19+40+modHeight*sz+10;
+	int windowWidth = 334;
 
-	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+	if( !CVisWnd::resize( windowWidth, windowHeight ) )
+		return false;
 	
 	int y=40;
 	
-	for( int i=0; i<sz; i++ ){
+	for( int i=st; i<sz; i++ ){
+		auto gimic = gimics[i];
 		info[i].checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
 		info[i].checkReg->changeEvent.push_back(
-			[this, i](CVisWidget* w){
+			[this, gimic, i](CVisWidget* w){
 				hwinfo *info = &this->info[i];
 				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-					info->regView = visC86RegViewFactory(this->gimic[i]->getChip(), 0);
+					info->regView = visC86RegViewFactory(gimic->getChip(), 0);
 					info->regView->create(hWnd);
 					this->manager->add( info->regView.get() );
 				}else{
@@ -90,10 +79,10 @@ bool CVisC86Main::create(void)
 			info[i].chiptype == CHIP_OPM ){
 			info[i].checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
 			info[i].checkKey->changeEvent.push_back(
-				[this, i](CVisWidget* w){
+				[this, gimic, i](CVisWidget* w){
 					hwinfo *info = &this->info[i];
 					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-						info->keyView = visC86KeyViewFactory(this->gimic[i]->getChip(), 0);
+						info->keyView = visC86KeyViewFactory(gimic->getChip(), 0);
 						info->keyView->create(hWnd);
 						this->manager->add( info->keyView.get() );
 					}else{
@@ -112,10 +101,10 @@ bool CVisC86Main::create(void)
 				sprintf(str, "FM%d", ch+1);
 				info[i].checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this,180 + 40*(ch%3), y+((ch/3)+1)*14, str));
 				info[i].checkFM[ch]->changeEvent.push_back(
-					[this, i, ch](CVisWidget* w){
+					[this, gimic, i, ch](CVisWidget* w){
 						hwinfo *info = &this->info[i];
 						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-							info->fmView[ch] = visC86FmViewFactory(this->gimic[i]->getChip(), i, ch);
+							info->fmView[ch] = visC86FmViewFactory(gimic->getChip(), i, ch);
 							info->fmView[ch]->create(hWnd);
 							this->manager->add( info->fmView[ch].get() );
 						}else{
@@ -144,8 +133,29 @@ bool CVisC86Main::create(void)
 	return true;
 }
 
+bool CVisC86Main::create(void)
+{
+	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
+	int windowHeight = 19+40+10;
+	int windowWidth = 334;
+	
+	if ( !CVisWnd::create( windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN ) ){
+		return false;
+	}
+
+	update();
+	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+
+	return true;
+}
+
 void CVisC86Main::onPaintClient()
 {
+	auto gimic = GetC86CtlMain()->getGimics();
+
+	// NOTE: gimic.size != info.size() となることがあるので注意
+	size_t sz = info.size();
+
 	CVisC86Skin *skin = &gVisSkin;
 	const int maxlen = 256;
 	char str[maxlen];
@@ -175,31 +185,41 @@ void CVisC86Main::onPaintClient()
 	tick++;
 
 	int y=40;
-	for( size_t i=0; i<gimic.size(); i++ ){
-		const GimicParam* param = gimic[i]->getParam();
-		
+	for( size_t i=0; i<sz; i++ ){
 		int dy=0;
 		// 枠線
 		visFillRect( clientCanvas, 5, y-2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID) );
 		visFillRect( clientCanvas, 5, y+64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
-		// デバイス名
-		sprintf(str, "MODULE%d: %s Rev.%c", i, &info[i].mbinfo.Devname[0], info[i].mbinfo.Rev );
-		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		// Firmware version
-		sprintf( str, "FW-VER : %d.%d.%d.%d", info[i].major, info[i].minor, info[i].rev, info[i].build );
-		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		// MODULE名
-		sprintf(str, "CHIP   : %s Rev.%c", &info[i].chipinfo.Devname[0], info[i].chipinfo.Rev );
-		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		// PLL Clock
-		sprintf(str, "CLOCK  : %d Hz", param->clock );
-		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		// SSG-Volume
-		sprintf(str, "SSG-VOL: %d", param->ssgVol );
-		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		// カロリー(w
-		sprintf(str, "CALORIE: %d CPS", gimic[i]->getCPS() );
-		skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+
+		if( gimic[i]->isValid() ){
+			const GimicParam* param = gimic[i]->getParam();
+			// デバイス名
+			sprintf(str, "MODULE%d: %s Rev.%c", i, &info[i].mbinfo.Devname[0], info[i].mbinfo.Rev );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			// Firmware version
+			sprintf( str, "FW-VER : %d.%d.%d.%d", info[i].major, info[i].minor, info[i].rev, info[i].build );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			// MODULE名
+			sprintf(str, "CHIP   : %s Rev.%c", &info[i].chipinfo.Devname[0], info[i].chipinfo.Rev );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			// PLL Clock
+			sprintf(str, "CLOCK  : %d Hz", param->clock );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			// SSG-Volume
+			sprintf(str, "SSG-VOL: %d", param->ssgVol );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			// カロリー(w
+			sprintf(str, "CALORIE: %d CPS", gimic[i]->getCPS() );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+		}else{
+			sprintf(str, "MODULE%d: DISCONNECTED", i );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			skin->drawStr( clientCanvas, 1, 15, y+dy, "FW-VER :" ); dy+=10;
+			skin->drawStr( clientCanvas, 1, 15, y+dy, "CHIP   :" ); dy+=10;
+			skin->drawStr( clientCanvas, 1, 15, y+dy, "CLOCK  :" ); dy+=10;
+			skin->drawStr( clientCanvas, 1, 15, y+dy, "SSG-VOL:" ); dy+=10;
+			skin->drawStr( clientCanvas, 1, 15, y+dy, "CALORIE:" ); dy+=10;
+		}
 		y+=modHeight;
 	}
 
@@ -207,7 +227,7 @@ void CVisC86Main::onPaintClient()
 	sprintf(str, "FPS: %0.1f", manager->getCurrentFPS() );
 	skin->drawStr( clientCanvas, 0, 260, ch-12, str );
 
-	if( gimic.size() == 0 ){
+	if( sz == 0 ){
 		skin->drawStr( clientCanvas, 0, 5, ch-12, "NO DEVICE!" );
 	}
 	
