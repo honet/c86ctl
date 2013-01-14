@@ -26,12 +26,6 @@ public:
 	virtual ~GimicIF(){};
 
 public:
-	virtual int init(void){ return 0; };
-	virtual void tick(void){};
-	virtual Chip* getChip(){ return 0; };
-	virtual const GimicParam* getParam(){ return 0; };
-
-public:
 	// IUnknown
 	virtual HRESULT __stdcall QueryInterface( REFIID riid, LPVOID *ppvObj ){
 		if( !ppvObj )
@@ -90,10 +84,20 @@ public:
 	// IGimic2
 	virtual int __stdcall getModuleType(enum ChipType *type){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 
+
 public:
 	// ”ñŒöŠJ
+	virtual int init(void){ return 0; };
+	virtual void tick(void){};
+	virtual void update(void){};
 	virtual UINT getCPS(void){ return 0; };
-	virtual void update(void){ };
+	virtual void checkConnection(void){};
+
+	virtual Chip* getChip(){ return 0; };
+	virtual const GimicParam* getParam(){ return 0; };
+
+public:
+	
 
 
 protected:

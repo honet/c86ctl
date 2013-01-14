@@ -27,7 +27,6 @@ class GimicHID : public GimicIF
 {
 // ファクトリ -------------------------------------------------------
 public:
-	//static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
 	static int UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics);
 
 // 公開インタフェイス -----------------------------------------------
@@ -80,6 +79,7 @@ public:
 public:
 	virtual UINT getCPS(void){ return cps; };
 	virtual void update(void);
+	virtual void checkConnection(void);
 
 
 // プライベート -----------------------------------------------------

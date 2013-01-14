@@ -107,98 +107,11 @@ GimicHID::~GimicHID(void)
 /*----------------------------------------------------------------------------
 	HIDIF factory
 ----------------------------------------------------------------------------*/
-#if 0
-std::vector< std::shared_ptr<GimicIF> > GimicHID::CreateInstances(void)
-{
-	std::vector< std::shared_ptr<GimicIF> > instances;
-	
-	GUID hidGuid;
-	HDEVINFO devinf;
-	SP_DEVICE_INTERFACE_DATA spid;
-	SP_DEVICE_INTERFACE_DETAIL_DATA* fc_data = NULL;
-
-	HidD_GetHidGuid(&hidGuid);
-	devinf = SetupDiGetClassDevs(
-		&hidGuid,
-		NULL,
-		0,
-		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
-
-	if( devinf ){
-		for(int i = 0; ;i++) {
-			ZeroMemory(&spid, sizeof(spid));
-			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-			if(!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid)){
-				//DWORD err = GetLastError();
-				break;
-			}
-
-			unsigned long sz;
-			// 必要なバッファサイズ取得
-			SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, 0);
-			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
-			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
-
-			// デバイスノード取得
-			if(!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0)){
-				free(dev_det);
-				break;
-			}
-
-			// デバイスオープン
-			HANDLE hHID = CreateFile(
-				dev_det->DevicePath,
-				GENERIC_READ|GENERIC_WRITE,
-				0/*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
-				NULL,
-				OPEN_EXISTING,
-				0,//FILE_FLAG_NO_BUFFERING,
-				NULL);
-
-			if(hHID == INVALID_HANDLE_VALUE){
-				free(dev_det);
-				continue;
-			}
-
-			// VID, PID, version 取得
-			HIDD_ATTRIBUTES attr;
-			if( !HidD_GetAttributes(hHID, &attr) ){
-				free(dev_det);
-				continue;
-			}
-
-			if((attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID)||
-				(attr.VendorID == C86USB_USBVID && attr.ProductID == C86USB_USBPID)){
-				// タイムアウト設定
-				COMMTIMEOUTS commTimeOuts;
-				commTimeOuts.ReadIntervalTimeout = 0;
-				commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
-				commTimeOuts.ReadTotalTimeoutMultiplier = 0;
-				commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
-				commTimeOuts.WriteTotalTimeoutMultiplier = 0;
-				::SetCommTimeouts( hHID, &commTimeOuts );
-
-				// インスタンス生成
-				GimicHID *gimicHid = new GimicHID(hHID);
-				if( gimicHid ){
-					gimicHid->devPath = dev_det->DevicePath;
-					instances.push_back( GimicIFPtr(gimicHid) );
-				}
-			}else{
-				CloseHandle(hHID);
-			}
-
-			free(dev_det);
-		}
-	}
-
-	std::for_each( instances.begin(), instances.end(), [](std::shared_ptr<GimicIF> x){ x->init(); } );
-	return instances;
-}
-#endif
-
 int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics)
 {
+	gimics.lock();
+	std::for_each( gimics.begin(), gimics.end(), []( std::shared_ptr<GimicIF> x ){ x->checkConnection(); } );
+
 	GUID hidGuid;
 	HDEVINFO devinf;
 	SP_DEVICE_INTERFACE_DATA spid;
@@ -293,6 +206,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 		}
 	}
 
+	gimics.unlock();
 	return 0;
 }
 
@@ -701,6 +615,16 @@ void GimicHID::update(void)
 		cal = 0;
 		calcount = 0;
 	}
+};
+void GimicHID::checkConnection(void)
+{
+	UCHAR buff[65];
+	buff[0] = 0;
+	memset( buff, 0, 65 );
+
+	::EnterCriticalSection(&csection);
+	devWrite(buff);
+	::LeaveCriticalSection(&csection);
 };
 
 int GimicHID::setDelay(int delay)

@@ -55,7 +55,7 @@ bool CVisC86Main::update()
 	if( !CVisWnd::resize( windowWidth, windowHeight ) )
 		return false;
 	
-	int y=40;
+	int y=40+modHeight*st;
 	
 	for( int i=st; i<sz; i++ ){
 		auto gimic = gimics[i];
@@ -64,7 +64,7 @@ bool CVisC86Main::update()
 			[this, gimic, i](CVisWidget* w){
 				hwinfo *info = &this->info[i];
 				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-					info->regView = visC86RegViewFactory(gimic->getChip(), 0);
+					info->regView = visC86RegViewFactory(gimic->getChip(), i);
 					info->regView->create(hWnd);
 					this->manager->add( info->regView.get() );
 				}else{
@@ -82,7 +82,7 @@ bool CVisC86Main::update()
 				[this, gimic, i](CVisWidget* w){
 					hwinfo *info = &this->info[i];
 					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-						info->keyView = visC86KeyViewFactory(gimic->getChip(), 0);
+						info->keyView = visC86KeyViewFactory(gimic->getChip(), i);
 						info->keyView->create(hWnd);
 						this->manager->add( info->keyView.get() );
 					}else{
