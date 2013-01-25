@@ -18,6 +18,7 @@
 #include <vector>
 #include "ringbuff.h"
 #include "chip/chip.h"
+#include "withlock.h"
 
 namespace c86ctl{
 
@@ -73,7 +74,9 @@ private:
 	GimicParam gimicParam;
 
 public:
-	static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
+	//static std::vector< std::shared_ptr<GimicIF> > CreateInstances(void);
+	static int UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics);
+
 };
 
 typedef std::shared_ptr<GimicMIDI> GimicMIDIPtr;

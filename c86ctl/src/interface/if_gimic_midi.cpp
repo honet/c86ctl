@@ -71,9 +71,9 @@ GimicMIDI::~GimicMIDI(void)
 /*----------------------------------------------------------------------------
 	MIDI-IF factory
 ----------------------------------------------------------------------------*/
-std::vector< std::shared_ptr<GimicIF> > GimicMIDI::CreateInstances(void)
+int GimicMIDI::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics)
 {
-	std::vector< std::shared_ptr<GimicIF> > instances;
+	gimics.lock();
 
 	// MIDIOUTCAPSでgimicかどうか選別できないかと思ったけどダメだった。
 //	UINT n = midiOutGetNumDevs();
@@ -84,13 +84,17 @@ std::vector< std::shared_ptr<GimicIF> > GimicMIDI::CreateInstances(void)
 
 	int DeviceID = gConfig.getInt(INISC_MAIN, INIKEY_MIDIDEVICE, -1);
 	HMIDIOUT hmidi = NULL;
+	
 	UINT res = midiOutOpen(&hmidi, DeviceID, 0, 0, CALLBACK_NULL);
 	if(res == MMSYSERR_NOERROR){
-		instances.push_back( GimicMIDIPtr(new GimicMIDI(hmidi)) );
+		GimicMIDIPtr p = GimicMIDIPtr(new GimicMIDI(hmidi));
+		gimics.push_back( p );
+		p->init();
 	}
 
-	std::for_each( instances.begin(), instances.end(), [](std::shared_ptr<GimicIF> x){ x->init(); } );
-	return instances;
+	gimics.unlock();
+	
+	return 0;
 }
 
 void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )

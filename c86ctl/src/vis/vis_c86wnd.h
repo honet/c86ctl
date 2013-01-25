@@ -65,6 +65,8 @@ protected:
 	virtual void onDestroy();
 	virtual void onPaint();
 	virtual void onPaintClient();
+	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){};
+	virtual void onCommand(HWND hwnd, DWORD id, DWORD notifyCode){};
 	
 protected:
 	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);
@@ -76,6 +78,7 @@ private:
 
 protected:
 	HWND hWnd;
+	HWND hParent;
 	tstring windowClass;
 	tstring windowTitle;
 

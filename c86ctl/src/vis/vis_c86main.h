@@ -36,15 +36,16 @@ public:
 	~CVisC86Main(){};
 
 public:
-	virtual bool create(void);
+	virtual bool create(HWND parent);
 	bool update(void);
 
 protected:
 	// message handler
 	virtual void onPaintClient();
+	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
+	virtual void onCommand(HWND hwnd, DWORD id, DWORD notifyCode);
 	
 protected:
-	//std::vector< std::shared_ptr<GimicIF> > gimic;
 	struct hwinfo{
 		Devinfo mbinfo;
 		Devinfo chipinfo;

@@ -142,8 +142,21 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 	
 	if( !handled ){
 		switch( msg ){
+		case WM_LBUTTONDBLCLK:
+		//case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONDBLCLK:
+		case WM_RBUTTONDOWN:
 		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		case WM_MOUSEWHEEL:
+			onMouseEvent( msg, wp, lp );
 			break;
+
+		case WM_COMMAND:
+			onCommand((HWND)lp, wp&0xffff, (wp>>16)&0xffff);
+			break;
+
 		case WM_LBUTTONDOWN:
 			PostMessage(hWnd, WM_NCLBUTTONDOWN, (WPARAM)HTCAPTION, lp);
 			break;
@@ -219,7 +232,7 @@ LRESULT CALLBACK CVisWnd::wndProcDispatcher(HWND hWnd , UINT msg , WPARAM wp , L
 
 
 
-bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND hParent )
+bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND parent )
 {
 	WNDCLASS winc;
 
@@ -228,6 +241,7 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND hP
 
 	wndWidth = width;
 	wndHeight = height;
+	hParent = parent;
 
 	if( left == INT_MIN || top == INT_MIN ){
 		int wx = GetSystemMetrics(SM_CXSCREEN);
@@ -322,6 +336,8 @@ void CVisWnd::close()
 		delete canvas;
 		canvas = NULL;
 	}
+	hParent = NULL;
+
 	::UnregisterClass( windowClass.c_str(), C86CtlMain::getInstanceHandle() );
 }
 

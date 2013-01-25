@@ -113,6 +113,10 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		hNotifyDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 	}
 
+	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) )
+		startVis();
+
+
 	return 0;
 }
 
@@ -145,9 +149,6 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 	case WM_CREATE:
 		// タスクトレイアイコンの要再登録通知用
 		taskbarRestartMsg = ::RegisterWindowMessage(_T("TaskbarCreated"));
-
-		if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) )
-			pThis->startVis();
 		break;
 
 	case WM_DESTROY:
@@ -175,6 +176,9 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 					::DestroyMenu(hMenu);
 					break;
 				}
+				if( pThis->mainVisWnd )
+					::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED );
+
 				TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, point.x, point.y, 0, hwnd, NULL);
 				::DestroyMenu(hMenu);
 			}
@@ -211,10 +215,9 @@ int C86CtlMainWnd::startVis()
 {
 	wm = new CVisManager();
 	mainVisWnd = new CVisC86Main();
-
-	//mainVisWnd->updateInfo();
 	wm->add( mainVisWnd );
-	mainVisWnd->create();
+
+	mainVisWnd->create(getHWND());
 
 	// 描画スレッド開始
 	hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, wm, 0, &visThreadID );

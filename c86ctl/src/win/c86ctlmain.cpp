@@ -105,6 +105,7 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		C86CtlMainWnd *pwnd = C86CtlMainWnd::getInstance();
 
 		pwnd->createMainWnd(param);
+		pThis->mainThreadReady = true;
 
 		// メッセージループ
 		while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
@@ -128,6 +129,8 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 
 		C86CtlMainWnd::shutdown();
 		Gdiplus::GdiplusShutdown(gdiToken);
+
+		pThis->mainThreadReady = false;
 	}
 	catch(...){
 		::OutputDebugString(_T("ERROR\r\n"));
@@ -151,6 +154,8 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 		UINT next = now + period;
 		UINT nextSec10 = now + 50;
 		C86CtlMain *pThis = reinterpret_cast<C86CtlMain*>(param);
+
+		pThis->senderThreadReady = true;
 
 		while(1){
 			if( pThis->terminateFlag )
@@ -176,6 +181,8 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 				for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->update(); };
 			}
 		}
+
+		pThis->senderThreadReady = false;
 	}catch(...){
 	}
 	
@@ -231,6 +238,8 @@ int C86CtlMain::initialize(void)
 	if( !hMainThread )
 		return C86CTL_ERR_UNKNOWN;
 
+	while(!mainThreadReady);
+
 	// 演奏スレッド開始
 	hSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
 	if( !hSenderThread ){
@@ -238,6 +247,8 @@ int C86CtlMain::initialize(void)
 		::WaitForSingleObject( hMainThread, INFINITE );
 		return C86CTL_ERR_UNKNOWN;
 	}
+	while(!senderThreadReady);
+
 	SetThreadPriority( hSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
 
 	isInitialized = true;
@@ -278,6 +289,9 @@ int C86CtlMain::deinitialize(void)
 	::timeEndPeriod(timerPeriod);
 	isInitialized = false;
 	
+	mainThreadReady = false;
+	senderThreadReady = false;
+
 	return C86CTL_ERR_NONE;
 }
 

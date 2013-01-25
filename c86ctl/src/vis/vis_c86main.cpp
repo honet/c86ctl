@@ -133,13 +133,14 @@ bool CVisC86Main::update()
 	return true;
 }
 
-bool CVisC86Main::create(void)
+bool CVisC86Main::create(HWND parent)
 {
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
-	int windowHeight = 19+40+10;
+	int sz = static_cast<int>(info.size());
+	int windowHeight = 19+40+modHeight*sz+10;
 	int windowWidth = 334;
 	
-	if ( !CVisWnd::create( windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN ) ){
+	if ( !CVisWnd::create( windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN, parent ) ){
 		return false;
 	}
 
@@ -223,14 +224,46 @@ void CVisC86Main::onPaintClient()
 		y+=modHeight;
 	}
 
+	if( sz == 0 ){
+		skin->drawStr( clientCanvas, 0, 5, ch-12, "NO DEVICE!" );
+	}
+
 	// FPS
 	sprintf(str, "FPS: %0.1f", manager->getCurrentFPS() );
 	skin->drawStr( clientCanvas, 0, 260, ch-12, str );
 
-	if( sz == 0 ){
-		skin->drawStr( clientCanvas, 0, 5, ch-12, "NO DEVICE!" );
-	}
-	
 }
 
+void CVisC86Main::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)
+{
+	POINT point;
+	GetCursorPos(&point);
 
+	switch(msg){
+	case WM_RBUTTONUP:
+		::SetForegroundWindow(hWnd);
+		
+		HMENU hMenu = ::LoadMenu(C86CtlMain::getInstanceHandle(), MAKEINTRESOURCE(IDR_MENU_SYSPOPUP));
+		if( !hMenu )
+			break;
+		HMENU hSubMenu = ::GetSubMenu(hMenu, 0);
+		if( !hSubMenu ){
+			::DestroyMenu(hMenu);
+			break;
+		}
+		::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED );
+		
+		TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, point.x, point.y, 0, hWnd, NULL);
+		::DestroyMenu(hMenu);
+	}
+}
+void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
+{
+	switch(id){
+	case ID_POPUP_SHOWVIS:
+		//close();
+		::PostMessage(hParent, WM_COMMAND, (notifyCode<<16)|id, (DWORD)hwnd);
+
+		break;
+	}
+}

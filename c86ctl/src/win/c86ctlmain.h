@@ -30,8 +30,10 @@ public:
 	    isInitialized(false),
 		hMainThread(0),
 		mainThreadID(0),
+		mainThreadReady(false),
 		hSenderThread(0),
 		senderThreadID(0),
+		senderThreadReady(false),
 		timerPeriod(0),
 		terminateFlag(false),
 		refCount(0)
@@ -77,13 +79,14 @@ private:
 private:
 	HANDLE hMainThread;
 	UINT mainThreadID;
+	volatile bool mainThreadReady;
 	HANDLE hSenderThread;
 	UINT senderThreadID;
+	volatile bool senderThreadReady;
 	
 	static HINSTANCE hInstance;
 	static ULONG_PTR gdiToken;
 	static Gdiplus::GdiplusStartupInput gdiInput;
-	//HANDLE hNotifyDevNode;
 	
 	DWORD timerPeriod;
 	bool isInitialized;

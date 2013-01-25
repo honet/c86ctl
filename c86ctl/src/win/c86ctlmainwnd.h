@@ -20,7 +20,15 @@ private:
 		  hVisThread(0),
 		  visThreadID(0)
 	{};
-	virtual ~C86CtlMainWnd(){};
+	virtual ~C86CtlMainWnd(){
+		if( mainVisWnd ){
+			wm->del( mainVisWnd );
+			mainVisWnd->close();
+
+			delete mainVisWnd;
+			delete wm;
+		}
+	};
 
 public:
 	static C86CtlMainWnd* getInstance(){
