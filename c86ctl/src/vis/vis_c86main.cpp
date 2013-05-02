@@ -72,6 +72,7 @@ bool CVisC86Main::update()
 					info->regView = 0;
 				}
 			} );
+		//info[i].checkReg->setCheck(
 		widgets.push_back(info[i].checkReg);
 
 		if( info[i].chiptype == CHIP_OPNA ||
@@ -140,9 +141,10 @@ bool CVisC86Main::create(HWND parent)
 	int windowHeight = 19+40+modHeight*sz+10;
 	int windowWidth = 334;
 	
-	if ( !CVisWnd::create( windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN, parent ) ){
+	if ( !CVisWnd::create( windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN, NULL ) ){
 		return false;
 	}
+	hMaster = parent;
 
 	update();
 	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
@@ -262,7 +264,7 @@ void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 	switch(id){
 	case ID_POPUP_SHOWVIS:
 		//close();
-		::PostMessage(hParent, WM_COMMAND, (notifyCode<<16)|id, (DWORD)hwnd);
+		::PostMessage(hMaster, WM_COMMAND, (notifyCode<<16)|id, (DWORD)hwnd);
 
 		break;
 	}

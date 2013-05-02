@@ -85,7 +85,7 @@ using namespace c86ctl;
 	コンストラクタ
 ----------------------------------------------------------------------------*/
 GimicHID::GimicHID( HANDLE h )
-	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(1000)
+	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0)
 {
 	rbuff.alloc( 128 );
 	dqueue.alloc(1024*16);
@@ -125,7 +125,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
 	if( devinf ){
-		for(int i = 0; ;i++) {
+		for(int i=0; ;i++) {
 			ZeroMemory(&spid, sizeof(spid));
 			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 			if(!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid)){
@@ -204,6 +204,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 				CloseHandle(hHID);
 			}
 		}
+		SetupDiDestroyDeviceInfoList(devinf);
 	}
 
 	gimics.unlock();

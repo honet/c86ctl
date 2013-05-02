@@ -32,6 +32,7 @@ public:
 	virtual bool resize( int width, int height );
 	virtual void close(void);
 	virtual void saveConfig(void);
+	virtual int getLastShowState(void);
 	
 public:
 	void setManager(CVisManager *m){ manager = m; };

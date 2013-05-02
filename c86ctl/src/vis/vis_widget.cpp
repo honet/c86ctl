@@ -32,6 +32,13 @@ void CVisCheckBox::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){
 		break;
 	}
 }
+void CVisCheckBox::setCheck(int newval)
+{
+	if( newval != sw ){
+		sw = newval;
+		std::for_each( changeEvent.begin(), changeEvent.end(), [this](std::function<void(CVisWidget*)> h){ h(this); } );
+	}
+}
 
 // --------------------------------------------------------
 void CVisSwitchBase::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){

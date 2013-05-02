@@ -36,6 +36,7 @@ extern "C" {
 #include "ringbuff.h"
 #include "interface/if.h"
 #include "interface/if_gimic_hid.h"
+#include "interface/if_gimic_winusb.h"
 #include "interface/if_gimic_midi.h"
 
 
@@ -176,6 +177,7 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			// update
 			for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->tick(); };
 			
+			// per 50msec
 			if( nextSec10 < now ){
 				nextSec10 += 50;
 				for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->update(); };
@@ -220,8 +222,8 @@ int C86CtlMain::initialize(void)
 	// インスタンス生成
 	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
 	if( type==0 ){
-		//gGIMIC = GimicHID::CreateInstances();
 		GimicHID::UpdateInstances(gGIMIC);
+		GimicWinUSB::UpdateInstances(gGIMIC);
 	}else if( type==1 ){
 		//gGIMIC = GimicMIDI::CreateInstances(); // TODO!!
 	}

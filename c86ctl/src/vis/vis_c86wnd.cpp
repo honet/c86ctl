@@ -350,7 +350,12 @@ void CVisWnd::saveConfig(void)
 			gConfig.writeInt( windowClass.c_str(), INIKEY_WNDLEFT, rc.left );
 			gConfig.writeInt( windowClass.c_str(), INIKEY_WNDTOP, rc.top );
 		}
-		//gConfig.writeInt( windowClass.c_str(), INIKEY_WNDVISIBLE, 1 );
+		
 	}
+	gConfig.writeInt( windowClass.c_str(), INIKEY_WNDVISIBLE, hwnd?1:0 );
 }
 
+int CVisWnd::getLastShowState(void)
+{
+	return gConfig.getInt( windowClass.c_str(), INIKEY_WNDVISIBLE, 0 );
+}

@@ -58,6 +58,7 @@ public:
 public:
 	virtual void onPaint(IVisBitmap *canvas);
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
+	virtual void setCheck(int newval);
 
 public:
 	int getValue(){ return sw; };

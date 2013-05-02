@@ -520,7 +520,7 @@ void C86winDlg::OnBnClickedButtonTest1()
 		IRealChip *pchip=NULL;
 		if( S_OK == pGimicModule->QueryInterface( IID_IRealChip, (void**)&pchip ) ){
 			//pchip->out( 0x28, 0 );
-			for( int i=0; i<100000; i++ ){
+			for( int i=0; i<1000000; i++ ){
 				pchip->out(0x38,0x5a);
 			}
 //			for( int i=0x38; i<=0x3f; i++ ){

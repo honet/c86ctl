@@ -13,7 +13,7 @@
 #include "c86ctl.h"
 #include "chip/chip.h"
 
-//#define SUPPORT_WINUSB
+#define SUPPORT_WINUSB
 #define SUPPORT_MIDI
 #define SUPPORT_HID
 

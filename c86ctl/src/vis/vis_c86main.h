@@ -28,7 +28,8 @@ class CVisC86Main : public CVisWnd
 public:
 	CVisC86Main()
 		: CVisWnd(),
-		  tick(0)
+		  tick(0),
+		  hMaster(0)
 	{
 		windowClass = TEXT("C86CTL");
 		windowTitle = TEXT("C86 CONTROL");
@@ -64,6 +65,7 @@ protected:
 		CVisC86FmPtr fmView[9];
 	};
 	std::vector<hwinfo> info;
+	HWND hMaster;
 
 	UINT tick;
 };

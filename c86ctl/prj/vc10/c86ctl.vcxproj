@@ -115,8 +115,8 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>cd $(SolutionDir)c86ctl\src
-c:\ruby193\bin\ruby verup.rb</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -156,9 +156,8 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PreBuildEvent>
-      <Command>cd $(SolutionDir)c86ctl\src
-c:\ruby193\bin\ruby verup.rb
-</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
