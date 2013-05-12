@@ -65,6 +65,7 @@ GimicWinUSB::GimicWinUSB( HANDLE dev, HANDLE winUsb )
 	::InitializeCriticalSection(&csection);
 
 	::QueryPerformanceFrequency(&freq);
+	freq.QuadPart/=1000; // 1ms
 
 	USB_INTERFACE_DESCRIPTOR desc;
 	if (!WinUsb_QueryInterfaceSettings(hWinUsb, 0, &desc)){
@@ -245,7 +246,7 @@ int GimicWinUSB::sendMsg( MSG *data )
 			memset( &buff[sz], 0xff, 64-sz );
 
 		::EnterCriticalSection(&csection);
-		int ret = devWrite(buff);
+		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);
 	}
 
@@ -659,6 +660,7 @@ void GimicWinUSB::tick(void)
 		if( ret == C86CTL_ERR_NONE )
 			cal+=64;
 
+		// 1tick‚Ìˆ—‚ª1ms‚ğ’´‚¦‚½‚çˆê‰ñ”²‚¯‚é
 		::QueryPerformanceCounter(&ct);
 		if( et.QuadPart<ct.QuadPart ){
 			break;

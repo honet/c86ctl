@@ -19,13 +19,20 @@ class COPNAAdpcm{
 	friend class COPNA;
 
 	static const size_t ramsize = 256*1024;
+	static const size_t minimapsize = 512;
 public:
 	COPNAAdpcm(IRealChip2 *p) : pIF(p){
 		dram = new UCHAR[ramsize];
+		map = new UCHAR[ramsize];
+		wav = new SHORT[ramsize*2];
+		minimap = new UCHAR[minimapsize];
 		reset();
 	};
 	virtual ~COPNAAdpcm(){
 		if( dram ) delete [] dram;
+		if( map ) delete [] map;
+		if( wav ) delete [] wav;
+		if( minimap ) delete [] minimap;
 	};
 
 	void reset(){
@@ -37,6 +44,12 @@ public:
 		deltaN = 0;
 		level = 0;
 		keyOnLevel = 0;
+		sw = false;
+
+		memset(dram,0,ramsize);
+		memset(map,0,ramsize);
+		memset(wav,0,ramsize*2*2);
+		memset(minimap,0,minimapsize);
 	};
 	void update(){
 		if(keyOnLevel) keyOnLevel--;
@@ -53,17 +66,21 @@ public:
 	int getKeyOnLevel(){ return keyOnLevel; };
 	
 public:
+	bool isOn(){ return sw; };
 	int getLevel(){ return level; };
+	UINT getStartAddr(){ return startAddr; };
+	UINT getStopAddr(){ return stopAddr; };
+	UINT getLimitAddr(){ return limitAddr; };
 	
 protected:
 	bool setReg( UCHAR addr, UCHAR data );
 	void setLR( bool l, bool r ){ left = l; right = r; };
 
 protected:
-	int startAddr;	//21bit
-	int stopAddr;	//21bit
-	int limitAddr;	//21bit
-	int currentAddr;//21bit (write pointer)
+	UINT startAddr;	//21bit
+	UINT stopAddr;	//21bit
+	UINT limitAddr;	//21bit
+	UINT currentAddr;//21bit (write pointer)
 	int prescale;	//16bit
 	int deltaN;		//16bit
 	int level;		//8bit;
@@ -74,10 +91,16 @@ protected:
 	
 	bool left;
 	bool right;
-	
-	UCHAR *dram;
+	bool sw;
 
 	IRealChip2 *pIF;
+
+public:
+	UCHAR *dram; // 2samples per 1byte
+	UCHAR *map;
+	SHORT *wav;
+	UCHAR *minimap;
+
 };
 
 // ---------------------------------------------------------------------------------------

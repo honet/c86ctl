@@ -26,9 +26,14 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		
 		if((data&0xa0) == 0xa0){	// start & mem
 			keyOnLevel = level>>3;
+			sw = true;
 		}
 		if(data&0x01){		// reset
 			keyOnLevel = 0;
+			sw = false;
+		}
+		if(!(data&0x80)){ // !start
+			sw = false;
 		}
 		//(data&0x80) // start
 		//(data&0x40) // rec
@@ -51,32 +56,35 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		break;
 		
 	case 0x02: /// start addr (L)
-		startAddr = (startAddr & 0x1fe000) | ((int)data<<5);
+		startAddr = (startAddr & 0x1fe000) | ((UINT)data<<5);
 		currentAddr = startAddr;
 		break;
 	case 0x03: /// start addr (H)
-		startAddr = ((int)data<<13) | (startAddr & 0x1fe0);
+		startAddr = ((UINT)data<<13) | (startAddr & 0x1fe0);
 		currentAddr = startAddr;
 		break;
 		
 	case 0x04: /// stop addr (L)
-		stopAddr = (startAddr & 0x1fe000) | ((int)data<<5);
+		stopAddr = (stopAddr & 0x1fe000) | ((UINT)data<<5);
 		break;
 	case 0x05: /// stop addr (H)
-		stopAddr = ((int)data<<13) | (startAddr & 0x1fe0);
+		stopAddr = ((UINT)data<<13) | (stopAddr & 0x1fe0);
 		break;
 
 	case 0x06: // prescale(L)
 		prescale = (prescale&0xff00) | data;
 		break;
 	case 0x07: // prescale(H)
-		prescale = ((int)data<<8) | (prescale&0xff);
+		prescale = ((UINT)data<<8) | (prescale&0xff);
 		break;
 		
 	case 0x08: // adpcm data.
 		if( control1 & 0x60 ){
-			if( 0<currentAddr && currentAddr < ramsize ) // ”O‚Ì‚½‚ß
+			if( 0 <= currentAddr && currentAddr < ramsize ){ // ”O‚Ì‚½‚ß
 				dram[currentAddr] = data;
+				map[currentAddr] |= 0x01;
+				minimap[currentAddr>>9] |= 0x01;
+			}
 			if( stopAddr > currentAddr ){
 				if( limitAddr > currentAddr ){
 					currentAddr++;
@@ -97,10 +105,10 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		break;
 		
 	case 0x0c: /// limit addr (L)
-		limitAddr = (limitAddr<<13) | ((int)data<<5);
+		limitAddr = (limitAddr<<13) | ((UINT)data<<5);
 		break;
 	case 0x0d: /// limit addr (H)
-		limitAddr = ((int)data<<13) | (limitAddr<<5);
+		limitAddr = ((UINT)data<<13) | (limitAddr<<5);
 		break;
 
 	case 0x0e: // dac data.

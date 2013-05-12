@@ -180,11 +180,31 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	sprintf( str, "ADPCM" );
 	skin->drawStr( canvas, 0, ltx+5+60, lty+sy+5, str );
 
+	UINT col_mid = skin->getPal(CVisC86Skin::IDCOL_MID);
+	UINT col_light = skin->getPal(CVisC86Skin::IDCOL_KEYLIGHT);
+
+	visDrawLine( canvas, ltx    , lty+sy+5+10, ltx+280, lty+sy+5+10, col_mid );
+	visDrawLine( canvas, ltx+280, lty+sy+5+10, ltx+280, lty+sy+5+30, col_mid );
+	visDrawLine( canvas, ltx+280, lty+sy+5+30, ltx    , lty+sy+5+30, col_mid );
+	visDrawLine( canvas, ltx    , lty+sy+5+30, ltx    , lty+sy+5+10, col_mid );
+
+	UINT stAddr = adpcm->getStartAddr()*280/512/1024;
+	UINT edAddr = adpcm->getStopAddr()*280/512/1024;
+	for( int i=0; i<280; i++ ){
+		if(adpcm->minimap[i*512/280]&0x1){
+			visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_mid);
+		}
+		if( adpcm->isOn() ){
+			if( stAddr <= i && i <= edAddr )
+				visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_light);
+		}
+	}
+
 	if( !pOPNA->getMixedMask(trNo) ){
-		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
+		//skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 		skin->drawHBar( canvas, 290, lty+sy+15, adpcm->getKeyOnLevel(), 0 );
 	}else{
-		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
+		//skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
 		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
 	}
 	
@@ -195,10 +215,12 @@ void CVisC86Key::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty,
 {
 	int sy = 0;
 	int cx=6, cy=8;
+	int x1, y1, x2, y2, l;
 	char str[64];
 	CVisC86Skin *skin = &gVisSkin;
 
 	UINT col_mid = skin->getPal(CVisC86Skin::IDCOL_MID);
+	UINT col_light = skin->getPal(CVisC86Skin::IDCOL_LIGHT);
 	
 	sprintf( str, "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
@@ -211,18 +233,42 @@ void CVisC86Key::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty,
 	visDrawLine( canvas, ltx    , lty+sy+5+30, ltx    , lty+sy+5+10, col_mid );
 
 	if( !isMute ){
-		if( rhythm->rim->isOn() )
-			skin->drawStr( canvas, 0, ltx+5+cx*9, lty+sy+5+18, "RIM" );
-		if( rhythm->tom->isOn() )
-			skin->drawStr( canvas, 0, ltx+5+cx*14, lty+sy+5+18, "TOM" );
-		if( rhythm->hh->isOn() )
-			skin->drawStr( canvas, 0, ltx+5+cx*19, lty+sy+5+18, "HH" );
-		if( rhythm->top->isOn() )
-			skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5+18, "TOP" );
-		if( rhythm->sd->isOn() )
-			skin->drawStr( canvas, 0, ltx+5+cx*29, lty+sy+5+18, "SD" );
-		if( rhythm->bd->isOn() )
-			skin->drawStr( canvas, 0, ltx+5+cx*34, lty+sy+5+18, "BD");
+		skin->drawStr( canvas, 0, ltx+5+cx*3, lty+sy+5+18, "RIM" );
+		if( rhythm->rim->isOn() ||1){
+			l=rhythm->rim->getKeyOnLevel()/2;
+			x1=ltx+5+cx*6+3; y1=lty+sy+16+16-l;
+			visFillRect( canvas,x1, y1, 8, l, col_light );
+		}
+		skin->drawStr( canvas, 0, ltx+5+cx*10, lty+sy+5+18, "TOM" );
+		if( rhythm->tom->isOn() ){
+			l=rhythm->tom->getKeyOnLevel()/2;
+			x1=ltx+5+cx*13+3; y1=lty+sy+16+16-l;
+			visFillRect( canvas,x1, y1, 8, l, col_light );
+		}
+		skin->drawStr( canvas, 0, ltx+5+cx*17, lty+sy+5+18, "HH" );
+		if( rhythm->hh->isOn() ){
+			l=rhythm->hh->getKeyOnLevel()/2;
+			x1=ltx+5+cx*19+3; y1=lty+sy+16+16-l;
+			visFillRect( canvas,x1, y1, 8, l, col_light );
+		}
+		skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5+18, "TOP" );
+		if( rhythm->top->isOn() ){
+			l=rhythm->top->getKeyOnLevel()/2;
+			x1=ltx+5+cx*27+3; y1=lty+sy+16+16-l;
+			visFillRect( canvas,x1, y1, 8, l, col_light );
+		}
+		skin->drawStr( canvas, 0, ltx+5+cx*31, lty+sy+5+18, "SD" );
+		if( rhythm->sd->isOn() ){
+			l=rhythm->sd->getKeyOnLevel()/2;
+			x1=ltx+5+cx*33+3; y1=lty+sy+16+16-l;
+			visFillRect( canvas,x1, y1, 8, l, col_light );
+		}
+		skin->drawStr( canvas, 0, ltx+5+cx*38, lty+sy+5+18, "BD");
+		if( rhythm->bd->isOn() ){
+			l=rhythm->bd->getKeyOnLevel()/2;
+			x1=ltx+5+cx*40+3; y1=lty+sy+16+16-l;
+			visFillRect( canvas,x1, y1, 8, l, col_light );
+		}
 		
 		skin->drawHBar( canvas, 290, lty+sy+16, rhythm->getKeyOnLevel(), 0 );
 	}else{

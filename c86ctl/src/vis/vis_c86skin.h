@@ -56,6 +56,7 @@ public:
 		IDCOL_MID = 1,
 		IDCOL_SHADOW = 2,
 		IDCOL_LIGHT = 3,
+		IDCOL_KEYLIGHT = 4
 	};
 
 	UINT getPal( enum PalletID id ){

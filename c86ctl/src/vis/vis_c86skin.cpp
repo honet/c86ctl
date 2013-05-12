@@ -156,7 +156,7 @@ CVisC86Skin gVisSkin;
 
 CVisC86Skin::CVisC86Skin() : skinbmp(0)
 {
-	pallet.resize(4);
+	pallet.resize(5);
 	coltbl.resize(256);
 }
 
@@ -167,7 +167,7 @@ CVisC86Skin::~CVisC86Skin(){
 void CVisC86Skin::init(void){
 	skinbmp = CVisBitmap::LoadFromResource( IDB_PNGSKIN1, _T("PNG"), C86CtlMain::getInstanceHandle() );
 	UINT *p = (UINT*)skinbmp->getPtr(639,511);
-	for( int i=0; i<4; i++ ){
+	for( int i=0; i<5; i++ ){
 		pallet[i] = *p--;
 	}
 	p = (UINT*)skinbmp->getPtr(639,510);
