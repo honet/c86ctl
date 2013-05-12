@@ -58,9 +58,10 @@ using namespace c86ctl::vis;
 
 C86CtlMainWnd *C86CtlMainWnd::pthis = 0;
 
+const TCHAR szAppName[] = _T("msg-receiver");
+
 int C86CtlMainWnd::createMainWnd(LPVOID param)
 {
-	const TCHAR szAppName[] = _T("msg-receiver");
 	WNDCLASSEX  wndclass;
 
 	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
@@ -136,6 +137,8 @@ int C86CtlMainWnd::destroyMainWnd(LPVOID param)
 	if(hwnd){
 		::Shell_NotifyIcon( NIM_DELETE, &notifyIcon );
 		::DestroyWindow(hwnd);
+		HINSTANCE hinst = C86CtlMain::getInstanceHandle();
+		::UnregisterClass(szAppName, hinst);
 	}
 	return 0;
 }

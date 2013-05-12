@@ -196,6 +196,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
     <ClCompile Include="..\..\src\win\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\c86ctl.h" />
     <ClInclude Include="..\..\src\chip\chip.h" />
     <ClInclude Include="..\..\src\chip\opl3.h" />
     <ClInclude Include="..\..\src\chip\opm.h" />
@@ -210,6 +211,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
     <ClInclude Include="..\..\src\interface\if_gimic_hid.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_midi.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_winusb.h" />
+    <ClInclude Include="..\..\src\version.h" />
     <ClInclude Include="..\..\src\vis\vis_bitmap.h" />
     <ClInclude Include="..\..\src\vis\vis_c86fm.h" />
     <ClInclude Include="..\..\src\vis\vis_c86key.h" />

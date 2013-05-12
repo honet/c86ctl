@@ -18,7 +18,8 @@ private:
 		  wm(0),
 		  mainVisWnd(0),
 		  hVisThread(0),
-		  visThreadID(0)
+		  visThreadID(0),
+		  hNotifyDevNode(0)
 	{};
 	virtual ~C86CtlMainWnd(){
 		if( mainVisWnd ){
