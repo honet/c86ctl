@@ -302,8 +302,8 @@ bool COPNRhythm::setReg( UCHAR adrs, UCHAR data )
 		hh->setLevel( data&0x1f );
 		break;
 	case 0x1c: // tom
-		top->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
-		top->setLevel( data&0x1f );
+		tom->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
+		tom->setLevel( data&0x1f );
 		break;
 	case 0x1d: // rim
 		rim->setLR( (data&0x80)?true:false, (data&0x40)?true:false );
