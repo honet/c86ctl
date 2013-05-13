@@ -11,9 +11,9 @@
 #define VERSION_MAJOR      1
 #define VERSION_MINOR      4
 #define VERSION_REVISION   1
-#define VERSION_BUILD      591
-#define VERSION_STRING     "1, 4, 1, 591"
-#define VERSION_MESSAGE    "VER 1.4.1.591(DBG-ONLY)"
+#define VERSION_BUILD      592
+#define VERSION_STRING     "1, 4, 1, 592"
+#define VERSION_MESSAGE    "VER 1.4.1.592(DBG-ONLY)"
 
 
 // 以下はDLLリソース用定義につき変更禁止

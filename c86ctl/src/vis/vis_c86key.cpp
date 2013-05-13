@@ -189,8 +189,8 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	visDrawLine( canvas, ltx+280, lty+sy+5+30, ltx    , lty+sy+5+30, col_mid );
 	visDrawLine( canvas, ltx    , lty+sy+5+30, ltx    , lty+sy+5+10, col_mid );
 
-	UINT stAddr = adpcm->getStartAddr()*280/512/1024;
-	UINT edAddr = adpcm->getStopAddr()*280/512/1024;
+	UINT stAddr = adpcm->getStartAddr()*280/256/1024;
+	UINT edAddr = adpcm->getStopAddr()*280/256/1024;
 	for( int i=0; i<280; i++ ){
 		if(adpcm->minimap[i*512/280]&0x1){
 			visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_mid);
