@@ -56,19 +56,19 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		break;
 		
 	case 0x02: /// start addr (L)
-		startAddr = (startAddr & 0x1fe000) | ((UINT)data<<5);
+		startAddr = (startAddr & 0x3e000) | ((UINT)data<<5);
 		currentAddr = startAddr;
 		break;
 	case 0x03: /// start addr (H)
-		startAddr = ((UINT)data<<13) | (startAddr & 0x1fe0);
+		startAddr = (((UINT)data<<13)&0x3e000) | (startAddr & 0x1fe0);
 		currentAddr = startAddr;
 		break;
 		
 	case 0x04: /// stop addr (L)
-		stopAddr = (stopAddr & 0x1fe000) | ((UINT)data<<5);
+		stopAddr = (stopAddr & 0x3e000) | ((UINT)data<<5);
 		break;
 	case 0x05: /// stop addr (H)
-		stopAddr = ((UINT)data<<13) | (stopAddr & 0x1fe0);
+		stopAddr = (((UINT)data<<13)&0x3e000) | (stopAddr & 0x1fe0);
 		break;
 
 	case 0x06: // prescale(L)
@@ -105,10 +105,10 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		break;
 		
 	case 0x0c: /// limit addr (L)
-		limitAddr = (limitAddr<<13) | ((UINT)data<<5);
+		limitAddr = (limitAddr&0x3e000) | ((UINT)data<<5);
 		break;
 	case 0x0d: /// limit addr (H)
-		limitAddr = ((UINT)data<<13) | (limitAddr<<5);
+		limitAddr = (((UINT)data<<13)&0x3e000) | (limitAddr&0x1fe0);
 		break;
 
 	case 0x0e: // dac data.

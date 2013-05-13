@@ -173,6 +173,7 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	int sy = 0;
 	char str[64];
 	CVisC86Skin *skin = &gVisSkin;
+	//const int cx=6;
 
 	COPNAAdpcm *adpcm = pOPNA->adpcm;
 	sprintf( str, "%02d", trNo+1 );
@@ -199,6 +200,8 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 				visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_light);
 		}
 	}
+	//sprintf( str, "ST:%02x ED:%02x", stAddr, edAddr);
+	//skin->drawStr( canvas, 0, ltx+5+60+cx*10, lty+sy+5, str );
 
 	if( !pOPNA->getMixedMask(trNo) ){
 		//skin->drawKeyboard( canvas, ltx, lty+sy+15 );
