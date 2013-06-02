@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -196,7 +196,7 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 			visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_mid);
 		}
 		if( adpcm->isOn() ){
-			if( stAddr <= i && i <= edAddr )
+			if( stAddr <= (UINT)i && (UINT)i <= edAddr )
 				visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_light);
 		}
 	}
@@ -218,7 +218,7 @@ void CVisC86Key::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty,
 {
 	int sy = 0;
 	int cx=6, cy=8;
-	int x1, y1, x2, y2, l;
+	int x1, y1, l;
 	char str[64];
 	CVisC86Skin *skin = &gVisSkin;
 

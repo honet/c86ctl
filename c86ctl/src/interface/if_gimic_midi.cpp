@@ -1,6 +1,6 @@
-/***
+ï»¿/***
 	c86ctl
-	gimic ƒRƒ“ƒgƒ[ƒ‹ MIDI”Å(ÀŒ±ƒR[ƒh)
+	gimic ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ« MIDIç‰ˆ(å®Ÿé¨“ã‚³ãƒ¼ãƒ‰)
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -9,10 +9,10 @@
 	Thanks to Nagai "Guu" Osamu 2011/12/08 for his advice.
 
 	note: honet/k.kotajima
-	MIDI‚Å‚ÌƒŒƒWƒXƒ^ƒ_ƒ“ƒv“]‘—‚Í‚¢‚¸‚ê”p~‚µ‚½‚¢‚Æv‚Á‚Ä‚¢‚é‚ª
-	¡‚Ì‚Æ‚±‚ëHID”Å‚ª‚Ü‚¾ˆÀ’è‚µ‚Ä‚¢‚È‚¢‚Ì‚Åc‚µ‚Ä‚¢‚éB
+	MIDIã§ã®ãƒ¬ã‚¸ã‚¹ã‚¿ãƒ€ãƒ³ãƒ—è»¢é€ã¯ã„ãšã‚Œå»ƒæ­¢ã—ãŸã„ã¨æ€ã£ã¦ã„ã‚‹ãŒ
+	ä»Šã®ã¨ã“ã‚HIDç‰ˆãŒã¾ã å®‰å®šã—ã¦ã„ãªã„ã®ã§æ®‹ã—ã¦ã„ã‚‹ã€‚
 
-	“]‘—d—lF sysex‚É3byte‚Æ‚²‚ÉƒpƒbƒN‚µ‚Ä‘—‚éB
+	è»¢é€ä»•æ§˜ï¼š sysexã«3byteã¨ã”ã«ãƒ‘ãƒƒã‚¯ã—ã¦é€ã‚‹ã€‚
 	 idx  data   mean
 	   0  0xF0: Start of SysEx
 	   1  0x7D:   device id
@@ -22,7 +22,7 @@
 	...
 	3N+5  0xF7: End of SysEx
 
-	ƒVƒXƒeƒ€ƒƒbƒZ[ƒWF
+	ã‚·ã‚¹ãƒ†ãƒ ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ï¼š
 	SW Reset     : f0, 7d, 40, 01, 00, 7e, f7
 	HW Reset     : f0, 7d, 40, 01, 00, 7f, f7
 	PLL Set      : f0, 7d, 40, 01, 00, 70, v0, v1, v2, v3, f7
@@ -47,7 +47,7 @@
 using namespace c86ctl;
 
 /*----------------------------------------------------------------------------
-	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 ----------------------------------------------------------------------------*/
 GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h), chip(0), chiptype(CHIP_OPNA)
 {
@@ -55,7 +55,7 @@ GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h), chip(0), chiptype(CHIP_OPNA)
 }
 
 /*----------------------------------------------------------------------------
-	ƒfƒXƒgƒ‰ƒNƒ^
+	ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 ----------------------------------------------------------------------------*/
 GimicMIDI::~GimicMIDI(void)
 {
@@ -75,7 +75,7 @@ int GimicMIDI::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> 
 {
 	gimics.lock();
 
-	// MIDIOUTCAPS‚Ågimic‚©‚Ç‚¤‚©‘I•Ê‚Å‚«‚È‚¢‚©‚Æv‚Á‚½‚¯‚Çƒ_ƒ‚¾‚Á‚½B
+	// MIDIOUTCAPSã§gimicã‹ã©ã†ã‹é¸åˆ¥ã§ããªã„ã‹ã¨æ€ã£ãŸã‘ã©ãƒ€ãƒ¡ã ã£ãŸã€‚
 //	UINT n = midiOutGetNumDevs();
 //	for( UINT i=0; i<n; i++ ){
 //		MIDIOUTCAPS midiOutCaps;
@@ -106,17 +106,17 @@ void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )
 
 	midiOutPrepareHeader(hHandle, &head, sizeof(MIDIHDR));
 	midiOutLongMsg(hHandle, &head, sizeof(MIDIHDR));
-	// «‚±‚ê–³‚­‚Ä‚à‚¢‚¢‚Å‚·‚æ‚ËH(by Guu)
+	// â†“ã“ã‚Œç„¡ãã¦ã‚‚ã„ã„ã§ã™ã‚ˆã­ï¼Ÿ(by Guu)
 	//	while((head.dwFlags & MHDR_DONE) == 0) ;
 	midiOutUnprepareHeader(hHandle, &head, sizeof(MIDIHDR));
 }
 
 /*----------------------------------------------------------------------------
-	À‘•
+	å®Ÿè£…
 ----------------------------------------------------------------------------*/
 int GimicMIDI::init(void)
 {
-	// MIDI-IF‚Ìê‡‚ÍOPNAŒˆ‚ß‚¤‚¿(module”»’èif‚ğì‚Á‚Ä‚È‚¢‚©‚ç)
+	// MIDI-IFã®å ´åˆã¯OPNAæ±ºã‚ã†ã¡(moduleåˆ¤å®šifã‚’ä½œã£ã¦ãªã„ã‹ã‚‰)
 	//chiptype = CHIP_OPNA;
 	//chip = new COPNA();
 	chiptype=CHIP_OPM;
@@ -126,7 +126,7 @@ int GimicMIDI::init(void)
 
 int GimicMIDI::reset( void )
 {
-	// “]‘—Š®—¹‘Ò‚¿
+	// è»¢é€å®Œäº†å¾…ã¡
 	while(rbuff.length()){
 		Sleep(10);
 	}
@@ -224,7 +224,7 @@ void GimicMIDI::tick(void)
 	if( !hHandle )
 		return;
 
-	// “]‘—”z—ñ€”õ
+	// è»¢é€é…åˆ—æº–å‚™
 	buff[0] = 0xf0;		// start of sysex
 	buff[1] = 0x7d;		// device id
 	UINT msz = rbuff.length();

@@ -1,6 +1,6 @@
-/***
+ï»¿/***
 	c86ctl
-	gimic ƒRƒ“ƒgƒ[ƒ‹ HID”Å
+	gimic ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ« HIDç‰ˆ
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -25,11 +25,11 @@ namespace c86ctl{
 
 class GimicHID : public GimicIF
 {
-// ƒtƒ@ƒNƒgƒŠ -------------------------------------------------------
+// ãƒ•ã‚¡ã‚¯ãƒˆãƒª -------------------------------------------------------
 public:
 	static int UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics);
 
-// ŒöŠJƒCƒ“ƒ^ƒtƒFƒCƒX -----------------------------------------------
+// å…¬é–‹ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ã‚¤ã‚¹ -----------------------------------------------
 public:
 	// IGimic
 	virtual int __stdcall setSSGVolume(UCHAR vol);
@@ -54,7 +54,7 @@ public:
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
 	virtual void __stdcall directOut(UINT addr, UCHAR data);
 
-// ÀŒ±’† -----------------------------------------------
+// å®Ÿé¨“ä¸­ -----------------------------------------------
 public:
 //	virtual int __stdcall adpcmZeroClear(void);
 //	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
@@ -63,7 +63,7 @@ public:
 	virtual int __stdcall getDelay(int *delay);
 	virtual int __stdcall isValid(void);
 
-// C86CTL“à•”—˜—p ---------------------------------------------------
+// C86CTLå†…éƒ¨åˆ©ç”¨ ---------------------------------------------------
 private:
 	GimicHID(HANDLE h);
 
@@ -82,12 +82,12 @@ public:
 	virtual void checkConnection(void);
 
 
-// ƒvƒ‰ƒCƒx[ƒg -----------------------------------------------------
+// ãƒ—ãƒ©ã‚¤ãƒ™ãƒ¼ãƒˆ -----------------------------------------------------
 private:
 	struct MSG{
-		// ‚È‚ñ‚Æ‚È‚­‡Œv2-DWORD‚É‚È‚é‚æ‚¤‚É‚µ‚Ä‚İ‚½B
+		// ãªã‚“ã¨ãªãåˆè¨ˆ2-DWORDã«ãªã‚‹ã‚ˆã†ã«ã—ã¦ã¿ãŸã€‚
 		UCHAR len;
-		UCHAR dat[7];	// Å‘åƒƒbƒZ[ƒW’·‚Í¡‚Ì‚Æ‚±‚ë6byte.
+		UCHAR dat[7];	// æœ€å¤§ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸é•·ã¯ä»Šã®ã¨ã“ã‚6byte.
 	};
 	
 	struct REQ{

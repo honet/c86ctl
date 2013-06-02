@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -7,32 +7,32 @@
 	honet.kk(at)gmail.com
  */
 
-// stdafx.h : �W���̃V�X�e�� �C���N���[�h �t�@�C���̃C���N���[�h �t�@�C���A�܂���
-// �Q�Ɖ񐔂������A�����܂�ύX����Ȃ��A�v���W�F�N�g��p�̃C���N���[�h �t�@�C��
-// ���L�q���܂��B
+// stdafx.h : 標準のシステム インクルード ファイルのインクルード ファイル、または
+// 参照回数が多く、かつあまり変更されない、プロジェクト専用のインクルード ファイル
+// を記述します。
 
 #pragma once
 
-// ���Ŏw�肳�ꂽ��`�̑O�ɑΏۃv���b�g�t�H�[�����w�肵�Ȃ���΂Ȃ�Ȃ��ꍇ�A�ȉ��̒�`��ύX���Ă��������B
-// �قȂ�v���b�g�t�H�[���ɑΉ�����l�Ɋւ���ŐV���ɂ��ẮAMSDN ���Q�Ƃ��Ă��������B
-#ifndef WINVER				// Windows XP �ȍ~�̃o�[�W�����ɌŗL�̋@�\�̎g�p�������܂��B
-#define WINVER 0x0501		// ����� Windows �̑��̃o�[�W���������ɓK�؂Ȓl�ɕύX���Ă��������B
+// 下で指定された定義の前に対象プラットフォームを指定しなければならない場合、以下の定義を変更してください。
+// 異なるプラットフォームに対応する値に関する最新情報については、MSDN を参照してください。
+#ifndef WINVER				// Windows XP 以降のバージョンに固有の機能の使用を許可します。
+#define WINVER 0x0501		// これを Windows の他のバージョン向けに適切な値に変更してください。
 #endif
 
-#ifndef _WIN32_WINNT		// Windows XP �ȍ~�̃o�[�W�����ɌŗL�̋@�\�̎g�p�������܂��B
-#define _WIN32_WINNT 0x0501	// ����� Windows �̑��̃o�[�W���������ɓK�؂Ȓl�ɕύX���Ă��������B
+#ifndef _WIN32_WINNT		// Windows XP 以降のバージョンに固有の機能の使用を許可します。
+#define _WIN32_WINNT 0x0501	// これを Windows の他のバージョン向けに適切な値に変更してください。
 #endif						
 
-#ifndef _WIN32_WINDOWS		// Windows 98 �ȍ~�̃o�[�W�����ɌŗL�̋@�\�̎g�p�������܂��B
-#define _WIN32_WINDOWS 0x0410 // ����� Windows Me �܂��͂���ȍ~�̃o�[�W���������ɓK�؂Ȓl�ɕύX���Ă��������B
+#ifndef _WIN32_WINDOWS		// Windows 98 以降のバージョンに固有の機能の使用を許可します。
+#define _WIN32_WINDOWS 0x0410 // これを Windows Me またはそれ以降のバージョン向けに適切な値に変更してください。
 #endif
 
-#ifndef _WIN32_IE			// IE 6.0 �ȍ~�̃o�[�W�����ɌŗL�̋@�\�̎g�p�������܂��B
-#define _WIN32_IE 0x0600	// ����� IE. �̑��̃o�[�W���������ɓK�؂Ȓl�ɕύX���Ă��������B
+#ifndef _WIN32_IE			// IE 6.0 以降のバージョンに固有の機能の使用を許可します。
+#define _WIN32_IE 0x0600	// これを IE. の他のバージョン向けに適切な値に変更してください。
 #endif
 
-#define WIN32_LEAN_AND_MEAN		// Windows �w�b�_�[����g�p����Ă��Ȃ����������O���܂��B
-// Windows �w�b�_�[ �t�@�C��:
+#define WIN32_LEAN_AND_MEAN		// Windows ヘッダーから使用されていない部分を除外します。
+// Windows ヘッダー ファイル:
 #include <windows.h>
 #include <stdint.h>
 #include <memory.h>
@@ -43,7 +43,7 @@
 #endif
 
 
-// TODO: �v���O�����ɕK�v�Ȓǉ��w�b�_�[�������ŎQ�Ƃ��Ă��������B
+// TODO: プログラムに必要な追加ヘッダーをここで参照してください。
 #include <ComSvcs.h>
 #include <gdiplus.h>
 //#include <d2d1.h>

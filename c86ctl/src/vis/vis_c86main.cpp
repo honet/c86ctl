@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -31,7 +31,7 @@ static const int modHeight = 74;
 
 bool CVisC86Main::update()
 {
-	// CHECKME: ‚±‚ÌŽž“_‚Åattach‚³‚ê‚Ä‚È‚¢‚Æ‚¢‚¯‚È‚¢B
+	// CHECKME: ã“ã®æ™‚ç‚¹ã§attachã•ã‚Œã¦ãªã„ã¨ã„ã‘ãªã„ã€‚
 	auto gimics = GetC86CtlMain()->getGimics();
 	int sz = static_cast<int>(info.size());
 	int st = sz;
@@ -41,7 +41,7 @@ bool CVisC86Main::update()
 
 	sz = gimics.size();
 	info.resize(sz);
-	for( size_t i=0; i<sz; i++ ){
+	for( int i=0; i<sz; i++ ){
 		gimics[i]->getMBInfo(&info[i].mbinfo);
 		gimics[i]->getFWVer(&info[i].major, &info[i].minor, &info[i].rev, &info[i].build);
 		gimics[i]->getModuleInfo(&info[i].chipinfo);
@@ -156,7 +156,7 @@ void CVisC86Main::onPaintClient()
 {
 	auto gimic = GetC86CtlMain()->getGimics();
 
-	// NOTE: gimic.size != info.size() ‚Æ‚È‚é‚±‚Æ‚ª‚ ‚é‚Ì‚Å’ˆÓ
+	// NOTE: gimic.size != info.size() ã¨ãªã‚‹ã“ã¨ãŒã‚ã‚‹ã®ã§æ³¨æ„
 	size_t sz = info.size();
 
 	CVisC86Skin *skin = &gVisSkin;
@@ -166,15 +166,15 @@ void CVisC86Main::onPaintClient()
 	int cw = clientCanvas->getWidth();
 	int ch = clientCanvas->getHeight();
 
-	// ”wŒiÁ‹Ž
+	// èƒŒæ™¯æ¶ˆåŽ»
 	visFillRect( clientCanvas, 0, 0, cw, ch, ARGB(255,0,0,0) );
 	
-	// ƒƒSEƒo[ƒWƒ‡ƒ“
+	// ãƒ­ã‚´ãƒ»ãƒãƒ¼ã‚¸ãƒ§ãƒ³
 	skin->drawLogo( clientCanvas, 2, 2 );
 	skin->drawStr( clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86USB" );
 	skin->drawStr( clientCanvas, 0, 130, 17, "(C)HONET " VERSION_MESSAGE );
 
-	// ‰¡ü
+	// æ¨ªç·š
 	int w = clientCanvas->getWidth()-4;
 	UINT *p = (UINT*)clientCanvas->getPtr(2,28);
 	int step = clientCanvas->getStep()/2;
@@ -190,19 +190,19 @@ void CVisC86Main::onPaintClient()
 	int y=40;
 	for( size_t i=0; i<sz; i++ ){
 		int dy=0;
-		// ˜gü
+		// æž ç·š
 		visFillRect( clientCanvas, 5, y-2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID) );
 		visFillRect( clientCanvas, 5, y+64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
 
 		if( gimic[i]->isValid() ){
 			const GimicParam* param = gimic[i]->getParam();
-			// ƒfƒoƒCƒX–¼
+			// ãƒ‡ãƒã‚¤ã‚¹å
 			sprintf(str, "MODULE%d: %s Rev.%c", i, &info[i].mbinfo.Devname[0], info[i].mbinfo.Rev );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			// Firmware version
 			sprintf( str, "FW-VER : %d.%d.%d.%d", info[i].major, info[i].minor, info[i].rev, info[i].build );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-			// MODULE–¼
+			// MODULEå
 			sprintf(str, "CHIP   : %s Rev.%c", &info[i].chipinfo.Devname[0], info[i].chipinfo.Rev );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			// PLL Clock
@@ -211,7 +211,7 @@ void CVisC86Main::onPaintClient()
 			// SSG-Volume
 			sprintf(str, "SSG-VOL: %d", param->ssgVol );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-			// ƒJƒƒŠ[(w
+			// ã‚«ãƒ­ãƒªãƒ¼(w
 			sprintf(str, "CALORIE: %d CPS", gimic[i]->getCPS() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		}else{

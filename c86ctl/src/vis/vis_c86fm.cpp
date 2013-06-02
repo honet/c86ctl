@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -72,7 +72,7 @@ bool CVisC86Fm::createFmSlotView( COPXFmSlot *slot, int i, int x, int y )
 	knobDET[i]->getter = [slot, i]() -> int{ return slot->getDetune(); };
 	widgets.push_back(knobDET[i]);
 
-	// DET2 - OPNA‚Å‚ÍŽg‚¦‚È‚¢B
+	// DET2 - OPNAã§ã¯ä½¿ãˆãªã„ã€‚
 	knobDET2[i] = CVisKnobPtr( new CVisKnob(this, x+216, y+50));
 	knobDET2[i]->setRange(0,31);
 	widgets.push_back(knobDET2[i]);
@@ -180,8 +180,8 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 	skin->drawVStr( canvas, 0, x+8, y+20, str );
 	
 #if 1
-	// VOPM‚ÌƒAƒ‹ƒSƒŠƒYƒ€‚ð‚Ï‚­‚Á‚½B
-	// ˆÓ–¡‚ª—‰ðo—ˆ‚Ä‚È‚¢‚Ì‚ÅƒoƒO—L‚é‚©‚àEEE
+	// VOPMã®ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ ã‚’ã±ãã£ãŸã€‚
+	// æ„å‘³ãŒç†è§£å‡ºæ¥ã¦ãªã„ã®ã§ãƒã‚°æœ‰ã‚‹ã‹ã‚‚ãƒ»ãƒ»ãƒ»
 	double ar = pSlot->getAttackRate();
 	double dr = pSlot->getDecayRate();
 	double sr = pSlot->getSustainRate();
@@ -196,7 +196,7 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 	double ax, ay, d1x, d1y, d2x, d2y, rx, ry;
 	
 	if(ar==0 || tl==127){
-		// –³‰¹
+		// ç„¡éŸ³
 	}else{
 		// attack ----
 		ay = tl;

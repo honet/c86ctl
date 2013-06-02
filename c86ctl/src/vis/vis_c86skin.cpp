@@ -1,4 +1,4 @@
-/***
+Ôªø/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -141,9 +141,9 @@ const BMPREG skinreg_view[] = {
 	{310,150,330,75},		// FM slot view
 };
 
-const int keyW1 = 5;	// îíåÆ
+const int keyW1 = 5;	// ÁôΩÈçµ
 const int keyH1 = 20;
-const int keyW2 = 3;	// çïåÆ
+const int keyW2 = 3;	// ÈªíÈçµ
 const int keyH2 = 10;
 const int keyXOffset[] = { 0,3,5,8,10,15,18,20,23,25,28,30 };
 const int keyHiXOffset[] = { 35,50,40,50,45,35,50,40,50,40,50,45 };
@@ -183,7 +183,7 @@ void CVisC86Skin::deinit(void){
 	}
 }
 
-// ÉEÉBÉìÉhÉEÉtÉåÅ[ÉÄÇÃï`âÊ
+// „Ç¶„Ç£„É≥„Éâ„Ç¶„Éï„É¨„Éº„É†„ÅÆÊèèÁîª
 void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
 {
 	int xe = canvas->getWidth() - 1;
@@ -197,13 +197,13 @@ void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
 	visDrawLine( canvas, 0, 0, xe, 0, col_light );
 	visDrawLine( canvas, 0, 0, 0, ye, col_light );
 
-	visDrawLine( canvas, xe, 1, xe, ye, col_shadow ); // âE
-	visDrawLine( canvas, 1, ye, xe, ye, col_shadow ); // â∫
+	visDrawLine( canvas, xe, 1, xe, ye, col_shadow ); // Âè≥
+	visDrawLine( canvas, 1, ye, xe, ye, col_shadow ); // ‰∏ã
 	
-	visDrawLine( canvas, 1, 1, xe-1, 1, col_mid ); // è„
-	visDrawLine( canvas, 1, 1, 1, ye-1, col_mid ); // ç∂
-	visDrawLine( canvas, xe-1, 1, xe-1, ye-1, col_mid ); // âE
-	visDrawLine( canvas, 1, ye-1, xe-1, ye-1, col_mid ); // â∫
+	visDrawLine( canvas, 1, 1, xe-1, 1, col_mid ); // ‰∏ä
+	visDrawLine( canvas, 1, 1, 1, ye-1, col_mid ); // Â∑¶
+	visDrawLine( canvas, xe-1, 1, xe-1, ye-1, col_mid ); // Âè≥
+	visDrawLine( canvas, 1, ye-1, xe-1, ye-1, col_mid ); // ‰∏ã
 
 	// topbar
 	BMPREG reg_l = skinreg_frame[0];
@@ -229,7 +229,7 @@ void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
 	}
 }
 
-// ï∂éöï`âÊ
+// ÊñáÂ≠óÊèèÁîª
 void CVisC86Skin::drawStr( IVisBitmap *canvas, int type, int x, int y, const char *str )
 {
 	if( type < 0 || 3 <= type )
@@ -248,7 +248,7 @@ void CVisC86Skin::drawStr( IVisBitmap *canvas, int type, int x, int y, const cha
 	}
 }
 
-// ècï∂éöï`âÊ
+// Á∏¶ÊñáÂ≠óÊèèÁîª
 void CVisC86Skin::drawVStr( IVisBitmap *canvas, int type, int x, int y, const char *str )
 {
 	if( type < 0 || 3 <= type )
@@ -267,7 +267,7 @@ void CVisC86Skin::drawVStr( IVisBitmap *canvas, int type, int x, int y, const ch
 	}
 }
 
-// ÇøÇ¡ÇøÇ·Ç¢êîéöï`âÊ
+// „Å°„Å£„Å°„ÇÉ„ÅÑÊï∞Â≠óÊèèÁîª
 void CVisC86Skin::drawNanoNumStr( IVisBitmap *canvas, int x, int y, const char *str )
 {
 	int left = skinreg_fonts[8].left;
@@ -291,7 +291,7 @@ void CVisC86Skin::drawNanoNumStr( IVisBitmap *canvas, int x, int y, const char *
 	}
 }
 
-// ëÂÇ´Ç¢êîéöï`âÊ
+// Â§ß„Åç„ÅÑÊï∞Â≠óÊèèÁîª
 void CVisC86Skin::drawNumStr1( IVisBitmap *canvas, int x, int y, const char *str )
 {
 	int left = skinreg_fonts[6].left;
@@ -307,7 +307,7 @@ void CVisC86Skin::drawNumStr1( IVisBitmap *canvas, int x, int y, const char *str
 	}
 }
 
-// ÉLÅ[É{Å[Éhï`âÊ
+// „Ç≠„Éº„Éú„Éº„ÉâÊèèÁîª
 void CVisC86Skin::drawKeyboard( IVisBitmap *canvas, int x, int y )
 {
 	int sx = skinreg_tool[ID_KEYBOARD].left;
@@ -319,7 +319,7 @@ void CVisC86Skin::drawKeyboard( IVisBitmap *canvas, int x, int y )
 	}
 }
 
-// à√Ç¢êFÇÃÉLÅ[É{Å[Éhï`âÊ
+// Êöó„ÅÑËâ≤„ÅÆ„Ç≠„Éº„Éú„Éº„ÉâÊèèÁîª
 void CVisC86Skin::drawDarkKeyboard( IVisBitmap *canvas, int x, int y )
 {
 	int sx = skinreg_tool[ID_DARK_KEYBOARD].left;
@@ -331,7 +331,7 @@ void CVisC86Skin::drawDarkKeyboard( IVisBitmap *canvas, int x, int y )
 	}
 }
 
-// î≠âπíÜÉLÅ[ï\é¶
+// Áô∫Èü≥‰∏≠„Ç≠„ÉºË°®Á§∫
 void CVisC86Skin::drawHilightKey( IVisBitmap *canvas, int x, int y, int oct, int note )
 {
 	if( oct < 0 || 8 <= oct ) return;
@@ -344,7 +344,7 @@ void CVisC86Skin::drawHilightKey( IVisBitmap *canvas, int x, int y, int oct, int
 	alphablt(canvas, x+dstx, y, w, h, skinbmp, srcx, srcy );
 }
 
-// Ç≠ÇÈÇ≠ÇÈÉTÅ[ÉNÉã
+// „Åè„Çã„Åè„Çã„Çµ„Éº„ÇØ„É´
 void CVisC86Skin::drawTickCircle( IVisBitmap *canvas, int x, int y, int tick )
 {
 	int idx = (tick==-1) ? 0 : 1+(tick&0x7);
@@ -352,7 +352,7 @@ void CVisC86Skin::drawTickCircle( IVisBitmap *canvas, int x, int y, int tick )
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
-// ÉçÉSï`âÊ
+// „É≠„Ç¥ÊèèÁîª
 void CVisC86Skin::drawLogo(IVisBitmap *canvas, int x, int y )
 {
 	BMPREG reg = skinreg_tool[ID_LOGO];
@@ -373,7 +373,7 @@ void CVisC86Skin::drawCheckBox(IVisBitmap *canvas, int x, int y, int sw )
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
-// Ç¬Ç‹Ç›
+// „Å§„Åæ„Åø
 void CVisC86Skin::drawKnob(IVisBitmap *canvas, int x, int y, int minval, int maxval, int numval )
 {
 	BMPREG reg_d = skinreg_tool[ID_KNOB_DARK];
@@ -400,21 +400,21 @@ void CVisC86Skin::drawSSGEG(IVisBitmap *canvas, int x, int y, int no )
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
-// FMÉAÉãÉSÉäÉYÉÄ
+// FM„Ç¢„É´„Ç¥„É™„Ç∫„É†
 void CVisC86Skin::drawFMAlgorithm(IVisBitmap *canvas, int x, int y, int no )
 {
 	BMPREG reg = skinreg_alg[no];
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
-// FMïîîwåi
+// FMÈÉ®ËÉåÊôØ
 void CVisC86Skin::drawFMSkin(IVisBitmap *canvas, int x, int y, int exmode )
 {
 	BMPREG reg = skinreg_view[ 1 ];
 	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
-// FM slotïîîwåi
+// FM slotÈÉ®ËÉåÊôØ
 void CVisC86Skin::drawFMSlotSkin(IVisBitmap *canvas, int x, int y )
 {
 	BMPREG reg = skinreg_view[2];

@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	RingBuffer module
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -7,10 +7,10 @@
 	honet.kk(at)gmail.com
 
 	note:
-	Lock-Free ƒ^ƒCƒv‚ÌƒŠƒ“ƒOƒoƒbƒtƒ@ƒ‹[ƒ`ƒ“B
-	read‚PƒXƒŒƒbƒhAwrite‚PƒXƒŒƒbƒh‚Ü‚Å‚ÍLock‚¹‚¸‚Ég‚¦‚Ü‚·B
-	‚½‚¾‚µAread, write‚ª‚QƒXƒŒƒbƒhˆÈã“¯‚ÉƒAƒNƒZƒX‚³‚ê‚éê‡‚Í
-	‚Ô‚Á‰ó‚ê‚é‚Ì‚ÅŠO•”•ÛŒì‚µ‚Ä‚­‚¾‚³‚¢B
+	Lock-Free ã‚¿ã‚¤ãƒ—ã®ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ãƒ«ãƒ¼ãƒãƒ³ã€‚
+	readï¼‘ã‚¹ãƒ¬ãƒƒãƒ‰ã€writeï¼‘ã‚¹ãƒ¬ãƒƒãƒ‰ã¾ã§ã¯Lockã›ãšã«ä½¿ãˆã¾ã™ã€‚
+	ãŸã ã—ã€read, writeãŒï¼’ã‚¹ãƒ¬ãƒƒãƒ‰ä»¥ä¸ŠåŒæ™‚ã«ã‚¢ã‚¯ã‚»ã‚¹ã•ã‚Œã‚‹å ´åˆã¯
+	ã¶ã£å£Šã‚Œã‚‹ã®ã§å¤–éƒ¨ä¿è­·ã—ã¦ãã ã•ã„ã€‚
  */
 
 #ifndef RINGBUFF_H_
@@ -62,7 +62,7 @@ public:
 		ridx = 0;
 	};
 
-	// c‚èƒoƒbƒtƒ@—Ê‚ğ•Ô‚·
+	// æ®‹ã‚Šãƒãƒƒãƒ•ã‚¡é‡ã‚’è¿”ã™
 	UINT remain(VOID){
 		if( !p ) return 0;
 		UINT cridx = ridx & mask;
@@ -74,7 +74,7 @@ public:
 		}
 	};
 
-	// Ši”[Ï‚İƒf[ƒ^—Ê‚ğ•Ô‚·
+	// æ ¼ç´æ¸ˆã¿ãƒ‡ãƒ¼ã‚¿é‡ã‚’è¿”ã™
 	UINT length(VOID){
 		if( !p ) return 0;
 		UINT cridx = ridx & mask;
@@ -86,7 +86,7 @@ public:
 		}
 	};
 
-	// Ši”[‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ª–³‚¢‚©‚Ç‚¤‚©
+	// æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ãŒç„¡ã„ã‹ã©ã†ã‹
 	BOOL isempty(void){
 		if( !p ) return 0;
 		return ( length() == 0 );

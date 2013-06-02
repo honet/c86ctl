@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -66,7 +66,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 
 	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
 
-	// ƒƒbƒZ[ƒWˆ——pƒEƒBƒ“ƒhƒE¶¬
+	// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å‡¦ç†ç”¨ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”Ÿæˆ
 	wndclass.cbSize        = sizeof(wndclass);
 	wndclass.style         = CS_HREDRAW | CS_VREDRAW;
 	wndclass.lpfnWndProc   = wndProc;
@@ -91,7 +91,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 	if(!hwnd)
 		return -1;
 
-	// ƒ^ƒXƒNƒgƒŒƒCƒAƒCƒRƒ“‚Ì“o˜^
+	// ã‚¿ã‚¹ã‚¯ãƒˆãƒ¬ã‚¤ã‚¢ã‚¤ã‚³ãƒ³ã®ç™»éŒ²
 	notifyIcon.cbSize = sizeof(NOTIFYICONDATA);
 	notifyIcon.uID = 0;
 	notifyIcon.hWnd = hwnd;
@@ -102,7 +102,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 	::Shell_NotifyIcon( NIM_ADD, &notifyIcon );
 
 
-	// ƒfƒoƒCƒX‘}”²ŠÄ‹“o˜^
+	// ãƒ‡ãƒã‚¤ã‚¹æŒ¿æŠœç›£è¦–ç™»éŒ²
 	DEV_BROADCAST_DEVICEINTERFACE *pFilterData = (DEV_BROADCAST_DEVICEINTERFACE*)_alloca(sizeof(DEV_BROADCAST_DEVICEINTERFACE));
 	if( pFilterData ){
 		ZeroMemory(pFilterData, sizeof(DEV_BROADCAST_DEVICEINTERFACE));
@@ -150,7 +150,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 
 	switch(iMsg){
 	case WM_CREATE:
-		// ƒ^ƒXƒNƒgƒŒƒCƒAƒCƒRƒ“‚Ì—vÄ“o˜^’Ê’m—p
+		// ã‚¿ã‚¹ã‚¯ãƒˆãƒ¬ã‚¤ã‚¢ã‚¤ã‚³ãƒ³ã®è¦å†ç™»éŒ²é€šçŸ¥ç”¨
 		taskbarRestartMsg = ::RegisterWindowMessage(_T("TaskbarCreated"));
 		break;
 
@@ -203,7 +203,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 
 	default:
 		if( iMsg == taskbarRestartMsg ){
-			// ƒ^ƒXƒNƒgƒŒƒCƒAƒCƒRƒ“‚ÌÄ“o˜^
+			// ã‚¿ã‚¹ã‚¯ãƒˆãƒ¬ã‚¤ã‚¢ã‚¤ã‚³ãƒ³ã®å†ç™»éŒ²
 			::Shell_NotifyIcon( NIM_ADD, &pThis->notifyIcon );
 
 		}else{
@@ -222,7 +222,7 @@ int C86CtlMainWnd::startVis()
 
 	mainVisWnd->create(getHWND());
 
-	// •`‰æƒXƒŒƒbƒhŠJn
+	// æç”»ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹
 	hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, wm, 0, &visThreadID );
 	if( !hVisThread ){
 		stopVis();
@@ -237,7 +237,7 @@ int C86CtlMainWnd::updateVis()
 
 int C86CtlMainWnd::stopVis()
 {
-	// •`‰æƒXƒŒƒbƒhI—¹
+	// æç”»ã‚¹ãƒ¬ãƒƒãƒ‰çµ‚äº†
 	if( hVisThread ){
 		::PostThreadMessage( visThreadID, WM_THREADEXIT, 0, 0 );
 		::WaitForSingleObject( hVisThread, INFINITE );
@@ -260,8 +260,8 @@ int C86CtlMainWnd::stopVis()
 
 
 // ---------------------------------------------------------
-// •`‰æˆ—ƒXƒŒƒbƒh
-// mm-timer‚É‚æ‚é60fps¶¬
+// æç”»å‡¦ç†ã‚¹ãƒ¬ãƒƒãƒ‰
+// mm-timerã«ã‚ˆã‚‹60fpsç”Ÿæˆ
 unsigned int WINAPI C86CtlMainWnd::threadVis(LPVOID param)
 {
 	MSG msg;

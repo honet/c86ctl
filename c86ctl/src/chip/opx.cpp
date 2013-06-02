@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -10,7 +10,7 @@
 #include "stdafx.h"
 #include "opx.h"
 
-// note‚Ì’†ŠÔü”g”*1024‚Ìƒe[ƒuƒ‹
+// noteã®ä¸­é–“å‘¨æ³¢æ•°*1024ã®ãƒ†ãƒ¼ãƒ–ãƒ«
 extern const uint32_t c86ctl::ftable[12] = {
 	/*260277,*/  // C#<->C   : 254.1775933119Hz
 	275754,  // C <->C#  : 269.291779527024Hz

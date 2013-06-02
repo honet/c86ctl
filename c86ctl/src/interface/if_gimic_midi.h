@@ -1,6 +1,6 @@
-/***
+ï»¿/***
 	c86ctl
-	gimic ƒRƒ“ƒgƒ[ƒ‹ MIDI”Å(ÀŒ±ƒR[ƒh)
+	gimic ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ« MIDIç‰ˆ(å®Ÿé¨“ã‚³ãƒ¼ãƒ‰)
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.

@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -94,7 +94,7 @@ protected:
 private:
 	CVisWidget *wcapture;
 	
-private: // CVisWnd‚ÆHWND‚Ì‘Î‰•t‚¯—p
+private: // CVisWndã¨HWNDã®å¯¾å¿œä»˜ã‘ç”¨
 	static LRESULT CALLBACK wndProcDispatcher(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);
 	static std::map< HWND, CVisWnd* > wndMap;
 	static CVisWnd* creatingWnd;

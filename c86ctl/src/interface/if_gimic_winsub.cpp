@@ -1,6 +1,6 @@
-/***
+ï»¿/***
 	c86ctl
-	gimic ƒRƒ“ƒgƒ[ƒ‹ WinUSB”Å(ÀŒ±ƒR[ƒh)
+	gimic ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ« WinUSBç‰ˆ(å®Ÿé¨“ã‚³ãƒ¼ãƒ‰)
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -9,12 +9,12 @@
 
 
 	note: honet.kk
-	Interface 2010/02† ‘æ‚TÍŒfÚ‚ÌƒTƒ“ƒvƒ‹ƒvƒƒOƒ‰ƒ€‚ğ
-	‚Ù‚ÚŠÛ‚Ï‚­‚è‚µ‚Ä‚¢‚Ü‚·B‚ ‚­‚Ü‚Å‚àHID’ÊM”Å‚Æ‚Ìˆá‚¢‚ğ
-	ƒeƒXƒg‚µ‚Ä‚İ‚é‚½‚ß‚ÌƒTƒ“ƒvƒ‹À‘•B
+	InterfaceèªŒ 2010/02å· ç¬¬ï¼•ç« æ²è¼‰ã®ã‚µãƒ³ãƒ—ãƒ«ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚’
+	ã»ã¼ä¸¸ã±ãã‚Šã—ã¦ã„ã¾ã™ã€‚ã‚ãã¾ã§ã‚‚HIDé€šä¿¡ç‰ˆã¨ã®é•ã„ã‚’
+	ãƒ†ã‚¹ãƒˆã—ã¦ã¿ã‚‹ãŸã‚ã®ã‚µãƒ³ãƒ—ãƒ«å®Ÿè£…ã€‚
 
-	g—p‚·‚é‚É‚Ígimic‚Ìƒtƒ@[ƒ€•ÏXiƒfƒXƒNƒŠƒvƒ^•ÏXj‚Æ
-	winusbƒhƒ‰ƒCƒo‚ÌƒCƒ“ƒXƒg[ƒ‹‚ª•K—vB
+	ä½¿ç”¨ã™ã‚‹ã«ã¯gimicã®ãƒ•ã‚¡ãƒ¼ãƒ å¤‰æ›´ï¼ˆãƒ‡ã‚¹ã‚¯ãƒªãƒ—ã‚¿å¤‰æ›´ï¼‰ã¨
+	winusbãƒ‰ãƒ©ã‚¤ãƒã®ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ãŒå¿…è¦ã€‚
 */
 
 
@@ -35,17 +35,17 @@
 using namespace c86ctl;
 
 /*----------------------------------------------------------------------------
-	’Ç‰Áƒ‰ƒCƒuƒ‰ƒŠ
+	è¿½åŠ ãƒ©ã‚¤ãƒ–ãƒ©ãƒª
 ----------------------------------------------------------------------------*/
 #pragma comment(lib, "setupapi.lib")
 #pragma comment(lib, "winusb.lib")
 
 
 /*----------------------------------------------------------------------------
-	ƒpƒ‰ƒƒ^
+	ãƒ‘ãƒ©ãƒ¡ã‚¿
 ----------------------------------------------------------------------------*/
-// ƒfƒoƒCƒXƒhƒ‰ƒCƒo‚Ìinf“à‚Å’è‹`‚µ‚½GUID
-// (WinUSB.sysg—pƒfƒoƒCƒX‚É‘Î‚·‚é¯•Êqj
+// ãƒ‡ãƒã‚¤ã‚¹ãƒ‰ãƒ©ã‚¤ãƒã®infå†…ã§å®šç¾©ã—ãŸGUID
+// (WinUSB.sysä½¿ç”¨ãƒ‡ãƒã‚¤ã‚¹ã«å¯¾ã™ã‚‹è­˜åˆ¥å­ï¼‰
 // {63275336-530B-4069-92B6-5F8AE3465462}
 DEFINE_GUID(GUID_DEVINTERFACE_WINUSBTESTTARGET, 
   0x63275336, 0x530b, 0x4069, 0x92, 0xb6, 0x5f, 0x8a, 0xe3, 0x46, 0x54, 0x62);
@@ -54,7 +54,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_WINUSBTESTTARGET,
 #define PIPE_BUFFER_SIZE 64
 
 /*----------------------------------------------------------------------------
-	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 ----------------------------------------------------------------------------*/
 GimicWinUSB::GimicWinUSB( HANDLE dev, HANDLE winUsb )
 	: hDev(dev), hWinUsb(winUsb), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0),
@@ -93,7 +93,7 @@ GimicWinUSB::GimicWinUSB( HANDLE dev, HANDLE winUsb )
 }
 
 /*----------------------------------------------------------------------------
-	ƒfƒXƒgƒ‰ƒNƒ^
+	ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 ----------------------------------------------------------------------------*/
 GimicWinUSB::~GimicWinUSB(void)
 {
@@ -140,12 +140,12 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 			unsigned long sz;
 			std::basic_string<TCHAR> devpath;
 
-			// •K—v‚Èƒoƒbƒtƒ@ƒTƒCƒYæ“¾
+			// å¿…è¦ãªãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºå–å¾—
 			bResult = SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, NULL);
 			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
 			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
-			// ƒfƒoƒCƒXƒm[ƒhæ“¾
+			// ãƒ‡ãƒã‚¤ã‚¹ãƒãƒ¼ãƒ‰å–å¾—
 			if (!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, NULL)){
 				free(dev_det);
 				break;
@@ -155,7 +155,7 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 			free(dev_det);
 			dev_det = NULL;
 
-			// Šù‚ÉƒCƒ“ƒXƒ^ƒ“ƒX‚ª‚ ‚é‚©‚Ç‚¤‚©ŒŸõ
+			// æ—¢ã«ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãŒã‚ã‚‹ã‹ã©ã†ã‹æ¤œç´¢
 			auto it = std::find_if( gimics.begin(), gimics.end(),
 				[devpath](std::shared_ptr<GimicIF> x) -> bool {
 					GimicWinUSB *gdev = dynamic_cast<GimicWinUSB*>(x.get());
@@ -205,7 +205,7 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 //				}
 				// ------
 
-				// ƒ^ƒCƒ€ƒAƒEƒgİ’è
+				// ã‚¿ã‚¤ãƒ ã‚¢ã‚¦ãƒˆè¨­å®š
 				//	COMMTIMEOUTS commTimeOuts;
 				//	commTimeOuts.ReadIntervalTimeout = 0;
 				//	commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
@@ -323,7 +323,7 @@ int GimicWinUSB::devWrite( LPCVOID data )
 
 
 /*----------------------------------------------------------------------------
-	À‘•
+	å®Ÿè£…
 ----------------------------------------------------------------------------*/
 
 int GimicWinUSB::init(void)
@@ -345,7 +345,7 @@ int GimicWinUSB::init(void)
 //	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	
-	// ’l‚ğƒLƒƒƒbƒVƒ…‚³‚¹‚é‚½‚ß‚Ìƒ_ƒ~[ŒÄ‚Ño‚µ
+	// å€¤ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã•ã›ã‚‹ãŸã‚ã®ãƒ€ãƒŸãƒ¼å‘¼ã³å‡ºã—
 	UCHAR vol;
 	getSSGVolume(&vol);
 	UINT clock;
@@ -358,17 +358,17 @@ int GimicWinUSB::reset(void)
 {
 	int ret;
 	
-	// ƒfƒBƒŒƒCƒLƒ…[‚Ì”pŠü
+	// ãƒ‡ã‚£ãƒ¬ã‚¤ã‚­ãƒ¥ãƒ¼ã®å»ƒæ£„
 	dqueue.flush();
 
-	// ƒŠƒZƒbƒgƒRƒ}ƒ“ƒh‘—M
+	// ãƒªã‚»ãƒƒãƒˆã‚³ãƒãƒ³ãƒ‰é€ä¿¡
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
 	ret =  sendMsg( &d );
 	
 	if( C86CTL_ERR_NONE == ret ){
-		// ŠeƒXƒe[ƒ^ƒX’lƒŠƒZƒbƒg
-		//   ƒ}ƒXƒN‚Ì“K—p‚ğreset“à‚Å‚·‚éi‘—Mˆ—‚ª”­¶‚·‚éj‚Ì‚Å
-		//   ƒŠƒZƒbƒgŒã‚Éˆ—‚µ‚È‚¢‚Æƒ_ƒB
+		// å„ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹å€¤ãƒªã‚»ãƒƒãƒˆ
+		//   ãƒã‚¹ã‚¯ã®é©ç”¨ã‚’resetå†…ã§ã™ã‚‹ï¼ˆé€ä¿¡å‡¦ç†ãŒç™ºç”Ÿã™ã‚‹ï¼‰ã®ã§
+		//   ãƒªã‚»ãƒƒãƒˆå¾Œã«å‡¦ç†ã—ãªã„ã¨ãƒ€ãƒ¡ã€‚
 		if( chip )
 			chip->reset();
 	}
@@ -650,9 +650,9 @@ void GimicWinUSB::tick(void)
 		if( sz<64 )
 			memset( &buff[sz], 0xff, 64-sz );
 
-		// WriteFile‚ªƒXƒŒƒbƒhƒZ[ƒt‚©‚Ç‚¤‚©‚æ‚­•ª‚©‚ç‚È‚¢‚Ì‚Å
-		// ”O‚Ì‚½‚ß•ÛŒì‚µ‚Ä‚¢‚é‚ªA‚½‚Ô‚ñ‚¢‚ç‚È‚¢B
-		// (directOut()‚Æd‚È‚é‰Â”\«‚ª‚ ‚é)
+		// WriteFileãŒã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã‹ã©ã†ã‹ã‚ˆãåˆ†ã‹ã‚‰ãªã„ã®ã§
+		// å¿µã®ãŸã‚ä¿è­·ã—ã¦ã„ã‚‹ãŒã€ãŸã¶ã‚“ã„ã‚‰ãªã„ã€‚
+		// (directOut()ã¨é‡ãªã‚‹å¯èƒ½æ€§ãŒã‚ã‚‹)
 		::EnterCriticalSection(&csection);
 		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);
@@ -660,7 +660,7 @@ void GimicWinUSB::tick(void)
 		if( ret == C86CTL_ERR_NONE )
 			cal+=64;
 
-		// 1tick‚Ìˆ—‚ª1ms‚ğ’´‚¦‚½‚çˆê‰ñ”²‚¯‚é
+		// 1tickã®å‡¦ç†ãŒ1msã‚’è¶…ãˆãŸã‚‰ä¸€å›æŠœã‘ã‚‹
 		::QueryPerformanceCounter(&ct);
 		if( et.QuadPart<ct.QuadPart ){
 			break;

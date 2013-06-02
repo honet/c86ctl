@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -48,14 +48,14 @@ public:
 			reg[0][i] = reg[1][i] = 0xc0;
 		reg[0][0x27] = 0x30; // Timer Control
 		reg[0][0x29] = 0x80; // FM4-6 Enable
-		reg[0][0x07] = 0x38; // SSG ƒ~ƒLƒT
+		reg[0][0x07] = 0x38; // SSG ãƒŸã‚­ã‚µ
 		reg[0][0x10] = 0xBF;
 
 		fm->reset();
 		ssg->reset();
 		rhythm->reset();
 
-		// ‹­§“I‚ÉOPNAƒ‚[ƒh‚ÉØ‚è‘Ö‚¦
+		// å¼·åˆ¶çš„ã«OPNAãƒ¢ãƒ¼ãƒ‰ã«åˆ‡ã‚Šæ›¿ãˆ
 		pIF->directOut( 0x29, 0x9f );
 		reg[0][0x29] = 0x9f;
 

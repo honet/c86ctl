@@ -20,7 +20,7 @@ open("version.h") {|file|
 
 build = build + 1
 
-FileUtils.rm('version.tmp')
+FileUtils.rm('version.tmp') if File.exists?('version.tmp')
 FileUtils.mv('version.h', 'version.tmp')
 vf = open("version.h", "w")
 

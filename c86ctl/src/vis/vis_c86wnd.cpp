@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -132,7 +132,7 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 		break;
 
 	case WM_PAINT:
-		// ‰æ–Ê•`‰æ‚Íƒ^ƒCƒ}‹ì“®‚Ås‚í‚ê‚é‚Ì‚Å•`‰æ—ÌˆæXV‚¾‚¯‚µ‚ÄI‚í‚é
+		// ç”»é¢æç”»ã¯ã‚¿ã‚¤ãƒžé§†å‹•ã§è¡Œã‚ã‚Œã‚‹ã®ã§æç”»é ˜åŸŸæ›´æ–°ã ã‘ã—ã¦çµ‚ã‚ã‚‹
 		::BeginPaint(hWnd, &ps);
 		::EndPaint(hWnd, &ps);
 		return 0;
@@ -174,17 +174,17 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 
 
 					if( isClose( prc->left, rc.right ) ){
-						if( isClose( prc->top, rc.top ) ){ // ‰Eã-¶ã
+						if( isClose( prc->top, rc.top ) ){ // å³ä¸Š-å·¦ä¸Š
 							::OffsetRect( prc, rc.right-prc->left, rc.top-prc->top );
-						}else if( isClose( prc->bottom, rc.bottom ) ){ // ‰E‰º-¶‰º
+						}else if( isClose( prc->bottom, rc.bottom ) ){ // å³ä¸‹-å·¦ä¸‹
 							::OffsetRect( prc, rc.right-prc->left, rc.bottom-prc->bottom );
 						}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
 							::OffsetRect( prc, rc.right-prc->left, 0 );
 						}
 					}else if( isClose( prc->right, rc.left ) ){
-						if( isClose( prc->top, rc.top ) ){ // ¶ã-‰Eã
+						if( isClose( prc->top, rc.top ) ){ // å·¦ä¸Š-å³ä¸Š
 							::OffsetRect( prc, rc.left-prc->right, rc.top-prc->top );
-						}else if( isClose( prc->bottom, rc.bottom ) ){ // ¶‰º-‰E‰º
+						}else if( isClose( prc->bottom, rc.bottom ) ){ // å·¦ä¸‹-å³ä¸‹
 							::OffsetRect( prc, rc.left-prc->right, rc.bottom-prc->bottom );
 						}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
 							::OffsetRect( prc, rc.left-prc->right, 0 );

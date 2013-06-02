@@ -1,6 +1,6 @@
-/***
+Ôªø/***
 	c86ctl
-	gimic ÉRÉìÉgÉçÅ[Éã HIDî≈(é¿å±ÉRÅ[Éh)
+	gimic „Ç≥„É≥„Éà„É≠„Éº„É´ HIDÁâà(ÂÆüÈ®ì„Ç≥„Éº„Éâ)
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -8,41 +8,41 @@
 	honet.kk(at)gmail.com
 	Thanks to Nagai "Guu" Osamu 2011/12/08 for his advice.
 	
-	HIDÉÅÉbÉZÅ[ÉWëÃån
-		íçà”ÅFHIDÉpÉPÉbÉgêÊì™ÅÅÉÅÉbÉZÅ[ÉWÇÃäJénÉoÉCÉgÇ≈óLÇÈÇ±Ç∆
-		Å@Å@Å@ÅiHIDÉpÉPÉbÉgÇQÇ¬Ç…Ç‹ÇΩÇ™ÇÈÉÅÉbÉZÅ[ÉWÇÕïsâ¬Åj
+	HID„É°„ÉÉ„Çª„Éº„Ç∏‰ΩìÁ≥ª
+		Ê≥®ÊÑèÔºöHID„Éë„Ç±„ÉÉ„ÉàÂÖàÈ†≠Ôºù„É°„ÉÉ„Çª„Éº„Ç∏„ÅÆÈñãÂßã„Éê„Ç§„Éà„ÅßÊúâ„Çã„Åì„Å®
+		„ÄÄ„ÄÄ„ÄÄÔºàHID„Éë„Ç±„ÉÉ„ÉàÔºí„Å§„Å´„Åæ„Åü„Åå„Çã„É°„ÉÉ„Çª„Éº„Ç∏„ÅØ‰∏çÂèØÔºâ
 		
-	 XX YY             : 2byte ÉåÉWÉXÉ^ÉAÉNÉZÉXÉRÉ}ÉìÉh, XX=ÉAÉhÉåÉX(00~fb), YY=ÉfÅ[É^(0~ff)
-	 FE XX YY          : 3byte ExÉåÉWÉXÉ^ÉAÉNÉZÉXÉRÉ}ÉìÉh, XX=ÉAÉhÉåÉX(00~fb), YY=ÉfÅ[É^(0~ff)
-	 FE FC             : ó\ñÒ(óòópã÷é~)
-	 FE FD             : ó\ñÒ(óòópã÷é~)
-	 FE FE             : ó\ñÒ(óòópã÷é~)
-	 FE FF             : ó\ñÒ(óòópã÷é~)
+	 XX YY             : 2byte „É¨„Ç∏„Çπ„Çø„Ç¢„ÇØ„Çª„Çπ„Ç≥„Éû„É≥„Éâ, XX=„Ç¢„Éâ„É¨„Çπ(00~fb), YY=„Éá„Éº„Çø(0~ff)
+	 FE XX YY          : 3byte Ex„É¨„Ç∏„Çπ„Çø„Ç¢„ÇØ„Çª„Çπ„Ç≥„Éû„É≥„Éâ, XX=„Ç¢„Éâ„É¨„Çπ(00~fb), YY=„Éá„Éº„Çø(0~ff)
+	 FE FC             : ‰∫àÁ¥Ñ(Âà©Áî®Á¶ÅÊ≠¢)
+	 FE FD             : ‰∫àÁ¥Ñ(Âà©Áî®Á¶ÅÊ≠¢)
+	 FE FE             : ‰∫àÁ¥Ñ(Âà©Áî®Á¶ÅÊ≠¢)
+	 FE FF             : ‰∫àÁ¥Ñ(Âà©Áî®Á¶ÅÊ≠¢)
 
 	 FD 81             : HARDWARE Reset
 	 FD 82             : Software Reset
 	 FD 83 WW XX YY ZZ : set PLL clock, WW=clock[7:0], XX=clock[15:8], YY=clock[23:16], ZZ=clock[31:24]
-	 FD 84 XX          : set SSG volume (OPNAÉÇÉWÉÖÅ[ÉãéûÇÃÇ›èàóù), XX=volume(0-127)
+	 FD 84 XX          : set SSG volume (OPNA„É¢„Ç∏„É•„Éº„É´ÊôÇ„ÅÆ„ÅøÂá¶ÁêÜ), XX=volume(0-127)
 	 FD 85             : get PLL clock
 	 FD 86             : get SSG volume
-	 FD 91 XX          : get HW report, XX=î‘çÜ(00=ÉÇÉWÉÖÅ[Éã, FF=É}ÉUÅ[É{Å[Éh)
+	 FD 91 XX          : get HW report, XX=Áï™Âè∑(00=„É¢„Ç∏„É•„Éº„É´, FF=„Éû„Ç∂„Éº„Éú„Éº„Éâ)
 	 FD 92             : get Firmware version
-	 FD 93 XX          : get STATUS, XX=î‘çÜ(00=STATUS0, 01=STATUS1)
+	 FD 93 XX          : get STATUS, XX=Áï™Âè∑(00=STATUS0, 01=STATUS1)
 	 FD A0             : adpcm ZERO Reset.
 	 FD A1
 	 FD A2
 	 FD A3
 
-	 FC                : ó\ñÒ(óòópã÷é~)
+	 FC                : ‰∫àÁ¥Ñ(Âà©Áî®Á¶ÅÊ≠¢)
 	 FF                : terminator
 
-	  É|Å[ÉgÉäÉ}ÉbÉvédól
+	  „Éù„Éº„Éà„É™„Éû„ÉÉ„Éó‰ªïÊßò
 		YM2608 & YMF288
-		  é¿ÉAÉhÉåÉX      í êMéûÇÃÉAÉhÉåÉX
+		  ÂÆü„Ç¢„Éâ„É¨„Çπ      ÈÄö‰ø°ÊôÇ„ÅÆ„Ç¢„Éâ„É¨„Çπ
 		  100~110     ->  C0~D0
 		
 		YM2151
-		  é¿ÉAÉhÉåÉX      í êMéûÇÃÉAÉhÉåÉX
+		  ÂÆü„Ç¢„Éâ„É¨„Çπ      ÈÄö‰ø°ÊôÇ„ÅÆ„Ç¢„Éâ„É¨„Çπ
 		  FC~FF       ->  1C~1F
 		  
  */
@@ -75,14 +75,14 @@ extern "C" {
 using namespace c86ctl;
 
 /*----------------------------------------------------------------------------
-	í«â¡ÉâÉCÉuÉâÉä
+	ËøΩÂä†„É©„Ç§„Éñ„É©„É™
 ----------------------------------------------------------------------------*/
 #pragma comment(lib, "hid.lib")
 #pragma comment(lib, "setupapi.lib")
 #pragma comment(lib, "winmm.lib")
 
 /*----------------------------------------------------------------------------
-	ÉRÉìÉXÉgÉâÉNÉ^
+	„Ç≥„É≥„Çπ„Éà„É©„ÇØ„Çø
 ----------------------------------------------------------------------------*/
 GimicHID::GimicHID( HANDLE h )
 	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0)
@@ -93,7 +93,7 @@ GimicHID::GimicHID( HANDLE h )
 }
 
 /*----------------------------------------------------------------------------
-	ÉfÉXÉgÉâÉNÉ^
+	„Éá„Çπ„Éà„É©„ÇØ„Çø
 ----------------------------------------------------------------------------*/
 GimicHID::~GimicHID(void)
 {
@@ -136,18 +136,18 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 			unsigned long sz;
 			std::basic_string<TCHAR> devpath;
 
-			// ïKóvÇ»ÉoÉbÉtÉ@ÉTÉCÉYéÊìæ
+			// ÂøÖË¶Å„Å™„Éê„ÉÉ„Éï„Ç°„Çµ„Ç§„Ç∫ÂèñÂæó
 			SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, 0);
 			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
 			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
-			// ÉfÉoÉCÉXÉmÅ[ÉhéÊìæ
+			// „Éá„Éê„Ç§„Çπ„Éé„Éº„ÉâÂèñÂæó
 			if(!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0)){
 				free(dev_det);
 				break;
 			}
 
-			// ÉfÉoÉCÉXÉIÅ[ÉvÉì
+			// „Éá„Éê„Ç§„Çπ„Ç™„Éº„Éó„É≥
 			HANDLE hHID = CreateFile(
 				dev_det->DevicePath,
 				GENERIC_READ|GENERIC_WRITE,
@@ -165,7 +165,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 			free(dev_det);
 			dev_det = NULL;
 
-			// VID, PID, version éÊìæ
+			// VID, PID, version ÂèñÂæó
 			HIDD_ATTRIBUTES attr;
 			if( !HidD_GetAttributes(hHID, &attr) )
 				continue;
@@ -183,7 +183,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 					}
 				);
 				if( it == gimics.end() ){
-					// É^ÉCÉÄÉAÉEÉgê›íË
+					// „Çø„Ç§„É†„Ç¢„Ç¶„ÉàË®≠ÂÆö
 					COMMTIMEOUTS commTimeOuts;
 					commTimeOuts.ReadIntervalTimeout = 0;
 					commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
@@ -192,7 +192,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 					commTimeOuts.WriteTotalTimeoutMultiplier = 0;
 					::SetCommTimeouts( hHID, &commTimeOuts );
 
-					// ÉCÉìÉXÉ^ÉìÉXê∂ê¨
+					// „Ç§„É≥„Çπ„Çø„É≥„ÇπÁîüÊàê
 					GimicHID *gimicHid = new GimicHID(hHID);
 					if( gimicHid ){
 						gimicHid->devPath = devpath;
@@ -257,7 +257,7 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 			len = 0;
 			ret = devRead(buff);
 			if( C86CTL_ERR_NONE == ret )
-				memcpy( rxdata, &buff[1], rxsz ); // 1byteñ⁄ÇÕUSBÇÃInterfaceNo.Ç»ÇÃÇ≈îÚÇŒÇ∑
+				memcpy( rxdata, &buff[1], rxsz ); // 1byteÁõÆ„ÅØUSB„ÅÆInterfaceNo.„Å™„ÅÆ„ÅßÈ£õ„Å∞„Åô
 		}
 	}
 	::LeaveCriticalSection(&csection);
@@ -266,7 +266,7 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 }
 
 /*----------------------------------------------------------------------------
-	é¿ëï
+	ÂÆüË£Ö
 ----------------------------------------------------------------------------*/
 
 int GimicHID::init(void)
@@ -288,7 +288,7 @@ int GimicHID::init(void)
 //	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	
-	// ílÇÉLÉÉÉbÉVÉÖÇ≥ÇπÇÈÇΩÇﬂÇÃÉ_É~Å[åƒÇ—èoÇµ
+	// ÂÄ§„Çí„Ç≠„É£„ÉÉ„Ç∑„É•„Åï„Åõ„Çã„Åü„ÇÅ„ÅÆ„ÉÄ„Éü„ÉºÂëº„Å≥Âá∫„Åó
 	UCHAR vol;
 	getSSGVolume(&vol);
 	UINT clock;
@@ -301,17 +301,17 @@ int GimicHID::reset(void)
 {
 	int ret;
 	
-	// ÉfÉBÉåÉCÉLÉÖÅ[ÇÃîpä¸
+	// „Éá„Ç£„É¨„Ç§„Ç≠„É•„Éº„ÅÆÂªÉÊ£Ñ
 	dqueue.flush();
 
-	// ÉäÉZÉbÉgÉRÉ}ÉìÉhëóêM
+	// „É™„Çª„ÉÉ„Éà„Ç≥„Éû„É≥„ÉâÈÄÅ‰ø°
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
 	ret =  sendMsg( &d );
 	
 	if( C86CTL_ERR_NONE == ret ){
-		// äeÉXÉeÅ[É^ÉXílÉäÉZÉbÉg
-		//   É}ÉXÉNÇÃìKópÇresetì‡Ç≈Ç∑ÇÈÅiëóêMèàóùÇ™î≠ê∂Ç∑ÇÈÅjÇÃÇ≈
-		//   ÉäÉZÉbÉgå„Ç…èàóùÇµÇ»Ç¢Ç∆É_ÉÅÅB
+		// ÂêÑ„Çπ„ÉÜ„Éº„Çø„ÇπÂÄ§„É™„Çª„ÉÉ„Éà
+		//   „Éû„Çπ„ÇØ„ÅÆÈÅ©Áî®„ÇíresetÂÜÖ„Åß„Åô„ÇãÔºàÈÄÅ‰ø°Âá¶ÁêÜ„ÅåÁô∫Áîü„Åô„ÇãÔºâ„ÅÆ„Åß
+		//   „É™„Çª„ÉÉ„ÉàÂæå„Å´Âá¶ÁêÜ„Åó„Å™„ÅÑ„Å®„ÉÄ„É°„ÄÇ
 		if( chip )
 			chip->reset();
 	}
@@ -592,9 +592,9 @@ void GimicHID::tick(void)
 		if( sz<64 )
 			memset( &buff[1+sz], 0xff, 64-sz );
 
-		// WriteFileÇ™ÉXÉåÉbÉhÉZÅ[ÉtÇ©Ç«Ç§Ç©ÇÊÇ≠ï™Ç©ÇÁÇ»Ç¢ÇÃÇ≈
-		// îOÇÃÇΩÇﬂï€åÏÇµÇƒÇ¢ÇÈÇ™ÅAÇΩÇ‘ÇÒÇ¢ÇÁÇ»Ç¢ÅB
-		// (directOut()Ç∆èdÇ»ÇÈâ¬î\ê´Ç™Ç†ÇÈ)
+		// WriteFile„Åå„Çπ„É¨„ÉÉ„Éâ„Çª„Éº„Éï„Åã„Å©„ÅÜ„Åã„Çà„ÅèÂàÜ„Åã„Çâ„Å™„ÅÑ„ÅÆ„Åß
+		// Âøµ„ÅÆ„Åü„ÇÅ‰øùË≠∑„Åó„Å¶„ÅÑ„Çã„Åå„ÄÅ„Åü„Å∂„Çì„ÅÑ„Çâ„Å™„ÅÑ„ÄÇ
+		// (directOut()„Å®Èáç„Å™„ÇãÂèØËÉΩÊÄß„Åå„ÅÇ„Çã)
 		::EnterCriticalSection(&csection);
 		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);

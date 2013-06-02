@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -71,7 +71,7 @@ public:
 		uint64_t b = fblock[exNo];
 		uint32_t n;
 		
-		// fno = (144*f*2**20)/ (mclk * 2**(block-1)) ‚æ‚è
+		// fno = (144*f*2**20)/ (mclk * 2**(block-1)) ã‚ˆã‚Š
 		// f*1024 = fno * mclk * (2**(block-1)) / (144*(2**20)) * 1024
 		if( b ) n = static_cast<uint32_t>( static_cast<uint64_t>(fnum[exNo])*mclk*(1ULL<<(b-1)) / 147456ULL );
 		else    n = static_cast<uint32_t>( static_cast<uint64_t>(fnum[exNo])*mclk / 294912ULL );
@@ -232,7 +232,7 @@ public:
 	bool isOn(){ return (tone|noise); };
 
 	void getNote(int &oct, int &note){
-		// tp = M/(f*64) ‚æ‚è
+		// tp = M/(f*64) ã‚ˆã‚Š
 		// f*1024 = (M*1024) / (tune*64)
 		uint64_t t = getTune();
 		if( !t ){
@@ -336,10 +336,10 @@ protected:
 	bool setReg( UCHAR addr, UCHAR data );
 	
 protected:
-	int envFineTune;	// 8bit ƒ`ƒƒƒlƒ‹‹¤’Ê
-	int envCoarseTune;	// 8bit ƒ`ƒƒƒlƒ‹‹¤’Ê
-	int envType;		// 4bit ƒ`ƒƒƒlƒ‹‹¤’Ê
-	int noisePeriod;	// 5bit ƒ`ƒƒƒlƒ‹‹¤’Ê
+	int envFineTune;	// 8bit ãƒãƒ£ãƒãƒ«å…±é€š
+	int envCoarseTune;	// 8bit ãƒãƒ£ãƒãƒ«å…±é€š
+	int envType;		// 4bit ãƒãƒ£ãƒãƒ«å…±é€š
+	int noisePeriod;	// 5bit ãƒãƒ£ãƒãƒ«å…±é€š
 	
 	IRealChip2 *pIF;
 };

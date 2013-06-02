@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -174,7 +174,7 @@ public:
 	int getFeedback(){ return feedback; };
 	int getAlgorithm(){ return algorithm; };
 	void getLR( bool &l, bool &r ){ l = left; r = right; };
-	int getPan(){ // �}1
+	int getPan(){ // ±1
 		if( left&&right ) return 0;
 		else if(left) return -1;
 		else if(right) return 1;

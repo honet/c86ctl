@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -80,7 +80,7 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		
 	case 0x08: // adpcm data.
 		if( control1 & 0x60 ){
-			if( 0 <= currentAddr && currentAddr < ramsize ){ // ”O‚Ì‚½‚ß
+			if( 0 <= currentAddr && currentAddr < ramsize ){ // å¿µã®ãŸã‚
 				dram[currentAddr] = data;
 				map[currentAddr] |= 0x01;
 				minimap[currentAddr>>9] |= 0x01;

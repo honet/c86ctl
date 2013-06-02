@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -8,9 +8,9 @@
 
 
 	note: honet.kk
-	ini�t�@�C���x�[�X�̎d�g�݂Ŏ������Ă���̂�
-	�P�Ƀe�L�X�g�G�f�B�^�ŕҏW�o����t�@�C���ɐݒ��
-	�ۑ��������Ƃ�����҂̎�Ȃ̂ő債���Ӗ��͂���܂���B
+	iniファイルベースの仕組みで実装しているのは
+	単にテキストエディタで編集出来るファイルに設定を
+	保存したいという作者の趣味なので大した意味はありません。
  */
 #pragma once
 
@@ -42,7 +42,7 @@ public:
 		TCHAR modulePath[_MAX_PATH];
 		TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
 
-		// ini�t�@�C�����擾
+		// iniファイル名取得
 		::GetModuleFileName( hModule, modulePath, _MAX_PATH );
 		_tsplitpath( modulePath, drv, dir, fname, ext );
 		_tcsncat( inipath, drv, _MAX_PATH );

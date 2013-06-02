@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -51,7 +51,7 @@ using namespace c86ctl::vis;
 
 
 // ------------------------------------------------------------------
-// ƒOƒ[ƒoƒ‹•Ï”
+// ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°
 C86CtlMain theC86CtlMain;
 
 
@@ -89,7 +89,7 @@ withlock< std::vector< std::shared_ptr<GimicIF> > > &C86CtlMain::getGimics()
 }
 
 // ---------------------------------------------------------
-// UIƒƒbƒZ[ƒWˆ—ƒXƒŒƒbƒh
+// UIãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å‡¦ç†ã‚¹ãƒ¬ãƒƒãƒ‰
 unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 {
 	C86CtlMain *pThis = reinterpret_cast<C86CtlMain*>(param);
@@ -108,7 +108,7 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		pwnd->createMainWnd(param);
 		pThis->mainThreadReady = true;
 
-		// ƒƒbƒZ[ƒWƒ‹[ƒv
+		// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒ«ãƒ¼ãƒ—
 		while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
 			if( b==-1 ) break;
 			switch( msg.message ){
@@ -118,7 +118,7 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 
 			case WM_MYDEVCHANGE:
 				::OutputDebugString(L"YEAH!\r\n");
-				GimicHID::UpdateInstances(pThis->gGIMIC); // NOTE: ’Ç‰Á‚µ‚©‚µ‚È‚¢B
+				GimicHID::UpdateInstances(pThis->gGIMIC); // NOTE: è¿½åŠ ã—ã‹ã—ãªã„ã€‚
 				pwnd->deviceUpdate();
 				break;
 			}
@@ -143,10 +143,10 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 
 
 // ---------------------------------------------------------
-// ‰‰‘tˆ—ƒXƒŒƒbƒh
-// mm-timer‚É‚æ‚é(‚¾‚¢‚½‚¢)1ms’PˆÊˆ—
-// note: timeSetEvent()‚¾‚Æ“]‘—ˆ—‚ªƒ^ƒCƒ}üŠú‚æ‚è’x‚¢‚Æ‚«‚É
-//       Ä“ü‚³‚ê‚é‚Ì‚ª•|‚©‚Á‚½‚Ì‚Å©‘Oƒ‹[ƒv‚É‚µ‚½
+// æ¼”å¥å‡¦ç†ã‚¹ãƒ¬ãƒƒãƒ‰
+// mm-timerã«ã‚ˆã‚‹(ã ã„ãŸã„)1mså˜ä½å‡¦ç†
+// note: timeSetEvent()ã ã¨è»¢é€å‡¦ç†ãŒã‚¿ã‚¤ãƒå‘¨æœŸã‚ˆã‚Šé…ã„ã¨ãã«
+//       å†å…¥ã•ã‚Œã‚‹ã®ãŒæ€–ã‹ã£ãŸã®ã§è‡ªå‰ãƒ«ãƒ¼ãƒ—ã«ã—ãŸ
 unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 {
 	try{
@@ -170,8 +170,8 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			}
 			next += period;
 
-			// ‚±‚±‚Åƒ‹[ƒv“àƒTƒCƒYŠm’èB
-			// •ÊƒXƒŒƒbƒh‚ÅƒTƒCƒYŠg’£‚³‚ê‚é–‚ª‚ ‚é‚Ì‚Å’ˆÓB
+			// ã“ã“ã§ãƒ«ãƒ¼ãƒ—å†…ã‚µã‚¤ã‚ºç¢ºå®šã€‚
+			// åˆ¥ã‚¹ãƒ¬ãƒƒãƒ‰ã§ã‚µã‚¤ã‚ºæ‹¡å¼µã•ã‚Œã‚‹äº‹ãŒã‚ã‚‹ã®ã§æ³¨æ„ã€‚
 			size_t sz = pThis->gGIMIC.size(); 
 
 			// update
@@ -219,7 +219,7 @@ int C86CtlMain::initialize(void)
 	if( isInitialized )
 		return C86CTL_ERR_UNKNOWN;
 	
-	// ƒCƒ“ƒXƒ^ƒ“ƒX¶¬
+	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ç”Ÿæˆ
 	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
 	if( type==0 ){
 		GimicHID::UpdateInstances(gGIMIC);
@@ -228,21 +228,21 @@ int C86CtlMain::initialize(void)
 		//gGIMIC = GimicMIDI::CreateInstances(); // TODO!!
 	}
 	
-	// ƒ^ƒCƒ}•ª‰ğ”\İ’è
+	// ã‚¿ã‚¤ãƒåˆ†è§£èƒ½è¨­å®š
 	TIMECAPS timeCaps;
 	if( ::timeGetDevCaps(&timeCaps, sizeof(timeCaps)) == TIMERR_NOERROR ){
 		::timeBeginPeriod(timeCaps.wPeriodMin);
 		timerPeriod = timeCaps.wPeriodMin;
 	}
 
-	// •`‰æ/UIƒXƒŒƒbƒhŠJn
+	// æç”»/UIã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹
 	hMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, this, 0, &mainThreadID );
 	if( !hMainThread )
 		return C86CTL_ERR_UNKNOWN;
 
 	while(!mainThreadReady);
 
-	// ‰‰‘tƒXƒŒƒbƒhŠJn
+	// æ¼”å¥ã‚¹ãƒ¬ãƒƒãƒ‰é–‹å§‹
 	hSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
 	if( !hSenderThread ){
 		::PostThreadMessage( mainThreadID, WM_THREADEXIT, 0, 0 );
@@ -265,7 +265,7 @@ int C86CtlMain::deinitialize(void)
 
 	reset();
 
-	// ŠeíƒXƒŒƒbƒhI—¹
+	// å„ç¨®ã‚¹ãƒ¬ãƒƒãƒ‰çµ‚äº†
 
 	if( hMainThread ){
 		::PostThreadMessage( mainThreadID, WM_THREADEXIT, 0, 0 );
@@ -282,12 +282,12 @@ int C86CtlMain::deinitialize(void)
 	}
 	terminateFlag = false;
 
-	// ƒCƒ“ƒXƒ^ƒ“ƒXíœ
-	// note: ‚±‚Ìƒ^ƒCƒ~ƒ“ƒO‚ÅI—¹ˆ—‚ªs‚í‚ê‚éB
-	//       gGIMIC‚ğQÆ‚·‚é‰‰‘tE•`‰æƒXƒŒƒbƒh‚ÍI—¹‚µ‚Ä‚¢‚È‚¯‚ê‚Î‚È‚ç‚È‚¢B
+	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å‰Šé™¤
+	// note: ã“ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§çµ‚äº†å‡¦ç†ãŒè¡Œã‚ã‚Œã‚‹ã€‚
+	//       gGIMICã‚’å‚ç…§ã™ã‚‹æ¼”å¥ãƒ»æç”»ã‚¹ãƒ¬ãƒƒãƒ‰ã¯çµ‚äº†ã—ã¦ã„ãªã‘ã‚Œã°ãªã‚‰ãªã„ã€‚
 	gGIMIC.clear();
 
-	// ƒ^ƒCƒ}•ª‰ğ”\İ’è‰ğœ
+	// ã‚¿ã‚¤ãƒåˆ†è§£èƒ½è¨­å®šè§£é™¤
 	::timeEndPeriod(timerPeriod);
 	isInitialized = false;
 	

@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -48,15 +48,15 @@ BOOL APIENTRY DllMain(
 
 
 // ----------------------------------------------------------------------
-// ŠO•”ƒCƒ“ƒ^[ƒtƒFƒCƒX
+// å¤–éƒ¨ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹
 HRESULT WINAPI CreateInstance( REFIID riid, void** ppi )
 {
-	// C86Ctl‚ª’PˆêƒCƒ“ƒXƒ^ƒ“ƒX‚È‚Ì‚ÅŽè”²‚«ŽÀ‘•B
+	// C86CtlãŒå˜ä¸€ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãªã®ã§æ‰‹æŠœãå®Ÿè£…ã€‚
 	return c86ctl::GetC86CtlMain()->QueryInterface(riid,ppi);
 }
 
 // ---------------------------------------------------
-// ˆÈ‰º‚ÍŒã•ûŒÝŠ·‚Ì‚½‚ß‚Ìnative I/F
+// ä»¥ä¸‹ã¯å¾Œæ–¹äº’æ›ã®ãŸã‚ã®native I/F
 int WINAPI c86ctl_initialize(void)
 {
 	return c86ctl::GetC86CtlMain()->initialize();

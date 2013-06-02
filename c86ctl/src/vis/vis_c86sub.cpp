@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -136,7 +136,7 @@ void c86ctl::vis::transblt2(
 void c86ctl::vis::visDrawLine(
 	IVisBitmap *bmp, int xs, int ys, int xe, int ye, COLORREF col )
 {
-	// note: ‚ß‚ñ‚Ç‚­‚³‚ª‚Á‚Ä bpp==4ê—pƒR[ƒh‚Å‘‚¢‚Ä‚é‚Ì‚Å’ˆÓ
+	// note: ã‚ã‚“ã©ãã•ãŒã£ã¦ bpp==4å°‚ç”¨ã‚³ãƒ¼ãƒ‰ã§æ›¸ã„ã¦ã‚‹ã®ã§æ³¨æ„
 	if( !bmp )
 		return;
 	if( xs<0 || ys<0 || bmp->getWidth()<=xs || bmp->getHeight()<=ys )
@@ -146,21 +146,21 @@ void c86ctl::vis::visDrawLine(
 	
 	int step = bmp->getStep()>>2;
 
-	if( xs == xe ){	// ‚’¼ü
+	if( xs == xe ){	// å‚ç›´ç·š
 		if( ye<ys ) SWAP(ys,ye);
 		UINT *p = ((UINT*)bmp->getRow0(ys)) + xs;
 		for( int y=ys; y<=ye; y++ ){
 			*p = col;
 			p += step;
 		}
-	}else if( ys == ye ){ //…•½ü
+	}else if( ys == ye ){ //æ°´å¹³ç·š
 		if( xe<xs ) SWAP(xs,xe);
 		UINT *p = ((UINT*)bmp->getRow0(ys)) + xs;
 		for( int x=xs; x<=xe; x++ ){
 			*p++ = col;
 		}
-	}else{ // Î‚ß
-		// TODO : ƒfƒoƒbƒO‚µ‚Ä‚È‚¢‚ÌB
+	}else{ // æ–œã‚
+		// TODO : ãƒ‡ãƒãƒƒã‚°ã—ã¦ãªã„ã®ã€‚
 		int dx = abs(xe-xs);
 		int dy = abs(ye-ys);
 		int dx2=dx*2;

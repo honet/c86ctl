@@ -1,6 +1,6 @@
-/***
+ï»¿/***
 	c86ctl
-	I/FƒAƒNƒZƒXƒCƒ“ƒ^ƒtƒF[ƒX’è‹` for GIMIC
+	I/Fã‚¢ã‚¯ã‚»ã‚¹ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹å®šç¾© for GIMIC
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
@@ -63,7 +63,7 @@ public:
 	virtual void __stdcall directOut(UINT addr, UCHAR data){};
 
 public:
-	// ÀŒ±’†
+	// å®Ÿé¨“ä¸­
 	//virtual int __stdcall adpcmZeroClear(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	//virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	//virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
@@ -86,7 +86,7 @@ public:
 
 
 public:
-	// ”ñŒöŠJ
+	// éå…¬é–‹
 	virtual int init(void){ return 0; };
 	virtual void tick(void){};
 	virtual void update(void){};
