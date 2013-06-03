@@ -19,7 +19,8 @@ private:
 		  mainVisWnd(0),
 		  hVisThread(0),
 		  visThreadID(0),
-		  hNotifyDevNode(0)
+		  hNotifyHIDDevNode(0),
+		  hNotifyWinUSBDevNode(0)
 	{};
 	virtual ~C86CtlMainWnd(){
 		if( mainVisWnd ){
@@ -69,7 +70,8 @@ private:
 	c86ctl::vis::CVisC86Main *mainVisWnd;
 	HANDLE hVisThread;
 	UINT visThreadID;
-	HANDLE hNotifyDevNode;
+	HANDLE hNotifyHIDDevNode;
+	HANDLE hNotifyWinUSBDevNode;
 
 private:
 	static C86CtlMainWnd *pthis;

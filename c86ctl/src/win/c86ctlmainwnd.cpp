@@ -38,6 +38,7 @@ extern "C" {
 #include "interface/if.h"
 #include "interface/if_gimic_hid.h"
 #include "interface/if_gimic_midi.h"
+#include "interface/if_gimic_winusb.h"
 
 
 #pragma comment(lib,"hidclass.lib")
@@ -109,9 +110,14 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 
 		pFilterData->dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
 		pFilterData->dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
-		HidD_GetHidGuid(&pFilterData->dbcc_classguid);
 
-		hNotifyDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+		// for HID interface
+	    HidD_GetHidGuid(&pFilterData->dbcc_classguid);
+		hNotifyHIDDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+
+		// for WinUSB interface
+		memcpy(&pFilterData->dbcc_classguid, &GUID_DEVINTERFACE_WINUSBTESTTARGET, sizeof(GUID));
+		hNotifyWinUSBDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 	}
 
 	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) )
@@ -131,8 +137,11 @@ int C86CtlMainWnd::deviceUpdate()
 
 int C86CtlMainWnd::destroyMainWnd(LPVOID param)
 {
-	if(hNotifyDevNode){
-		::UnregisterDeviceNotification(hNotifyDevNode);
+	if(hNotifyHIDDevNode){
+		::UnregisterDeviceNotification(hNotifyHIDDevNode);
+	}
+	if(hNotifyWinUSBDevNode){
+		::UnregisterDeviceNotification(hNotifyWinUSBDevNode);
 	}
 	if(hwnd){
 		::Shell_NotifyIcon( NIM_DELETE, &notifyIcon );

@@ -23,6 +23,13 @@
 
 namespace c86ctl{
 
+// デバイスドライバのinf内で定義したGUID
+// (WinUSB.sys使用デバイスに対する識別子）
+// {63275336-530B-4069-92B6-5F8AE3465462}
+DEFINE_GUID(GUID_DEVINTERFACE_WINUSBTESTTARGET, 
+  0x63275336, 0x530b, 0x4069, 0x92, 0xb6, 0x5f, 0x8a, 0xe3, 0x46, 0x54, 0x62);
+
+
 class GimicWinUSB : public GimicIF
 {
 // ファクトリ -------------------------------------------------------
