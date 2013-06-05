@@ -8,9 +8,9 @@
 	honet.kk(at)gmail.com
 	Thanks to Nagai "Guu" Osamu 2011/12/08 for his advice.
 
-	note: honet/k.kotajima
-	MIDIでのレジスタダンプ転送はいずれ廃止したいと思っているが
-	今のところHID版がまだ安定していないので残している。
+	note: honet/k.kotajima 2013/6/6
+	HID/WinUSB版が実用十分に安定したのでMIDI版は廃止。
+	ろくにメンテしていないので・・・
 
 	転送仕様： sysexに3byteとごにパックして送る。
 	 idx  data   mean
@@ -117,10 +117,10 @@ void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )
 int GimicMIDI::init(void)
 {
 	// MIDI-IFの場合はOPNA決めうち(module判定ifを作ってないから)
-	//chiptype = CHIP_OPNA;
-	//chip = new COPNA();
-	chiptype=CHIP_OPM;
-	chip = new COPM(static_cast<IRealChip2*>(this));
+	chiptype = CHIP_OPNA;
+	chip = new COPNA(static_cast<IRealChip2*>(this));
+	//chiptype = CHIP_OPM;
+	//chip = new COPM(static_cast<IRealChip2*>(this));
 	return C86CTL_ERR_NONE;
 }
 

@@ -13,8 +13,8 @@
 #include "c86ctl.h"
 #include "chip/chip.h"
 
+//#define SUPPORT_MIDI <=全然メンテしていません
 #define SUPPORT_WINUSB
-#define SUPPORT_MIDI
 #define SUPPORT_HID
 
 namespace c86ctl{

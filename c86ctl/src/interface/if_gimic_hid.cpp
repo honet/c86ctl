@@ -1,6 +1,6 @@
 ﻿/***
 	c86ctl
-	gimic コントロール HID版(実験コード)
+	gimic コントロール HID版
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
 	This software is licensed under the BSD license.
