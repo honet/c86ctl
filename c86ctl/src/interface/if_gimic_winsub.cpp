@@ -117,6 +117,8 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 	//	commTimeOuts.WriteTotalTimeoutMultiplier = 0;
 	//	::SetCommTimeouts( hDev, &commTimeOuts );
 
+	
+	// エンドポイント情報取得
 	USB_INTERFACE_DESCRIPTOR desc;
 	if (!WinUsb_QueryInterfaceSettings(hNewWinUsb, 0, &desc)){
 		WinUsb_Free(hNewWinUsb);
@@ -142,6 +144,9 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 	hDev = hNewDev;
 	hWinUsb = hNewWinUsb;
 	devPath = devpath;
+
+	WinUsb_FlushPipe(hWinUsb, outPipeId);
+	WinUsb_FlushPipe(hWinUsb, inPipeId);
 
 	// Module情報取得 -----------
 	// NOTE: (*chip) はキャッシュされているところが有るので、
@@ -251,7 +256,6 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 					GimicWinUSB *gdev = dynamic_cast<GimicWinUSB*>(x.get());
 					if(!gdev) return false;
 					if(gdev->devPath != devpath ) return false;
-					//if(!gdev->isValid()) return false;
 					return true;
 				}
 			);
@@ -259,13 +263,27 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 			if( it == gimics.end() ){
 				GimicWinUSB *gimicDev = new GimicWinUSB();
 				if( gimicDev ){
-					gimicDev->OpenDevice(devpath);
-					gimics.push_back( GimicIFPtr(gimicDev) );
+					if( gimicDev->OpenDevice(devpath) ){
+						gimics.push_back( GimicIFPtr(gimicDev) );
+					}else{
+						delete gimicDev;
+					}
 				}
 			}
 			else if (!(*it)->isValid()){
 				GimicWinUSB *gimicDev = dynamic_cast<GimicWinUSB*>(it->get());
-				gimicDev->OpenDevice(devpath);
+				if( !gimicDev->OpenDevice(devpath) ){
+					// OpenDeviceが失敗した場合は音源モジュールが前回接続時と
+					// 異なっているため、別インスタンスを生成する
+					GimicWinUSB *gimicDev = new GimicWinUSB();
+					if( gimicDev ){
+						if( gimicDev->OpenDevice(devpath) ){
+							gimics.push_back( GimicIFPtr(gimicDev) );
+						}else{
+							delete gimicDev;
+						}
+					}
+				}
 			}
 		}
 		
