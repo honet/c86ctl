@@ -39,6 +39,7 @@ protected:
 	
 public:
 	void init(HMODULE hModule){
+		// TODO!!: UAC対応
 		TCHAR modulePath[_MAX_PATH];
 		TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
 

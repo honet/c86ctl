@@ -31,7 +31,6 @@ extern "C" {
 #include "c86ctlmain.h"
 #include "c86ctlmainwnd.h"
 
-//#include "module.h"
 #include "config.h"
 #include "vis/vis_c86main.h"
 #include "ringbuff.h"

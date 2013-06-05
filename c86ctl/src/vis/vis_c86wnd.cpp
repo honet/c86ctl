@@ -242,12 +242,22 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND pa
 	wndHeight = height;
 	hParent = parent;
 
+	// 位置指定されていないときはメインモニタ中央に配置
 	if( left == INT_MIN || top == INT_MIN ){
 		int wx = GetSystemMetrics(SM_CXSCREEN);
 		int wy = GetSystemMetrics(SM_CYSCREEN);
 		left = (wx - width) / 2;
 		top  = (wy - height) / 2;
 	}
+
+	// ウィンドウ位置が画面からはみ出ているときの処理
+	// NOTE: マルチモニタ環境では全体包括サイズのみで判定（＝手抜き）
+	int wvx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	int wvy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	if( left < 0 ) left = 0;
+	if( top < 0 ) top = 0;
+	if( wvx <= left+width ) left = wvx - width-1;
+	if( wvy <= top+height ) top = wvy - height-1;
 
 	canvas = new CVisBitmap( width, height );
 	clientCanvas = new CVisChildBitmap( canvas, 2, 17, width-4, height-19 );

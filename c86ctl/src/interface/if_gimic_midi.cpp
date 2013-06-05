@@ -12,6 +12,7 @@
 	HID/WinUSB版が実用十分に安定したのでMIDI版は廃止。
 	ろくにメンテしていないので・・・
 
+
 	転送仕様： sysexに3byteとごにパックして送る。
 	 idx  data   mean
 	   0  0xF0: Start of SysEx
@@ -33,6 +34,9 @@
 #include <stdafx.h>
 #include <algorithm>
 #include "if_gimic_midi.h"
+
+#ifdef SUPPORT_MIDI
+
 #include "config.h"
 #include "chip/chip.h"
 #include "chip/opm.h"
@@ -238,4 +242,4 @@ void GimicMIDI::tick(void)
 	return;
 }
 
-
+#endif // SUPPORT_MIDI
