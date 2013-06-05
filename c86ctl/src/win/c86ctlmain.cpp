@@ -117,7 +117,7 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 				break;
 
 			case WM_MYDEVCHANGE:
-				::OutputDebugString(L"YEAH!\r\n");
+				//::OutputDebugString(L"DEVICE CHANGED!\r\n");
 				GimicHID::UpdateInstances(pThis->gGIMIC); // NOTE: 追加しかしない。
 				GimicWinUSB::UpdateInstances(pThis->gGIMIC);
 				pwnd->deviceUpdate();

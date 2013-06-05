@@ -12,7 +12,6 @@
 #include <tchar.h>
 
 #include "c86ctlmain.h"
-#include "module.h"
 #include "config.h"
 #include "resource.h"
 #include "vis_c86sub.h"

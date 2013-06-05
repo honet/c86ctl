@@ -1,17 +1,24 @@
 ﻿/***
 	c86ctl
-	gimic コントロール WinUSB版(実験コード)
+	gimic コントロール WinUSB版
 	
-	Copyright (c) 2009-2012, honet. All rights reserved.
+	Copyright (c) 2009-2013, honet. All rights reserved.
 	This software is licensed under the BSD license.
 
 	honet.kk(at)gmail.com
 
-
 	note: honet.kk
-	Interface誌 2010/02号 第５章掲載のサンプルプログラムを
-	ほぼ丸ぱくりしています。あくまでもHID通信版との違いを
-	テストしてみるためのサンプル実装。
+	WinUSBドライバによるバルクダンプ転送方式。
+
+	HID版では1フレーム(1ms)に1回の転送しか行えなかったが、
+	WinUSB版では十数回（理論最大値）まで
+	1ms内に転送を行えるため、転送速度が速くなっている。
+
+	ただし、USB転送速度よりもチップ書き込み速度のほうが遅いので
+	その制限によってある程度の速度で頭打ちとなる。
+
+	また、電文及び時間分解能等の仕組みはHID版と同じで有るため、
+	USB伝送速度以外の違いはHID版とWinUSB版の間には無い。
 
 	使用するにはgimicのファーム変更（デスクリプタ変更）と
 	winusbドライバのインストールが必要。
@@ -50,8 +57,8 @@ using namespace c86ctl;
 /*----------------------------------------------------------------------------
 	コンストラクタ
 ----------------------------------------------------------------------------*/
-GimicWinUSB::GimicWinUSB( HANDLE dev, HANDLE winUsb )
-	: hDev(dev), hWinUsb(winUsb), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0),
+GimicWinUSB::GimicWinUSB()
+	: hDev(0), hWinUsb(0), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0),
 	  inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0)
 {
 	rbuff.alloc( 128 );
@@ -60,29 +67,6 @@ GimicWinUSB::GimicWinUSB( HANDLE dev, HANDLE winUsb )
 
 	::QueryPerformanceFrequency(&freq);
 	freq.QuadPart/=1000; // 1ms
-
-	USB_INTERFACE_DESCRIPTOR desc;
-	if (!WinUsb_QueryInterfaceSettings(hWinUsb, 0, &desc)){
-		WinUsb_Free(hWinUsb);
-		hWinUsb = NULL;
-		CloseHandle(hDev);
-		hDev = NULL;
-	}
-
-	for ( int i=0; i<desc.bNumEndpoints; i++ ){
-		WINUSB_PIPE_INFORMATION pipeInfo;
-		if (WinUsb_QueryPipe(hWinUsb, 0, (UCHAR)i, &pipeInfo)){
-			if( pipeInfo.PipeType == UsbdPipeTypeBulk &&
-				USB_ENDPOINT_DIRECTION_OUT(pipeInfo.PipeId) ){
-				outPipeId = pipeInfo.PipeId;
-				outPipeMaxPktSize = pipeInfo.MaximumPacketSize;
-			}else if ( pipeInfo.PipeType == UsbdPipeTypeBulk &&
-				USB_ENDPOINT_DIRECTION_IN(pipeInfo.PipeId) ){
-				inPipeId = pipeInfo.PipeId;
-				inPipeMaxPktSize = pipeInfo.MaximumPacketSize;
-			}
-		}
-	}
 
 }
 
@@ -99,6 +83,120 @@ GimicWinUSB::~GimicWinUSB(void)
 	if( chip )
 		delete chip;
 }
+
+/*----------------------------------------------------------------------------
+	Device Open
+----------------------------------------------------------------------------*/
+bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
+{
+	HANDLE hNewDev = CreateFile(
+		devpath.c_str(),
+		GENERIC_READ|GENERIC_WRITE,
+		0 /*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
+		NULL,
+		OPEN_EXISTING,
+		FILE_FLAG_OVERLAPPED, //FILE_FLAG_NO_BUFFERING,
+		NULL);
+
+	if(hNewDev == INVALID_HANDLE_VALUE)
+		return false;
+
+	HANDLE hNewWinUsb = NULL;
+	if (!WinUsb_Initialize(hNewDev, &hNewWinUsb)){
+		//DWORD err = GetLastError();
+		CloseHandle(hNewDev);
+		return false;
+	}
+
+	// タイムアウト設定
+	//	COMMTIMEOUTS commTimeOuts;
+	//	commTimeOuts.ReadIntervalTimeout = 0;
+	//	commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
+	//	commTimeOuts.ReadTotalTimeoutMultiplier = 0;
+	//	commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
+	//	commTimeOuts.WriteTotalTimeoutMultiplier = 0;
+	//	::SetCommTimeouts( hDev, &commTimeOuts );
+
+	USB_INTERFACE_DESCRIPTOR desc;
+	if (!WinUsb_QueryInterfaceSettings(hNewWinUsb, 0, &desc)){
+		WinUsb_Free(hNewWinUsb);
+		CloseHandle(hNewDev);
+		return false;
+	}
+
+	for ( int i=0; i<desc.bNumEndpoints; i++ ){
+		WINUSB_PIPE_INFORMATION pipeInfo;
+		if (WinUsb_QueryPipe(hNewWinUsb, 0, (UCHAR)i, &pipeInfo)){
+			if( pipeInfo.PipeType == UsbdPipeTypeBulk &&
+				USB_ENDPOINT_DIRECTION_OUT(pipeInfo.PipeId) ){
+				outPipeId = pipeInfo.PipeId;
+				outPipeMaxPktSize = pipeInfo.MaximumPacketSize;
+			}else if ( pipeInfo.PipeType == UsbdPipeTypeBulk &&
+				USB_ENDPOINT_DIRECTION_IN(pipeInfo.PipeId) ){
+				inPipeId = pipeInfo.PipeId;
+				inPipeMaxPktSize = pipeInfo.MaximumPacketSize;
+			}
+		}
+	}
+
+	hDev = hNewDev;
+	hWinUsb = hNewWinUsb;
+	devPath = devpath;
+
+	// Module情報取得 -----------
+	// NOTE: (*chip) はキャッシュされているところが有るので、
+	//       一度作ったら削除してはいけない。
+	Devinfo info;
+	getModuleInfo(&info);
+
+	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
+		if( chiptype == 0 && chip == 0 ){
+			chiptype = CHIP_OPN3L;
+			chip = new COPN3L(this);
+		}else if( chiptype != CHIP_OPN3L ){
+			goto MODULE_CHANGED;
+		}
+	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
+		if( chiptype == 0 && chip == 0 ){
+			chiptype = CHIP_OPM;
+			chip = new COPM(this);
+		}else if( chiptype != CHIP_OPM ){
+			goto MODULE_CHANGED;
+		}
+	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
+		if( chiptype == 0 && chip == 0 ){
+			chiptype = CHIP_OPNA;
+			chip = new COPNA(this);
+		}else if( chiptype != CHIP_OPNA ){
+			goto MODULE_CHANGED;
+		}
+	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
+		if( chiptype == 0 && chip == 0 ){
+			chiptype = CHIP_OPL3;
+			chip = new COPL3();
+		}else if( chiptype != CHIP_OPL3 ){
+			goto MODULE_CHANGED;
+		}
+//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
+	}
+	
+	// 値をキャッシュさせるためのダミー呼び出し
+	UCHAR vol;
+	getSSGVolume(&vol);
+	UINT clock;
+	getPLLClock(&clock);
+	
+	return true;
+
+
+MODULE_CHANGED:
+	CloseHandle(hDev);
+	WinUsb_Free(hWinUsb);
+	hDev = NULL;
+	hWinUsb = NULL;
+	return false;
+}
+
 /*----------------------------------------------------------------------------
 	factory
 ----------------------------------------------------------------------------*/
@@ -113,8 +211,6 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 	SP_DEVICE_INTERFACE_DATA spid;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA fc_data = NULL;
 	
-//	ULONG requiredLength = 0;
-//	ULONG gotLength = 0;
 
 	devinf = SetupDiGetClassDevs(
 		(LPGUID)&GUID_DEVINTERFACE_WINUSBTESTTARGET,
@@ -155,65 +251,23 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 					GimicWinUSB *gdev = dynamic_cast<GimicWinUSB*>(x.get());
 					if(!gdev) return false;
 					if(gdev->devPath != devpath ) return false;
-					if(!gdev->isValid()) return false;
+					//if(!gdev->isValid()) return false;
 					return true;
 				}
 			);
 			
 			if( it == gimics.end() ){
-				HANDLE hDev = CreateFile(
-					devpath.c_str(),
-					GENERIC_READ|GENERIC_WRITE,
-					0 /*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
-					NULL,
-					OPEN_EXISTING,
-					FILE_FLAG_OVERLAPPED, //FILE_FLAG_NO_BUFFERING,
-					NULL);
-
-				if(hDev == INVALID_HANDLE_VALUE)
-					return NULL;
-
-				
-				
-				HANDLE hWinUsb = NULL;
-				if (!WinUsb_Initialize(hDev, &hWinUsb)){
-					//DWORD err = GetLastError();
-					CloseHandle(hDev);
-					return NULL;
-				}
-
-//				USB_INTERFACE_DESCRIPTOR desc;
-//				if (!WinUsb_QueryInterfaceSettings(hWinUsb, 0, &desc)){
-//					WinUsb_Free(hWinUsb);
-//					CloseHandle(hDev);
-//					return NULL;
-//				}
-//
-//				for ( int i=0; i<desc.bNumEndpoints; i++ ){
-//					WINUSB_PIPE_INFORMATION pipeInfo;
-//					if (WinUsb_QueryPipe(hWinUsb, 0, (UCHAR)i, &pipeInfo)){
-//						if( pipeInfo.PipeType == USBD_PIPE_TYPE::UsbdPipeTypeBulk ){
-//OutputDebugString(_T("AA"));
-//						}
-//					}
-//				}
-				// ------
-
-				// タイムアウト設定
-				//	COMMTIMEOUTS commTimeOuts;
-				//	commTimeOuts.ReadIntervalTimeout = 0;
-				//	commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
-				//	commTimeOuts.ReadTotalTimeoutMultiplier = 0;
-				//	commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
-				//	commTimeOuts.WriteTotalTimeoutMultiplier = 0;
-				//	::SetCommTimeouts( hDev, &commTimeOuts );
-
-				GimicWinUSB *gimicDev = new GimicWinUSB(hDev, hWinUsb);
+				GimicWinUSB *gimicDev = new GimicWinUSB();
 				if( gimicDev ){
-					gimicDev->devPath = devpath;
+					gimicDev->OpenDevice(devpath);
 					gimics.push_back( GimicIFPtr(gimicDev) );
 					gimicDev->init();
 				}
+			}
+			else if (!(*it)->isValid()){
+				GimicWinUSB *gimicDev = dynamic_cast<GimicWinUSB*>(it->get());
+				gimicDev->OpenDevice(devpath);
+				gimicDev->init();
 			}
 		}
 		
@@ -319,32 +373,10 @@ int GimicWinUSB::devWrite( LPCVOID data )
 /*----------------------------------------------------------------------------
 	実装
 ----------------------------------------------------------------------------*/
+#define SAFE_DELETE(x) while(0){ if(x){ delete x; x = NULL; };
 
 int GimicWinUSB::init(void)
 {
-	Devinfo info;
-	getModuleInfo(&info);
-	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
-		chiptype = CHIP_OPN3L;
-		chip = new COPN3L(this);
-	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
-		chiptype = CHIP_OPM;
-		chip = new COPM(this);
-	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
-		chiptype = CHIP_OPNA;
-		chip = new COPNA(this);
-	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
-		chiptype = CHIP_OPL3;
-		chip = new COPL3();
-//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
-	}
-	
-	// 値をキャッシュさせるためのダミー呼び出し
-	UCHAR vol;
-	getSSGVolume(&vol);
-	UINT clock;
-	getPLLClock(&clock);
-	
 	return C86CTL_ERR_NONE;
 }
 

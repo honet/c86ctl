@@ -14,7 +14,6 @@
 
 #include "config.h"
 #include "version.h"
-#include "module.h"
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86main.h"

@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "module.h"
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86skin.h"

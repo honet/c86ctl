@@ -12,7 +12,6 @@
 #include "c86ctlmain.h"
 #include "vis_c86skin.h"
 #include "vis_c86sub.h"
-#include "module.h"
 
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)

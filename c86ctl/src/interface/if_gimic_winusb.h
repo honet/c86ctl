@@ -71,8 +71,9 @@ public:
 
 // C86CTL内部利用 ---------------------------------------------------
 private:
-	GimicWinUSB(HANDLE dev, HANDLE winUsb);
-
+	GimicWinUSB();
+	bool OpenDevice(std::basic_string<TCHAR> devpath);
+	
 public:
 	~GimicWinUSB(void);
 
