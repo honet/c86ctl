@@ -261,13 +261,11 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 				if( gimicDev ){
 					gimicDev->OpenDevice(devpath);
 					gimics.push_back( GimicIFPtr(gimicDev) );
-					gimicDev->init();
 				}
 			}
 			else if (!(*it)->isValid()){
 				GimicWinUSB *gimicDev = dynamic_cast<GimicWinUSB*>(it->get());
 				gimicDev->OpenDevice(devpath);
-				gimicDev->init();
 			}
 		}
 		
@@ -372,14 +370,7 @@ int GimicWinUSB::devWrite( LPCVOID data )
 
 /*----------------------------------------------------------------------------
 	実装
-----------------------------------------------------------------------------*/
-#define SAFE_DELETE(x) while(0){ if(x){ delete x; x = NULL; };
-
-int GimicWinUSB::init(void)
-{
-	return C86CTL_ERR_NONE;
-}
-
+---------------------------------------------------------------------------*/
 int GimicWinUSB::reset(void)
 {
 	int ret;

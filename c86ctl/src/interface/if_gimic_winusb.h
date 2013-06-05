@@ -79,7 +79,6 @@ public:
 
 public:
 	// 非公開
-	virtual int init(void);
 	virtual void tick(void);
 	virtual void update(void);
 	virtual Chip* getChip(void){ return chip; };
