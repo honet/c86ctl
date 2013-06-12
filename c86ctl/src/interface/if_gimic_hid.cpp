@@ -7,8 +7,18 @@
 
 	honet.kk(at)gmail.com
 	Thanks to Nagai "Guu" Osamu 2011/12/08 for his advice.
-	
-	HIDメッセージ体系
+
+	HID-APIによる転送方式。
+	HID Reportをベンダ定義の64Byte固定パケットにして、
+	無理矢理データを詰め込む事で転送を行う。
+
+	HIDの仕組みを利用しているため、デバイスドライバが不要で
+	プラットフォーム依存が少ない利点が有る。
+	反面、HIDの規格上1パケット/1msという制約が有るため、
+	あまり転送速度を出すことが出来ない。
+
+
+	HIDメッセージ体系 ------------------------------------------
 		注意：HIDパケット先頭＝メッセージの開始バイトで有ること
 		　　　（HIDパケット２つにまたがるメッセージは不可）
 		
@@ -28,10 +38,11 @@
 	 FD 91 XX          : get HW report, XX=番号(00=モジュール, FF=マザーボード)
 	 FD 92             : get Firmware version
 	 FD 93 XX          : get STATUS, XX=番号(00=STATUS0, 01=STATUS1)
-	 FD A0             : adpcm ZERO Reset.
-	 FD A1
-	 FD A2
-	 FD A3
+
+	 FD A0             : 予約(利用禁止)
+	 FD A1             : 予約(利用禁止)
+	 FD A2             : 予約(利用禁止)
+	 FD A3             : 予約(利用禁止)
 
 	 FC                : 予約(利用禁止)
 	 FF                : terminator

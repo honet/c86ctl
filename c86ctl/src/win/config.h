@@ -16,7 +16,6 @@
 
 #include <tchar.h>
 
-//#define INIFILE			TEXT(".\\c86ctl.ini")
 #define INISC_MAIN		TEXT("c86ctl")
 #define INISC_KEY		TEXT("c86key")
 #define INISC_REG		TEXT("c86reg")
@@ -38,18 +37,7 @@ protected:
 	TCHAR inipath[_MAX_PATH];
 	
 public:
-	void init(HMODULE hModule){
-		// TODO!!: UAC対応
-		TCHAR modulePath[_MAX_PATH];
-		TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
-
-		// iniファイル名取得
-		::GetModuleFileName( hModule, modulePath, _MAX_PATH );
-		_tsplitpath( modulePath, drv, dir, fname, ext );
-		_tcsncat( inipath, drv, _MAX_PATH );
-		_tcsncat( inipath, dir, _MAX_PATH );
-		_tcsncat( inipath, TEXT("c86ctl.ini"), _MAX_PATH );
-	};
+	void init(HMODULE hModule);
 	
 	UINT get( LPCTSTR section, LPCTSTR key, LPCTSTR defstr, LPTSTR val, UINT sz_val ){
 		return GetPrivateProfileString( section, key, defstr, val, sz_val, inipath );

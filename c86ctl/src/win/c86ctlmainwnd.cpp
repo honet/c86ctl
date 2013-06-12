@@ -199,6 +199,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case ID_POPUP_CONFIG:
+			pThis->mainVisWnd->openConfigDialog();
 			break;
 		case ID_POPUP_SHOWVIS:
 			if( pThis->mainVisWnd ){

@@ -261,10 +261,16 @@ void CVisC86Main::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)
 void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 {
 	switch(id){
+	case ID_POPUP_CONFIG:
+		openConfigDialog();
+		break;
 	case ID_POPUP_SHOWVIS:
-		//close();
 		::PostMessage(hMaster, WM_COMMAND, (notifyCode<<16)|id, (DWORD)hwnd);
 
 		break;
 	}
+}
+void CVisC86Main::openConfigDialog(void)
+{
+	::MessageBox(hWnd, _T("NOT YET IMPREMENTED."), _T("TEST"), MB_OK | MB_ICONEXCLAMATION);
 }
