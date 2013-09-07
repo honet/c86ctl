@@ -1,4 +1,4 @@
-﻿//{{NO_DEPENDENCIES}}
+//{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by c86ctl.rc
 //
@@ -7,6 +7,8 @@
 #define IDB_PNGSKIN1                    102
 #define IDI_ICON_C86CTL                 103
 #define IDR_MENU_SYSPOPUP               104
+#define IDD_DIALOG_CONFIG               105
+#define IDD_C86CTL_CONFIG               105
 #define ID_POPUP_40001                  40001
 #define ID_POPUP_40002                  40002
 #define ID_POPUP_                       40003
@@ -17,7 +19,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        105
+#define _APS_NEXT_RESOURCE_VALUE        106
 #define _APS_NEXT_COMMAND_VALUE         40006
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

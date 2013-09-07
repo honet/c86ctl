@@ -77,6 +77,8 @@ BOOL CS98Data::loadFile( CString &fname )
 				switch( devInfo.type ){
 				case YM2149:
 				case YM2203:
+					d.first.clock = 7987200;
+					break;
 				case YM2612:
 				case YM2608:
 				case AY_3_8910:
