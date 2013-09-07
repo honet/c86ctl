@@ -30,7 +30,7 @@ VS_VERSION_INFO VERSIONINFO
             VALUE "FileDescription", "C86CTL dynamic link library"
             VALUE "FileVersion",     __C86CTL_DLL_FILEVERSION_STRING
             VALUE "InternalName",    "C86CTL"
-            VALUE "LegalCopyright",  "Copyright (C) 2011 honet"
+            VALUE "LegalCopyright",  "Copyright (C) 2011~2013 honet"
             VALUE "ProductName",     "C86CTL dynamic link library"
             VALUE "ProductVersion",  __C86CTL_DLL_PRODUCTVERSION_STRING
         }
