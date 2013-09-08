@@ -127,6 +127,12 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 					break;
 				}
 			}
+			if(!handled){
+				if(msg == WM_LBUTTONDOWN)
+					PostMessage(hWnd, WM_NCLBUTTONDOWN, (WPARAM)HTCAPTION, lp);
+				else
+					onMouseEvent( msg, wp, lp );
+			}
 		}
 		break;
 
@@ -137,81 +143,67 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 		return 0;
 	case WM_ERASEBKGND:
 		return 0;
-	}
-	
-	if( !handled ){
-		switch( msg ){
-		case WM_LBUTTONDBLCLK:
-		//case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONDBLCLK:
-		case WM_RBUTTONDOWN:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		case WM_MOUSEWHEEL:
-			onMouseEvent( msg, wp, lp );
-			break;
 
-		case WM_COMMAND:
-			onCommand((HWND)lp, wp&0xffff, (wp>>16)&0xffff);
-			break;
+	case WM_COMMAND:
+		onCommand((HWND)lp, wp&0xffff, (wp>>16)&0xffff);
+		break;
 
-		case WM_LBUTTONDOWN:
-			PostMessage(hWnd, WM_NCLBUTTONDOWN, (WPARAM)HTCAPTION, lp);
-			break;
+//	case WM_LBUTTONDOWN:
+//		break;
 #if 0
-		case WM_MOVING:
-			{
-				std::map< HWND, CVisWnd* >::iterator it;
-				RECT *prc = reinterpret_cast<LPRECT>(lp);
-				if( ::GetAsyncKeyState(VK_SHIFT) < 0 )
-					break;
+	case WM_MOVING:
+		{
+			std::map< HWND, CVisWnd* >::iterator it;
+			RECT *prc = reinterpret_cast<LPRECT>(lp);
+			if( ::GetAsyncKeyState(VK_SHIFT) < 0 )
+				break;
 
-				for( it=frameWndMap.begin(); it!=frameWndMap.end(); it++ ){
-					if( it->first == hWnd ) continue;
-					::GetWindowRect( it->first, &rc );
+			for( it=frameWndMap.begin(); it!=frameWndMap.end(); it++ ){
+				if( it->first == hWnd ) continue;
+				::GetWindowRect( it->first, &rc );
 
 
-					if( isClose( prc->left, rc.right ) ){
-						if( isClose( prc->top, rc.top ) ){ // 右上-左上
-							::OffsetRect( prc, rc.right-prc->left, rc.top-prc->top );
-						}else if( isClose( prc->bottom, rc.bottom ) ){ // 右下-左下
-							::OffsetRect( prc, rc.right-prc->left, rc.bottom-prc->bottom );
-						}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
-							::OffsetRect( prc, rc.right-prc->left, 0 );
-						}
-					}else if( isClose( prc->right, rc.left ) ){
-						if( isClose( prc->top, rc.top ) ){ // 左上-右上
-							::OffsetRect( prc, rc.left-prc->right, rc.top-prc->top );
-						}else if( isClose( prc->bottom, rc.bottom ) ){ // 左下-右下
-							::OffsetRect( prc, rc.left-prc->right, rc.bottom-prc->bottom );
-						}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
-							::OffsetRect( prc, rc.left-prc->right, 0 );
-						}
+				if( isClose( prc->left, rc.right ) ){
+					if( isClose( prc->top, rc.top ) ){ // 右上-左上
+						::OffsetRect( prc, rc.right-prc->left, rc.top-prc->top );
+					}else if( isClose( prc->bottom, rc.bottom ) ){ // 右下-左下
+						::OffsetRect( prc, rc.right-prc->left, rc.bottom-prc->bottom );
+					}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
+						::OffsetRect( prc, rc.right-prc->left, 0 );
 					}
-					else if( isClose( prc->left, rc.left ) ){
-						if( isClose( prc->top, rc.bottom ) ){
-							::OffsetRect( prc, rc.left-prc->left, rc.bottom-prc->top );
-						}else if( isClose( prc->bottom, rc.top ) ){
-							::OffsetRect( prc, rc.left-prc->left, rc.top-prc->bottom );
-						}
+				}else if( isClose( prc->right, rc.left ) ){
+					if( isClose( prc->top, rc.top ) ){ // 左上-右上
+						::OffsetRect( prc, rc.left-prc->right, rc.top-prc->top );
+					}else if( isClose( prc->bottom, rc.bottom ) ){ // 左下-右下
+						::OffsetRect( prc, rc.left-prc->right, rc.bottom-prc->bottom );
+					}else if( rc.top <= prc->top && prc->top <= rc.bottom ){
+						::OffsetRect( prc, rc.left-prc->right, 0 );
 					}
-					else if( isClose( prc->right, rc.right ) ){
-						if( isClose( prc->top, rc.bottom ) ){
-							::OffsetRect( prc, rc.right-prc->right, rc.bottom-prc->top );
-						}else if( isClose( prc->bottom, rc.top ) ){
-							::OffsetRect( prc, rc.right-prc->right, rc.top-prc->bottom );
-						}
+				}
+				else if( isClose( prc->left, rc.left ) ){
+					if( isClose( prc->top, rc.bottom ) ){
+						::OffsetRect( prc, rc.left-prc->left, rc.bottom-prc->top );
+					}else if( isClose( prc->bottom, rc.top ) ){
+						::OffsetRect( prc, rc.left-prc->left, rc.top-prc->bottom );
+					}
+				}
+				else if( isClose( prc->right, rc.right ) ){
+					if( isClose( prc->top, rc.bottom ) ){
+						::OffsetRect( prc, rc.right-prc->right, rc.bottom-prc->top );
+					}else if( isClose( prc->bottom, rc.top ) ){
+						::OffsetRect( prc, rc.right-prc->right, rc.top-prc->bottom );
 					}
 				}
 			}
-#endif
-			break;
-
-		default:
-			return DefWindowProc(hWnd , msg , wp , lp);
 		}
+#endif
+		break;
+
+	default:
+		return DefWindowProc(hWnd , msg , wp , lp);
+
 	}
+	
 	return 0;
 }
 
@@ -368,3 +360,4 @@ int CVisWnd::getLastShowState(void)
 {
 	return gConfig.getInt( windowClass.c_str(), INIKEY_WNDVISIBLE, 0 );
 }
+

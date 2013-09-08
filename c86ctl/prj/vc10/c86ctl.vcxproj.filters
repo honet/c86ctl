@@ -109,6 +109,9 @@
     <ClCompile Include="..\..\src\win\c86ctlmainwnd.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_dlg_config.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\win\config.h">
@@ -206,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\c86ctl.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis\vis_dlg_config.h">
+      <Filter>vis</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

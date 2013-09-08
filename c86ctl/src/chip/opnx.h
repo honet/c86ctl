@@ -291,7 +291,7 @@ class COPNSsg{
 	friend class COPN3L;
 
 public:
-	COPNSsg(IRealChip2 *p) : pIF(p){
+	COPNSsg(IRealChip2 *p) : pIF(p), mclk(7987200ULL) {
 		for( int i=0; i<3; i++ )
 			ch[i] = new COPNSsgCh(p);
 		reset();
@@ -324,18 +324,45 @@ public:
 	int getNoisePeriod(){ return noisePeriod; };
 	
 	void setMasterClock( UINT clock ){
+		mclk = clock;
 		for( int i=0; i<3; i++ )
 			ch[i]->setMasterClock(clock);
+	};
+	
+	void getNoiseNote(int &oct, int &note){
+		// f*1024 = (M*1024) / (period*64)
+		uint64_t t = getNoisePeriod();
+		if( !t ){
+			oct = 0;
+			note = 0;
+			return;
+		}
+		uint32_t n = static_cast<uint32_t>( (mclk*16ULL)/t );
+
+		oct = 4;
+		while( n<fmin ){
+			oct--;
+			n<<=1;
+		}
+		while( fmax<n ){
+			oct++;
+			n>>=1;
+		}
+
+		int i;
+		for( i=0; ftable[i]<=n; i++ );
+		note = i;
 	};
 
 protected:
 	void setEnvFineTune(int ft){ envFineTune = ft; };
 	void setEnvCoarseTune(int ct){ envCoarseTune = ct; };
 	void setEnvType(int type){ envType = type&0x7; };
-	void setNoisePeriod(int np){ noisePeriod = np; };
+	void setNoisePeriod(int np){ noisePeriod = np&0x1f; };
 	bool setReg( UCHAR addr, UCHAR data );
 	
 protected:
+	uint64_t mclk;
 	int envFineTune;	// 8bit チャネル共通
 	int envCoarseTune;	// 8bit チャネル共通
 	int envType;		// 4bit チャネル共通

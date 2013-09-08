@@ -186,6 +186,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
     <ClCompile Include="..\..\src\vis\vis_c86skin.cpp" />
     <ClCompile Include="..\..\src\vis\vis_c86sub.cpp" />
     <ClCompile Include="..\..\src\vis\vis_c86wnd.cpp" />
+    <ClCompile Include="..\..\src\vis\vis_dlg_config.cpp" />
     <ClCompile Include="..\..\src\vis\vis_manager.cpp" />
     <ClCompile Include="..\..\src\vis\vis_widget.cpp" />
     <ClCompile Include="..\..\src\win\c86ctl.cpp" />
@@ -220,6 +221,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
     <ClInclude Include="..\..\src\vis\vis_c86skin.h" />
     <ClInclude Include="..\..\src\vis\vis_c86sub.h" />
     <ClInclude Include="..\..\src\vis\vis_c86wnd.h" />
+    <ClInclude Include="..\..\src\vis\vis_dlg_config.h" />
     <ClInclude Include="..\..\src\vis\vis_manager.h" />
     <ClInclude Include="..\..\src\vis\vis_widget.h" />
     <ClInclude Include="..\..\src\win\c86ctlmain.h" />

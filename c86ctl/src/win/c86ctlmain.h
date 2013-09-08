@@ -63,6 +63,7 @@ public:
 	static INT init(HINSTANCE h);
 	static INT deinit(void);
 	static HINSTANCE getInstanceHandle();
+	static void setActiveDlg(HWND dlg){ hActiveDlg = dlg; };
 	
 private:
 	bool terminateFlag;
@@ -87,6 +88,7 @@ private:
 	static HINSTANCE hInstance;
 	static ULONG_PTR gdiToken;
 	static Gdiplus::GdiplusStartupInput gdiInput;
+	static HWND hActiveDlg;
 	
 	DWORD timerPeriod;
 	bool isInitialized;

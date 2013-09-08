@@ -639,14 +639,18 @@ void GimicHID::checkConnection(void)
 	::LeaveCriticalSection(&csection);
 };
 
-int GimicHID::setDelay(int delay)
+int GimicHID::setDelay(int d)
 {
 	return C86CTL_ERR_NONE;
 }
 
-int GimicHID::getDelay(int *delay)
+int GimicHID::getDelay(int *d)
 {
-	return C86CTL_ERR_NONE;
+	if(d){
+		*d = delay;
+		return C86CTL_ERR_NONE;
+	}
+	return C86CTL_ERR_INVALID_PARAM;
 }
 
 #endif

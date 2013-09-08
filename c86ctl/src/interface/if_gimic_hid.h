@@ -59,8 +59,8 @@ public:
 //	virtual int __stdcall adpcmZeroClear(void);
 //	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
 //	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
-	virtual int __stdcall setDelay(int delay);
-	virtual int __stdcall getDelay(int *delay);
+	virtual int __stdcall setDelay(int d);
+	virtual int __stdcall getDelay(int *d);
 	virtual int __stdcall isValid(void);
 
 // C86CTL内部利用 ---------------------------------------------------

@@ -17,6 +17,7 @@
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86main.h"
+#include "vis_dlg_config.h"
 #include "c86ctlmain.h"
 
 #ifdef _DEBUG
@@ -272,5 +273,5 @@ void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 }
 void CVisC86Main::openConfigDialog(void)
 {
-	::MessageBox(hWnd, _T("NOT YET IMPREMENTED."), _T("TEST"), MB_OK | MB_ICONEXCLAMATION);
+	CVisDlgConfig::create(hWnd);
 }

@@ -156,7 +156,11 @@ void CVisC86Key::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty,
 		}
 		if( pSsgCh->isOn() && pSsgCh->getLevel()!=0 ){
 			int oct, note;
-			pSsgCh->getNote( oct, note );
+			if( pSsgCh->isToneOn() )
+				pSsgCh->getNote( oct, note );
+			else
+				pSsg->getNoiseNote( oct, note );
+			
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
 			sprintf( str, "O%d%s", oct, noteStr[note] );
 			skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );

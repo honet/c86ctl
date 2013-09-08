@@ -727,14 +727,21 @@ void GimicWinUSB::checkConnection(void)
 	::LeaveCriticalSection(&csection);
 };
 
-int GimicWinUSB::setDelay(int delay)
+int GimicWinUSB::setDelay(int d)
 {
+	if(d!=delay){
+		delay = d;
+	}
 	return C86CTL_ERR_NONE;
 }
 
-int GimicWinUSB::getDelay(int *delay)
+int GimicWinUSB::getDelay(int *d)
 {
-	return C86CTL_ERR_NONE;
+	if(d){
+		*d = delay;
+		return C86CTL_ERR_NONE;
+	}
+	return C86CTL_ERR_INVALID_PARAM;
 }
 
 #endif

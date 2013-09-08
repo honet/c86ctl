@@ -64,8 +64,8 @@ public:
 
 // 実験中 -----------------------------------------------
 public:
-	virtual int __stdcall setDelay(int delay);
-	virtual int __stdcall getDelay(int *delay);
+	virtual int __stdcall setDelay(int d);
+	virtual int __stdcall getDelay(int *d);
 	virtual int __stdcall isValid(void);
 
 

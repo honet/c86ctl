@@ -58,6 +58,7 @@ C86CtlMain theC86CtlMain;
 HINSTANCE C86CtlMain::hInstance = 0;
 ULONG_PTR C86CtlMain::gdiToken = 0;
 Gdiplus::GdiplusStartupInput C86CtlMain::gdiInput;
+HWND C86CtlMain::hActiveDlg = 0;
 
 // ------------------------------------------------------------------
 // imprement
@@ -124,9 +125,10 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 				break;
 			}
 
-
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
+			if( !hActiveDlg || !IsDialogMessage(hActiveDlg, &msg) ){
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
+			}
 		}
 
 		C86CtlMainWnd::shutdown();
@@ -217,6 +219,9 @@ ULONG C86CtlMain::Release(VOID)
 
 int C86CtlMain::initialize(void)
 {
+	int tout;
+	const int TIMEOUT=100;
+
 	if( isInitialized )
 		return C86CTL_ERR_UNKNOWN;
 	
@@ -241,7 +246,8 @@ int C86CtlMain::initialize(void)
 	if( !hMainThread )
 		return C86CTL_ERR_UNKNOWN;
 
-	while(!mainThreadReady);
+ 	for(tout=0; !mainThreadReady && (tout<TIMEOUT); tout++)
+		Sleep(10);
 
 	// 演奏スレッド開始
 	hSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
@@ -250,7 +256,9 @@ int C86CtlMain::initialize(void)
 		::WaitForSingleObject( hMainThread, INFINITE );
 		return C86CTL_ERR_UNKNOWN;
 	}
-	while(!senderThreadReady);
+
+ 	for(tout=0; !senderThreadReady && (tout<TIMEOUT); tout++)
+		Sleep(10);
 
 	SetThreadPriority( hSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
 
