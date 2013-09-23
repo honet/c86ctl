@@ -115,10 +115,13 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 	case 0x0f: // pcm data.
 		break;
 
+	//case 0x10: // flag control
+	//	break;
+
 	default:
 		handled = false;
 	}
-	
+
 	return handled;
 }
 
@@ -134,12 +137,23 @@ void COPNA::filter( int addr, UCHAR *data )
 	case 0x29: // SCH/IRQ ENABLE
 		*data |= 0x80;
 		break;
+
+	//OPNA/OPN mode-mask
+	//case 0x60: case 0x61: case 0x62:	// FM -- AMON/DR
+	//case 0x64: case 0x65: case 0x66:
+	//case 0x68: case 0x69: case 0x6a:
+	//case 0x6c: case 0x6d: case 0x6e:
+	//	if(!modeOPNA)
+	//		*data &= 0x70;
+		
 	case 0xb4: // FM -- LR, AMS, PMS
 	case 0xb5:
 	case 0xb6:
 		ch = addr - 0xb4;
 		if( getMixedMask( ch ) )
 			*data &= 0x3f;
+		//if(!modeOPNA)
+		//	*data = 0xc0;
 		break;
 			
 	case 0x1b4: // FM -- LR, AMS, PMS
@@ -183,6 +197,11 @@ bool COPNA::setReg( int addr, UCHAR data ){
 	regATime[idx][addr] = 255<c ? 255 : c;
 
 	if( idx == 0 ){
+		//if( addr == 0x29){
+		//	// SCH/IRQ ENABLE
+		//	modeOPNA = (data&0x80) ? true : false;
+		//}
+		
 		if( ssg->setReg( addr, data ) )
 			return true;
 		if( rhythm->setReg( addr, data ) )

@@ -11,9 +11,9 @@
 #define VERSION_MAJOR      1
 #define VERSION_MINOR      4
 #define VERSION_REVISION   2
-#define VERSION_BUILD      743
-#define VERSION_STRING     "1, 4, 2, 743"
-#define VERSION_MESSAGE    "VER 1.4.2.743(DBG-ONLY)"
+#define VERSION_BUILD      804
+#define VERSION_STRING     "1, 4, 2, 804"
+#define VERSION_MESSAGE    "VER 1.4.2.804(DBG-ONLY)"
 
 
 // DON'T CHANGE FOLLOWINGS. (for DLL resorce) ---------------------

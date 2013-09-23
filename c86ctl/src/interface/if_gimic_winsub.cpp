@@ -19,6 +19,10 @@
 
 	また、電文及び時間分解能等の仕組みはHID版と同じで有るため、
 	USB伝送速度以外の違いはHID版とWinUSB版の間には無い。
+	
+	-- HID版のコード流用するためにこのような仕様にしてしまったが、
+	-- 今となってはsetPLL等のコントロール系はEP0(ControlTransfer)を
+	-- 使うべきであったと若干後悔している・・・。
 
 	使用するにはgimicのファーム変更（デスクリプタ変更）と
 	winusbドライバのインストールが必要。
@@ -107,16 +111,6 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 		CloseHandle(hNewDev);
 		return false;
 	}
-
-	// タイムアウト設定
-	//	COMMTIMEOUTS commTimeOuts;
-	//	commTimeOuts.ReadIntervalTimeout = 0;
-	//	commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
-	//	commTimeOuts.ReadTotalTimeoutMultiplier = 0;
-	//	commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
-	//	commTimeOuts.WriteTotalTimeoutMultiplier = 0;
-	//	::SetCommTimeouts( hDev, &commTimeOuts );
-
 	
 	// エンドポイント情報取得
 	USB_INTERFACE_DESCRIPTOR desc;
@@ -141,6 +135,12 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 		}
 	}
 
+	// タイムアウト設定
+	ULONG timeout = 500; //ms
+	::WinUsb_SetPipePolicy( hNewWinUsb, outPipeId, PIPE_TRANSFER_TIMEOUT, sizeof(ULONG), &timeout );
+	::WinUsb_SetPipePolicy( hNewWinUsb, inPipeId, PIPE_TRANSFER_TIMEOUT, sizeof(ULONG), &timeout );
+
+	// ここでハンドル更新
 	hDev = hNewDev;
 	hWinUsb = hNewWinUsb;
 	devPath = devpath;
@@ -631,10 +631,6 @@ void GimicWinUSB::out(UINT addr, UCHAR data)
 		dqueue.push(r);
 		return;
 	}
-	if(delay==0){
-		if( dqueue.isempty() )
-			delay = -1;
-	}
 
 	out2buf(addr, data);
 }
@@ -651,7 +647,7 @@ void GimicWinUSB::tick(void)
 {
 	int ret;
 	
-	if( 0<=delay && !dqueue.isempty() ){
+	if( !dqueue.isempty() ){
 		UINT t = timeGetTime();
 		while( !dqueue.isempty() && t>=dqueue.front()->t ){
 			if( rbuff.remain()<4 ) break;

@@ -107,13 +107,14 @@ public:
 class COPNA : public Chip
 {
 public:
-	COPNA(IRealChip2 *p) : pIF(p) {
+	COPNA(IRealChip2 *p) : pIF(p){
 		fm = new COPNFm(p);
 		ssg = new COPNSsg(p);
 		adpcm = new COPNAAdpcm(p);
 		rhythm = new COPNRhythm(p);
 		partMask = 0;
 		partSolo = 0;
+		//modeOPNA = true;
 		reset();
 	};
 	virtual ~COPNA(){
@@ -218,6 +219,7 @@ protected:
 	
 	bool timerA_sw;
 	bool timerB_sw;
+	//bool modeOPNA;
 	
 	UINT partMask;
 	UINT partSolo;

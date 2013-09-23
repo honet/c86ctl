@@ -11,10 +11,9 @@ c86ctlTest/Debug
 c86ctlTest/Release
 c86win/Debug
 c86win/Release
-debug
-Debug
-release
-Release
+Win32
+x64
+ipch
 ipch
 *.ncb
 *.suo
