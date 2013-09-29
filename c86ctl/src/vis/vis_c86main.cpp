@@ -70,10 +70,12 @@ bool CVisC86Main::update()
 				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 					info->regView = visC86RegViewFactory(gimic->getChip(), i);
 					info->regView->create(hWnd);
-					this->manager->add( info->regView.get() );
+					
+					info->regView->closeEvent.push_back(
+						[](CVisWnd* h){});
+					
 					gConfig.writeInt( windowClass.c_str(), INIKEY_REGWND, 1 );
 				}else{
-					this->manager->del( info->regView.get() );
 					info->regView = 0;
 					gConfig.writeInt( windowClass.c_str(), INIKEY_REGWND, 0 );
 				}
@@ -93,10 +95,8 @@ bool CVisC86Main::update()
 					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 						info->keyView = visC86KeyViewFactory(gimic->getChip(), i);
 						info->keyView->create(hWnd);
-						this->manager->add( info->keyView.get() );
 						gConfig.writeInt( windowClass.c_str(), INIKEY_KEYWND, 1 );
 					}else{
-						this->manager->del( info->keyView.get() );
 						info->keyView = 0;
 						gConfig.writeInt( windowClass.c_str(), INIKEY_KEYWND, 0 );
 					}
@@ -123,10 +123,8 @@ bool CVisC86Main::update()
 						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 							info->fmView[ch] = visC86FmViewFactory(gimic->getChip(), i, ch);
 							info->fmView[ch]->create(hWnd);
-							this->manager->add( info->fmView[ch].get() );
 							gConfig.writeInt( windowClass.c_str(), key, 1 );
 						}else{
-							this->manager->del( info->fmView[ch].get() );
 							info->fmView[ch] = 0;
 							gConfig.writeInt( windowClass.c_str(), key, 0 );
 						}
@@ -255,7 +253,7 @@ void CVisC86Main::onPaintClient()
 	}
 
 	// FPS
-	sprintf(str, "FPS: %0.1f", manager->getCurrentFPS() );
+	sprintf(str, "FPS: %0.1f", CVisManager::getInstance()->getCurrentFPS() );
 	skin->drawStr( clientCanvas, 0, 260, ch-12, str );
 
 }

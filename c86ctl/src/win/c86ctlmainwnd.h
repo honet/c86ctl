@@ -15,7 +15,6 @@ class C86CtlMainWnd
 private:
 	C86CtlMainWnd()
 		: hwnd(0),
-		  wm(0),
 		  mainVisWnd(0),
 		  hVisThread(0),
 		  visThreadID(0),
@@ -24,11 +23,9 @@ private:
 	{};
 	virtual ~C86CtlMainWnd(){
 		if( mainVisWnd ){
-			wm->del( mainVisWnd );
 			mainVisWnd->close();
 
 			delete mainVisWnd;
-			delete wm;
 		}
 	};
 
@@ -66,7 +63,6 @@ private:
 	HWND hwnd;
 	NOTIFYICONDATA notifyIcon;
 
-	c86ctl::vis::CVisManager *wm;
 	c86ctl::vis::CVisC86Main *mainVisWnd;
 	HANDLE hVisThread;
 	UINT visThreadID;

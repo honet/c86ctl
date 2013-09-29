@@ -22,16 +22,27 @@ class CVisWnd;
 
 class CVisManager
 {
-public:
+private:
 	CVisManager(void) : fps(0) {
 		InitializeCriticalSection(&cs);
 		gVisSkin.init();
 	};
-	
 	virtual ~CVisManager(void){
 		DeleteCriticalSection(&cs);
 		gVisSkin.deinit();
 	};
+	
+public:
+	static CVisManager* getInstance(void){
+		if(!pInstance){
+			pInstance = new CVisManager();
+		}
+		return pInstance;
+	};
+	static void shutdown(void){
+		delete getInstance();
+		pInstance = 0;
+	}
 
 	void draw(void);
 	void add( CVisWnd *wnd );
@@ -41,7 +52,9 @@ public:
 		return fps;
 	};
 
-protected:
+private:
+	static CVisManager *pInstance;
+	
 	std::vector<CVisWnd*> clients;
 	CRITICAL_SECTION cs;
 

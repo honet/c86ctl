@@ -18,11 +18,12 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
+CVisManager* CVisManager::pInstance = NULL;
+
 void CVisManager::add( CVisWnd *wnd )
 {
 	::EnterCriticalSection(&cs);
 	clients.push_back(wnd);
-	wnd->setManager(this);
 	::LeaveCriticalSection(&cs);
 }
 

@@ -225,14 +225,13 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 
 int C86CtlMainWnd::startVis()
 {
-	wm = new CVisManager();
 	mainVisWnd = new CVisC86Main();
-	wm->add( mainVisWnd );
+	CVisManager::getInstance()->add( mainVisWnd );
 
 	mainVisWnd->create(getHWND());
 
 	// 描画スレッド開始
-	hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, wm, 0, &visThreadID );
+	hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, 0/*wm*/, 0, &visThreadID );
 	if( !hVisThread ){
 		stopVis();
 	}
@@ -255,15 +254,13 @@ int C86CtlMainWnd::stopVis()
 		visThreadID = 0;
 	}
 	
-	if( mainVisWnd && wm ){
-		wm->del( mainVisWnd );
+	if( mainVisWnd ){
 		mainVisWnd->close();
-
 		delete mainVisWnd;
-		delete wm;
 		mainVisWnd = 0;
-		wm = 0;
 	}
+	CVisManager::shutdown();
+
 	return 0;
 }
 
@@ -278,7 +275,8 @@ unsigned int WINAPI C86CtlMainWnd::threadVis(LPVOID param)
 	ZeroMemory(&msg, sizeof(msg));
 	::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-	CVisManager *pwm = reinterpret_cast<CVisManager*>(param);
+	//CVisManager *pwm = reinterpret_cast<CVisManager*>(param);
+	CVisManager *pwm = CVisManager::getInstance();
 
 	DWORD next = ::timeGetTime()*6 + 100;
 	while(1){

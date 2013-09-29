@@ -74,6 +74,8 @@ void CVisWnd::onPaint()
 	int type = 0;
 	if( hWnd == ::GetForegroundWindow() ) type = 1;
 	gVisSkin.drawFrame( canvas, type, str );
+	std::for_each( sysWidgets.begin(), sysWidgets.end(),
+				   [this](std::shared_ptr<CVisWidget> x){ x->onPaint(canvas); } );
 
 	onPaintClient();
 	std::for_each( widgets.begin(), widgets.end(),
@@ -112,18 +114,29 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
 	case WM_MOUSEWHEEL:
-		POINT pt;
+		POINT pt, cpt;
 		::GetCursorPos(&pt);
 		::ScreenToClient(hWnd, &pt);
-		windowToClient(pt);
+		cpt = pt;
+		windowToClient(cpt);
 		if( wcapture ){
 			wcapture->onMouseEvent(msg, wp, lp);
 		}else{
-			for( auto it = widgets.begin(); it != widgets.end(); it++ ){
+			for( auto it = sysWidgets.begin(); it != sysWidgets.end(); it++ ){
 				RECT rc;
 				(*it)->getWindowRect(rc);
 				if( (rc.left <= pt.x) && (pt.x < rc.right) &&
-					( rc.top <= pt.y ) && (pt.y < rc.bottom) ){
+					(rc.top  <= pt.y) && (pt.y < rc.bottom) ){
+					(*it)->onMouseEvent(msg, wp, lp);
+					handled = true;
+					break;
+				}
+			}
+			for( auto it = widgets.begin(); it != widgets.end(); it++ ){
+				RECT rc;
+				(*it)->getWindowRect(rc);
+				if( (rc.left <= cpt.x) && (cpt.x < rc.right) &&
+					(rc.top  <= cpt.y) && (cpt.y < rc.bottom) ){
 					(*it)->onMouseEvent(msg, wp, lp);
 					handled = true;
 					break;
@@ -285,11 +298,20 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND pa
 
 	creatingWnd = NULL;
 	::ReleaseMutex( hCreatingMutex );
+
+	closeButton = CVisCloseButtonPtr(new CVisCloseButton(this,width-17,2));
+	closeButton->pushEvent.push_back(
+		[this](CVisWidget* w){
+			::SendMessage( this->hWnd, WM_CLOSE, 0, 0 );
+	});
+	sysWidgets.push_back(closeButton);
 	
 	if(!hWnd) return false;
 
+	CVisManager::getInstance()->add( this );
 	return true;
 }
+
 bool CVisWnd::resize(int width, int height)
 {
 	if( wndWidth == width && wndHeight == height )
@@ -327,7 +349,10 @@ void CVisWnd::onPaintClient()
 
 void CVisWnd::close()
 {
+	CVisManager::getInstance()->del( this );
+
 	widgets.clear();
+	sysWidgets.clear();
 	
 	if(hWnd){
 		DestroyWindow( hWnd );
@@ -343,6 +368,9 @@ void CVisWnd::close()
 		canvas = NULL;
 	}
 	hParent = NULL;
+	
+	std::for_each( closeEvent.begin(), closeEvent.end(),
+				   [this](std::function<void(CVisWnd*)> h){ h(this); } );
 
 	::UnregisterClass( windowClass.c_str(), C86CtlMain::getInstanceHandle() );
 }

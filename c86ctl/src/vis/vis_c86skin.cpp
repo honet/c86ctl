@@ -34,9 +34,11 @@ const BMPREG skinreg_frame[] = {
 	{98,307,8,15},		// window frame left
 	{233,307,8,15},		// window frame right
 	{106,307,129,15},	// window frame center
+	{242,307,15,15},	// window frame close button
 	{98,291,8,15},		// window frame left (LIGHT)
 	{233,291,8,15},		// window frame right (LIGHT)
-	{106,291,129,15}	// window frame center (LIGHT)
+	{106,291,129,15},	// window frame center (LIGHT)
+	{242,291,15,15}		// window frame close button (LIGHT)
 };
 const BMPREG skinreg_fonts[] = {
 	{0,0,6,8},			// 0:font1
@@ -214,15 +216,15 @@ void CVisC86Skin::drawFrame( IVisBitmap *canvas, int type, CHAR *title )
 		reg_r = skinreg_frame[1];
 		reg_c = skinreg_frame[2];
 	}else{
-		reg_l = skinreg_frame[3];
-		reg_r = skinreg_frame[4];
-		reg_c = skinreg_frame[5];
+		reg_l = skinreg_frame[4];
+		reg_r = skinreg_frame[5];
+		reg_c = skinreg_frame[6];
 	}
 
 	blt(canvas,    2, 2, reg_l.width, reg_l.height, skinbmp, reg_l.left, reg_l.top );
-	blt(canvas, xe-9, 2, reg_r.width, reg_r.height, skinbmp, reg_r.left, reg_r.top );
+	blt(canvas, xe-9-14, 2, reg_r.width, reg_r.height, skinbmp, reg_r.left, reg_r.top );
 
-	int tw = xe - 3 - reg_l.width - reg_r.width;
+	int tw = xe - 3 - reg_l.width - reg_r.width - 14;
 	int l = 10;
 	while(0<tw){
 		INT w = __min( tw, reg_c.width );
@@ -236,6 +238,13 @@ void CVisC86Skin::drawFrame( IVisBitmap *canvas, int type, CHAR *title )
 		visFillRect( canvas, 3, 3, (6*(l+2)), 13, RGB(0,0,0) );
 		drawStr( canvas, 1, 10, 6, title );
 	}
+}
+
+// 閉じるボタン
+void CVisC86Skin::drawCloseButton( IVisBitmap *canvas, int type, int x, int y )
+{
+	BMPREG reg = skinreg_frame[(type==0)?3:7];
+	blt( canvas, x, y, reg.width, reg.height, skinbmp, reg.left, reg.top );
 }
 
 // 文字描画

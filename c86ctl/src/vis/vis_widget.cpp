@@ -18,6 +18,23 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
+
+// ---------------------------------------------------------------------------
+void CVisCloseButton::onPaint(IVisBitmap *canvas)
+{
+	gVisSkin.drawCloseButton( canvas, 0, sx, sy );
+}
+
+void CVisCloseButton::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch(msg){
+	case WM_LBUTTONUP:
+		std::for_each( pushEvent.begin(), pushEvent.end(), [this](std::function<void(CVisWidget*)> h){ h(this); } );
+		break;
+	}
+}
+
+
 // --------------------------------------------------------
 void CVisCheckBox::onPaint(IVisBitmap *canvas){
 	gVisSkin.drawCheckBox( canvas, sx, sy, sw );

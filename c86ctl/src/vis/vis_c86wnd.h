@@ -34,7 +34,6 @@ public:
 	virtual void saveWndPos(void);
 	
 public:
-	void setManager(CVisManager *m){ manager = m; };
 	HWND getHWND(void){ return hWnd; };
 	void redraw(){ onPaint(); };
 
@@ -58,6 +57,9 @@ public:
 		wcapture = NULL;
 		::ReleaseCapture();
 	};
+
+public:
+	std::list< std::function< void(CVisWnd*) > > closeEvent;
 	
 protected:
 	// message handler
@@ -83,12 +85,12 @@ protected:
 	tstring windowTitle;
 
 protected:
-	CVisManager *manager;
 	CVisBitmap *canvas;
 	CVisChildBitmap *clientCanvas;
+	CVisCloseButtonPtr closeButton;
 
 	std::list< std::shared_ptr<CVisWidget> > widgets;
-	
+	std::list< std::shared_ptr<CVisWidget> > sysWidgets;
 
 private:
 	CVisWidget *wcapture;

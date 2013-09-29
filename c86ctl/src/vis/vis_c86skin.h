@@ -32,6 +32,7 @@ public:
 	void drawNanoNumStr( IVisBitmap *canvas, int x, int y, const char *str );
 	void drawNumStr1( IVisBitmap *canvas, int x, int y, const char *str );
 	void drawFrame( IVisBitmap *canvas, int type, CHAR *title );
+	void drawCloseButton( IVisBitmap *canvas, int type, int x, int y );
 	
 	void drawKeyboard( IVisBitmap *canvas, int x, int y );
 	void drawDarkKeyboard( IVisBitmap *canvas, int x, int y );

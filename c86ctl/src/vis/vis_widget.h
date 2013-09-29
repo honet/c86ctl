@@ -42,6 +42,30 @@ protected:
 
 
 // ---------------------------------------------------------------------------
+// close-button
+class CVisCloseButton : public CVisWidget
+{
+public:
+	CVisCloseButton( CVisWnd *parentWnd, int x, int y )
+		: CVisWidget(parentWnd){
+		sx = x;
+		sy = y;
+		ex = x + 15;
+		ey = y + 15;
+	};
+	~CVisCloseButton(){};
+
+public:
+	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
+
+public:
+	std::list< std::function< void(CVisWidget*) > > pushEvent;
+};
+
+typedef std::shared_ptr<CVisCloseButton> CVisCloseButtonPtr;
+
+// ---------------------------------------------------------------------------
 // checkbox
 class CVisCheckBox : public CVisWidget
 {
