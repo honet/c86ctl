@@ -53,6 +53,7 @@ For further information please contact.
 ============
  ChangeLog
 ============
+1.4.3.xxx				・
 
 1.3.0.11				・GUI復活（GUIルーチン全書換）
 						・OPMのアドレスフィルタ処理に問題があったのを修正

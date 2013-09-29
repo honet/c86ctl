@@ -31,9 +31,12 @@ struct BMPREG{
 };
 
 const BMPREG skinreg_frame[] = {
-	{144,129,8,15},		// window frame left
-	{279,129,8,15},		// window frame right
-	{152,129,129,15}	// window frame center
+	{98,307,8,15},		// window frame left
+	{233,307,8,15},		// window frame right
+	{106,307,129,15},	// window frame center
+	{98,291,8,15},		// window frame left (LIGHT)
+	{233,291,8,15},		// window frame right (LIGHT)
+	{106,291,129,15}	// window frame center (LIGHT)
 };
 const BMPREG skinreg_fonts[] = {
 	{0,0,6,8},			// 0:font1
@@ -183,7 +186,7 @@ void CVisC86Skin::deinit(void){
 }
 
 // ウィンドウフレームの描画
-void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
+void CVisC86Skin::drawFrame( IVisBitmap *canvas, int type, CHAR *title )
 {
 	int xe = canvas->getWidth() - 1;
 	int ye = canvas->getHeight() - 1;
@@ -205,9 +208,16 @@ void CVisC86Skin::drawFrame( IVisBitmap *canvas, CHAR *title )
 	visDrawLine( canvas, 1, ye-1, xe-1, ye-1, col_mid ); // 下
 
 	// topbar
-	BMPREG reg_l = skinreg_frame[0];
-	BMPREG reg_r = skinreg_frame[1];
-	BMPREG reg_c = skinreg_frame[2];
+	BMPREG reg_l, reg_r, reg_c;
+	if( type==0 ){
+		reg_l = skinreg_frame[0];
+		reg_r = skinreg_frame[1];
+		reg_c = skinreg_frame[2];
+	}else{
+		reg_l = skinreg_frame[3];
+		reg_r = skinreg_frame[4];
+		reg_c = skinreg_frame[5];
+	}
 
 	blt(canvas,    2, 2, reg_l.width, reg_l.height, skinbmp, reg_l.left, reg_l.top );
 	blt(canvas, xe-9, 2, reg_r.width, reg_r.height, skinbmp, reg_r.left, reg_r.top );

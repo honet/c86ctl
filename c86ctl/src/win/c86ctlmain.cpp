@@ -169,6 +169,9 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			if(now < next){
 				if( pThis->terminateFlag ) break;
 				Sleep(1);
+				//LARGE_INTEGER d;
+				//d.QuadPart = 1000; // 100ns-units = 0.1ms
+				//NtDelayExecution(FALSE, &d); // delay 100ns-units. <-非公開関数@ntdll.dll
 				continue;
 			}
 			next += period;

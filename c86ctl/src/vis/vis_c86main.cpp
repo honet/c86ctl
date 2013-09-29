@@ -24,6 +24,10 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
+#define INIKEY_REGWND		TEXT("regwnd")
+#define INIKEY_KEYWND		TEXT("keywnd")
+#define INIKEY_FMWND		TEXT("fm%dwnd")
+
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
@@ -67,13 +71,17 @@ bool CVisC86Main::update()
 					info->regView = visC86RegViewFactory(gimic->getChip(), i);
 					info->regView->create(hWnd);
 					this->manager->add( info->regView.get() );
+					gConfig.writeInt( windowClass.c_str(), INIKEY_REGWND, 1 );
 				}else{
 					this->manager->del( info->regView.get() );
 					info->regView = 0;
+					gConfig.writeInt( windowClass.c_str(), INIKEY_REGWND, 0 );
 				}
 			} );
-		//info[i].checkReg->setCheck(
 		widgets.push_back(info[i].checkReg);
+		if( gConfig.getInt( windowClass.c_str(), INIKEY_REGWND, 0 ) ){
+			info[i].checkReg->setCheck(1);
+		}
 
 		if( info[i].chiptype == CHIP_OPNA ||
 			info[i].chiptype == CHIP_OPN3L ||
@@ -86,12 +94,17 @@ bool CVisC86Main::update()
 						info->keyView = visC86KeyViewFactory(gimic->getChip(), i);
 						info->keyView->create(hWnd);
 						this->manager->add( info->keyView.get() );
+						gConfig.writeInt( windowClass.c_str(), INIKEY_KEYWND, 1 );
 					}else{
 						this->manager->del( info->keyView.get() );
 						info->keyView = 0;
+						gConfig.writeInt( windowClass.c_str(), INIKEY_KEYWND, 0 );
 					}
 				} );
 			widgets.push_back(info[i].checkKey);
+			if( gConfig.getInt( windowClass.c_str(), INIKEY_KEYWND, 0 ) ){
+				info[i].checkKey->setCheck(1);
+			}
 
 			int nch = 6;
 			if( info[i].chiptype == CHIP_OPM )
@@ -104,16 +117,27 @@ bool CVisC86Main::update()
 				info[i].checkFM[ch]->changeEvent.push_back(
 					[this, gimic, i, ch](CVisWidget* w){
 						hwinfo *info = &this->info[i];
+						TCHAR key[32];
+						_stprintf(key, INIKEY_FMWND, ch+1);
+						
 						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 							info->fmView[ch] = visC86FmViewFactory(gimic->getChip(), i, ch);
 							info->fmView[ch]->create(hWnd);
 							this->manager->add( info->fmView[ch].get() );
+							gConfig.writeInt( windowClass.c_str(), key, 1 );
 						}else{
 							this->manager->del( info->fmView[ch].get() );
 							info->fmView[ch] = 0;
+							gConfig.writeInt( windowClass.c_str(), key, 0 );
 						}
 					} );
 				widgets.push_back(info[i].checkFM[ch]);
+				
+				TCHAR key[32];
+				_stprintf(key, INIKEY_FMWND, ch+1);
+				if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
+					info[i].checkFM[ch]->setCheck(1);
+				}
 			}
 		}
 

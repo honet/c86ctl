@@ -71,7 +71,9 @@ void CVisWnd::onPaint()
 	int l = ::WideCharToMultiByte(CP_THREAD_ACP, 0, windowTitle.c_str(), windowTitle.size(), str, maxlen, NULL, NULL);
 	if( 0<l ){ str[l] = 0; }else{ str[0] = 0; };
 
-	gVisSkin.drawFrame( canvas, str );
+	int type = 0;
+	if( hWnd == ::GetForegroundWindow() ) type = 1;
+	gVisSkin.drawFrame( canvas, type, str );
 
 	onPaintClient();
 	std::for_each( widgets.begin(), widgets.end(),
@@ -244,12 +246,14 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND pa
 
 	// ウィンドウ位置が画面からはみ出ているときの処理
 	// NOTE: マルチモニタ環境では全体包括サイズのみで判定（＝手抜き）
-	int wvx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-	int wvy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-	if( left < 0 ) left = 0;
-	if( top < 0 ) top = 0;
-	if( wvx <= left+width ) left = wvx - width-1;
-	if( wvy <= top+height ) top = wvy - height-1;
+	int wvl = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	int wvt = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	int wvr = wvl+GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	int wvb = wvt+GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	if( left < wvl ) left = wvl;
+	if( top < wvt ) top = wvt;
+	if( wvr <= left+width ) left = wvr - width-1;
+	if( wvb <= top+height ) top = wvb - height-1;
 
 	canvas = new CVisBitmap( width, height );
 	clientCanvas = new CVisChildBitmap( canvas, 2, 17, width-4, height-19 );
@@ -281,6 +285,7 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND pa
 
 	creatingWnd = NULL;
 	::ReleaseMutex( hCreatingMutex );
+	
 	if(!hWnd) return false;
 
 	return true;
@@ -314,7 +319,7 @@ void CVisWnd::onCreate()
 
 void CVisWnd::onDestroy()
 {
-	saveConfig();
+	saveWndPos();
 }
 void CVisWnd::onPaintClient()
 {
@@ -342,7 +347,7 @@ void CVisWnd::close()
 	::UnregisterClass( windowClass.c_str(), C86CtlMain::getInstanceHandle() );
 }
 
-void CVisWnd::saveConfig(void)
+void CVisWnd::saveWndPos(void)
 {
 	RECT rc;
 	HWND hwnd = getHWND();
@@ -351,13 +356,6 @@ void CVisWnd::saveConfig(void)
 			gConfig.writeInt( windowClass.c_str(), INIKEY_WNDLEFT, rc.left );
 			gConfig.writeInt( windowClass.c_str(), INIKEY_WNDTOP, rc.top );
 		}
-		
 	}
-	gConfig.writeInt( windowClass.c_str(), INIKEY_WNDVISIBLE, hwnd?1:0 );
-}
-
-int CVisWnd::getLastShowState(void)
-{
-	return gConfig.getInt( windowClass.c_str(), INIKEY_WNDVISIBLE, 0 );
 }
 

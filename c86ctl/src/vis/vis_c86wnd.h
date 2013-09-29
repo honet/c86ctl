@@ -31,8 +31,7 @@ public:
 	virtual bool create( int width, int height, DWORD exstyle = 0, DWORD style = (WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN), HWND hParent = 0 );
 	virtual bool resize( int width, int height );
 	virtual void close(void);
-	virtual void saveConfig(void);
-	virtual int getLastShowState(void);
+	virtual void saveWndPos(void);
 	
 public:
 	void setManager(CVisManager *m){ manager = m; };

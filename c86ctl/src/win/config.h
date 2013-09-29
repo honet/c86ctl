@@ -23,7 +23,7 @@
 
 #define INIKEY_WNDLEFT		TEXT("wndleft")
 #define INIKEY_WNDTOP		TEXT("wndtop")
-#define INIKEY_WNDVISIBLE	TEXT("wndvisible")
+//#define INIKEY_WNDVISIBLE	TEXT("wndvisible")
 #define INIKEY_MIDIDEVICE	TEXT("mididevice")
 #define INIKEY_HIDDEVICE	TEXT("hiddevice")
 #define INIKEY_GIMICIFTYPE	TEXT("gimic_iftype")
