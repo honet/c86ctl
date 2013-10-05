@@ -49,11 +49,12 @@ void CVisCheckBox::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){
 		break;
 	}
 }
-void CVisCheckBox::setCheck(int newval)
+void CVisCheckBox::setCheck(int newval, bool pulseEvent)
 {
 	if( newval != sw ){
 		sw = newval;
-		std::for_each( changeEvent.begin(), changeEvent.end(), [this](std::function<void(CVisWidget*)> h){ h(this); } );
+		if(pulseEvent)
+			std::for_each( changeEvent.begin(), changeEvent.end(), [this](std::function<void(CVisWidget*)> h){ h(this); } );
 	}
 }
 

@@ -57,6 +57,13 @@ public:
 		wcapture = NULL;
 		::ReleaseCapture();
 	};
+	virtual bool isWindowVisible(){
+		if( !hWnd ) return false;
+		if( ::IsWindowVisible(hWnd) )
+			return true;
+		else
+			return false;
+	};
 
 public:
 	std::list< std::function< void(CVisWnd*) > > closeEvent;
@@ -64,6 +71,7 @@ public:
 protected:
 	// message handler
 	virtual void onCreate();
+	virtual void onClose();
 	virtual void onDestroy();
 	virtual void onPaint();
 	virtual void onPaintClient();

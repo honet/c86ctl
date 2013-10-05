@@ -187,7 +187,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 					::DestroyMenu(hMenu);
 					break;
 				}
-				if( pThis->mainVisWnd )
+				if( pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible() )
 					::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED );
 
 				TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, point.x, point.y, 0, hwnd, NULL);
@@ -202,7 +202,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 			pThis->mainVisWnd->openConfigDialog();
 			break;
 		case ID_POPUP_SHOWVIS:
-			if( pThis->mainVisWnd ){
+			if( pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible() ){
 				pThis->stopVis();
 			}else{
 				pThis->startVis();
@@ -225,9 +225,9 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 
 int C86CtlMainWnd::startVis()
 {
+	stopVis();
+	
 	mainVisWnd = new CVisC86Main();
-	CVisManager::getInstance()->add( mainVisWnd );
-
 	mainVisWnd->create(getHWND());
 
 	// 描画スレッド開始
@@ -275,11 +275,10 @@ unsigned int WINAPI C86CtlMainWnd::threadVis(LPVOID param)
 	ZeroMemory(&msg, sizeof(msg));
 	::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-	//CVisManager *pwm = reinterpret_cast<CVisManager*>(param);
-	CVisManager *pwm = CVisManager::getInstance();
-
 	DWORD next = ::timeGetTime()*6 + 100;
 	while(1){
+		CVisManager *pwm = CVisManager::getInstance();
+
 		// message proc
 		if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
 			if( msg.message == WM_THREADEXIT )

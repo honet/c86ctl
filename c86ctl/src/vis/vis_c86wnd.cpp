@@ -97,12 +97,16 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 	bool handled = false;
 
 	switch (msg) {
-	case WM_DESTROY:
-		onDestroy();
-		return 0;
-
 	case WM_CREATE:
 		onCreate();
+		return 0;
+
+	case WM_CLOSE:
+		onClose();
+		return 0;
+		
+	case WM_DESTROY:
+		onDestroy();
 		return 0;
 
 	// mouse events
@@ -302,7 +306,7 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND pa
 	closeButton = CVisCloseButtonPtr(new CVisCloseButton(this,width-17,2));
 	closeButton->pushEvent.push_back(
 		[this](CVisWidget* w){
-			::SendMessage( this->hWnd, WM_CLOSE, 0, 0 );
+			this->close();
 	});
 	sysWidgets.push_back(closeButton);
 	
@@ -339,16 +343,26 @@ void CVisWnd::onCreate()
 {
 }
 
+void CVisWnd::onClose()
+{
+}
+
 void CVisWnd::onDestroy()
 {
 	saveWndPos();
 }
+
 void CVisWnd::onPaintClient()
 {
 }
 
 void CVisWnd::close()
 {
+	std::for_each( closeEvent.begin(), closeEvent.end(),
+				   [this](std::function<void(CVisWnd*)> h){ h(this); } );
+	
+	saveWndPos();
+
 	CVisManager::getInstance()->del( this );
 
 	widgets.clear();
@@ -368,9 +382,6 @@ void CVisWnd::close()
 		canvas = NULL;
 	}
 	hParent = NULL;
-	
-	std::for_each( closeEvent.begin(), closeEvent.end(),
-				   [this](std::function<void(CVisWnd*)> h){ h(this); } );
 
 	::UnregisterClass( windowClass.c_str(), C86CtlMain::getInstanceHandle() );
 }

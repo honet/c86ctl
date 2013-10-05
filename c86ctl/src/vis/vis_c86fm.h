@@ -77,7 +77,7 @@ public:
 		  pOPNA(chip), ch(channel)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPNAFM%d%d"), id,ch);
+		_stprintf_s(str, _T("C86OPNA%dFM%d"), id,ch);
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPNA FM CH%d PARAMETER VIEW"), id, ch+1);
 		windowTitle = str;
@@ -106,7 +106,7 @@ public:
 		  pOPN3L(chip), ch(channel)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPN3LFM%d%d"), id,ch);
+		_stprintf_s(str, _T("C86OPN3L%dFM%d"), id,ch);
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPN3L FM CH%d PARAMETER VIEW"), id, ch+1);
 		windowTitle = str;
@@ -133,7 +133,7 @@ public:
 		  pOPM(chip), ch(channel)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPMFM%d%d"), id,ch);
+		_stprintf_s(str, _T("C86OPM%dFM%d"), id,ch);
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPM FM CH%d PARAMETER VIEW"), id, ch+1);
 		windowTitle = str;

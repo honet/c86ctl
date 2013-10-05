@@ -24,14 +24,16 @@
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
 #endif
 
-#define INIKEY_REGWND		TEXT("regwnd")
-#define INIKEY_KEYWND		TEXT("keywnd")
-#define INIKEY_FMWND		TEXT("fm%dwnd")
+#define INIKEY_REGWND		TEXT("m%d_regwnd")
+#define INIKEY_KEYWND		TEXT("m%d_keywnd")
+#define INIKEY_FMWND		TEXT("m%d_fm%d_wnd")
 
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
 static const int modHeight = 74;
+
+#define KEYBUFLEN 32
 
 bool CVisC86Main::update()
 {
@@ -62,48 +64,68 @@ bool CVisC86Main::update()
 	int y=40+modHeight*st;
 	
 	for( int i=st; i<sz; i++ ){
-		auto gimic = gimics[i];
-		info[i].checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
-		info[i].checkReg->changeEvent.push_back(
-			[this, gimic, i](CVisWidget* w){
-				hwinfo *info = &this->info[i];
+		TCHAR key[KEYBUFLEN];
+		Chip *pchip = gimics[i]->getChip();
+		hwinfo *pinfo = &info[i];
+		
+		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
+		pinfo->regView = visC86RegViewFactory(pchip, i);
+		pinfo->regView->closeEvent.push_back(
+			[pinfo](CVisWnd* h){
+				pinfo->checkReg->setCheck(0, false);
+			});
+		
+		pinfo->checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
+		pinfo->checkReg->changeEvent.push_back(
+			[this, pinfo, i](CVisWidget* w){
+				TCHAR key[KEYBUFLEN];
+				_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
+				
 				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-					info->regView = visC86RegViewFactory(gimic->getChip(), i);
-					info->regView->create(hWnd);
-					
-					info->regView->closeEvent.push_back(
-						[](CVisWnd* h){});
-					
-					gConfig.writeInt( windowClass.c_str(), INIKEY_REGWND, 1 );
+					if( pinfo->regView )
+						pinfo->regView->create(hWnd);
+					gConfig.writeInt( windowClass.c_str(), key, 1 );
 				}else{
-					info->regView = 0;
-					gConfig.writeInt( windowClass.c_str(), INIKEY_REGWND, 0 );
+					if( pinfo->regView )
+						pinfo->regView->close();
+					gConfig.writeInt( windowClass.c_str(), key, 0 );
 				}
 			} );
-		widgets.push_back(info[i].checkReg);
-		if( gConfig.getInt( windowClass.c_str(), INIKEY_REGWND, 0 ) ){
-			info[i].checkReg->setCheck(1);
+		widgets.push_back(pinfo->checkReg);
+		if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
+			info[i].checkReg->setCheck(1, true);
 		}
 
 		if( info[i].chiptype == CHIP_OPNA ||
 			info[i].chiptype == CHIP_OPN3L ||
 			info[i].chiptype == CHIP_OPM ){
-			info[i].checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
-			info[i].checkKey->changeEvent.push_back(
-				[this, gimic, i](CVisWidget* w){
-					hwinfo *info = &this->info[i];
+
+			_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
+			pinfo->keyView = visC86KeyViewFactory(pchip, i);
+			pinfo->keyView->closeEvent.push_back(
+				[pinfo](CVisWnd* h){
+					pinfo->checkKey->setCheck(0, false);
+				});
+			
+			pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
+			pinfo->checkKey->changeEvent.push_back(
+				[this, pinfo, i](CVisWidget* w){
+					TCHAR key[KEYBUFLEN];
+					_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
+
 					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-						info->keyView = visC86KeyViewFactory(gimic->getChip(), i);
-						info->keyView->create(hWnd);
-						gConfig.writeInt( windowClass.c_str(), INIKEY_KEYWND, 1 );
+						if( pinfo->keyView )
+							pinfo->keyView->create(hWnd);
+						gConfig.writeInt( windowClass.c_str(), key, 1 );
 					}else{
-						info->keyView = 0;
-						gConfig.writeInt( windowClass.c_str(), INIKEY_KEYWND, 0 );
+						if( pinfo->keyView )
+							pinfo->keyView->close();
+						gConfig.writeInt( windowClass.c_str(), key, 0 );
 					}
 				} );
 			widgets.push_back(info[i].checkKey);
-			if( gConfig.getInt( windowClass.c_str(), INIKEY_KEYWND, 0 ) ){
-				info[i].checkKey->setCheck(1);
+			if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
+				info[i].checkKey->setCheck(1, true);
 			}
 
 			int nch = 6;
@@ -113,28 +135,33 @@ bool CVisC86Main::update()
 			for( int ch=0; ch<nch; ch++ ){
 				char str[10];
 				sprintf(str, "FM%d", ch+1);
-				info[i].checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this,180 + 40*(ch%3), y+((ch/3)+1)*14, str));
-				info[i].checkFM[ch]->changeEvent.push_back(
-					[this, gimic, i, ch](CVisWidget* w){
-						hwinfo *info = &this->info[i];
-						TCHAR key[32];
-						_stprintf(key, INIKEY_FMWND, ch+1);
+				
+				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
+				pinfo->fmView[ch] = visC86FmViewFactory(pchip, i, ch);
+				pinfo->fmView[ch]->closeEvent.push_back(
+					[pinfo, ch](CVisWnd* h){
+						pinfo->checkFM[ch]->setCheck(0, false);
+					});
+				
+				pinfo->checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this,180 + 40*(ch%3), y+((ch/3)+1)*14, str));
+				pinfo->checkFM[ch]->changeEvent.push_back(
+					[this, pinfo, i, ch](CVisWidget* w){
+						TCHAR key[KEYBUFLEN];
+						_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
 						
 						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-							info->fmView[ch] = visC86FmViewFactory(gimic->getChip(), i, ch);
-							info->fmView[ch]->create(hWnd);
+							if( pinfo->fmView[ch] )
+								pinfo->fmView[ch]->create(hWnd);
 							gConfig.writeInt( windowClass.c_str(), key, 1 );
 						}else{
-							info->fmView[ch] = 0;
+							if( pinfo->fmView[ch] )
+								pinfo->fmView[ch]->close();
 							gConfig.writeInt( windowClass.c_str(), key, 0 );
 						}
 					} );
 				widgets.push_back(info[i].checkFM[ch]);
-				
-				TCHAR key[32];
-				_stprintf(key, INIKEY_FMWND, ch+1);
 				if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
-					info[i].checkFM[ch]->setCheck(1);
+					info[i].checkFM[ch]->setCheck(1, true);
 				}
 			}
 		}
