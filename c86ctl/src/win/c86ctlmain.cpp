@@ -229,13 +229,9 @@ int C86CtlMain::initialize(void)
 		return C86CTL_ERR_UNKNOWN;
 	
 	// インスタンス生成
-	int type = gConfig.getInt(INISC_MAIN, INIKEY_GIMICIFTYPE, 0);
-	if( type==0 ){
-		GimicHID::UpdateInstances(gGIMIC);
-		GimicWinUSB::UpdateInstances(gGIMIC);
-	}else if( type==1 ){
-		//gGIMIC = GimicMIDI::CreateInstances(); // TODO!!
-	}
+	GimicHID::UpdateInstances(gGIMIC);
+	GimicWinUSB::UpdateInstances(gGIMIC);
+	//gGIMIC = GimicMIDI::CreateInstances(); // deprecated.
 	
 	// タイマ分解能設定
 	TIMECAPS timeCaps;
@@ -264,6 +260,8 @@ int C86CtlMain::initialize(void)
 		Sleep(10);
 
 	SetThreadPriority( hSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
+
+	loadConfig();
 
 	isInitialized = true;
 	return C86CTL_ERR_NONE;
@@ -308,6 +306,49 @@ int C86CtlMain::deinitialize(void)
 
 	return C86CTL_ERR_NONE;
 }
+
+void C86CtlMain::loadConfig(void)
+{
+	TCHAR key[128];
+	int val=0;
+	
+	for( size_t i=0; i<gGIMIC.size(); i++ ){
+		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
+		val = gConfig.getInt(INISC_MAIN, key, -1);
+		if( val>=0 ) gGIMIC[i]->setDelay(val);
+
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+		val = gConfig.getInt(INISC_MAIN, key, -1);
+		if( val>=0 ) gGIMIC[i]->setSSGVolume((UCHAR)val);
+
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+		val = gConfig.getInt(INISC_MAIN, key, -1);
+		if( val>=0 ) gGIMIC[i]->setPLLClock((UINT)val);
+	}
+}
+
+void C86CtlMain::saveConfig(void)
+{
+	TCHAR key[128];
+	for( size_t i=0; i<gGIMIC.size(); i++ ){
+		int delay=0;
+		gGIMIC[i]->getDelay(&delay);
+		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
+		gConfig.writeInt(INISC_MAIN, key, delay);
+
+		UCHAR vol=0;
+		gGIMIC[i]->getSSGVolume(&vol);
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+		gConfig.writeInt(INISC_MAIN, key, vol);
+
+		UINT clock=0;
+		gGIMIC[i]->getPLLClock(&clock);
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+		gConfig.writeInt(INISC_MAIN, key, clock);
+		
+	}
+}
+
 
 int C86CtlMain::reset(void)
 {

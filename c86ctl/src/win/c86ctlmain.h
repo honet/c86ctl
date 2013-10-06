@@ -64,6 +64,10 @@ public:
 	static INT deinit(void);
 	static HINSTANCE getInstanceHandle();
 	static void setActiveDlg(HWND dlg){ hActiveDlg = dlg; };
+
+public:
+	void loadConfig(void);
+	void saveConfig(void);
 	
 private:
 	bool terminateFlag;

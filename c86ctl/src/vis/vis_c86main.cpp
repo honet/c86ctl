@@ -17,8 +17,9 @@
 #include "resource.h"
 #include "vis_c86sub.h"
 #include "vis_c86main.h"
-#include "vis_dlg_config.h"
 #include "c86ctlmain.h"
+#include "c86ctlmainwnd.h"
+
 
 #ifdef _DEBUG
 #define new new(_NORMAL_BLOCK,__FILE__,__LINE__)
@@ -312,15 +313,11 @@ void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 {
 	switch(id){
 	case ID_POPUP_CONFIG:
-		openConfigDialog();
+		C86CtlMainWnd::getInstance()->openConfigDialog();
 		break;
 	case ID_POPUP_SHOWVIS:
 		::PostMessage(hMaster, WM_COMMAND, (notifyCode<<16)|id, (DWORD)hwnd);
 
 		break;
 	}
-}
-void CVisC86Main::openConfigDialog(void)
-{
-	CVisDlgConfig::create(hWnd);
 }

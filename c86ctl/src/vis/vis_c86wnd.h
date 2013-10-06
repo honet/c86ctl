@@ -70,13 +70,15 @@ public:
 	
 protected:
 	// message handler
-	virtual void onCreate();
-	virtual void onClose();
+	virtual void onCreate(){};
+	virtual void onClose(){};
 	virtual void onDestroy();
 	virtual void onPaint();
-	virtual void onPaintClient();
+	virtual void onPaintClient(){};
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){};
 	virtual void onCommand(HWND hwnd, DWORD id, DWORD notifyCode){};
+	virtual void onKeyDown(DWORD keycode){};
+	virtual void onKeyUp(DWORD keycode){};
 	
 protected:
 	virtual LRESULT CALLBACK wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp);

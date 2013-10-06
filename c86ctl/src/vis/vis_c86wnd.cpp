@@ -155,6 +155,11 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 		}
 		break;
 
+	case WM_KEYDOWN:
+		onKeyDown(wp);
+	case WM_KEYUP:
+		onKeyUp(wp);
+
 	case WM_PAINT:
 		// 画面描画はタイマ駆動で行われるので描画領域更新だけして終わる
 		::BeginPaint(hWnd, &ps);
@@ -339,21 +344,9 @@ bool CVisWnd::resize(int width, int height)
 	return true;
 }
 
-void CVisWnd::onCreate()
-{
-}
-
-void CVisWnd::onClose()
-{
-}
-
 void CVisWnd::onDestroy()
 {
 	saveWndPos();
-}
-
-void CVisWnd::onPaintClient()
-{
 }
 
 void CVisWnd::close()

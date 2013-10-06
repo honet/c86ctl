@@ -6,6 +6,7 @@
 
 	honet.kk(at)gmail.com
  */
+#include <ShellAPI.h>
 #include "vis/vis_c86main.h"
 
 namespace c86ctl{
@@ -54,9 +55,12 @@ private:
 	static unsigned int WINAPI threadVis(LPVOID param);
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 	
-private:
+public:
 	int startVis();
 	int stopVis();
+	void openConfigDialog(void);
+	
+private:
 	int updateVis();
 
 private:

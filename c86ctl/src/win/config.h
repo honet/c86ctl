@@ -23,10 +23,10 @@
 
 #define INIKEY_WNDLEFT		TEXT("wndleft")
 #define INIKEY_WNDTOP		TEXT("wndtop")
-//#define INIKEY_WNDVISIBLE	TEXT("wndvisible")
-#define INIKEY_MIDIDEVICE	TEXT("mididevice")
-#define INIKEY_HIDDEVICE	TEXT("hiddevice")
-#define INIKEY_GIMICIFTYPE	TEXT("gimic_iftype")
+
+#define INIKEY_DELAY			TEXT("m%d_delay")
+#define INIKEY_GIMIC_SSGVOL		TEXT("m%d_gimic_ssgvol")
+#define INIKEY_GIMIC_PLLCLK		TEXT("m%d_gimic_pllclk")
 
 
 namespace c86ctl{

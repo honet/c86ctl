@@ -67,6 +67,9 @@ public:
 	//virtual int __stdcall adpcmZeroClear(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	//virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	//virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	
+public:
+	// 非公開
 	virtual int __stdcall setDelay(int delay){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall getDelay(int *delay){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual int __stdcall isValid(void){ return 0; };

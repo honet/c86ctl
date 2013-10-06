@@ -33,6 +33,7 @@ extern "C" {
 
 #include "config.h"
 #include "vis/vis_c86main.h"
+#include "vis/vis_dlg_config.h"
 #include "ringbuff.h"
 #include "interface/if.h"
 #include "interface/if_gimic_hid.h"
@@ -54,6 +55,7 @@ using namespace c86ctl::vis;
 // ------------------------------------------------------------------
 #define WM_THREADEXIT       (WM_APP+10)
 #define WM_TASKTRAY_EVENT   (WM_APP+11)
+#define WM_CHANGEVIS_STATE  (WM_APP+12)
 
 
 C86CtlMainWnd *C86CtlMainWnd::pthis = 0;
@@ -199,7 +201,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case ID_POPUP_CONFIG:
-			pThis->mainVisWnd->openConfigDialog();
+			pThis->openConfigDialog();
 			break;
 		case ID_POPUP_SHOWVIS:
 			if( pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible() ){
@@ -262,6 +264,11 @@ int C86CtlMainWnd::stopVis()
 	CVisManager::shutdown();
 
 	return 0;
+}
+
+void C86CtlMainWnd::openConfigDialog(void)
+{
+	CVisDlgConfig::create(hwnd);
 }
 
 

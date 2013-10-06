@@ -22,6 +22,9 @@ private:
 	static void onCommand(HWND hwnd, DWORD id, DWORD notifyCode);
 	static void onInitDialog(HWND hWnd);
 	static void onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode);
+	static void onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode);
+	static void onPLLClockCmbNotify(HWND hwnd, DWORD id, DWORD notifyCode);
+	static void onShowVisCheckNotify(HWND hwnd, DWORD notifyCode);
 	
 private:
 	static HWND hDlg;

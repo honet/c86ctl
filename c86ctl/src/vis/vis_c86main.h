@@ -39,7 +39,6 @@ public:
 public:
 	virtual bool create(HWND parent);
 	bool update(void);
-	void openConfigDialog(void);
 
 protected:
 	// message handler
