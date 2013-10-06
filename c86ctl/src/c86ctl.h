@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -14,12 +14,11 @@
 #include <ObjBase.h>
 
 #ifdef __cplusplus
-extern "C" {
+namespace c86ctl{
 #endif
 
-
 /*----------------------------------------------------------------------------*/
-/*  ’è”’è‹`                                                                  */
+/*  å®šæ•°å®šç¾©                                                                  */
 /*----------------------------------------------------------------------------*/
 #define C86CTL_ERR_NONE						0
 #define C86CTL_ERR_UNKNOWN					-1
@@ -33,10 +32,11 @@ enum ChipType {
 	CHIP_OPNA,
 	CHIP_OPM,
 	CHIP_OPN3L,
+	CHIP_OPL3
 };
 
 /*----------------------------------------------------------------------------*/
-/*  \‘¢‘Ì’è‹`                                                                */
+/*  æ§‹é€ ä½“å®šç¾©                                                                */
 /*----------------------------------------------------------------------------*/
 struct Devinfo{
 	char Devname[16];
@@ -45,7 +45,7 @@ struct Devinfo{
 };
 
 /*----------------------------------------------------------------------------*/
-/*  Interface’è‹`                                                             */
+/*  Interfaceå®šç¾©                                                             */
 /*----------------------------------------------------------------------------*/
 // IRealChipBase {5C457918-E66D-4AC1-8CB5-B91C4704DF79}
 static const GUID IID_IRealChipBase = 
@@ -108,8 +108,12 @@ interface IGimic2 : public IGimic
 
 
 /*----------------------------------------------------------------------------*/
-/*  ŒöŠJŠÖ”’è‹`                                                              */
+/*  å…¬é–‹é–¢æ•°å®šç¾©                                                              */
 /*----------------------------------------------------------------------------*/
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 HRESULT WINAPI CreateInstance( REFIID riid, void** ppi );
 
 
@@ -122,7 +126,8 @@ UCHAR WINAPI c86ctl_in( UINT addr );				// DEPRECATED
 
 
 #ifdef __cplusplus
-}
+};
+};
 #endif
 
 #endif

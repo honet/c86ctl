@@ -16,6 +16,7 @@
 #define new DEBUG_NEW
 #endif
 
+using namespace c86ctl;
 
 // アプリケーションのバージョン情報に使われる CAboutDlg ダイアログ
 
@@ -96,6 +97,7 @@ BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_GET_FWVER, &C86winDlg::OnBnClickedButtonGetFwver)
 	ON_BN_CLICKED(IDC_BUTTON_TEST1, &C86winDlg::OnBnClickedButtonTest1)
 	ON_BN_CLICKED(IDC_BUTTON_ADPCM_ZERORESET, &C86winDlg::OnBnClickedButtonAdpcmZeroreset)
+	ON_BN_CLICKED(IDC_BUTTON_SWRESET, &C86winDlg::OnBnClickedButtonSwreset)
 END_MESSAGE_MAP()
 
 
@@ -206,6 +208,7 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 	CString str;
 	UINT tpus; // tick per micro second
 	UINT last_is_adpcm=0;
+	UINT loopidx = pThis->s98data.loopidx;
 
 	IRealChip *pRC = NULL;
 
@@ -218,6 +221,20 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 	}
 	pRC->reset();
 	// -----------------------------------------------------------------
+	if( 0 < pThis->s98data.devinfo.size() ){
+		IGimic2 *pIGimic;
+		if( S_OK == pRC->QueryInterface( IID_IGimic2, (void**)&pIGimic ) ){
+			UINT cclock;
+			pIGimic->getPLLClock(&cclock);
+			UINT mclock = pThis->s98data.devinfo.front().first.clock;
+			if( mclock != cclock ){
+				pIGimic->setPLLClock(mclock);
+				pIGimic->Release();
+			}
+		}
+	}
+
+		
 
 	tpus = (INT)(pThis->s98data.getTimerPrec() * 1000.0);
 	if(tpus==0) tpus = 1;
@@ -268,7 +285,10 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 					pRC->out( addr, data );
 					last_is_adpcm = ( addr == 0x108 );
 				}else if( pr->cmd == 0xfd ){ // end / loop
-					//if( pThis->s98data.
+					if( loopidx != 0 ){
+						idx = loopidx;
+						tick = prow->at(loopidx).gtick;
+					}
 				}
 				if( ++idx >= prow->size() )
 					break;
@@ -500,9 +520,12 @@ void C86winDlg::OnBnClickedButtonTest1()
 		IRealChip *pchip=NULL;
 		if( S_OK == pGimicModule->QueryInterface( IID_IRealChip, (void**)&pchip ) ){
 			//pchip->out( 0x28, 0 );
-			for( int i=0x38; i<=0x3f; i++ ){
-				pchip->out( i, 0x73 );
+			for( int i=0; i<1000000; i++ ){
+				pchip->out(0x38,0x5a);
 			}
+//			for( int i=0x38; i<=0x3f; i++ ){
+//				pchip->out( i, 0x73 );
+//			}
 
 			pchip->Release();
 		}
@@ -521,3 +544,20 @@ void C86winDlg::OnBnClickedButtonAdpcmZeroreset()
 		pchip->Release();
 	}
 }
+
+
+void C86winDlg::OnBnClickedButtonSwreset()
+{
+	C86winApp *pApp = (C86winApp*)AfxGetApp();
+	IGimic *pGimicModule;
+	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
+		IRealChip *pchip=NULL;
+		if( S_OK == pGimicModule->QueryInterface( IID_IRealChip, (void**)&pchip ) ){
+			pchip->reset();
+			pchip->Release();
+		}
+		pGimicModule->Release();
+	}
+}
+
+

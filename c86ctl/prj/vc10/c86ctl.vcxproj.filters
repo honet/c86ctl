@@ -18,168 +18,204 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\vis_c86fm.cpp">
-      <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vis_c86key.cpp">
-      <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vis_c86main.cpp">
-      <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vis_c86reg.cpp">
-      <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vis_c86sub.cpp">
-      <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vis_c86wnd.cpp">
-      <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\opna.cpp">
-      <Filter>module</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\c86ctl.cpp">
+    <None Include="..\..\ReadMe.txt" />
+    <None Include="..\..\src\win\c86ctl.def">
+      <Filter>core</Filter>
+    </None>
+    <None Include="..\..\src\win\res\c86ctl.rc2">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="..\..\src\win\res\skin.png">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="..\..\src\win\res\c86ctl.ico">
+      <Filter>resource</Filter>
+    </None>
+    <None Include="res\c86ctl.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\win\c86ctl.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\config.cpp">
+    <ClCompile Include="..\..\src\win\config.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ringbuff.cpp">
+    <ClCompile Include="..\..\src\win\fpscounter.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\stdafx.cpp">
+    <ClCompile Include="..\..\src\win\stdafx.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\if_gimic_hid.cpp">
+    <ClCompile Include="..\..\src\interface\if_gimic_hid.cpp">
       <Filter>interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\if_gimic_midi.cpp">
+    <ClCompile Include="..\..\src\interface\if_gimic_midi.cpp">
       <Filter>interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\if_gimic_winsub.cpp">
+    <ClCompile Include="..\..\src\interface\if_gimic_winsub.cpp">
       <Filter>interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\module.cpp">
+    <ClCompile Include="..\..\src\vis\vis_bitmap.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86fm.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86key.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86main.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86reg.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86skin.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86sub.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_c86wnd.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_manager.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_widget.cpp">
+      <Filter>vis</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\ringbuff.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\vis_manager.cpp">
-      <Filter>vis</Filter>
+    <ClCompile Include="..\..\src\chip\opm.cpp">
+      <Filter>module</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\vis_bitmap.cpp">
-      <Filter>vis</Filter>
+    <ClCompile Include="..\..\src\chip\opn3l.cpp">
+      <Filter>module</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\vis_c86skin.cpp">
-      <Filter>vis</Filter>
+    <ClCompile Include="..\..\src\chip\opna.cpp">
+      <Filter>module</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fpscounter.cpp">
+    <ClCompile Include="..\..\src\chip\opnx.cpp">
+      <Filter>module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\chip\opx.cpp">
+      <Filter>module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\win\c86ctlmain.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\vis_widget.cpp">
+    <ClCompile Include="..\..\src\win\c86ctlmainwnd.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vis\vis_dlg_config.cpp">
       <Filter>vis</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\opnx.cpp">
-      <Filter>module</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\opn3l.cpp">
-      <Filter>module</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\vis_c86fm.h">
+    <ClInclude Include="..\..\src\win\config.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\win\fpscounter.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\win\resource.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\win\stdafx.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\if.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\if_gimic_hid.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\if_gimic_midi.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\if_gimic_winusb.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis\vis_bitmap.h">
       <Filter>vis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vis_c86key.h">
+    <ClInclude Include="..\..\src\vis\vis_c86fm.h">
       <Filter>vis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vis_c86main.h">
+    <ClInclude Include="..\..\src\vis\vis_c86key.h">
       <Filter>vis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vis_c86reg.h">
+    <ClInclude Include="..\..\src\vis\vis_c86main.h">
       <Filter>vis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vis_c86sub.h">
+    <ClInclude Include="..\..\src\vis\vis_c86reg.h">
       <Filter>vis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vis_c86wnd.h">
+    <ClInclude Include="..\..\src\vis\vis_c86skin.h">
       <Filter>vis</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\opna.h">
+    <ClInclude Include="..\..\src\vis\vis_c86sub.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis\vis_c86wnd.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis\vis_manager.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vis\vis_widget.h">
+      <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\mydef.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\ringbuff.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\chip.h">
       <Filter>module</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\c86ctl.h">
+    <ClInclude Include="..\..\src\chip\opl3.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\opm.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\opn3l.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\opna.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\opnx.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\opx.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\win\c86ctlmain.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\config.h">
+    <ClInclude Include="..\..\src\win\c86ctlmainwnd.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\resource.h">
+    <ClInclude Include="..\..\src\common\withlock.h">
       <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ringbuff.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\stdafx.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\if.h">
-      <Filter>interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\if_gimic_hid.h">
-      <Filter>interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\if_gimic_midi.h">
-      <Filter>interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\if_gimic_winusb.h">
-      <Filter>interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\version.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\module.h">
+    <ClInclude Include="..\..\src\c86ctl.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\chip.h">
-      <Filter>module</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\opm.h">
-      <Filter>module</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\opn3l.h">
-      <Filter>module</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\vis_manager.h">
+    <ClInclude Include="..\..\src\vis\vis_dlg_config.h">
       <Filter>vis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\vis_bitmap.h">
-      <Filter>vis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\vis_c86skin.h">
-      <Filter>vis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\fpscounter.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\vis_widget.h">
-      <Filter>vis</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\opnx.h">
-      <Filter>module</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\c86ctl.def">
-      <Filter>core</Filter>
-    </None>
-    <None Include="..\..\ReadMe.txt" />
-    <None Include="..\..\src\res\skin.png">
-      <Filter>resource</Filter>
-    </None>
-    <None Include="res\skin.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\..\src\c86ctl.rc">
+    <ResourceCompile Include="..\..\src\win\c86ctl.rc">
       <Filter>resource</Filter>
     </ResourceCompile>
   </ItemGroup>

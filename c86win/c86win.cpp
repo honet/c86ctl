@@ -78,7 +78,7 @@ BOOL C86winApp::InitInstance()
 
 	hC86DLL = ::LoadLibrary( _T("c86ctl.dll") );
 	pCI = (TCreateInstance)::GetProcAddress( hC86DLL, "CreateInstance" );
-	(*pCI)( IID_IRealChipBase, (void**)&pChipBase );
+	(*pCI)( c86ctl::IID_IRealChipBase, (void**)&pChipBase );
 	// ---------------------------------------------------------------------
 	
 	

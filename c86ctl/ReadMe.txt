@@ -53,6 +53,7 @@ For further information please contact.
 ============
  ChangeLog
 ============
+1.4.3.xxx				・
 
 1.3.0.11				・GUI復活（GUIルーチン全書換）
 						・OPMのアドレスフィルタ処理に問題があったのを修正
@@ -84,7 +85,8 @@ For further information please contact.
 
 ::TODO::
 ・adpcmバースト転送
-・ウインドウ位置保存コード
+・ウインドウ表示状態保存
 ・try/catchコードを全ルーチンに
-・実装見送りのIF削る。
+・WriteFileに対する保護をハンドルごとのMutexに変える
+・OPN系のFNUM/BLOCKからOCT/NOTE計算処理をφMに対応するように直す。
 

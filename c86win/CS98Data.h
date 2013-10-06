@@ -287,6 +287,8 @@ public:
 
 	INT loadFile(CString &fname);
 	INT saveFile(CString &fname);
+
+	// tick“–‚½‚è‚ÌŠÔ‚ğ•Ô‚·B’PˆÊ:ms
 	DOUBLE getTimerPrec()
 	{
 		int numerator = header.timer_info[0] == 0 ? 10 : header.timer_info[0];
@@ -325,5 +327,6 @@ public:
 	std::vector<char> songinfo;
 	std::vector<DeviceInfo> devinfo;
 	std::vector<CDumpRow> row;
+	UINT loopidx;
 };
 

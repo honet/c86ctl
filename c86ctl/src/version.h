@@ -1,4 +1,4 @@
-/***
+Ôªø/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -7,16 +7,16 @@
 	honet.kk(at)gmail.com
  */
 
-// ÇcÇkÇkÇÃÉoÅ[ÉWÉáÉìíËã`
+// definition of the DLL version.
 #define VERSION_MAJOR      1
-#define VERSION_MINOR      3
-#define VERSION_REVISION   1
-#define VERSION_BUILD      24
-#define VERSION_STRING     "1, 3, 1, 24"
-#define VERSION_MESSAGE    "VER 1.3.1.24(Release)"
+#define VERSION_MINOR      4
+#define VERSION_REVISION   3
+#define VERSION_BUILD      1006
+#define VERSION_STRING     "1, 4, 3, 1006"
+#define VERSION_MESSAGE    "VER 1.4.3.1006(RELEASE)"
 
 
-// à»â∫ÇÕDLLÉäÉ\Å[ÉXópíËã`Ç…Ç¬Ç´ïœçXã÷é~
+// DON'T CHANGE FOLLOWINGS. (for DLL resorce) ---------------------
 #define C86CTL_VERSION        VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD
 
 #define __C86CTL_DLL_FILEVERSION              C86CTL_VERSION

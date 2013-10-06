@@ -29,7 +29,7 @@ public:
 // ŽÀ‘•
 public:
 	HMODULE hC86DLL;
-	IRealChipBase *pChipBase;
+	c86ctl::IRealChipBase *pChipBase;
 	
 	DECLARE_MESSAGE_MAP()
 };

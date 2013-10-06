@@ -77,6 +77,8 @@ BOOL CS98Data::loadFile( CString &fname )
 				switch( devInfo.type ){
 				case YM2149:
 				case YM2203:
+					d.first.clock = 7987200;
+					break;
 				case YM2612:
 				case YM2608:
 				case AY_3_8910:
@@ -109,9 +111,15 @@ BOOL CS98Data::loadFile( CString &fname )
 		ifs.seekg( header.offset_to_dump, ios::beg );
 		CDumpRow r;
 		int last = header.offset_to_tag < header.offset_to_dump ? fs : header.offset_to_tag;
+		int offset = header.offset_to_dump;
+		loopidx = 0;
 		do{
 			ifs >> r;
+			offset += r.len;
 			row.push_back(r);
+			if( offset == header.offset_to_loop_point ){
+				loopidx = row.size() - 1;
+			}
 		}while( !ifs.eof() && (ifs.tellg() < last ) );
 
 		if( header.version == '3' ){
