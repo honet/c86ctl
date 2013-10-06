@@ -344,6 +344,126 @@ void CVisC86OPNAKey::onPaintClient(void)
 }
 
 
+void CVisC86OPNAKey::onKeyDown(DWORD keycode)
+{
+	bool sw;
+	if( ::GetAsyncKeyState(VK_SHIFT) < 0 ){
+		switch(keycode){
+		case '1': //FM1
+			sw = pOPNA->getPartSolo(0);
+			pOPNA->setPartSolo(0, sw?false:true);
+			break;
+		case '2': //FM2
+			sw = pOPNA->getPartSolo(1);
+			pOPNA->setPartSolo(1, sw?false:true);
+			break;
+		case '3': //FM3
+			sw = pOPNA->getPartSolo(2);
+			pOPNA->setPartSolo(2, sw?false:true);
+			break;
+		case '7': //FM4
+			sw = pOPNA->getPartSolo(6);
+			pOPNA->setPartSolo(6, sw?false:true);
+			break;
+		case '8': //FM5
+			sw = pOPNA->getPartSolo(7);
+			pOPNA->setPartSolo(7, sw?false:true);
+			break;
+		case '9': //FM6
+			sw = pOPNA->getPartSolo(8);
+			pOPNA->setPartSolo(8, sw?false:true);
+			break;
+		case 'Q': //SSG1
+			sw = pOPNA->getPartSolo(9);
+			pOPNA->setPartSolo(9, sw?false:true);
+			break;
+		case 'W': //SSG2
+			sw = pOPNA->getPartSolo(10);
+			pOPNA->setPartSolo(10, sw?false:true);
+			break;
+		case 'E': //SSG3
+			sw = pOPNA->getPartSolo(11);
+			pOPNA->setPartSolo(11, sw?false:true);
+			break;
+		case 'R': //ADPCM
+			sw = pOPNA->getPartSolo(12);
+			pOPNA->setPartSolo(12, sw?false:true);
+			break;
+		case 'T': //RYTHM
+			sw = pOPNA->getPartSolo(13);
+			pOPNA->setPartSolo(13, sw?false:true);
+			break;
+		case '0': //全クリア
+			for( int i=0; i<14; i++ )
+				pOPNA->setPartSolo(i, false);
+			break;
+		}
+	}else{
+		switch(keycode){
+		case '1': //FM1
+			sw = pOPNA->getPartMask(0);
+			pOPNA->setPartMask(0, sw?false:true);
+			break;
+		case '2': //FM2
+			sw = pOPNA->getPartMask(1);
+			pOPNA->setPartMask(1, sw?false:true);
+			break;
+		case '3': //FM3
+			sw = pOPNA->getPartMask(2);
+			pOPNA->setPartMask(2, sw?false:true);
+			break;
+		// FM3Ex0~3は未対応
+		//	case '4':
+		//		sw = pOPNA->getPartMask(3);
+		//		pOPNA->setPartMask(3, sw?false:true);
+		//		break;
+		//	case '5':
+		//		sw = pOPNA->getPartMask(4);
+		//		pOPNA->setPartMask(4, sw?false:true);
+		//		break;
+		//	case '6':
+		//		sw = pOPNA->getPartMask(5);
+		//		pOPNA->setPartMask(5, sw?false:true);
+		//		break;
+		case '7': //FM4
+			sw = pOPNA->getPartMask(6);
+			pOPNA->setPartMask(6, sw?false:true);
+			break;
+		case '8': //FM5
+			sw = pOPNA->getPartMask(7);
+			pOPNA->setPartMask(7, sw?false:true);
+			break;
+		case '9': //FM6
+			sw = pOPNA->getPartMask(8);
+			pOPNA->setPartMask(8, sw?false:true);
+			break;
+		case 'Q': //SSG1
+			sw = pOPNA->getPartMask(9);
+			pOPNA->setPartMask(9, sw?false:true);
+			break;
+		case 'W': //SSG2
+			sw = pOPNA->getPartMask(10);
+			pOPNA->setPartMask(10, sw?false:true);
+			break;
+		case 'E': //SSG3
+			sw = pOPNA->getPartMask(11);
+			pOPNA->setPartMask(11, sw?false:true);
+			break;
+		case 'R': //ADPCM
+			sw = pOPNA->getPartMask(12);
+			pOPNA->setPartMask(12, sw?false:true);
+			break;
+		case 'T': //RYTHM
+			sw = pOPNA->getPartMask(13);
+			pOPNA->setPartMask(13, sw?false:true);
+			break;
+		case '0': //全クリア
+			for( int i=0; i<14; i++ )
+				pOPNA->setPartMask(i, false);
+			break;
+		}
+	}
+}
 
 
 // --------------------------------------------------------
@@ -403,6 +523,120 @@ void CVisC86OPN3LKey::onPaintClient(void)
 							 pOPN3L->getMixedMask(tr), pOPN3L->rhythm );
 	}
 }
+
+void CVisC86OPN3LKey::onKeyDown(DWORD keycode)
+{
+	bool sw;
+	if( ::GetAsyncKeyState(VK_SHIFT) < 0 ){
+		switch(keycode){
+		case '1': //FM1
+			sw = pOPN3L->getPartSolo(0);
+			pOPN3L->setPartSolo(0, sw?false:true);
+			break;
+		case '2': //FM2
+			sw = pOPN3L->getPartSolo(1);
+			pOPN3L->setPartSolo(1, sw?false:true);
+			break;
+		case '3': //FM3
+			sw = pOPN3L->getPartSolo(2);
+			pOPN3L->setPartSolo(2, sw?false:true);
+			break;
+		case '7': //FM4
+			sw = pOPN3L->getPartSolo(6);
+			pOPN3L->setPartSolo(6, sw?false:true);
+			break;
+		case '8': //FM5
+			sw = pOPN3L->getPartSolo(7);
+			pOPN3L->setPartSolo(7, sw?false:true);
+			break;
+		case '9': //FM6
+			sw = pOPN3L->getPartSolo(8);
+			pOPN3L->setPartSolo(8, sw?false:true);
+			break;
+		case 'Q': //SSG1
+			sw = pOPN3L->getPartSolo(9);
+			pOPN3L->setPartSolo(9, sw?false:true);
+			break;
+		case 'W': //SSG2
+			sw = pOPN3L->getPartSolo(10);
+			pOPN3L->setPartSolo(10, sw?false:true);
+			break;
+		case 'E': //SSG3
+			sw = pOPN3L->getPartSolo(11);
+			pOPN3L->setPartSolo(11, sw?false:true);
+			break;
+		case 'R': //RYTHM
+			sw = pOPN3L->getPartSolo(12);
+			pOPN3L->setPartSolo(12, sw?false:true);
+			break;
+		case '0': //全クリア
+			for( int i=0; i<13; i++ )
+				pOPN3L->setPartSolo(i, false);
+			break;
+		}
+	}else{
+		switch(keycode){
+		case '1': //FM1
+			sw = pOPN3L->getPartMask(0);
+			pOPN3L->setPartMask(0, sw?false:true);
+			break;
+		case '2': //FM2
+			sw = pOPN3L->getPartMask(1);
+			pOPN3L->setPartMask(1, sw?false:true);
+			break;
+		case '3': //FM3
+			sw = pOPN3L->getPartMask(2);
+			pOPN3L->setPartMask(2, sw?false:true);
+			break;
+		// FM3Ex0~3は未対応
+		//	case '4':
+		//		sw = pOPN3L->getPartMask(3);
+		//		pOPN3L->setPartMask(3, sw?false:true);
+		//		break;
+		//	case '5':
+		//		sw = pOPN3L->getPartMask(4);
+		//		pOPN3L->setPartMask(4, sw?false:true);
+		//		break;
+		//	case '6':
+		//		sw = pOPN3L->getPartMask(5);
+		//		pOPN3L->setPartMask(5, sw?false:true);
+		//		break;
+		case '7': //FM4
+			sw = pOPN3L->getPartMask(6);
+			pOPN3L->setPartMask(6, sw?false:true);
+			break;
+		case '8': //FM5
+			sw = pOPN3L->getPartMask(7);
+			pOPN3L->setPartMask(7, sw?false:true);
+			break;
+		case '9': //FM6
+			sw = pOPN3L->getPartMask(8);
+			pOPN3L->setPartMask(8, sw?false:true);
+			break;
+		case 'Q': //SSG1
+			sw = pOPN3L->getPartMask(9);
+			pOPN3L->setPartMask(9, sw?false:true);
+			break;
+		case 'W': //SSG2
+			sw = pOPN3L->getPartMask(10);
+			pOPN3L->setPartMask(10, sw?false:true);
+			break;
+		case 'E': //SSG3
+			sw = pOPN3L->getPartMask(11);
+			pOPN3L->setPartMask(11, sw?false:true);
+			break;
+		case 'R': //RYTHM
+			sw = pOPN3L->getPartMask(12);
+			pOPN3L->setPartMask(12, sw?false:true);
+			break;
+		case '0': //全クリア
+			for( int i=0; i<13; i++ )
+				pOPN3L->setPartMask(i, false);
+			break;
+		}
+	}
+}
+
 
 // --------------------------------------------------------
 bool CVisC86OPMKey::create( HWND parent )
@@ -485,6 +719,90 @@ void CVisC86OPMKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 	}else{
 		skin->drawDarkKeyboard( canvas, ltx, lty+sy+15 );
 		skin->drawHBar( canvas, 290, lty+sy+15, 0, 0 );
+	}
+}
+
+void CVisC86OPMKey::onKeyDown(DWORD keycode)
+{
+	bool sw;
+	if( ::GetAsyncKeyState(VK_SHIFT) < 0 ){
+		switch(keycode){
+		case '1': //FM1
+			sw = pOPM->getPartSolo(0);
+			pOPM->setPartSolo(0, sw?false:true);
+			break;
+		case '2': //FM2
+			sw = pOPM->getPartSolo(1);
+			pOPM->setPartSolo(1, sw?false:true);
+			break;
+		case '3': //FM3
+			sw = pOPM->getPartSolo(2);
+			pOPM->setPartSolo(2, sw?false:true);
+			break;
+		case '4': //FM4
+			sw = pOPM->getPartSolo(3);
+			pOPM->setPartSolo(3, sw?false:true);
+			break;
+		case '5': //FM5
+			sw = pOPM->getPartSolo(4);
+			pOPM->setPartSolo(4, sw?false:true);
+			break;
+		case '6': //FM6
+			sw = pOPM->getPartSolo(5);
+			pOPM->setPartSolo(5, sw?false:true);
+			break;
+		case '7': //FM7
+			sw = pOPM->getPartSolo(6);
+			pOPM->setPartSolo(6, sw?false:true);
+			break;
+		case '8': //FM8
+			sw = pOPM->getPartSolo(7);
+			pOPM->setPartSolo(7, sw?false:true);
+			break;
+		case '0': //全クリア
+			for( int i=0; i<8; i++ )
+				pOPM->setPartSolo(i, false);
+			break;
+		}
+	}else{
+		switch(keycode){
+		case '1': //FM1
+			sw = pOPM->getPartMask(0);
+			pOPM->setPartMask(0, sw?false:true);
+			break;
+		case '2': //FM2
+			sw = pOPM->getPartMask(1);
+			pOPM->setPartMask(1, sw?false:true);
+			break;
+		case '3': //FM3
+			sw = pOPM->getPartMask(2);
+			pOPM->setPartMask(2, sw?false:true);
+			break;
+		case '4': //FM4
+			sw = pOPM->getPartMask(3);
+			pOPM->setPartMask(3, sw?false:true);
+			break;
+		case '5': //FM5
+			sw = pOPM->getPartMask(4);
+			pOPM->setPartMask(4, sw?false:true);
+			break;
+		case '6': //FM6
+			sw = pOPM->getPartMask(5);
+			pOPM->setPartMask(5, sw?false:true);
+			break;
+		case '7': //FM7
+			sw = pOPM->getPartMask(6);
+			pOPM->setPartMask(6, sw?false:true);
+			break;
+		case '8': //FM8
+			sw = pOPM->getPartMask(7);
+			pOPM->setPartMask(7, sw?false:true);
+			break;
+		case '0': //全クリア
+			for( int i=0; i<8; i++ )
+				pOPM->setPartMask(i, false);
+			break;
+		}
 	}
 }
 
