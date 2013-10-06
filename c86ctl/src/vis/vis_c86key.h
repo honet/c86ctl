@@ -32,7 +32,6 @@ public:
 
 public:
 	virtual bool create( HWND parent = 0 ){ return false; };
-	virtual void close(){};
 	virtual int getId(void){ return id; };
 	
 protected:
@@ -69,6 +68,7 @@ public:
 protected:
 	virtual bool create( HWND parent = 0 );
 	virtual void onPaintClient(void);
+	virtual void onKeyDown(DWORD keycode);
 	
 protected:
 	void drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
@@ -101,6 +101,7 @@ public:
 protected:
 	virtual bool create( HWND parent = 0 );
 	virtual void onPaintClient(void);
+	virtual void onKeyDown(DWORD keycode);
 
 protected:
 	CVisMuteSwPtr muteSw[13];
@@ -130,6 +131,7 @@ public:
 protected:
 	virtual bool create( HWND parent = 0 );
 	virtual void onPaintClient(void);
+	virtual void onKeyDown(DWORD keycode);
 
 protected:
 	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
