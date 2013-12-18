@@ -12,6 +12,7 @@
 #include "chip/opm.h"
 #include "chip/opn3l.h"
 #include "chip/opl3.h"
+#include "chip/opll.h"
 #include "vis_c86wnd.h"
 
 namespace c86ctl{
@@ -127,6 +128,26 @@ protected:
 	
 private:
 	COPL3 *pOPL3;
+};
+
+// --------------------------------------------------------
+class CVisC86OPLLReg : public CVisC86Reg
+{
+public:
+	CVisC86OPLLReg(COPLL *pchip, int id) : CVisC86Reg(id), pOPLL(pchip){
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86OPLLREG%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] OPLL REGISTER VIEW"), id);
+		windowTitle = str;
+	};
+	~CVisC86OPLLReg(){};
+
+protected:
+	virtual void onPaintClient(void);
+	
+private:
+	COPLL *pOPLL;
 };
 
 // --------------------------------------------------------

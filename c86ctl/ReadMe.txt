@@ -93,8 +93,8 @@ For further information please contact.
 
 ::TODO::
 ・adpcmバースト転送
-・ウインドウ表示状態保存
 ・try/catchコードを全ルーチンに
 ・WriteFileに対する保護をハンドルごとのMutexに変える
-・OPN系のFNUM/BLOCKからOCT/NOTE計算処理をφMに対応するように直す。
+・<1.4.3対応完了>ウインドウ表示状態保存
+・<1.4.3対応完了>OPN系のFNUM/BLOCKからOCT/NOTE計算処理をφMに対応するように直す。
 

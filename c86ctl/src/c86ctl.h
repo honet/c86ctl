@@ -32,7 +32,8 @@ enum ChipType {
 	CHIP_OPNA,
 	CHIP_OPM,
 	CHIP_OPN3L,
-	CHIP_OPL3
+	CHIP_OPL3,
+	CHIP_OPLL
 };
 
 /*----------------------------------------------------------------------------*/

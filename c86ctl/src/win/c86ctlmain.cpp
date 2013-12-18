@@ -366,7 +366,7 @@ int C86CtlMain::getNumberOfChip(void)
 
 HRESULT C86CtlMain::getChipInterface( int id, REFIID riid, void** ppi )
 {
-	if( id < gGIMIC.size() ){
+	if( id < static_cast<int>(gGIMIC.size()) ){
 		return gGIMIC[id]->QueryInterface( riid, ppi );
 	}
 	return E_NOINTERFACE;

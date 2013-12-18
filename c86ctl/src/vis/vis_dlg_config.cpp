@@ -162,6 +162,7 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 			case CHIP_OPNA: clklist = opna_clocklist; break;
 			case CHIP_OPL3: clklist = opl3_clocklist; break;
 			case CHIP_OPN3L: break; // unsupported.
+			case CHIP_OPLL:  break; // unsupported.
 			}
 			
 			HWND hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);

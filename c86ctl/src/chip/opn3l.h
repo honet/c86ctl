@@ -11,7 +11,6 @@
 #include "chip.h"
 #include "interface/if.h"
 #include "opnx.h"
-#include "opl3.h"
 
 namespace c86ctl{
 

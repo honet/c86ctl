@@ -74,6 +74,7 @@
 #include "chip/opna.h"
 #include "chip/opn3l.h"
 #include "chip/opl3.h"
+#include "chip/opll.h"
 
 extern "C" {
 #include "hidsdi.h"
@@ -296,6 +297,9 @@ int GimicHID::init(void)
 	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
 		chiptype = CHIP_OPL3;
 		chip = new COPL3();
+	}else if( !memcmp( info.Devname, "GMC-OPLL", 8 ) ){
+		chiptype = CHIP_OPLL;
+		chip = new COPLL();
 //	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	

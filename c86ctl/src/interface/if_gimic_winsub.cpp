@@ -42,6 +42,7 @@
 #include "chip/opna.h"
 #include "chip/opn3l.h"
 #include "chip/opl3.h"
+#include "chip/opll.h"
 
 using namespace c86ctl;
 
@@ -180,6 +181,13 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 			chiptype = CHIP_OPL3;
 			chip = new COPL3();
 		}else if( chiptype != CHIP_OPL3 ){
+			goto MODULE_CHANGED;
+		}
+	}else if( !memcmp( info.Devname, "GMC-OPLL", 8 ) ){
+		if( chiptype == 0 && chip == 0 ){
+			chiptype = CHIP_OPLL;
+			chip = new COPLL();
+		}else if( chiptype != CHIP_OPLL ){
 			goto MODULE_CHANGED;
 		}
 //	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
