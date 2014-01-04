@@ -129,6 +129,17 @@ void CVisC86OPL3Reg::onPaintClient()
 	}
 }
 
+void CVisC86OPLLReg::onPaintClient()
+{
+	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+
+	if( pOPLL ){
+		int sx=5, sy=5, cx=6, cy=8;
+		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
+		drawRegView( clientCanvas, sx, sy+cy* 1, pOPLL->reg, pOPLL->regATime );
+	}
+}
+
 // --------------------------------------------------------
 CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
 {
@@ -140,6 +151,8 @@ CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
 		return CVisC86RegPtr( new CVisC86OPMReg(dynamic_cast<COPM*>(pchip), id) );
 	}else if( typeid(*pchip) == typeid(COPL3) ){
 		return CVisC86RegPtr( new CVisC86OPL3Reg(dynamic_cast<COPL3*>(pchip), id) );
+	}else if( typeid(*pchip) == typeid(COPLL) ){
+		return CVisC86RegPtr( new CVisC86OPLLReg(dynamic_cast<COPLL*>(pchip), id) );
 	}
 	return 0;
 }

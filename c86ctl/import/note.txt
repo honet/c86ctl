@@ -9,12 +9,23 @@ import/ddk
   HIDSDI.H
   HIDUSAGE.H
   Setupapi.h
+  usb.h
+  usb100.h
+  usb200.h
+  winusb.h
+  winusbio.h
 
 import/ddk/ia32
   HID.LIB
+  hidclass.lib
+  hidparse.lib
   SETUPAPI.LIB
+  winusb.lib
 
 import/ddk/x64
   HID.LIB
+  hidclass.lib
+  hidparse.lib
   SETUPAPI.LIB
+  winusb.lib
 
