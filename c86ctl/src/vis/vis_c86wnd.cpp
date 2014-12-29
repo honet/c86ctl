@@ -75,11 +75,11 @@ void CVisWnd::onPaint()
 	if( hWnd == ::GetForegroundWindow() ) type = 1;
 	gVisSkin.drawFrame( canvas, type, str );
 	std::for_each( sysWidgets.begin(), sysWidgets.end(),
-				   [this](std::shared_ptr<CVisWidget> x){ x->onPaint(canvas); } );
+				   [this](CVisWidgetPtr x){ x->onPaint(canvas); } );
 
 	onPaintClient();
 	std::for_each( widgets.begin(), widgets.end(),
-				   [this](std::shared_ptr<CVisWidget> x){ x->onPaint(this->clientCanvas); } );
+				   [this](CVisWidgetPtr x){ x->onPaint(this->clientCanvas); } );
 
 	::StretchDIBits(
 		hdc, 0, 0, canvas->getWidth(), canvas->getHeight(),
@@ -156,9 +156,9 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
 		break;
 
 	case WM_KEYDOWN:
-		onKeyDown(wp);
+		onKeyDown(static_cast<DWORD>(wp));
 	case WM_KEYUP:
-		onKeyUp(wp);
+		onKeyUp(static_cast<DWORD>(wp));
 
 	case WM_PAINT:
 		// 画面描画はタイマ駆動で行われるので描画領域更新だけして終わる
@@ -308,7 +308,7 @@ bool CVisWnd::create( int width, int height, DWORD exstyle, DWORD style, HWND pa
 	creatingWnd = NULL;
 	::ReleaseMutex( hCreatingMutex );
 
-	closeButton = CVisCloseButtonPtr(new CVisCloseButton(this,width-17,2));
+	auto closeButton = std::make_shared<CVisCloseButton>(this,width-17,2);
 	closeButton->pushEvent.push_back(
 		[this](CVisWidget* w){
 			this->close();

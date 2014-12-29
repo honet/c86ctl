@@ -23,45 +23,36 @@
 
 namespace c86ctl{
 
-class GimicHID : public GimicIF
+class GimicHID : public DeviceIF
 {
 // ファクトリ -------------------------------------------------------
 public:
-	static int UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics);
+	static int UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> > > &gimics);
 
 // 公開インタフェイス -----------------------------------------------
 public:
 	// IGimic
-	virtual int __stdcall setSSGVolume(UCHAR vol);
-	virtual int __stdcall getSSGVolume(UCHAR *vol);
-	virtual int __stdcall setPLLClock(UINT clock);
-	virtual int __stdcall getPLLClock(UINT *clock);
-	virtual int __stdcall getMBInfo(struct Devinfo *info);
-	virtual int __stdcall getModuleInfo(struct Devinfo *info);
-	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
+	virtual int setSSGVolume(UCHAR idx, UCHAR vol);
+	virtual int getSSGVolume(UCHAR idx, UCHAR *vol);
+	virtual int setPLLClock(UCHAR idx, UINT clock);
+	virtual int getPLLClock(UCHAR idx, UINT *clock);
+	virtual int getMBInfo(struct Devinfo *info);
+	virtual int getModuleInfo(UCHAR idx, struct Devinfo *info);
+	virtual int getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build );
 public:
 	// IGimic2
-	virtual int __stdcall getModuleType(enum ChipType *type);
+	virtual int getModuleType(UCHAR idx, enum ChipType *type);
 
 public:
 	// IRealChip
-	virtual int __stdcall reset(void);
-	virtual void __stdcall out(UINT addr, UCHAR data);
-	virtual UCHAR __stdcall in( UINT addr );
+	virtual int reset(void);
+	virtual void out( UCHAR idx, UINT addr, UCHAR data);
+	virtual UCHAR in( UCHAR idx, UINT addr );
 
 public:
 	// IRealChip2
-	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
-	virtual void __stdcall directOut(UINT addr, UCHAR data);
-
-// 実験中 -----------------------------------------------
-public:
-//	virtual int __stdcall adpcmZeroClear(void);
-//	virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data );
-//	virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data );
-	virtual int __stdcall setDelay(int d);
-	virtual int __stdcall getDelay(int *d);
-	virtual int __stdcall isValid(void);
+	virtual int getChipStatus(UCHAR idx, UINT addr, UCHAR *status);
+	virtual void directOut(UCHAR idx,UINT addr, UCHAR data);
 
 // C86CTL内部利用 ---------------------------------------------------
 private:
@@ -71,16 +62,27 @@ public:
 	~GimicHID(void);
 
 public:
-	virtual int init(void);
-	virtual void tick(void);
-	virtual Chip* getChip(void){ return chip; };
-	virtual const GimicParam* getParam(){ return &gimicParam; };
+	// 非公開
+	virtual int setDelay(int d);
+	virtual int getDelay(int *d);
+	virtual int isValid(void);
 
 public:
-	virtual UINT getCPS(void){ return cps; };
+	virtual void tick(void);
 	virtual void update(void);
+	virtual const GimicParam* getParam(UCHAR idx){ return &gimicParam; };
+	
+	virtual UINT getCPS(void){ return cps; };
 	virtual void checkConnection(void);
 
+public:
+	virtual int getNumberOfModules();
+	virtual bool isChipConnected(int idx);
+	virtual int connectChip(int idx, IChip *dev);
+	virtual int disconnectChip(int idx);
+	
+private:
+	int init(void);
 
 // プライベート -----------------------------------------------------
 private:
@@ -144,9 +146,12 @@ private:
 	int delay;
 	CRingBuff<REQ> dqueue;
 	
-	Chip *chip;
+	IChip *chip;
 	ChipType chiptype;
 	GimicParam gimicParam;
+
+protected:
+	int refcount;
 };
 
 typedef std::shared_ptr<GimicHID> GimicHIDPtr;

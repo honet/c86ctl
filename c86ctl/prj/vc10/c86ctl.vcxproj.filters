@@ -112,6 +112,18 @@
     <ClCompile Include="..\..\src\vis\vis_dlg_config.cpp">
       <Filter>vis</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\interface\logical_device.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interface\delay_filter.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interface\stream.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\interface\if_c86usb_winusb.cpp">
+      <Filter>interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\win\config.h">
@@ -212,6 +224,24 @@
     </ClInclude>
     <ClInclude Include="..\..\src\vis\vis_dlg_config.h">
       <Filter>vis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\logical_device.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\delay_filter.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\basefilter.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\stream.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\interface\if_c86usb_winusb.h">
+      <Filter>interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\generic.h">
+      <Filter>module</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

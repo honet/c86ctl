@@ -58,6 +58,7 @@ C86winDlg::C86winDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(C86winDlg::IDD, pParent)
 	, m_ssgVol(255)
 	, m_pllClock(8000000)
+	, moduleID(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	hThread = NULL;
@@ -73,6 +74,7 @@ void C86winDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_MESSAGE, m_editMessage);
 	DDX_Text(pDX, IDC_EDIT_SSGVOL, m_ssgVol);
 	DDX_Text(pDX, IDC_EDIT_PLLCLOCK, m_pllClock);
+	DDX_Text(pDX, IDC_EDIT_MODULEID, moduleID);
 }
 
 BEGIN_MESSAGE_MAP(C86winDlg, CDialogEx)
@@ -217,7 +219,11 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
 	int nchip = pApp->pChipBase->getNumberOfChip();
 	if( 0<nchip ){
-		pApp->pChipBase->getChipInterface( 0, IID_IRealChip, (void**)&pRC );
+		int mID = 0;
+		if (0<=pThis->moduleID && pThis->moduleID < pApp->pChipBase->getNumberOfChip() )
+			mID = pThis->moduleID;
+			
+		pApp->pChipBase->getChipInterface( mID, IID_IRealChip, (void**)&pRC );
 	}
 	pRC->reset();
 	// -----------------------------------------------------------------
@@ -234,6 +240,8 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 		}
 	}
 
+
+	//tick = 10000;
 		
 
 	tpus = (INT)(pThis->s98data.getTimerPrec() * 1000.0);
@@ -263,6 +271,8 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 //		pThis->m_staticTick.SetWindowText(str);
 //		pThis->m_staticTick.UpdateWindow();
 
+
+
 		auto prow = &pThis->s98data.row;
 		if( idx < prow->size() ){
 			auto pr = &prow->at(idx);
@@ -283,6 +293,7 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 #endif
 					//c86ctl_out(addr, data);
 					pRC->out( addr, data );
+//Sleep(10);
 					last_is_adpcm = ( addr == 0x108 );
 				}else if( pr->cmd == 0xfd ){ // end / loop
 					if( loopidx != 0 ){
@@ -320,6 +331,7 @@ void C86winDlg::OnBnClickedCancel()
 
 void C86winDlg::OnBnClickedButtonPlay()
 {
+	UpdateData();
 	if( hThread == 0 ){
 		C86winApp *pApp = (C86winApp*)AfxGetApp();
 		int nchip = pApp->pChipBase->getNumberOfChip();

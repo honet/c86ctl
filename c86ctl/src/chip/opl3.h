@@ -38,7 +38,20 @@ public:
 	};
 
 public:
-	bool setReg( int addr, UCHAR data ){
+	void byteOut( UINT addr, UCHAR data ){
+		if(setReg(addr,data))
+			if(ds) ds->byteOut(addr,data);
+	};
+
+	UCHAR getReg( UINT addr ){
+		if( addr < 0x200 )
+			return reg[addr>>8][addr&0xff];
+		return 0;
+	};
+	virtual void setMasterClock( UINT clock ){};
+
+private:
+	bool setReg( UINT addr, UCHAR data ){
 		if( 0x200 <= addr )
 			return false;
 		
@@ -49,13 +62,7 @@ public:
 		return true;
 		//return false;
 	}
-	UCHAR getReg( int addr ){
-		if( addr < 0x200 )
-			return reg[addr>>8][addr&0xff];
-		return 0;
-	};
-	virtual void setMasterClock( UINT clock ){};
-
+	
 public:
 	UCHAR reg[2][256];
 	UCHAR regATime[2][256];

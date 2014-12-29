@@ -84,6 +84,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\import\ddk\ia32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -95,7 +96,7 @@
     </Link>
     <PreBuildEvent>
       <Command>cd $(SolutionDir)c86ctl\src
-c:\ruby193\bin\ruby verup.rb</Command>
+c:\ruby\bin\ruby verup.rb</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -108,6 +109,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\import\ddk\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -128,6 +130,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\import\ddk\ia32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -148,6 +151,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\import\ddk\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -177,9 +181,13 @@ c:\ruby193\bin\ruby verup.rb</Command>
     <ClCompile Include="..\..\src\chip\opnx.cpp" />
     <ClCompile Include="..\..\src\chip\opx.cpp" />
     <ClCompile Include="..\..\src\common\ringbuff.cpp" />
+    <ClCompile Include="..\..\src\interface\delay_filter.cpp" />
+    <ClCompile Include="..\..\src\interface\if_c86usb_winusb.cpp" />
     <ClCompile Include="..\..\src\interface\if_gimic_hid.cpp" />
     <ClCompile Include="..\..\src\interface\if_gimic_midi.cpp" />
     <ClCompile Include="..\..\src\interface\if_gimic_winsub.cpp" />
+    <ClCompile Include="..\..\src\interface\logical_device.cpp" />
+    <ClCompile Include="..\..\src\interface\stream.cpp" />
     <ClCompile Include="..\..\src\vis\vis_bitmap.cpp" />
     <ClCompile Include="..\..\src\vis\vis_c86fm.cpp" />
     <ClCompile Include="..\..\src\vis\vis_c86key.cpp" />
@@ -201,6 +209,7 @@ c:\ruby193\bin\ruby verup.rb</Command>
   <ItemGroup>
     <ClInclude Include="..\..\src\c86ctl.h" />
     <ClInclude Include="..\..\src\chip\chip.h" />
+    <ClInclude Include="..\..\src\chip\generic.h" />
     <ClInclude Include="..\..\src\chip\opl3.h" />
     <ClInclude Include="..\..\src\chip\opm.h" />
     <ClInclude Include="..\..\src\chip\opn3l.h" />
@@ -210,10 +219,15 @@ c:\ruby193\bin\ruby verup.rb</Command>
     <ClInclude Include="..\..\src\common\mydef.h" />
     <ClInclude Include="..\..\src\common\ringbuff.h" />
     <ClInclude Include="..\..\src\common\withlock.h" />
+    <ClInclude Include="..\..\src\interface\basefilter.h" />
+    <ClInclude Include="..\..\src\interface\delay_filter.h" />
     <ClInclude Include="..\..\src\interface\if.h" />
+    <ClInclude Include="..\..\src\interface\if_c86usb_winusb.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_hid.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_midi.h" />
     <ClInclude Include="..\..\src\interface\if_gimic_winusb.h" />
+    <ClInclude Include="..\..\src\interface\logical_device.h" />
+    <ClInclude Include="..\..\src\interface\stream.h" />
     <ClInclude Include="..\..\src\version.h" />
     <ClInclude Include="..\..\src\vis\vis_bitmap.h" />
     <ClInclude Include="..\..\src\vis\vis_c86fm.h" />

@@ -127,7 +127,7 @@ bool COPMFm::setReg( UCHAR addr, UCHAR data )
 	return handled;
 }
 
-void COPM::filter( int addr, UCHAR *data )
+void COPM::byteOut( UINT addr, UCHAR data )
 {
 	int ch;
 	if( 0x100 <= addr ) return;
@@ -135,13 +135,15 @@ void COPM::filter( int addr, UCHAR *data )
 	if( 0x20<=addr && addr<=0x27 ){
 		ch = addr-0x20;
 		if( getMixedMask( ch ) ){
-			*data &= 0x3f;
+			data &= 0x3f;
 		}
 	}
-	return;
+	
+	if(setReg(addr,data))
+		if(ds) ds->byteOut(addr,data);
 }
 
-bool COPM::setReg( int addr, UCHAR data )
+bool COPM::setReg( UINT addr, UCHAR data )
 {
 	if( 0x100 <= addr ) return false;
 	
@@ -153,7 +155,7 @@ bool COPM::setReg( int addr, UCHAR data )
 	return fm->setReg( addr, data );
 }
 
-UCHAR COPM::getReg( int addr )
+UCHAR COPM::getReg( UINT addr )
 {
 	if( addr < 0x100 )
 		return reg[addr];
@@ -163,6 +165,8 @@ UCHAR COPM::getReg( int addr )
 void COPM::applyMask(int ch)
 {
 	UCHAR data;
+	if(!ds) return;
+
 	bool mask = getMixedMask(ch);
 	
 	if( 0<=ch && ch<=7 ){ // FM 1~8
@@ -173,7 +177,8 @@ void COPM::applyMask(int ch)
 			fm->ch[fmNo]->getLR( l,r );
 			data |= (l?0x80:0) | (r?0x40:0);
 		}
-		pIF->directOut( 0x20+ch, data );
+		ds->byteOut(0x20+ch, data);
+		//pIF->directOut( 0x20+ch, data );
 	}
 }
 

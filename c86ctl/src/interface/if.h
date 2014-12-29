@@ -10,103 +10,112 @@
  */
 #pragma once
 #include <memory>
+#include <string>
 #include "c86ctl.h"
-#include "chip/chip.h"
 
 //#define SUPPORT_MIDI <=全然メンテしていません
 #define SUPPORT_WINUSB
-#define SUPPORT_HID
+//#define SUPPORT_HID
 
 namespace c86ctl{
 
-class GimicIF : public IRealChip2, public IGimic2
+class GimicParam;
+
+// ------------------------------------
+interface IComponentControl
 {
 public:
-	GimicIF() : refcount(0){ };
-	virtual ~GimicIF(){};
+	virtual void reset(void) = 0;
+	virtual void tick(void) = 0;
+};
 
+interface IByteInput
+{
 public:
-	// IUnknown
-	virtual HRESULT __stdcall QueryInterface( REFIID riid, LPVOID *ppvObj ){
-		if( !ppvObj )
-			return ERROR_INVALID_PARAMETER;
-		
-		if( ::IsEqualIID( riid, IID_IRealChip ) ){
-			*ppvObj = static_cast<IRealChip*>(this);
-			return NOERROR;
-		}else if( ::IsEqualIID( riid, IID_IRealChip2 ) ){
-			*ppvObj = static_cast<IRealChip2*>(this);
-			return NOERROR;
-		}else if( ::IsEqualIID( riid, IID_IGimic ) ){
-			*ppvObj = static_cast<IGimic*>(this);
-			return NOERROR;
-		}else if( ::IsEqualIID( riid, IID_IGimic2 ) ){
-			*ppvObj = static_cast<IGimic2*>(this);
-			return NOERROR;
-		}
-		*ppvObj = NULL;
-		return E_NOINTERFACE;
-	};
+	virtual void byteOut(UINT addr, UCHAR data) = 0;
+};
 
-	virtual ULONG __stdcall AddRef(VOID){ return ++refcount; };
-	virtual ULONG __stdcall Release(VOID){ return --refcount; };
-
+/*
+interface IGimicModule
+{
 public:
-	// IRealChip
-	virtual int __stdcall reset(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual void __stdcall out( UINT addr, UCHAR data){};
-	virtual UCHAR __stdcall in( UINT addr ){ return 0; };
+	virtual int setSSGVolume(UCHAR vol) = 0;
+	virtual int getSSGVolume(UCHAR *vol) = 0;
+	virtual int setPLLClock(UINT clock) = 0;
+	virtual int getPLLClock(UINT *clock) = 0;
+	virtual int getChipStatus(UINT addr, UCHAR *status) = 0;
+	virtual int getModuleInfo(struct Devinfo *info) = 0;
+	virtual const GimicParam* getGimicParam() = 0;
+};
 
+interface IGimicDevice
+{
 public:
-	// IRealChip2
-	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual void __stdcall directOut(UINT addr, UCHAR data){};
+	virtual int getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build ) = 0;
+	virtual int getMBInfo(struct Devinfo *info) = 0;
+};
+*/
+interface IFirmwareVersionInfo
+{
+public:
+	virtual int getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build ) = 0;
+};
 
+
+// ---------------------------------
+class BaseSoundDevice;
+
+// 子モジュール
+class BaseSoundModule : public IByteInput
+{
 public:
-	// 実験中
-	//virtual int __stdcall adpcmZeroClear(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	//virtual int __stdcall adpcmWrite( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	//virtual int __stdcall adpcmRead( UINT startAddr, UINT size, UCHAR *data ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	BaseSoundModule(){};
+public:
+	// IByteInput
+	virtual void byteOut(UINT addr, UCHAR data){};
+	virtual void directOut( UINT addr, UCHAR data ){};
 	
 public:
-	// 非公開
-	virtual int __stdcall setDelay(int delay){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall getDelay(int *delay){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall isValid(void){ return 0; };
+	virtual enum ChipType getChipType(){ return CHIP_UNKNOWN; };
+	virtual int isValid(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	//virtual std::basic_string<TCHAR> getNodeId(){ return std::basic_string<TCHAR>(); };
+	
+	virtual BaseSoundDevice* getParentDevice(){ return 0; };
 
-public:
-	// IGimic
-	virtual int __stdcall setSSGVolume(UCHAR vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall getSSGVolume(UCHAR *vol){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall setPLLClock(UINT clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall getPLLClock(UINT *clock){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build ){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall getMBInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual int __stdcall getModuleInfo(struct Devinfo *info){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-public:
-	// IGimic2
-	virtual int __stdcall getModuleType(enum ChipType *type){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+};
 
-
+// 親デバイス
+class BaseSoundDevice
+{
 public:
-	// 非公開
-	virtual int init(void){ return 0; };
+	BaseSoundDevice(){};
+	
+public:
+	virtual int reset(){ return C86CTL_ERR_NOT_IMPLEMENTED; };
 	virtual void tick(void){};
 	virtual void update(void){};
 	virtual UINT getCPS(void){ return 0; };
-	virtual void checkConnection(void){};
-
-	virtual Chip* getChip(){ return 0; };
-	virtual const GimicParam* getParam(){ return 0; };
-
-public:
 	
-
-
-protected:
-	int refcount;
+	virtual int isValid(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
+	virtual void checkConnection(void){};
+	//virtual std::basic_string<TCHAR> getNodeId(){ return std::basic_string<TCHAR>(); };
+	
+	virtual BaseSoundModule* getModule(int id){ return NULL; };
+	virtual int getNumberOfModules(){ return 0; };
 };
 
-typedef std::shared_ptr<GimicIF> GimicIFPtr;
+typedef std::shared_ptr<BaseSoundDevice> BaseSoundDevicePtr;
+
+class GimicParam
+{
+public:
+	GimicParam() : ssgVol(0), clock(0) {
+	};
+
+	UCHAR ssgVol;
+	UINT clock;
+};
+
+
 
 };

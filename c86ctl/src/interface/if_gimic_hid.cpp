@@ -119,10 +119,10 @@ GimicHID::~GimicHID(void)
 /*----------------------------------------------------------------------------
 	HIDIF factory
 ----------------------------------------------------------------------------*/
-int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics)
+int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> > > &gimics)
 {
 	gimics.lock();
-	std::for_each( gimics.begin(), gimics.end(), []( std::shared_ptr<GimicIF> x ){ x->checkConnection(); } );
+	std::for_each( gimics.begin(), gimics.end(), []( std::shared_ptr<DeviceIF> x ){ x->checkConnection(); } );
 
 	GUID hidGuid;
 	HDEVINFO devinf;
@@ -186,7 +186,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 				(attr.VendorID == C86USB_USBVID && attr.ProductID == C86USB_USBPID)){
 				
 				auto it = std::find_if( gimics.begin(), gimics.end(),
-					[devpath](std::shared_ptr<GimicIF> x) -> bool {
+					[devpath](std::shared_ptr<DeviceIF> x) -> bool {
 						GimicHID *ghid = dynamic_cast<GimicHID*>(x.get());
 						if(!ghid) return false;
 						if(ghid->devPath != devpath ) return false;
@@ -208,7 +208,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> >
 					GimicHID *gimicHid = new GimicHID(hHID);
 					if( gimicHid ){
 						gimicHid->devPath = devpath;
-						gimics.push_back( GimicIFPtr(gimicHid) );
+						gimics.push_back( DeviceIFPtr(gimicHid) );
 						gimicHid->init();
 					}
 				}
@@ -284,30 +284,25 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 int GimicHID::init(void)
 {
 	Devinfo info;
-	getModuleInfo(&info);
+	getModuleInfo(0, &info);
 	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
 		chiptype = CHIP_OPN3L;
-		chip = new COPN3L(this);
 	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
 		chiptype = CHIP_OPM;
-		chip = new COPM(this);
 	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
 		chiptype = CHIP_OPNA;
-		chip = new COPNA(this);
 	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
 		chiptype = CHIP_OPL3;
-		chip = new COPL3();
 	}else if( !memcmp( info.Devname, "GMC-OPLL", 8 ) ){
 		chiptype = CHIP_OPLL;
-		chip = new COPLL();
 //	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	
 	// 値をキャッシュさせるためのダミー呼び出し
 	UCHAR vol;
-	getSSGVolume(&vol);
+	getSSGVolume(0, &vol);
 	UINT clock;
-	getPLLClock(&clock);
+	getPLLClock(0, &clock);
 	
 	return C86CTL_ERR_NONE;
 }
@@ -339,7 +334,7 @@ int GimicHID::isValid(void)
 	return (hHandle == 0) ? FALSE : TRUE;
 }
 
-int GimicHID::setSSGVolume(UCHAR vol)
+int GimicHID::setSSGVolume(UCHAR idx, UCHAR vol)
 {
 	if( chiptype != CHIP_OPNA )
 		return C86CTL_ERR_UNSUPPORTED;
@@ -349,7 +344,7 @@ int GimicHID::setSSGVolume(UCHAR vol)
 	return sendMsg( &d );
 }
 
-int GimicHID::getSSGVolume(UCHAR *vol)
+int GimicHID::getSSGVolume(UCHAR idx, UCHAR *vol)
 {
 	if( chiptype != CHIP_OPNA )
 		return C86CTL_ERR_UNSUPPORTED;
@@ -365,7 +360,7 @@ int GimicHID::getSSGVolume(UCHAR *vol)
 	return ret;
 }
 
-int GimicHID::setPLLClock(UINT clock)
+int GimicHID::setPLLClock(UCHAR idx, UINT clock)
 {
 	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3  )
 		return C86CTL_ERR_UNSUPPORTED;
@@ -374,14 +369,14 @@ int GimicHID::setPLLClock(UINT clock)
 	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
 	int ret = sendMsg( &d );
 
-	if( ret == C86CTL_ERR_NONE ){
-		if( chip )
-			chip->setMasterClock(clock);
-	}
+	//if( ret == C86CTL_ERR_NONE ){
+	//	if( chip )
+	//		chip->setMasterClock(clock);
+	//}
 	return ret;
 }
 
-int GimicHID::getPLLClock(UINT *clock)
+int GimicHID::getPLLClock(UCHAR idx, UINT *clock)
 {
 	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3 )
 		return C86CTL_ERR_UNSUPPORTED;
@@ -395,8 +390,8 @@ int GimicHID::getPLLClock(UINT *clock)
 	if( ret == C86CTL_ERR_NONE ){
 		if( gimicParam.clock != *clock ){
 			gimicParam.clock = *clock;
-			if( chip )
-				chip->setMasterClock(*clock);
+//			if( chip )
+//				chip->setMasterClock(*clock);
 		}
 	}
 	return ret;
@@ -419,7 +414,7 @@ int GimicHID::getMBInfo( struct Devinfo *info )
 	return ret;
 }
 
-int GimicHID::getModuleInfo( struct Devinfo *info )
+int GimicHID::getModuleInfo( UCHAR idx, struct Devinfo *info )
 {
 	int ret;
 	
@@ -436,7 +431,7 @@ int GimicHID::getModuleInfo( struct Devinfo *info )
 	return ret;
 }
 
-int GimicHID::getModuleType(enum ChipType *type)
+int GimicHID::getModuleType(UCHAR idx, enum ChipType *type)
 {
 	if( !type )
 		return C86CTL_ERR_INVALID_PARAM;
@@ -460,7 +455,7 @@ int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 	return ret;
 }
 
-int GimicHID::getChipStatus( UINT addr, UCHAR *status )
+int GimicHID::getChipStatus( UCHAR idx, UINT addr, UCHAR *status )
 {
 	if( !status )
 		return C86CTL_ERR_INVALID_PARAM;
@@ -497,7 +492,7 @@ int GimicHID::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 }
 */
 
-void GimicHID::directOut(UINT addr, UCHAR data)
+void GimicHID::directOut(UCHAR idx, UINT addr, UCHAR data)
 {
 	switch( chiptype ){
 	case CHIP_OPNA:
@@ -547,7 +542,7 @@ void GimicHID::out2buf(UINT addr, UCHAR data)
 		}
 	}
 }
-void GimicHID::out(UINT addr, UCHAR data)
+void GimicHID::out(UCHAR idx, UINT addr, UCHAR data)
 {
 	if( 0<delay ){
 		REQ r = { ::timeGetTime()+delay, addr, data };
@@ -562,7 +557,7 @@ void GimicHID::out(UINT addr, UCHAR data)
 	out2buf(addr, data);
 }
 
-UCHAR GimicHID::in(UINT addr)
+UCHAR GimicHID::in(UCHAR idx, UINT addr)
 {
 	if( chip )
 		return chip->getReg(addr);
@@ -656,5 +651,37 @@ int GimicHID::getDelay(int *d)
 	}
 	return C86CTL_ERR_INVALID_PARAM;
 }
+
+int GimicHID::getNumberOfModules()
+{
+	return 1;
+}
+
+bool GimicHID::isChipConnected(int idx)
+{
+	if (idx!=0)
+		return false;
+	
+	return (chip==0) ? false : true;
+}
+
+int GimicHID::connectChip(int idx, IChip *dev)
+{
+	if (idx!=0)
+		return C86CTL_ERR_INVALID_PARAM;
+
+	chip = dev;
+	return C86CTL_ERR_NONE;
+}
+
+int GimicHID::disconnectChip(int idx)
+{
+	if (idx!=0)
+		return C86CTL_ERR_INVALID_PARAM;
+
+	chip = NULL;
+	return C86CTL_ERR_NONE;
+}
+
 
 #endif

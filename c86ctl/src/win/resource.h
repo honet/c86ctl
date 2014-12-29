@@ -9,6 +9,7 @@
 #define IDR_MENU_SYSPOPUP               104
 #define IDD_DIALOG_CONFIG               105
 #define IDD_C86CTL_CONFIG               105
+#define IDD_C86CLT_DEVICETAB            106
 #define IDC_EDIT_DELAY0                 1001
 #define IDC_EDIT_DELAY1                 1002
 #define IDC_EDIT_DELAY2                 1003
@@ -24,6 +25,8 @@
 #define IDC_EDIT_SSGVOL0                1011
 #define IDC_COMBO_PLLCLOCK1             1012
 #define IDC_COMBO_PLLCLOCK2             1013
+#define IDC_TAB1                        1014
+#define IDC_TAB_DEVICE                  1014
 #define IDC_COMBO_PLLCLOCK3             1015
 #define IDC_EDIT_SSGVOL1                1016
 #define IDC_EDIT_SSGVOL2                1018
@@ -42,9 +45,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        106
+#define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40006
-#define _APS_NEXT_CONTROL_VALUE         1011
+#define _APS_NEXT_CONTROL_VALUE         1015
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

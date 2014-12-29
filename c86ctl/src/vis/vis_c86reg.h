@@ -13,6 +13,7 @@
 #include "chip/opn3l.h"
 #include "chip/opl3.h"
 #include "chip/opll.h"
+#include "chip/generic.h"
 #include "vis_c86wnd.h"
 
 namespace c86ctl{
@@ -148,6 +149,46 @@ protected:
 	
 private:
 	COPLL *pOPLL;
+};
+
+// --------------------------------------------------------
+class CVisC86Generic1Reg : public CVisC86Reg
+{
+public:
+	CVisC86Generic1Reg(CGenericChipBank1 *pchip, int id) : CVisC86Reg(id), pChip(pchip){
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86 GENERIC1REG%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
+		windowTitle = str;
+	};
+	~CVisC86Generic1Reg(){};
+
+protected:
+	virtual void onPaintClient(void);
+	
+private:
+	CGenericChipBank1 *pChip;
+};
+
+// --------------------------------------------------------
+class CVisC86Generic2Reg : public CVisC86Reg
+{
+public:
+	CVisC86Generic2Reg(CGenericChipBank2 *pchip, int id) : CVisC86Reg(id), pChip(pchip){
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86 GENERIC2REG%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
+		windowTitle = str;
+	};
+	~CVisC86Generic2Reg(){};
+
+protected:
+	virtual void onPaintClient(void);
+	
+private:
+	CGenericChipBank2 *pChip;
 };
 
 // --------------------------------------------------------

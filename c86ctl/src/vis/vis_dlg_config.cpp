@@ -15,6 +15,9 @@
 #include "vis_dlg_config.h"
 #include "resource.h"
 
+#include "../interface/if_c86usb_winusb.h"
+#include "../interface/if_gimic_winusb.h"
+
 using namespace c86ctl::vis;
 
 HWND CVisDlgConfig::hDlg = 0;
@@ -95,6 +98,18 @@ INT_PTR CALLBACK CVisDlgConfig::dlgProc(HWND hWnd , UINT msg , WPARAM wp , LPARA
 	case WM_COMMAND:
 		onCommand((HWND)lp, wp&0xffff, (wp>>16)&0xffff);
 		break;
+
+	case WM_NOTIFY:
+		{
+			NMHDR *nmhdr = reinterpret_cast<NMHDR*>(lp);
+			if (nmhdr->idFrom == IDC_TAB_DEVICE) {
+				switch(nmhdr->code){
+				case TCN_SELCHANGE:
+					break;
+				}
+			}
+		}
+		break;
 		
 	case WM_INITDIALOG:
 		onInitDialog(hWnd);
@@ -112,8 +127,9 @@ INT_PTR CALLBACK CVisDlgConfig::dlgProc(HWND hWnd , UINT msg , WPARAM wp , LPARA
 
 void CVisDlgConfig::onInitDialog(HWND hWnd)
 {
-	auto gimics = GetC86CtlMain()->getGimics();
-	int n = gimics.size();
+	auto ctrl = GetC86CtlMain();
+	int n = ctrl->getNumberOfChip();
+
 	const int bufsz = 128;
 	TCHAR str[bufsz];
 
@@ -127,8 +143,9 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 	const UINT clocks_cmbid[nMaxModules] = { IDC_COMBO_PLLCLOCK0, IDC_COMBO_PLLCLOCK1, IDC_COMBO_PLLCLOCK2, IDC_COMBO_PLLCLOCK3 };
 
 	for( int i=0; i<nMaxModules; i++ ){
-		if(i<n && gimics[i]->isValid()){
-			auto gimic = gimics[i];
+
+		if(i<n){
+			auto stream = ctrl->getStream(i);
 			HWND hspin, hedit;
 			
 			hspin = GetDlgItem(hWnd, delay_spinid[i]);
@@ -136,59 +153,70 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 			SendMessage(hspin, UDM_SETRANGE32, 0, 5000);
 
 			int delay=0;
-			gimic->getDelay(&delay);
+			stream->delay->getDelay(&delay);
 			_sntprintf(str, bufsz, _T("%d"), delay);
 			hedit = GetDlgItem(hWnd, delay_editid[i]);
 			EnableWindow(hedit,TRUE);
 			Edit_SetText(hedit, str);
 
-			hspin = GetDlgItem(hWnd, ssgvol_spinid[i]);
-			EnableWindow(hspin,TRUE);
-			SendMessage(hspin, UDM_SETRANGE32, 0, 127);
-
 			UCHAR vol=0;
-			gimic->getSSGVolume(&vol);
-			_sntprintf(str, bufsz, _T("%d"), vol);
-			hedit = GetDlgItem(hWnd, ssgvol_editid[i]);
-			EnableWindow(hedit,TRUE);
-			Edit_SetText(hedit, str);
+			GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
+			if(gimic_module){
 
-			ChipType type;
-			gimic->getModuleType(&type);
+				hspin = GetDlgItem(hWnd, ssgvol_spinid[i]);
+				EnableWindow(hspin,TRUE);
+				SendMessage(hspin, UDM_SETRANGE32, 0, 127);
+				
+				gimic_module->getSSGVolume(&vol);
+				_sntprintf(str, bufsz, _T("%d"), vol);
+				hedit = GetDlgItem(hWnd, ssgvol_editid[i]);
+				EnableWindow(hedit,TRUE);
+				Edit_SetText(hedit, str);
 
-			const int *clklist = NULL;
-			switch(type){
-			case CHIP_OPM:  clklist = opm_clocklist; break;
-			case CHIP_OPNA: clklist = opna_clocklist; break;
-			case CHIP_OPL3: clklist = opl3_clocklist; break;
-			case CHIP_OPN3L: break; // unsupported.
-			case CHIP_OPLL:  break; // unsupported.
-			}
+
+				ChipType type = stream->module->getChipType();
+				const int *clklist = NULL;
+				switch(type){
+				case CHIP_OPM:  clklist = opm_clocklist; break;
+				case CHIP_OPNA: clklist = opna_clocklist; break;
+				case CHIP_OPL3: clklist = opl3_clocklist; break;
+				case CHIP_OPN3L: break; // unsupported.
+				case CHIP_OPLL:  break; // unsupported.
+				}
+
 			
-			HWND hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);
-			if( clklist ){
-				EnableWindow(hcmb, TRUE);
-				for(int i=0;;i++){
-					if( clklist[i]<0 ) break;
-					_sntprintf(str, bufsz, _T("%d Hz"), clklist[i]);
-					int idx = ComboBox_AddItemData( hcmb, str );
-					if( idx != CB_ERR && idx != CB_ERRSPACE )
-						ComboBox_SetItemData( hcmb, idx, clklist[i] );
-				}
-				
-				UINT clk;
-				gimic->getPLLClock(&clk);
-				for(int i=0;;i++){
-					if( clklist[i]<0 ) break;
-					if( clklist[i]==clk ){
-						ComboBox_SetCurSel(hcmb, i);
-						break;
+				HWND hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);
+				if( clklist ){
+					EnableWindow(hcmb, TRUE);
+					for(int i=0;;i++){
+						if( clklist[i]<0 ) break;
+						_sntprintf(str, bufsz, _T("%d Hz"), clklist[i]);
+						int idx = ComboBox_AddItemData( hcmb, str );
+						if( idx != CB_ERR && idx != CB_ERRSPACE )
+							ComboBox_SetItemData( hcmb, idx, clklist[i] );
 					}
+					
+					UINT clk;
+					gimic_module->getPLLClock(&clk);
+					for(int i=0;;i++){
+						if( clklist[i]<0 ) break;
+						if( clklist[i]==clk ){
+							ComboBox_SetCurSel(hcmb, i);
+							break;
+						}
+					}
+				}else{
+					EnableWindow(hcmb, FALSE);
 				}
-				
 			}else{
+				hspin = GetDlgItem(hWnd, ssgvol_spinid[i]);
+				EnableWindow(hspin,FALSE);
+				hedit = GetDlgItem(hWnd, ssgvol_editid[i]);
+				EnableWindow(hedit,FALSE);
+				HWND hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);
 				EnableWindow(hcmb, FALSE);
 			}
+
 		}else{
 			HWND hspin,hedit,hcmb;
 			hspin = GetDlgItem(hWnd, delay_spinid[i]);
@@ -204,26 +232,30 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 		}
 
 	}
-	
 	isInit = true;
 }
 
 
 void CVisDlgConfig::onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	auto gimics = GetC86CtlMain()->getGimics();
-	TCHAR buff[256];
-	int delay=0;
-
-	if(id>=gimics.size() || !gimics[id].get()->isValid())
-		return;
-
 	switch(notifyCode){
 	case EN_CHANGE:
 		if( isInit ){
+			auto ctrl = GetC86CtlMain();
+			int n = ctrl->getNumberOfChip();
+
+			if(id>=n)
+				return;
+			auto stream = ctrl->getStream(id);
+			if (!stream->module->isValid())
+				return;
+
+			TCHAR buff[256];
+			int delay=0;
+			
 			Edit_GetText(hwnd, buff, sizeof(buff));
 			delay = _ttoi(buff);
-			gimics[id]->setDelay(delay);
+			stream->delay->setDelay(delay);
 		}
 		break;
 	}
@@ -231,21 +263,30 @@ void CVisDlgConfig::onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 
 void CVisDlgConfig::onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	auto gimics = GetC86CtlMain()->getGimics();
-	TCHAR buff[256];
-	UCHAR vol=0;
-
-	if(id>=gimics.size() || !gimics[id].get()->isValid())
-		return;
-
 	switch(notifyCode){
 	case EN_CHANGE:
 		if( isInit ){
+			auto ctrl = GetC86CtlMain();
+			int n = ctrl->getNumberOfChip();
+
+			if(id>=n)
+				return;
+			auto stream = ctrl->getStream(id);
+			if (!stream->module->isValid())
+				return;
+
+			GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
+			if(!gimic_module)
+				return;
+
+			TCHAR buff[256];
+			UCHAR vol=0;
+			
 			Edit_GetText(hwnd, buff, sizeof(buff));
 			vol = (UCHAR)_ttoi(buff);
 			if( vol<0 ) vol = 0;
 			if( vol>127 ) vol = 127;
-			gimics[id]->setSSGVolume(vol);
+			gimic_module->setSSGVolume(vol);
 		}
 		break;
 	}
@@ -253,17 +294,26 @@ void CVisDlgConfig::onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 
 void CVisDlgConfig::onPLLClockCmbNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	auto gimics = GetC86CtlMain()->getGimics();
-
-	if(id>=gimics.size() || !gimics[id].get()->isValid())
-		return;
-
 	switch(notifyCode){
 	case CBN_SELCHANGE:
 		if( isInit ){
+			auto ctrl = GetC86CtlMain();
+			int n = ctrl->getNumberOfChip();
+			if(id>=n)
+				return;
+			auto stream = ctrl->getStream(id);
+			if (!stream->module->isValid())
+				return;
+
+			GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
+			if(!gimic_module)
+				return;
+
+			
 			int idx = ComboBox_GetCurSel(hwnd);
 			int clk = ComboBox_GetItemData(hwnd, idx);
-			gimics[id]->setPLLClock(clk);
+			gimic_module->setPLLClock(clk);
+			stream->chip->setMasterClock(clk);
 		}
 		break;
 	}

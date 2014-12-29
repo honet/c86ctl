@@ -8,12 +8,12 @@
  */
 
 // definition of the DLL version.
-#define VERSION_MAJOR      1
-#define VERSION_MINOR      4
-#define VERSION_REVISION   5
-#define VERSION_BUILD      1032
-#define VERSION_STRING     "1, 4, 5, 1032"
-#define VERSION_MESSAGE    "VER 1.4.5.1032(DBG-ONLY)"
+#define VERSION_MAJOR      2
+#define VERSION_MINOR      0
+#define VERSION_REVISION   1
+#define VERSION_BUILD      2
+#define VERSION_STRING     "2, 0, 1, 2"
+#define VERSION_MESSAGE    "VER 2.0.1.2(DBG-ONLY)"
 
 
 // DON'T CHANGE FOLLOWINGS. (for DLL resorce) ---------------------

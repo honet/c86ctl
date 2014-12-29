@@ -7,10 +7,11 @@
 	honet.kk(at)gmail.com
  */
 #pragma once
+#include "interface/basefilter.h"
 
 namespace c86ctl{
 
-class Chip
+class Chip : public BaseFilter
 {
 public:
 	Chip(){};
@@ -21,21 +22,11 @@ public:
 	virtual void update(){};
 
 public:
-	virtual void filter( int addr, UCHAR *data ){};
-	virtual bool setReg( int addr, UCHAR data ){ return false; };
+	virtual void byteOut( UINT addr, UCHAR data ){};
 	virtual UCHAR getReg( int addr ){ return 0; };
 	virtual void setMasterClock( UINT clock ){};
+	virtual UINT getMasterClock(){ return 0; };
 };
 
-class GimicParam
-{
-public:
-	GimicParam() : ssgVol(0), clock(0) {
-	};
-
-	UCHAR ssgVol;
-	UINT clock;
+typedef std::shared_ptr<Chip> ChipPtr;
 };
-
-};
-

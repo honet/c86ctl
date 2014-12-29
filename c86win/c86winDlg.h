@@ -67,4 +67,5 @@ public:
 	afx_msg void OnBnClickedButtonTest1();
 	afx_msg void OnBnClickedButtonAdpcmZeroreset();
 	afx_msg void OnBnClickedButtonSwreset();
+	int moduleID;
 };

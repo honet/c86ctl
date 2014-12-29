@@ -39,6 +39,7 @@ extern "C" {
 #include "interface/if_gimic_hid.h"
 #include "interface/if_gimic_midi.h"
 #include "interface/if_gimic_winusb.h"
+#include "interface/if_c86usb_winusb.h"
 
 
 #pragma comment(lib,"hidclass.lib")
@@ -113,11 +114,14 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		pFilterData->dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 
 		// for HID interface
-	    HidD_GetHidGuid(&pFilterData->dbcc_classguid);
-		hNotifyHIDDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+//	    HidD_GetHidGuid(&pFilterData->dbcc_classguid);
+//		hNotifyHIDDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 
 		// for WinUSB interface
-		memcpy(&pFilterData->dbcc_classguid, &GUID_DEVINTERFACE_WINUSBTESTTARGET, sizeof(GUID));
+		// gimic
+		memcpy(&pFilterData->dbcc_classguid, &GUID_DEVINTERFACE_GIMIC_WINUSB_TARGET, sizeof(GUID));
+		hNotifyWinUSBDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+		memcpy(&pFilterData->dbcc_classguid, &GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET, sizeof(GUID));
 		hNotifyWinUSBDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 	}
 
@@ -250,6 +254,7 @@ int C86CtlMainWnd::stopVis()
 	// 描画スレッド終了
 	if( hVisThread ){
 		::PostThreadMessage( visThreadID, WM_THREADEXIT, 0, 0 );
+		::OutputDebugStringA("stopVis\r\n");
 		::WaitForSingleObject( hVisThread, INFINITE );
 
 		hVisThread = NULL;
@@ -288,8 +293,10 @@ unsigned int WINAPI C86CtlMainWnd::threadVis(LPVOID param)
 
 		// message proc
 		if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
-			if( msg.message == WM_THREADEXIT )
+			if( msg.message == WM_THREADEXIT ){
+				::OutputDebugStringA("thiredVis:Exit\r\n");
 				break;
+			}
 		}else{
 			// fps management
 			DWORD now = ::timeGetTime() * 6;

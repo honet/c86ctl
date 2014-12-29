@@ -35,7 +35,7 @@ class COPXFmSlot {
 	friend class COPM;
 	
 public:
-	COPXFmSlot(IRealChip2 *p) : pIF(p){ reset(); };
+	COPXFmSlot(){};
 	~COPXFmSlot(){};
 
 	void reset(void){
@@ -111,8 +111,6 @@ protected:
 
 	bool enable;
 	bool AM;
-
-	IRealChip2 *pIF;
 };
 
 
@@ -125,9 +123,9 @@ class COPXFmCh {
 	friend class COPMFm;
 	
 public:
-	COPXFmCh(IRealChip2 *p) : pIF(p){
+	COPXFmCh(){
 		for( int i=0; i<4; i++ )
-			slot[i] = new COPXFmSlot(p);
+			slot[i] = new COPXFmSlot();
 		reset();
 	};
 	virtual ~COPXFmCh(void){
@@ -210,8 +208,6 @@ protected:
 	bool left;
 	bool right;
 	int keyOnLevel[4];
-	
-	IRealChip2 *pIF;
 };
 
 };

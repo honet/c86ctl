@@ -27,7 +27,7 @@ class COPNFmCh : public COPXFmCh {
 	friend class COPM;
 	
 public:
-	COPNFmCh(IRealChip2 *p) : COPXFmCh(p), mclk(7987200ULL) {
+	COPNFmCh() : mclk(7987200ULL) {
 		reset();
 	};
 	virtual ~COPNFmCh(void){
@@ -140,8 +140,6 @@ protected:
 	int fnum[4];	//11bit
 	int fblock[4];	//3bit
 	int fpacked[4];
-	
-	IRealChip2 *pIF;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -150,9 +148,9 @@ class COPNFm{
 	friend class COPN3L;
 
 public:
-	COPNFm(IRealChip2 *p) : pIF(p){
+	COPNFm(){
 		for( int i=0; i<6; i++ )
-			ch[i] = new COPNFmCh(p);
+			ch[i] = new COPNFmCh();
 		reset();
 	};
 	virtual ~COPNFm(){
@@ -189,8 +187,6 @@ public:
 protected:
 	int lfo; //3bit
 	bool lfo_sw;
-
-	IRealChip2 *pIF;
 };
 
 
@@ -201,7 +197,7 @@ class COPNSsgCh{
 	friend class COPNSsg;
 
 public:
-	COPNSsgCh(IRealChip2 *p) : pIF(p), mclk(7987200ULL) { reset(); };
+	COPNSsgCh() : mclk(7987200ULL) { reset(); };
 	virtual ~COPNSsgCh(){};
 
 	void reset(){
@@ -281,8 +277,6 @@ protected:
 	bool tone;
 	bool noise;
 	int keyOnLevel;
-
-	IRealChip2 *pIF;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -291,9 +285,9 @@ class COPNSsg{
 	friend class COPN3L;
 
 public:
-	COPNSsg(IRealChip2 *p) : pIF(p), mclk(7987200ULL) {
+	COPNSsg() : mclk(7987200ULL) {
 		for( int i=0; i<3; i++ )
-			ch[i] = new COPNSsgCh(p);
+			ch[i] = new COPNSsgCh();
 		reset();
 	};
 	virtual ~COPNSsg(){
@@ -367,8 +361,6 @@ protected:
 	int envCoarseTune;	// 8bit チャネル共通
 	int envType;		// 4bit チャネル共通
 	int noisePeriod;	// 5bit チャネル共通
-	
-	IRealChip2 *pIF;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -378,7 +370,7 @@ class COPNRhythmCh{
 	friend class COPN3L;
 
 public:
-	COPNRhythmCh(IRealChip2 *p) : pIF(p){ reset(); };
+	COPNRhythmCh(){ reset(); };
 	virtual ~COPNRhythmCh(){};
 
 	void reset(){
@@ -413,8 +405,6 @@ protected:
 	bool right;
 	int limit;
 	int keyOnLevel;
-
-	IRealChip2 *pIF;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -423,13 +413,13 @@ class COPNRhythm{
 	friend class COPN3L;
 	
 public:
-	COPNRhythm(IRealChip2 *p) : pIF(p){
-		rim = new COPNRhythmCh(p);
-		tom = new COPNRhythmCh(p);
-		hh = new COPNRhythmCh(p);
-		top = new COPNRhythmCh(p);
-		sd = new COPNRhythmCh(p);
-		bd = new COPNRhythmCh(p);
+	COPNRhythm(){
+		rim = new COPNRhythmCh();
+		tom = new COPNRhythmCh();
+		hh = new COPNRhythmCh();
+		top = new COPNRhythmCh();
+		sd = new COPNRhythmCh();
+		bd = new COPNRhythmCh();
 		reset();
 	};
 	virtual ~COPNRhythm(){
@@ -485,8 +475,6 @@ protected:
 	
 protected:
 	int tl;
-
-	IRealChip2 *pIF;
 };
 
 };

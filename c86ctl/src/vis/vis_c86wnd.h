@@ -97,10 +97,10 @@ protected:
 protected:
 	CVisBitmap *canvas;
 	CVisChildBitmap *clientCanvas;
-	CVisCloseButtonPtr closeButton;
+	//CVisCloseButtonPtr closeButton;
 
-	std::list< std::shared_ptr<CVisWidget> > widgets;
-	std::list< std::shared_ptr<CVisWidget> > sysWidgets;
+	std::list<CVisWidgetPtr> widgets;
+	std::list<CVisWidgetPtr> sysWidgets;
 
 private:
 	CVisWidget *wcapture;

@@ -16,20 +16,20 @@
 
 using namespace c86ctl;
 
-void COPN3L::filter( int addr, UCHAR *data )
+void COPN3L::byteOut( UINT addr, UCHAR data )
 {
 	int ch;
 	if( 0x200 <= addr ) return;
 
 	switch( addr ){
 	case 0x29: // SCH/IRQ ENABLE
-		*data |= 0x80;
+		data |= 0x80;
 	case 0xb4: // FM -- LR, AMS, PMS
 	case 0xb5:
 	case 0xb6:
 		ch = addr - 0xb4;
 		if( getMixedMask( ch ) )
-			*data &= 0x3f;
+			data &= 0x3f;
 		break;
 			
 	case 0x1b4: // FM -- LR, AMS, PMS
@@ -37,7 +37,7 @@ void COPN3L::filter( int addr, UCHAR *data )
 	case 0x1b6:
 		ch = addr - 0x1b4;
 		if( getMixedMask( 6+ch ) )
-			*data &= 0x3f;
+			data &= 0x3f;
 		break;
 
 	case 0x08: // SSG amp level
@@ -45,17 +45,21 @@ void COPN3L::filter( int addr, UCHAR *data )
 	case 0x0a:
 		ch = addr-0x08;
 		if( getMixedMask( 9+ch ) )
-			*data &= 0xf0;
+			data &= 0xf0;
 		break;
 		
 	case 0x11: // Rhythm total level
 		if( getMixedMask( 12 ) )
-			*data = 0;
+			data = 0;
 		break;
 	}
+
+	if(setReg(addr, data))
+		if(ds)
+			ds->byteOut(addr,data);
 }
 
-bool COPN3L::setReg( int addr, UCHAR data ){
+bool COPN3L::setReg( UINT addr, UCHAR data ){
 	if( 0x200 <= addr ) return false;
 	int idx = 0;
 	if( 0x100 <= addr ){
@@ -81,7 +85,7 @@ bool COPN3L::setReg( int addr, UCHAR data ){
 	return false;
 };
 
-UCHAR COPN3L::getReg( int addr ){
+UCHAR COPN3L::getReg( UINT addr ){
 	if( 0x200 <= addr ) return 0;
 	int idx = 0;
 	if( 0x100 <= addr ){
@@ -132,6 +136,8 @@ bool COPN3L::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 void COPN3L::applyMask(int ch)
 {
 	UCHAR data;
+	if(!ds) return;
+
 	bool mask = getMixedMask(ch);
 	
 	if( 0<=ch && ch<=2 ){ // FM 1~3
@@ -142,7 +148,8 @@ void COPN3L::applyMask(int ch)
 			fm->ch[fmNo]->getLR( l,r );
 			data |= (l?0x80:0) | (r?0x40:0);
 		}
-		pIF->directOut( 0xb4+ch, data );
+		ds->byteOut( 0xb4+ch, data );
+		//pIF->directOut( 0xb4+ch, data );
 	}
 	else if( 6<=ch && ch<=8 ){ // FM 4~6
 		int fmNo = ch - 3;
@@ -152,17 +159,20 @@ void COPN3L::applyMask(int ch)
 			fm->ch[fmNo]->getLR( l,r );
 			data |= (l?0x80:0) | (r?0x40:0);
 		}
-		pIF->directOut( 0x1b4+(ch-6), data );
+		ds->byteOut( 0x1b4+(ch-6), data );
+		//pIF->directOut( 0x1b4+(ch-6), data );
 	}
 	else if( 9<=ch && ch<=11 ){ // SSG 1~3
 		int ssgNo = ch-9;
 		data = mask ? 0 : ssg->ch[ssgNo]->getLevel();
 		data |= ssg->ch[ssgNo]->isUseEnv() ? 0x10 : 0;
-		pIF->directOut( 0x08+ssgNo, data );
+		ds->byteOut( 0x08+ssgNo, data );
+		//pIF->directOut( 0x08+ssgNo, data );
 	}
 	else if( ch == 12 ){ // RHYTHM
 		data = mask ? 0 : rhythm->getTotalLevel();
-		pIF->directOut( 0x11, data );
+		ds->byteOut( 0x11, data );
+		//pIF->directOut( 0x11, data );
 	}
 }
 

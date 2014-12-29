@@ -19,10 +19,10 @@ namespace c86ctl{
 class COPN3L : public Chip
 {
 public:
-	COPN3L(IRealChip2 *p) : pIF(p) {
-		fm = new COPNFm(p);
-		ssg = new COPNSsg(p);
-		rhythm = new COPNRhythm(p);
+	COPN3L(){
+		fm = new COPNFm();
+		ssg = new COPNSsg();
+		rhythm = new COPNRhythm();
 		partMask = 0;
 		partSolo = 0;
 		reset();
@@ -54,9 +54,9 @@ public:
 		ssg->reset();
 		rhythm->reset();
 
-		// 強制的にOPNAモードに切り替え
-		pIF->directOut( 0x29, 0x9f );
-		reg[0][0x29] = 0x9f;
+		//// 強制的にOPNAモードに切り替え
+		//pIF->directOut( 0x29, 0x9f );
+		//reg[0][0x29] = 0x9f;
 
 		for( int i=0; i<13; i++ )
 			applyMask(i);
@@ -81,9 +81,8 @@ public:
 	};
 
 public:
-	virtual void filter( int addr, UCHAR *data );
-	virtual bool setReg( int addr, UCHAR data );
-	virtual UCHAR getReg( int addr );
+	virtual void byteOut( UINT addr, UCHAR data );
+	virtual UCHAR getReg( UINT addr );
 	virtual void setMasterClock( UINT clock ){
 		fm->setMasterClock(clock);
 		ssg->setMasterClock(clock);
@@ -102,6 +101,8 @@ public:
 	int getTimerA(){ return timerA; };
 	int getTimerB(){ return timerB; };
 
+private:
+	bool setReg( UINT addr, UCHAR data );
 
 public:
 	COPNFm *fm;
@@ -124,7 +125,6 @@ protected:
 	
 	UINT partMask;
 	UINT partSolo;
-	IRealChip2 *pIF;
 };
 
 

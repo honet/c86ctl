@@ -38,11 +38,6 @@
 #include <initguid.h>
 #include <algorithm>
 #include "chip/chip.h"
-#include "chip/opm.h"
-#include "chip/opna.h"
-#include "chip/opn3l.h"
-#include "chip/opl3.h"
-#include "chip/opll.h"
 
 using namespace c86ctl;
 
@@ -63,16 +58,16 @@ using namespace c86ctl;
 	コンストラクタ
 ----------------------------------------------------------------------------*/
 GimicWinUSB::GimicWinUSB()
-	: hDev(0), hWinUsb(0), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0),
-	  inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0)
+	: hDev(0), hWinUsb(0), cps(0), cal(0), calcount(0),
+	  inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0), nmodules(0)
 {
 	rbuff.alloc( 128 );
-	dqueue.alloc(1024*16);
 	::InitializeCriticalSection(&csection);
 
 	::QueryPerformanceFrequency(&freq);
 	freq.QuadPart/=1000; // 1ms
 
+	memset(modules, 0, sizeof(modules));
 }
 
 /*----------------------------------------------------------------------------
@@ -85,8 +80,10 @@ GimicWinUSB::~GimicWinUSB(void)
 	WinUsb_Free(hWinUsb);
 	hDev = NULL;
 	hWinUsb = NULL;
-	if( chip )
-		delete chip;
+	for(int i=0; i<nmodules; i++)
+		if(modules[i])
+			delete modules[i];
+
 }
 
 /*----------------------------------------------------------------------------
@@ -150,54 +147,49 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 	WinUsb_FlushPipe(hWinUsb, inPipeId);
 
 	// Module情報取得 -----------
-	// NOTE: (*chip) はキャッシュされているところが有るので、
-	//       一度作ったら削除してはいけない。
-	Devinfo info;
-	getModuleInfo(&info);
+	for( int i=0; i<NMAXCHIP; i++ ){
+		Devinfo info;
+		if( C86CTL_ERR_NONE != getModuleInfo(i, &info) ){
+			break;
+		}
+		if( nmodules<(i+1) )
+			nmodules = i+1;
 
-	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
-		if( chiptype == 0 && chip == 0 ){
-			chiptype = CHIP_OPN3L;
-			chip = new COPN3L(this);
-		}else if( chiptype != CHIP_OPN3L ){
-			goto MODULE_CHANGED;
+		// この仕様はなかなかマゾい。
+		if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
+			if( modules[i] == 0 ){
+				modules[i] = new GimicModuleWinUSB(this, i, CHIP_OPN3L);
+			}else if( modules[i]->getChipType() != CHIP_OPN3L ){
+				goto MODULE_CHANGED;
+			}
+		}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
+			if( modules[i] == 0 ){
+				modules[i] = new GimicModuleWinUSB(this, i, CHIP_OPM);
+			}else if( modules[i]->getChipType() != CHIP_OPM ){
+				goto MODULE_CHANGED;
+			}
+		}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
+			if( modules[i] == 0 ){
+				modules[i] = new GimicModuleWinUSB(this, i, CHIP_OPNA);
+			}else if( modules[i]->getChipType() != CHIP_OPNA ){
+				goto MODULE_CHANGED;
+			}
+		}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
+			if( modules[i] == 0 ){
+				modules[i] = new GimicModuleWinUSB(this, i, CHIP_OPL3);
+			}else if( modules[i]->getChipType() != CHIP_OPL3 ){
+				goto MODULE_CHANGED;
+			}
+		}else if( !memcmp( info.Devname, "GMC-OPLL", 8 ) ){
+			if( modules[i] == 0 ){
+				modules[i] = new GimicModuleWinUSB(this, i, CHIP_OPLL);
+			}else if( modules[i]->getChipType() != CHIP_OPLL ){
+				goto MODULE_CHANGED;
+			}
+		//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 		}
-	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
-		if( chiptype == 0 && chip == 0 ){
-			chiptype = CHIP_OPM;
-			chip = new COPM(this);
-		}else if( chiptype != CHIP_OPM ){
-			goto MODULE_CHANGED;
-		}
-	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
-		if( chiptype == 0 && chip == 0 ){
-			chiptype = CHIP_OPNA;
-			chip = new COPNA(this);
-		}else if( chiptype != CHIP_OPNA ){
-			goto MODULE_CHANGED;
-		}
-	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
-		if( chiptype == 0 && chip == 0 ){
-			chiptype = CHIP_OPL3;
-			chip = new COPL3();
-		}else if( chiptype != CHIP_OPL3 ){
-			goto MODULE_CHANGED;
-		}
-	}else if( !memcmp( info.Devname, "GMC-OPLL", 8 ) ){
-		if( chiptype == 0 && chip == 0 ){
-			chiptype = CHIP_OPLL;
-			chip = new COPLL();
-		}else if( chiptype != CHIP_OPLL ){
-			goto MODULE_CHANGED;
-		}
-//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
-	}
 	
-	// 値をキャッシュさせるためのダミー呼び出し
-	UCHAR vol;
-	getSSGVolume(&vol);
-	UINT clock;
-	getPLLClock(&clock);
+	}
 	
 	return true;
 
@@ -213,20 +205,20 @@ MODULE_CHANGED:
 /*----------------------------------------------------------------------------
 	factory
 ----------------------------------------------------------------------------*/
-int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> > > &gimics)
+int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSoundDevice> > > &gimics)
 {
 	gimics.lock();
-	std::for_each( gimics.begin(), gimics.end(), []( std::shared_ptr<GimicIF> x ){ x->checkConnection(); } );
+	std::for_each( gimics.begin(), gimics.end(), []( std::shared_ptr<BaseSoundDevice> x ){ x->checkConnection(); } );
 
 	BOOL bResult = TRUE;
 	
 	HDEVINFO devinf = INVALID_HANDLE_VALUE;
 	SP_DEVICE_INTERFACE_DATA spid;
 	PSP_DEVICE_INTERFACE_DETAIL_DATA fc_data = NULL;
-	
+
 
 	devinf = SetupDiGetClassDevs(
-		(LPGUID)&GUID_DEVINTERFACE_WINUSBTESTTARGET,
+		(LPGUID)&GUID_DEVINTERFACE_GIMIC_WINUSB_TARGET,
 		NULL,
 		0,
 		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
@@ -236,7 +228,7 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 			ZeroMemory(&spid, sizeof(spid));
 			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 			if ( !SetupDiEnumDeviceInterfaces(devinf, NULL,
-				  (LPGUID) &GUID_DEVINTERFACE_WINUSBTESTTARGET, i, &spid) ){
+				  (LPGUID) &GUID_DEVINTERFACE_GIMIC_WINUSB_TARGET, i, &spid) ){
 				break;
 			}
 
@@ -260,7 +252,7 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 
 			// 既にインスタンスがあるかどうか検索
 			auto it = std::find_if( gimics.begin(), gimics.end(),
-				[devpath](std::shared_ptr<GimicIF> x) -> bool {
+				[devpath](std::shared_ptr<BaseSoundDevice> x) -> bool {
 					GimicWinUSB *gdev = dynamic_cast<GimicWinUSB*>(x.get());
 					if(!gdev) return false;
 					if(gdev->devPath != devpath ) return false;
@@ -272,7 +264,7 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 				GimicWinUSB *gimicDev = new GimicWinUSB();
 				if( gimicDev ){
 					if( gimicDev->OpenDevice(devpath) ){
-						gimics.push_back( GimicIFPtr(gimicDev) );
+						gimics.push_back( BaseSoundDevicePtr(gimicDev) );
 					}else{
 						delete gimicDev;
 					}
@@ -286,7 +278,7 @@ int GimicWinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF
 					GimicWinUSB *gimicDev = new GimicWinUSB();
 					if( gimicDev ){
 						if( gimicDev->OpenDevice(devpath) ){
-							gimics.push_back( GimicIFPtr(gimicDev) );
+							gimics.push_back( BaseSoundDevicePtr(gimicDev) );
 						}else{
 							delete gimicDev;
 						}
@@ -325,7 +317,7 @@ int GimicWinUSB::sendMsg( MSG *data )
 	return ret;
 }
 
-int GimicWinUSB::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
+int GimicWinUSB::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz, bool ignore_error )
 {
 	UCHAR buff[66];
 	DWORD len = 0;
@@ -344,7 +336,7 @@ int GimicWinUSB::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 
 		if( C86CTL_ERR_NONE==ret ){
 			len = 0;
-			ret = devRead(buff);
+			ret = devRead(buff, ignore_error);
 			if( C86CTL_ERR_NONE == ret )
 				memcpy( rxdata, &buff[0], rxsz );
 		}
@@ -354,9 +346,7 @@ int GimicWinUSB::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 	return ret;
 }
 
-
-
-int GimicWinUSB::devRead( LPVOID data )
+int GimicWinUSB::devRead( LPVOID data, bool ignore_error )
 {
 	if( !hDev || !hWinUsb )
 		return C86CTL_ERR_NODEVICE;
@@ -364,11 +354,13 @@ int GimicWinUSB::devRead( LPVOID data )
 	DWORD rlen;
 	BOOL ret = WinUsb_ReadPipe( hWinUsb, inPipeId, (UCHAR*)data, 64, &rlen, 0);
 	
-	if(ret == FALSE){
-		WinUsb_Free(hWinUsb);
-		hWinUsb = NULL;
-		CloseHandle(hDev);
-		hDev = NULL;
+	if(ret == FALSE ){
+		if(ignore_error == false){
+			WinUsb_Free(hWinUsb);
+			hWinUsb = NULL;
+			CloseHandle(hDev);
+			hDev = NULL;
+		}
 		return C86CTL_ERR_UNKNOWN;
 	}
 	return C86CTL_ERR_NONE;
@@ -392,6 +384,43 @@ int GimicWinUSB::devWrite( LPCVOID data )
 	return C86CTL_ERR_NONE;
 }
 
+void GimicWinUSB::out2buf(UCHAR idx, UINT addr, UCHAR data)
+{
+	if( idx >= nmodules )
+		return;
+	
+	if( addr<0x200 ){
+		switch( modules[idx]->getChipType() ){
+		case CHIP_OPNA:
+		case CHIP_OPN3L:
+			if( 0x100<=addr && addr<=0x110 )
+				addr -= 0x40;
+			break;
+		case CHIP_OPM:
+			if( 0xfc<=addr && addr<=0xff )
+				addr -= 0xe0;
+			break;
+		}
+		if( addr < 0xfc ){
+			MSG d = { 2, { addr&0xff, data } };
+			rbuff.push(d);
+		}else if( 0x100 <= addr && addr <= 0x1fb ){
+			MSG d = { 3, { 0xfe, addr&0xff, data } };
+			rbuff.push(d);
+		}
+	}else{
+		MSG d = { 4, { 0xfc, (addr>>8)&0xff, addr&0xff, data } };
+		rbuff.push(d);
+	}
+}
+
+void GimicWinUSB::out(UCHAR idx, UINT addr, UCHAR data)
+{
+	if( idx >= nmodules )
+		return;
+
+	out2buf(idx, addr, data);
+}
 
 
 /*----------------------------------------------------------------------------
@@ -401,9 +430,6 @@ int GimicWinUSB::reset(void)
 {
 	int ret;
 	
-	// ディレイキューの廃棄
-	dqueue.flush();
-
 	// リセットコマンド送信
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
 	ret =  sendMsg( &d );
@@ -412,8 +438,10 @@ int GimicWinUSB::reset(void)
 		// 各ステータス値リセット
 		//   マスクの適用をreset内でする（送信処理が発生する）ので
 		//   リセット後に処理しないとダメ。
-		if( chip )
-			chip->reset();
+		for( int i=0; i<nmodules; i++ ){
+//			if( modules[i] )
+//				modules[i]->chipmodel_reset();
+		}
 	}
 
 	return ret;
@@ -424,68 +452,6 @@ int GimicWinUSB::isValid(void)
 	return (hDev == 0) ? FALSE : TRUE;
 }
 
-int GimicWinUSB::setSSGVolume(UCHAR vol)
-{
-	if( chiptype != CHIP_OPNA )
-		return C86CTL_ERR_UNSUPPORTED;
-
-	gimicParam.ssgVol = vol;
-	MSG d = { 3, { 0xfd, 0x84, vol } };
-	return sendMsg( &d );
-}
-
-int GimicWinUSB::getSSGVolume(UCHAR *vol)
-{
-	if( chiptype != CHIP_OPNA )
-		return C86CTL_ERR_UNSUPPORTED;
-	if( !vol )
-		return C86CTL_ERR_INVALID_PARAM;
-
-	MSG d = { 2, { 0xfd, 0x86 } };
-	int ret = transaction( &d, (uint8_t*)vol, 1 );
-	
-	if( C86CTL_ERR_NONE == ret )
-		gimicParam.ssgVol = *vol;
-	
-	return ret;
-}
-
-int GimicWinUSB::setPLLClock(UINT clock)
-{
-	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3  )
-		return C86CTL_ERR_UNSUPPORTED;
-
-	gimicParam.clock = clock;
-	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
-	int ret = sendMsg( &d );
-
-	if( ret == C86CTL_ERR_NONE ){
-		if( chip )
-			chip->setMasterClock(clock);
-	}
-	return ret;
-}
-
-int GimicWinUSB::getPLLClock(UINT *clock)
-{
-	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3 )
-		return C86CTL_ERR_UNSUPPORTED;
-
-	if( !clock )
-		return C86CTL_ERR_INVALID_PARAM;
-
-	MSG d = { 2, { 0xfd, 0x85 } };
-	int ret = transaction( &d, (uint8_t*)clock, 4 );
-
-	if( ret == C86CTL_ERR_NONE ){
-		if( gimicParam.clock != *clock ){
-			gimicParam.clock = *clock;
-			if( chip )
-				chip->setMasterClock(*clock);
-		}
-	}
-	return ret;
-}
 
 int GimicWinUSB::getMBInfo( struct Devinfo *info )
 {
@@ -504,30 +470,22 @@ int GimicWinUSB::getMBInfo( struct Devinfo *info )
 	return ret;
 }
 
-int GimicWinUSB::getModuleInfo( struct Devinfo *info )
+int GimicWinUSB::getModuleInfo( UCHAR idx, struct Devinfo *info )
 {
 	int ret;
 	
 	if( !info )
 		return C86CTL_ERR_INVALID_PARAM;
 
-	MSG d = { 3, { 0xfd, 0x91, 0 } };
-	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
+	MSG d = { 3, { 0xfd, 0x91, idx } };
+	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32, true )) ){
 		char *p = &info->Devname[15];
 		while(*p==0||*p==-1) *p--=0;
 		p = &info->Serial[14];
 		while(*p==0||*p==-1) *p--=0;
 	}
+
 	return ret;
-}
-
-int GimicWinUSB::getModuleType(enum ChipType *type)
-{
-	if( !type )
-		return C86CTL_ERR_INVALID_PARAM;
-
-	*type = chiptype;
-	return C86CTL_ERR_NONE;
 }
 
 int GimicWinUSB::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
@@ -545,126 +503,11 @@ int GimicWinUSB::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 	return ret;
 }
 
-int GimicWinUSB::getChipStatus( UINT addr, UCHAR *status )
-{
-	if( !status )
-		return C86CTL_ERR_INVALID_PARAM;
-	
-	uint8_t rx[4];
-	MSG d = { 3, { 0xfd, 0x93, addr&0x01 } };
-	int ret;
-
-	if( C86CTL_ERR_NONE == (ret = transaction( &d, rx, 4 )) ){
-		*status = *((uint32_t*)&rx[0]);
-	}
-	return ret;
-}
-
-/*
-int GimicWinUSB::adpcmZeroClear(void)
-{
-	uint8_t rx[1];
-	MSG d = { 2, { 0xfd, 0xa0 } };
-	int ret;
-
-	ret = transaction( &d, rx, 1 );
-	return ret;
-}
-
-int GimicWinUSB::adpcmWrite( UINT startAddr, UINT size, UCHAR *data )
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-
-int GimicWinUSB::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
-{
-	return C86CTL_ERR_NOT_IMPLEMENTED;
-}
-*/
-
-void GimicWinUSB::directOut(UINT addr, UCHAR data)
-{
-	switch( chiptype ){
-	case CHIP_OPNA:
-	case CHIP_OPN3L:
-		if( 0x100<=addr && addr<=0x110 )
-			addr -= 0x40;
-		break;
-	case CHIP_OPM:
-		if( 0xfc<=addr && addr<=0xff )
-			addr -= 0xe0;
-		break;
-	}
-	if( addr < 0xfc ){
-		MSG d = { 2, { addr&0xff, data } };
-		sendMsg(&d);
-	}else if( 0x100 <= addr && addr <= 0x1fb ){
-		MSG d = { 3, { 0xfe, addr&0xff, data } };
-		sendMsg(&d);
-	}
-}
-
-void GimicWinUSB::out2buf(UINT addr, UCHAR data)
-{
-	bool flag = true;
-	if( chip ){
-		flag = chip->setReg( addr, data );
-		chip->filter( addr, &data );
-	}
-	if( flag ){
-		switch( chiptype ){
-		case CHIP_OPNA:
-		case CHIP_OPN3L:
-			if( 0x100<=addr && addr<=0x110 )
-				addr -= 0x40;
-			break;
-		case CHIP_OPM:
-			if( 0xfc<=addr && addr<=0xff )
-				addr -= 0xe0;
-			break;
-		}
-		if( addr < 0xfc ){
-			MSG d = { 2, { addr&0xff, data } };
-			rbuff.push(d);
-		}else if( 0x100 <= addr && addr <= 0x1fb ){
-			MSG d = { 3, { 0xfe, addr&0xff, data } };
-			rbuff.push(d);
-		}
-	}
-}
-void GimicWinUSB::out(UINT addr, UCHAR data)
-{
-	if( 0<delay ){
-		REQ r = { ::timeGetTime()+delay, addr, data };
-		dqueue.push(r);
-		return;
-	}
-
-	out2buf(addr, data);
-}
-
-UCHAR GimicWinUSB::in(UINT addr)
-{
-	if( chip )
-		return chip->getReg(addr);
-
-	return 0;
-}
 
 void GimicWinUSB::tick(void)
 {
 	int ret;
 	
-	if( !dqueue.isempty() ){
-		UINT t = timeGetTime();
-		while( !dqueue.isempty() && t>=dqueue.front()->t ){
-			if( rbuff.remain()<4 ) break;
-			REQ req;
-			dqueue.pop(&req);
-			out2buf( req.addr, req.dat );
-		}
-	}
-
 	LARGE_INTEGER et, ct;
 	::QueryPerformanceCounter(&et);
 	et.QuadPart += freq.QuadPart;
@@ -690,7 +533,7 @@ void GimicWinUSB::tick(void)
 			memset( &buff[sz], 0xff, 64-sz );
 
 		// WriteFileがスレッドセーフかどうかよく分からないので
-		// 念のため保護しているが、たぶんいらない。
+		// 念のため保護しているが、いらない気がする。
 		// (directOut()と重なる可能性がある)
 		::EnterCriticalSection(&csection);
 		ret = devWrite(buff);
@@ -711,15 +554,18 @@ void GimicWinUSB::tick(void)
 
 void GimicWinUSB::update(void)
 {
-	if( chip )
-		chip->update();
+//	for( int i=0; i<nmodules; i++ ){
+//		if( modules[i] )
+//			modules[i]->chipmodel_update();
+//	}
 
 	if( 1 <= calcount++ ){
 		cps = cal;
 		cal = 0;
 		calcount = 0;
 	}
-};
+}
+
 void GimicWinUSB::checkConnection(void)
 {
 	UCHAR buff[65];
@@ -731,21 +577,202 @@ void GimicWinUSB::checkConnection(void)
 	::LeaveCriticalSection(&csection);
 };
 
-int GimicWinUSB::setDelay(int d)
+std::basic_string<TCHAR> GimicWinUSB::getNodeId(){
+	return devPath;
+};
+
+
+
+
+// -------------------------------------------------------------------------------
+GimicWinUSB::GimicModuleWinUSB::GimicModuleWinUSB(GimicWinUSB *device, int idx, ChipType chipType)
+	: devif(device), devidx(idx), chiptype(chipType)
 {
-	if(d!=delay){
-		delay = d;
-	}
-	return C86CTL_ERR_NONE;
+	// 値をキャッシュさせるためのダミー呼び出し
+	UCHAR vol;
+	getSSGVolume(&vol);
+	UINT clock;
+	getPLLClock(&clock);
 }
 
-int GimicWinUSB::getDelay(int *d)
+GimicWinUSB::GimicModuleWinUSB::~GimicModuleWinUSB()
 {
-	if(d){
-		*d = delay;
-		return C86CTL_ERR_NONE;
+}
+
+void GimicWinUSB::GimicModuleWinUSB::byteOut( UINT addr, UCHAR data )
+{
+	devif->out(devidx, addr, data);
+}
+
+
+
+
+int GimicWinUSB::GimicModuleWinUSB::setSSGVolume(UCHAR vol)
+{
+	if( chiptype != CHIP_OPNA )
+		return C86CTL_ERR_UNSUPPORTED;
+
+	gimicParam.ssgVol = vol;
+	if( devidx == 0 ){
+		MSG d = { 3, { 0xfd, 0x84, vol } };
+		return devif->sendMsg( &d );
+	}else{
+		MSG d = { 4, { 0xfd, 0x88, devidx, vol } };
+		return devif->sendMsg( &d );
 	}
-	return C86CTL_ERR_INVALID_PARAM;
+}
+
+int GimicWinUSB::GimicModuleWinUSB::getSSGVolume(UCHAR *vol)
+{
+	if( chiptype != CHIP_OPNA )
+		return C86CTL_ERR_UNSUPPORTED;
+	if( !vol )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	int ret;
+	if( devidx == 0 ){
+		MSG d = { 2, { 0xfd, 0x86 } };
+		ret = devif->transaction( &d, (uint8_t*)vol, 1 );
+	}else{
+		MSG d = { 3, { 0xfd, 0x8A, devidx } };
+		ret = devif->transaction( &d, (uint8_t*)vol, 1 );
+	}
+	
+	if( C86CTL_ERR_NONE == ret )
+		gimicParam.ssgVol = *vol;
+	
+	return ret;
+}
+
+int GimicWinUSB::GimicModuleWinUSB::setPLLClock(UINT clock)
+{
+	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3  )
+		return C86CTL_ERR_UNSUPPORTED;
+
+	int ret;
+	gimicParam.clock = clock;
+	if( devidx == 0 ){
+		MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
+		ret = devif->sendMsg( &d );
+	}else{
+		MSG d = { 7, { 0xfd, 0x87, devidx, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff } };
+		ret = devif->sendMsg( &d );
+	}
+	return ret;
+}
+
+int GimicWinUSB::GimicModuleWinUSB::getPLLClock(UINT *clock)
+{
+	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3 )
+		return C86CTL_ERR_UNSUPPORTED;
+
+	if( !clock )
+		return C86CTL_ERR_INVALID_PARAM;
+
+	int ret;
+	if( devidx == 0 ){
+		MSG d = { 2, { 0xfd, 0x85 } };
+		ret = devif->transaction( &d, (uint8_t*)clock, 4 );
+	}else{
+		MSG d = { 3, { 0xfd, devidx, 0x89 } };
+		ret = devif->transaction( &d, (uint8_t*)clock, 4 );
+	}
+
+	if( ret == C86CTL_ERR_NONE ){
+		if( gimicParam.clock != *clock ){
+			gimicParam.clock = *clock;
+		}
+	}
+	return ret;
+}
+
+
+
+/*
+int GimicWinUSB::adpcmZeroClear(void)
+{
+	uint8_t rx[1];
+	MSG d = { 2, { 0xfd, 0xa0 } };
+	int ret;
+
+	ret = transaction( &d, rx, 1 );
+	return ret;
+}
+
+int GimicWinUSB::adpcmWrite( UINT startAddr, UINT size, UCHAR *data )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+
+int GimicWinUSB::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
+{
+	return C86CTL_ERR_NOT_IMPLEMENTED;
+}
+*/
+
+int GimicWinUSB::GimicModuleWinUSB::getChipStatus(UINT addr, UCHAR *status)
+{
+	if( !status )
+		return C86CTL_ERR_INVALID_PARAM;
+	
+	uint8_t rx[4];
+	MSG d = { 4, { 0xfd, 0x94, devidx, addr&0x01 } };
+	int ret;
+
+	if( C86CTL_ERR_NONE == (ret = devif->transaction( &d, rx, 4 )) ){
+		*status = *((uint32_t*)&rx[0]);
+	}
+	return ret;
+}
+
+void GimicWinUSB::GimicModuleWinUSB::directOut(UINT addr, UCHAR data)
+{
+	if( devidx == 0 ){
+		switch( chiptype ){
+		case CHIP_OPNA:
+		case CHIP_OPN3L:
+			if( 0x100<=addr && addr<=0x110 )
+				addr -= 0x40;
+			break;
+		case CHIP_OPM:
+			if( 0xfc<=addr && addr<=0xff )
+				addr -= 0xe0;
+			break;
+		}
+		if( addr < 0xfc ){
+			MSG d = { 2, { addr&0xff, data } };
+			devif->sendMsg(&d);
+		}else if( 0x100 <= addr && addr <= 0x1fb ){
+			MSG d = { 3, { 0xfe, addr&0xff, data } };
+			devif->sendMsg(&d);
+		}
+	}
+	else{
+		if( addr < 0x100 ){
+			MSG d = { 4, { 0xfc, 2*devidx, addr&0xff, data } };
+			devif->sendMsg(&d);
+		}else if( addr < 0x200 ){
+			MSG d = { 4, { 0xfc, 2*devidx+1, addr&0xff, data } };
+			devif->sendMsg(&d);
+		}
+	}
+}
+
+int GimicWinUSB::GimicModuleWinUSB::getModuleInfo( struct Devinfo *info )
+{
+	return devif->getModuleInfo(devidx, info);
+}
+
+const GimicParam* GimicWinUSB::GimicModuleWinUSB::getGimicParam()
+{
+	return &gimicParam;
+}
+
+std::basic_string<TCHAR> GimicWinUSB::GimicModuleWinUSB::getNodeId()
+{
+	TCHAR buf[128];
+	_sntprintf( buf, 128, _T("\\%d"), devidx);
+	return devif->getNodeId() + buf;
 }
 
 #endif

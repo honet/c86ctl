@@ -19,7 +19,7 @@ class COPMFmCh : public COPXFmCh {
 	friend class COPMFm;
 	
 public:
-	COPMFmCh(IRealChip2 *p) : COPXFmCh(p) {
+	COPMFmCh(){
 		setMasterClock(3579545);
 		reset();
 	};
@@ -68,8 +68,6 @@ protected:
 	uint32_t kcoct;
 	uint32_t kcnote;
 	uint32_t kfcent;
-	
-	IRealChip2 *pIF;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -78,9 +76,9 @@ class COPMFm{
 	friend class COPM;
 
 public:
-	COPMFm(IRealChip2 *p) : pIF(p){
+	COPMFm(){
 		for( int i=0; i<9; i++ )
-			ch[i] = new COPMFmCh(p);
+			ch[i] = new COPMFmCh();
 		reset();
 	};
 	virtual ~COPMFm(){
@@ -114,8 +112,6 @@ public:
 protected:
 	int lfo; //3bit
 	bool lfo_sw;
-
-	IRealChip2 *pIF;
 };
 
 
@@ -124,8 +120,8 @@ protected:
 class COPM : public Chip
 {
 public:
-	COPM(IRealChip2 *p) : pIF(p) {
-		fm = new COPMFm(p);
+	COPM(){
+		fm = new COPMFm();
 		partMask = 0;
 		partSolo = 0;
 		reset();
@@ -141,9 +137,8 @@ public:
 	}
 
 public:
-	virtual void filter( int addr, UCHAR *data );
-	virtual bool setReg( int addr, UCHAR data );
-	virtual UCHAR getReg( int addr );
+	virtual void byteOut( UINT addr, UCHAR data );
+	virtual UCHAR getReg( UINT addr );
 	virtual void setMasterClock( UINT clock ){};
 	
 	void setPartMask(int ch, bool mask);
@@ -154,6 +149,10 @@ public:
 		if( partSolo ) return (((~partSolo) | partMask) & (1<<ch)) ? true : false;
 		else return getPartMask(ch);
 	};
+
+
+private:
+	bool setReg( UINT addr, UCHAR data );
 	
 public:
 	void update(){
@@ -182,7 +181,6 @@ protected:
 protected:
 	UINT partMask;
 	UINT partSolo;
-	IRealChip2 *pIF;
 };
 
 };

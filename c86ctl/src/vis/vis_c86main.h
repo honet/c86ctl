@@ -48,10 +48,12 @@ protected:
 	
 protected:
 	struct hwinfo{
-		Devinfo mbinfo;
-		Devinfo chipinfo;
+		std::string device_name;
+		std::string module_name;
+		std::string board_name;
+		std::string verstr;
+		
 		ChipType chiptype;
-		UINT major, minor, rev, build;
 
 		CVisCheckBoxPtr checkKey;
 		CVisCheckBoxPtr checkReg;
@@ -65,6 +67,7 @@ protected:
 		CVisC86FmPtr fmView[9];
 	};
 	std::vector<hwinfo> info;
+	//std::list<hwinfo> info;
 	HWND hMaster;
 
 	UINT tick;

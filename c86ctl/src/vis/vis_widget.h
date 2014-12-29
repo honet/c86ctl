@@ -39,7 +39,7 @@ protected:
 	int sx, sy, ex, ey;
 	CVisWnd *parent;
 };
-
+typedef std::shared_ptr<CVisWidget> CVisWidgetPtr;
 
 // ---------------------------------------------------------------------------
 // close-button

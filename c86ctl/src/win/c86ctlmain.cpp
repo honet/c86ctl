@@ -38,6 +38,7 @@ extern "C" {
 #include "interface/if_gimic_hid.h"
 #include "interface/if_gimic_winusb.h"
 #include "interface/if_gimic_midi.h"
+#include "interface/if_c86usb_winusb.h"
 
 
 #pragma comment(lib,"hidclass.lib")
@@ -84,9 +85,68 @@ HINSTANCE C86CtlMain::getInstanceHandle()
 	return hInstance;
 }
 
-withlock< std::vector< std::shared_ptr<GimicIF> > > &C86CtlMain::getGimics()
+//withlock< std::vector< std::shared_ptr<BaseSoundDevice> > > &C86CtlMain::getDevices()
+//{
+//	return gIF;
+//}
+
+Stream* C86CtlMain::getStream(int index)
 {
-	return gGIMIC;
+	if(index<gStream.size())
+		return gStream[index].get();
+	return NULL;
+}
+
+size_t C86CtlMain::getNStreams()
+{
+	return gStream.size();
+}
+
+void C86CtlMain::updateMapping(void)
+{
+	gIF.lock();
+	gLogicalDevices.lock();
+
+//	for_each( definedList ){
+//		if(matched){
+//			if(!already generated){
+//				gLogicalDevice.push_back( new LogicalDevice() );
+//			}
+//		}
+//	}
+	
+	for(int devidx=0; devidx<gIF.size(); devidx++){
+		for(int modidx=0; modidx<gIF[devidx]->getNumberOfModules(); modidx++){
+			
+			BaseSoundModule *module = gIF[devidx]->getModule(modidx);
+			UINT_PTR module_address = (UINT_PTR)module;
+			// フィルタグラフが構築されているか？
+			auto it = std::find_if( gStream.begin(), gStream.end(),
+				[module]( StreamPtr s ) -> bool {
+					return (s->module == module ) ? true : false;
+			} );
+			if ( it == gStream.end() ){
+				Stream *stream = Stream::Build(gIF[devidx]->getModule(modidx));
+				if(stream){
+					gStream.push_back( StreamPtr(stream) );
+
+					LogicalDevice *ldev = new LogicalDevice();
+					ldev->connect(stream);
+					gLogicalDevices.push_back( LogicalDevicePtr(ldev) );
+				}
+			}
+			else{
+				//CHECKME: 挿抜されるとここに来る
+				//assert(0);
+			}
+		}
+	}
+
+	
+	
+	gLogicalDevices.unlock();
+	gIF.unlock();
+	
 }
 
 // ---------------------------------------------------------
@@ -114,13 +174,16 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 			if( b==-1 ) break;
 			switch( msg.message ){
 			case WM_THREADEXIT:
+				::OutputDebugStringA("threadMain: request destroyMainWnd\r\n");
 				pwnd->destroyMainWnd(param);
 				break;
 
 			case WM_MYDEVCHANGE:
 				//::OutputDebugString(L"DEVICE CHANGED!\r\n");
-				GimicHID::UpdateInstances(pThis->gGIMIC);
-				GimicWinUSB::UpdateInstances(pThis->gGIMIC);
+				//GimicHID::UpdateInstances(pThis->gIF);
+				GimicWinUSB::UpdateInstances(pThis->gIF);
+				C86WinUSB::UpdateInstances(pThis->gIF);
+				pThis->updateMapping();
 				pwnd->deviceUpdate();
 				break;
 			}
@@ -168,7 +231,8 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			now = ::timeGetTime();
 			if(now < next){
 				if( pThis->terminateFlag ) break;
-				Sleep(1);
+				Sleep(1); // 0の方がいいかなぁ？
+				
 				//LARGE_INTEGER d;
 				//d.QuadPart = 1000; // 100ns-units = 0.1ms
 				//NtDelayExecution(FALSE, &d); // delay 100ns-units. <-非公開関数@ntdll.dll
@@ -178,15 +242,22 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 
 			// ここでループ内サイズ確定。
 			// 別スレッドでサイズ拡張される事があるので注意。
-			size_t sz = pThis->gGIMIC.size(); 
+			size_t ssz = pThis->gStream.size();
+			size_t ifsz = pThis->gIF.size(); 
 
 			// update
-			for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->tick(); };
+			for( size_t i=0; i<ssz; i++ ){ pThis->gStream[i]->delay->tick(); };
+			for( size_t i=0; i<ifsz; i++ ){ pThis->gIF[i]->tick(); };
 			
 			// per 50msec
 			if( nextSec10 < now ){
 				nextSec10 += 50;
-				for( size_t i=0; i<sz; i++ ){ pThis->gGIMIC[i]->update(); };
+				for( size_t i=0; i<ssz; i++ ){
+					pThis->gStream[i]->chip->update();
+				};
+				for( size_t i=0; i<ifsz; i++ ){
+					pThis->gIF[i]->update();
+				};
 			}
 		}
 
@@ -229,9 +300,11 @@ int C86CtlMain::initialize(void)
 		return C86CTL_ERR_UNKNOWN;
 	
 	// インスタンス生成
-	GimicHID::UpdateInstances(gGIMIC);
-	GimicWinUSB::UpdateInstances(gGIMIC);
+	//GimicHID::UpdateInstances(gIF);
+	GimicWinUSB::UpdateInstances(gIF);
 	//gGIMIC = GimicMIDI::CreateInstances(); // deprecated.
+	C86WinUSB::UpdateInstances(gIF);
+	updateMapping();
 	
 	// タイマ分解能設定
 	TIMECAPS timeCaps;
@@ -294,8 +367,9 @@ int C86CtlMain::deinitialize(void)
 
 	// インスタンス削除
 	// note: このタイミングで終了処理が行われる。
-	//       gGIMICを参照する演奏・描画スレッドは終了していなければならない。
-	gGIMIC.clear();
+	//       gIF/gLogicalDevicesを参照する演奏・描画スレッドは終了していなければならない。
+	gIF.clear();
+	gLogicalDevices.clear();
 
 	// タイマ分解能設定解除
 	::timeEndPeriod(timerPeriod);
@@ -311,40 +385,42 @@ void C86CtlMain::loadConfig(void)
 {
 	TCHAR key[128];
 	int val=0;
-	
-	for( size_t i=0; i<gGIMIC.size(); i++ ){
+
+	for( size_t i=0; i<gIF.size(); i++ ){
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
 		val = gConfig.getInt(INISC_MAIN, key, -1);
-		if( val>=0 ) gGIMIC[i]->setDelay(val);
+//		if( val>=0 ) gIF[i]->setDelay(val);
 
-		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
-		val = gConfig.getInt(INISC_MAIN, key, -1);
-		if( val>=0 ) gGIMIC[i]->setSSGVolume((UCHAR)val);
+	// TODO: なおす
+//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+//		val = gConfig.getInt(INISC_MAIN, key, -1);
+//		if( val>=0 ) gIF[i]->setSSGVolume((UCHAR)val);
 
-		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
-		val = gConfig.getInt(INISC_MAIN, key, -1);
-		if( val>=0 ) gGIMIC[i]->setPLLClock((UINT)val);
+//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+//		val = gConfig.getInt(INISC_MAIN, key, -1);
+//		if( val>=0 ) gIF[i]->setPLLClock((UINT)val);
 	}
 }
 
 void C86CtlMain::saveConfig(void)
 {
 	TCHAR key[128];
-	for( size_t i=0; i<gGIMIC.size(); i++ ){
+	for( size_t i=0; i<gIF.size(); i++ ){
 		int delay=0;
-		gGIMIC[i]->getDelay(&delay);
+//		gIF[i]->getDelay(&delay);
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
 		gConfig.writeInt(INISC_MAIN, key, delay);
 
-		UCHAR vol=0;
-		gGIMIC[i]->getSSGVolume(&vol);
-		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
-		gConfig.writeInt(INISC_MAIN, key, vol);
+	// TODO: なおす
+//		UCHAR vol=0;
+//		gGIMIC[i]->getSSGVolume(&vol);
+//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+//		gConfig.writeInt(INISC_MAIN, key, vol);
 
-		UINT clock=0;
-		gGIMIC[i]->getPLLClock(&clock);
-		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
-		gConfig.writeInt(INISC_MAIN, key, clock);
+//		UINT clock=0;
+//		gGIMIC[i]->getPLLClock(&clock);
+//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+//		gConfig.writeInt(INISC_MAIN, key, clock);
 		
 	}
 }
@@ -352,37 +428,45 @@ void C86CtlMain::saveConfig(void)
 
 int C86CtlMain::reset(void)
 {
-	gGIMIC.lock();
-	std::for_each( gGIMIC.begin(), gGIMIC.end(), [](std::shared_ptr<GimicIF> x){ x->reset(); } );
-	gGIMIC.unlock();
+//	gIF.lock();
+//	std::for_each( gIF.begin(), gIF.end(), [](std::shared_ptr<BaseSoundDevice> x){ x->reset(); } );
+//	gIF.unlock();
+	gLogicalDevices.lock();
+	std::for_each( gLogicalDevices.begin(), gLogicalDevices.end(), [](LogicalDevicePtr x){ x->reset(); } );
+	gLogicalDevices.unlock();
 
 	return 0;
 }
 
 int C86CtlMain::getNumberOfChip(void)
 {
-	return static_cast<int>(gGIMIC.size());
+	return static_cast<int>(gLogicalDevices.size());
 }
 
 HRESULT C86CtlMain::getChipInterface( int id, REFIID riid, void** ppi )
 {
-	if( id < static_cast<int>(gGIMIC.size()) ){
-		return gGIMIC[id]->QueryInterface( riid, ppi );
+	HRESULT result = E_NOINTERFACE;
+	
+	gLogicalDevices.lock();
+	if( id < static_cast<int>(gLogicalDevices.size()) ){
+		result = gLogicalDevices[id]->QueryInterface( riid, ppi );
 	}
-	return E_NOINTERFACE;
+	gLogicalDevices.unlock();
+	
+	return result;
 }
 
 void C86CtlMain::out( UINT addr, UCHAR data )
 {
-	if( gGIMIC.size() ){
-		gGIMIC.front()->out(addr,data);
+	if( gLogicalDevices.size() ){
+		gLogicalDevices[0]->out(addr,data);
 	}
 }
 
 UCHAR C86CtlMain::in( UINT addr )
 {
-	if( gGIMIC.size() ){
-		return gGIMIC.front()->in(addr);
+	if( gLogicalDevices.size() ){
+		return gLogicalDevices[0]->in(addr);
 	}else
 		return 0;
 }

@@ -21,7 +21,7 @@ class COPNAAdpcm{
 	static const size_t ramsize = 256*1024;
 	static const size_t minimapsize = 512;
 public:
-	COPNAAdpcm(IRealChip2 *p) : pIF(p){
+	COPNAAdpcm(){
 		dram = new UCHAR[ramsize];
 		map = new UCHAR[ramsize];
 		wav = new SHORT[ramsize*2];
@@ -93,8 +93,6 @@ protected:
 	bool right;
 	bool sw;
 
-	IRealChip2 *pIF;
-
 public:
 	UCHAR *dram; // 2samples per 1byte
 	UCHAR *map;
@@ -107,11 +105,11 @@ public:
 class COPNA : public Chip
 {
 public:
-	COPNA(IRealChip2 *p) : pIF(p){
-		fm = new COPNFm(p);
-		ssg = new COPNSsg(p);
-		adpcm = new COPNAAdpcm(p);
-		rhythm = new COPNRhythm(p);
+	COPNA(){
+		fm = new COPNFm();
+		ssg = new COPNSsg();
+		adpcm = new COPNAAdpcm();
+		rhythm = new COPNRhythm();
 		partMask = 0;
 		partSolo = 0;
 		//modeOPNA = true;
@@ -146,9 +144,9 @@ public:
 		rhythm->reset();
 		adpcm->reset();
 
-		// 強制的にOPNAモードに切り替え
-		pIF->directOut( 0x29, 0x9f );
-		reg[0][0x29] = 0x9f;
+		//// 強制的にOPNAモードに切り替え
+		//pIF->directOut( 0x29, 0x9f );
+		//reg[0][0x29] = 0x9f;
 
 		for( int i=0; i<14; i++ )
 			applyMask(i);
@@ -174,9 +172,8 @@ public:
 	};
 
 public:
-	virtual void filter( int addr, UCHAR *data );
-	virtual bool setReg( int addr, UCHAR data );
-	virtual UCHAR getReg( int addr );
+	virtual void byteOut( UINT addr, UCHAR data );
+	virtual UCHAR getReg( UINT addr );
 	virtual void setMasterClock( UINT clock ){
 		fm->setMasterClock(clock);
 		ssg->setMasterClock(clock);
@@ -197,6 +194,8 @@ public:
 	int getFMPrescale(){ return prescale_fm; };
 	int getSSGPrescale(){ return prescale_ssg; };
 
+private:
+	bool setReg( UINT addr, UCHAR data );
 
 public:
 	COPNFm *fm;
@@ -223,7 +222,7 @@ protected:
 	
 	UINT partMask;
 	UINT partSolo;
-	IRealChip2 *pIF;
+	//IModule *pIF;
 };
 
 };

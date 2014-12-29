@@ -19,6 +19,8 @@
 #include "vis_c86main.h"
 #include "c86ctlmain.h"
 #include "c86ctlmainwnd.h"
+#include "../interface/if_c86usb_winusb.h"
+#include "../interface/if_gimic_winusb.h"
 
 
 #ifdef _DEBUG
@@ -38,23 +40,211 @@ static const int modHeight = 74;
 
 bool CVisC86Main::update()
 {
-	// CHECKME: この時点でattachされてないといけない。
-	auto gimics = GetC86CtlMain()->getGimics();
+	size_t sz = GetC86CtlMain()->getNStreams();
+	size_t st = info.size();
+	
+	if( sz == st )
+		return true;
+
+#if 0
+	auto devices = GetC86CtlMain()->getDevices();
 	int sz = static_cast<int>(info.size());
 	int st = sz;
 
-	if( sz == gimics.size() )
+	if( sz == devices.size() )
 		return true;
-
-	sz = gimics.size();
+	
+	// TODO:listで管理に
+	auto it = info.begin();
+	for( int i=0; i<sz; i++ ){
+		int nmodule = devices[i]->getNumberOfModules();
+		for (int k=0; k<nmodule; k++){
+			if( it->id != devices[i]->nodeid ){
+				// 新しいデバイス
+				info.insert( it, newinfo );
+			}
+			it++;
+		}
+	}
+#endif
+	
 	info.resize(sz);
 	for( int i=0; i<sz; i++ ){
-		gimics[i]->getMBInfo(&info[i].mbinfo);
-		gimics[i]->getFWVer(&info[i].major, &info[i].minor, &info[i].rev, &info[i].build);
-		gimics[i]->getModuleInfo(&info[i].chipinfo);
-		gimics[i]->getModuleType(&info[i].chiptype);
-	}
+		Stream *s = GetC86CtlMain()->getStream(i);
+		
+		info[i].chiptype = s->module->getChipType();
+		char str[128];		
+			
+		IFirmwareVersionInfo *fwinfo = dynamic_cast<IFirmwareVersionInfo*>(s->module->getParentDevice());
+		if(fwinfo){
+			UINT major, minor, rev, build;
+			fwinfo->getFWVer(&major, &minor, &rev, &build);
+			sprintf( str, "%d.%d.%d.%d", major, minor, rev, build );
+			info[i].verstr.assign(str);
+		}
 
+		
+		GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module);
+		if (gimic_module){
+			Devinfo chipinfo;
+			gimic_module->getModuleInfo(&chipinfo);
+			sprintf(str, "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev );
+			info[i].module_name.assign(str);
+
+			GimicWinUSB *gimic_dev = dynamic_cast<GimicWinUSB*>(s->module->getParentDevice());
+			if (gimic_dev){
+				Devinfo mbinfo;
+				gimic_dev->getMBInfo(&mbinfo);
+				sprintf(str, "%s Rev.%c", &mbinfo.Devname[0], mbinfo.Rev );
+				info[i].device_name.assign(str);
+			}
+		}else{
+			switch(info[i].chiptype){
+			case CHIP_YM2608:
+				info[i].module_name.assign("YM2608"); break;
+			case CHIP_YM2608NOADPCM:
+				info[i].module_name.assign("YM2608(NOADPCM)"); break;
+			case CHIP_YM2151:
+				info[i].module_name.assign("YM2151"); break;
+			case CHIP_YMF288:
+				info[i].module_name.assign("YMF288"); break;
+			case CHIP_YMF262:
+				info[i].module_name.assign("YMF262"); break;
+			case CHIP_YM2413:
+				info[i].module_name.assign("YMF2413"); break;
+			case CHIP_SN76489:
+				info[i].module_name.assign("SN76489"); break;
+			case CHIP_SN76496:
+				info[i].module_name.assign("SN76496"); break;
+			case CHIP_AY38910:
+				info[i].module_name.assign("AY-3-8910"); break;
+			case CHIP_YM2149:
+				info[i].module_name.assign("YM2149"); break;
+			case CHIP_YM2203:
+				info[i].module_name.assign("YM2203"); break;
+			case CHIP_YM2612:
+				info[i].module_name.assign("YM2612"); break;
+			case CHIP_YM3526:
+				info[i].module_name.assign("YM3526"); break;
+			case CHIP_YM3812:
+				info[i].module_name.assign("YM3812"); break;
+			case CHIP_YMF271:
+				info[i].module_name.assign("YMF271"); break;
+			case CHIP_YMF278B:
+				info[i].module_name.assign("YMF278"); break;
+			case CHIP_YMZ280B:
+				info[i].module_name.assign("YMZ280"); break;
+			case CHIP_YMF297:
+				info[i].module_name.assign("YMZ297"); break;
+			case CHIP_YM2610B:
+				info[i].module_name.assign("YM2610B"); break;
+			case CHIP_Y8950:
+				info[i].module_name.assign("Y8950"); break;
+			case CHIP_Y8950ADPCM:
+				info[i].module_name.assign("Y8950 (w/ADPCM)"); break;
+			case CHIP_YM3438:
+				info[i].module_name.assign("YM3438"); break;
+			}
+
+			C86WinUSB::C86ModuleWinUSB *c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
+			if(c86){
+				char slotname[] = {'A', 'B', 'C', 'D'};
+				sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex() );
+				info[i].device_name.assign(str);
+
+				switch(c86->getBoardType()){
+				case CBUS_BOARD_UNKNOWN:
+					info[i].board_name.assign("UNKNOWN"); break;
+				case CBUS_BOARD_14:
+					info[i].board_name.assign("PC-9801-14"); break;
+				case CBUS_BOARD_26:
+					info[i].board_name.assign("PC-9801-26K"); break;
+				case CBUS_BOARD_SOUND_ORCHESTRA:
+					info[i].board_name.assign("ORCHESTRA"); break;
+				case CBUS_BOARD_SOUND_ORCHESTRA_L:
+					info[i].board_name.assign("ORCHESTRA-L"); break;
+				case CBUS_BOARD_SOUND_ORCHESTRA_V:
+					info[i].board_name.assign("ORCHESTRA-V"); break;
+				case CBUS_BOARD_SOUND_ORCHESTRA_VS:
+					info[i].board_name.assign("ORCHESTRA-VS"); break;
+				case CBUS_BOARD_SOUND_ORCHESTRA_LS:
+					info[i].board_name.assign("ORCHESTRA-LS"); break;
+				case CBUS_BOARD_SOUND_ORCHESTRA_MATE:
+					info[i].board_name.assign("ORCHESTRA-MATE"); break;
+				case CBUS_BOARD_MULTIMEDIA_ORCHESTRA:
+					info[i].board_name.assign("MMO"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA:
+					info[i].board_name.assign("LITTLE"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA_L:
+					info[i].board_name.assign("LITTLE-L"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA_RS:
+					info[i].board_name.assign("LITTLE-RS"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA_LS:
+					info[i].board_name.assign("LITTLE-LS"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA_SS:
+					info[i].board_name.assign("LITTLE-SS"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA_MATE:
+					info[i].board_name.assign("LITTLE-MATE"); break;
+				case CBUS_BOARD_LITTLE_ORCHESTRA_FELLOW:
+					info[i].board_name.assign("LITTLE-FELLOW"); break;
+				case CBUS_BOARD_JOY2:
+					info[i].board_name.assign("JOY2"); break;
+				case CBUS_BOARD_SOUND_GRANPRI:
+					info[i].board_name.assign("GRANPRI"); break;
+				case CBUS_BOARD_TN_F3FM:
+					info[i].board_name.assign("TN-F3FM"); break;
+				case CBUS_BOARD_73:
+					info[i].board_name.assign("PC-9801-73"); break;
+				case CBUS_BOARD_86:
+					info[i].board_name.assign("PC-9801-86"); break;
+				case CBUS_BOARD_ASB01:
+					info[i].board_name.assign("ASB-01"); break;
+				case CBUS_BOARD_SPEAKBOARD:
+					info[i].board_name.assign("SPEAKBOARD"); break;
+				case CBUS_BOARD_SOUNDPLAYER98:
+					info[i].board_name.assign("SPB98"); break;
+				case CBUS_BOARD_SECONDBUS86:
+					info[i].board_name.assign("SB86"); break;
+				case CBUS_BOARD_SOUNDEDGE:
+					info[i].board_name.assign("SOUNDEDGE"); break;
+				case CBUS_BOARD_WINDUO:
+					info[i].board_name.assign("WINDUO"); break;
+				case CBUS_BOARD_OTOMI:
+					info[i].board_name.assign("OTOMI"); break;
+				case CBUS_BOARD_WAVEMASTER:
+					info[i].board_name.assign("WAVEMASTER"); break;
+				case CBUS_BOARD_WAVESMIT:
+					info[i].board_name.assign("WAVESIMIT"); break;
+				case CBUS_BOARD_WAVESTAR:
+					info[i].board_name.assign("WAVESTAR"); break;
+				case CBUS_BOARD_WSN_A4F:
+					info[i].board_name.assign("WSN-A4F"); break;
+				case CBUS_BOARD_SB16:
+					info[i].board_name.assign("SB16"); break;
+				case CBUS_BOARD_SB16_2203:
+					info[i].board_name.assign("SB16"); break;
+				case CBUS_BOARD_SB16VALUE:
+					info[i].board_name.assign("SB16VALUE"); break;
+				case CBUS_BOARD_POWERWINDOW_T64S:
+					info[i].board_name.assign("PW-T64S"); break;
+				case CBUS_BOARD_PCSB2:
+					info[i].board_name.assign("PC-SB2"); break;
+				case CBUS_BOARD_WGS98S:
+					info[i].board_name.assign("WGS98S"); break;
+				case CBUS_BOARD_SRB_G:
+					info[i].board_name.assign("SRB-G"); break;
+				case CBUS_BOARD_MIDI_ORCHESTRA_MIDI3:
+					info[i].board_name.assign("MIDI-3"); break;
+				case CBUS_BOARD_SB_AWE32:
+					info[i].board_name.assign("SB-AWE32"); break;
+				case CBUS_BOARD_118:
+					info[i].board_name.assign("PC-9801-118"); break;
+				}
+			}
+		}
+
+	}
+	
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
 	int windowHeight = 19+40+modHeight*sz+10;
 	int windowWidth = 334;
@@ -65,12 +255,14 @@ bool CVisC86Main::update()
 	int y=40+modHeight*st;
 	
 	for( int i=st; i<sz; i++ ){
+		Stream *s = GetC86CtlMain()->getStream(i);
+
 		TCHAR key[KEYBUFLEN];
-		Chip *pchip = gimics[i]->getChip();
+		//Chip *pchip = s->chip;
 		hwinfo *pinfo = &info[i];
 		
 		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
-		pinfo->regView = visC86RegViewFactory(pchip, i);
+		pinfo->regView = visC86RegViewFactory(s->chip, i);
 		pinfo->regView->closeEvent.push_back(
 			[pinfo](CVisWnd* h){
 				pinfo->checkReg->setCheck(0, false);
@@ -97,12 +289,12 @@ bool CVisC86Main::update()
 			info[i].checkReg->setCheck(1, true);
 		}
 
-		if( info[i].chiptype == CHIP_OPNA ||
+		if( info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_YM2608NOADPCM ||
 			info[i].chiptype == CHIP_OPN3L ||
 			info[i].chiptype == CHIP_OPM ){
 
 			_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
-			pinfo->keyView = visC86KeyViewFactory(pchip, i);
+			pinfo->keyView = visC86KeyViewFactory(s->chip, i);
 			pinfo->keyView->closeEvent.push_back(
 				[pinfo](CVisWnd* h){
 					pinfo->checkKey->setCheck(0, false);
@@ -138,7 +330,7 @@ bool CVisC86Main::update()
 				sprintf(str, "FM%d", ch+1);
 				
 				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
-				pinfo->fmView[ch] = visC86FmViewFactory(pchip, i, ch);
+				pinfo->fmView[ch] = visC86FmViewFactory(s->chip, i, ch);
 				pinfo->fmView[ch]->closeEvent.push_back(
 					[pinfo, ch](CVisWnd* h){
 						pinfo->checkFM[ch]->setCheck(0, false);
@@ -204,9 +396,7 @@ bool CVisC86Main::create(HWND parent)
 
 void CVisC86Main::onPaintClient()
 {
-	auto gimic = GetC86CtlMain()->getGimics();
-
-	// NOTE: gimic.size != info.size() となることがあるので注意
+	// NOTE: devices.size != info.size() となることがあるので注意
 	size_t sz = info.size();
 
 	CVisC86Skin *skin = &gVisSkin;
@@ -221,7 +411,7 @@ void CVisC86Main::onPaintClient()
 	
 	// ロゴ・バージョン
 	skin->drawLogo( clientCanvas, 2, 2 );
-	skin->drawStr( clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86USB" );
+	skin->drawStr( clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86BOX" );
 	skin->drawStr( clientCanvas, 0, 130, 17, "(C)HONET " VERSION_MESSAGE );
 
 	// 横線
@@ -244,25 +434,41 @@ void CVisC86Main::onPaintClient()
 		visFillRect( clientCanvas, 5, y-2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID) );
 		visFillRect( clientCanvas, 5, y+64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
 
-		if( gimic[i]->isValid() ){
-			const GimicParam* param = gimic[i]->getParam();
+		BaseSoundModule *module = GetC86CtlMain()->getStream(i)->module;
+		BaseSoundDevice *dev = module->getParentDevice();
+
+		if (module->isValid()){
 			// デバイス名
-			sprintf(str, "MODULE%d: %s Rev.%c", i, &info[i].mbinfo.Devname[0], info[i].mbinfo.Rev );
+			sprintf(str, "MODULE%d: %s", i, info[i].device_name.c_str() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			// Firmware version
-			sprintf( str, "FW-VER : %d.%d.%d.%d", info[i].major, info[i].minor, info[i].rev, info[i].build );
+			sprintf( str, "FW-VER : %s", info[i].verstr.c_str() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			// バスボード名
+			C86WinUSB::C86ModuleWinUSB *c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(module);
+			if (c86){
+				sprintf(str, "BOARD  : %s", info[i].board_name.c_str() );
+				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			}
+
 			// MODULE名
-			sprintf(str, "CHIP   : %s Rev.%c", &info[i].chipinfo.Devname[0], info[i].chipinfo.Rev );
+			sprintf(str, "CHIP   : %s", info[i].module_name.c_str() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-			// PLL Clock
-			sprintf(str, "CLOCK  : %d Hz", param->clock );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-			// SSG-Volume
-			sprintf(str, "SSG-VOL: %d", param->ssgVol );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+
+			GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(module);
+			if (gimic){
+				const GimicParam *param = gimic->getGimicParam();
+
+				// PLL Clock
+				sprintf(str, "CLOCK  : %d Hz", param->clock );
+				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+				// SSG-Volume
+				sprintf(str, "SSG-VOL: %d", param->ssgVol );
+				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			}
+
 			// カロリー(w
-			sprintf(str, "CALORIE: %d CPS", gimic[i]->getCPS() );
+			sprintf(str, "CALORIE: %d CPS", dev->getCPS() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		}else{
 			sprintf(str, "MODULE%d: DISCONNECTED", i );

@@ -8,10 +8,12 @@
  */
 
 #include <vector>
-
+#include <map>
 #include "c86ctl.h"
 #include "withlock.h"
 #include "interface/if.h"
+#include "interface/logical_device.h"
+#include "interface/delay_filter.h"
 
 
 #define WM_THREADEXIT       (WM_APP+10)
@@ -68,14 +70,19 @@ public:
 public:
 	void loadConfig(void);
 	void saveConfig(void);
+	void updateMapping(void);
 	
 private:
 	bool terminateFlag;
-	withlock< std::vector< std::shared_ptr<GimicIF> > > gGIMIC;
+	withlock< std::vector< LogicalDevicePtr > > gLogicalDevices;
+	withlock< std::vector< BaseSoundDevicePtr > > gIF;
 
+	withlock< std::vector< StreamPtr > > gStream;
+	
 
 public:
-	withlock< std::vector< std::shared_ptr<GimicIF> > > &getGimics();
+	Stream* getStream(int index);
+	size_t getNStreams();
 	
 private:
 	static unsigned int WINAPI threadMain(LPVOID param);
