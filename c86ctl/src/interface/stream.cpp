@@ -59,18 +59,18 @@ Stream* Stream::Build(BaseSoundModule *module)
 	//ncase CHIP_AY38910:
 	case CHIP_YM2149:
 	case CHIP_YM2203:
+	case CHIP_Y8950:
+	case CHIP_Y8950ADPCM:
+	case CHIP_YM3526:
+	case CHIP_YM3812:
 		chip = new CGenericChipBank1();
 		break;
 	case CHIP_YM2612:
-	case CHIP_YM3526:
-	case CHIP_YM3812:
 	case CHIP_YMF271:
 	case CHIP_YMF278B:
 	case CHIP_YMZ280B:
 	case CHIP_YMF297:
 	case CHIP_YM2610B:
-	case CHIP_Y8950:
-	case CHIP_Y8950ADPCM:
 	case CHIP_YM3438:
 		chip = new CGenericChipBank2();
 		break;

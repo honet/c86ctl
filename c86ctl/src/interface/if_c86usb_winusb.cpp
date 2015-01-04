@@ -37,12 +37,14 @@ using namespace c86ctl;
 /*----------------------------------------------------------------------------
 	定義いろいろ
 ----------------------------------------------------------------------------*/
+// メッセージ用リングバッファサイズ
 #define PIPE_BUFFER_SIZE 1024
-// VENDOR REQUEST ------------------------------------------------------------
+
+// VENDOR REQUEST ------------------------------------
 #define C86_VENDOR_GET_BOARD_INFO		0x81
 // SETUP:
 //   bmRequestType: (0x80|0x40|0x00) DeviceToHost, vendor, device
-//   bRequest     : USBFS_VENDOR_GET_BOARD_INFO
+//   bRequest     : C86_VENDOR_GET_BOARD_INFO
 //   wValue       : ignore
 //   wIndex       : ボード番号(0~4)
 //   wLength      : 
@@ -52,30 +54,42 @@ using namespace c86ctl;
 #define C86_VENDOR_GET_FW_VER			0x82
 // SETUP:
 //   bmRequestType: DeviceToHost, vendor, device
-//   bRequest     : USBFS_VENDOR_GET_FW_VER
+//   bRequest     : C86_VENDOR_GET_FW_VER
 //   wValue       : ignore
 //   wIndex       : ignore
 //   wLength      : 4
 // DATA STAGE:
 //   (uint32_t)verison
 
+#define C86_VENDOR_GET_CONF_BOARD_TYPE		0x13
+// SETUP:
+//   bmRequestType: DeviceToHost, vendor, device
+//   bRequest     : C86_VENDOR_GET_BOARD_INFO
+//   wValue       : ignore
+//   wIndex       : ボード番号(0~4)
+//   wLength      : 4
+// DATA STAGE:
+//   (uint32_t)board_type
+
+#define C86_VENDOR_SET_CONF_BOARD_TYPE		0x14
+// SETUP:
+//   bmRequestType: HostToDevice, vendor, device
+//   bRequest     : C86_VENDOR_CBUS_RESET
+//   wValue       : ignore
+//   wIndex       : ボード番号(0~4)
+//   wLength      : 4
+// DATA STAGE:
+//   (uint32_t)board_type
+
+
 #define C86_VENDOR_SYSTEM_RESET			0x11
 // SETUP:
 //   bmRequestType: HostToDevice, vendor, device
-//   bRequest     : USBFS_VENDOR_CBUS_RESET
+//   bRequest     : C86_VENDOR_CBUS_RESET
 //   wValue       : ignore
 //   wIndex       : 0
 //   wLength      : 0
 
-#define C86_VENDOR_BOARD_CONTROL		0x13
-// SETUP:
-//   bmRequestType: HostToDevice, vendor, device
-//   bRequest     : USBFS_VENDOR_BOARD_CONTROL
-//   wValue       : コントロール番号
-//   wIndex       : ボード番号(0~4)
-//   wLength      : データ長
-// DATTA STAGE:
-//   コントロールごとに定義
 
 
 /*----------------------------------------------------------------------------
@@ -212,7 +226,6 @@ int C86WinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSound
 	
 	HDEVINFO devinf = INVALID_HANDLE_VALUE;
 	SP_DEVICE_INTERFACE_DATA spid;
-	PSP_DEVICE_INTERFACE_DETAIL_DATA fc_data = NULL;
 
 
 	devinf = SetupDiGetClassDevs(

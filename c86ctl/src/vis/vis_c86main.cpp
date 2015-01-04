@@ -152,7 +152,7 @@ bool CVisC86Main::update()
 				sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex() );
 				info[i].device_name.assign(str);
 
-				switch(c86->getBoardType()){
+				switch(c86->getBoardType()&0xffff){
 				case CBUS_BOARD_UNKNOWN:
 					info[i].board_name.assign("UNKNOWN"); break;
 				case CBUS_BOARD_14:
