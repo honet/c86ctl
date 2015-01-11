@@ -107,6 +107,7 @@ void C86CtlMain::updateMapping(void)
 	gIF.lock();
 	gLogicalDevices.lock();
 
+// TODO: マッパーGUI作ってこういうことをしたいというメモ書き
 //	for_each( definedList ){
 //		if(matched){
 //			if(!already generated){

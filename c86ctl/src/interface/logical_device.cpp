@@ -64,7 +64,6 @@ UCHAR LogicalDevice::in( UINT addr )
 		return 0;
 	
 	return streams[0]->chip->getReg(addr);
-	//return 0;
 }
 
 int LogicalDevice::getChipStatus( UINT addr, UCHAR *status )
@@ -243,20 +242,6 @@ int LogicalDevice::isValid(void)
 	}
 	return true;
 }
-
-//int LogicalDevice::init(void){ return 0; };
-//void LogicalDevice::tick(void){};
-//void LogicalDevice::update(void)
-//{
-//	if( chip )
-//		chip->update();
-//	
-//	return pIF->update();
-//};
-
-//UINT LogicalDevice::getCPS(void){ return 0; };
-//void LogicalDevice::checkConnection(void){};
-
 
 void LogicalDevice::connect(Stream *s)
 {
