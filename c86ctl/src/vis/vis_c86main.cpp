@@ -231,6 +231,8 @@ bool CVisC86Main::update()
 					info[i].board_name.assign("PC-SB2"); break;
 				case CBUS_BOARD_WGS98S:
 					info[i].board_name.assign("WGS98S"); break;
+				case CBUS_BOARD_SXM_F:
+					info[i].board_name.assign("SXM-F"); break;
 				case CBUS_BOARD_SRB_G:
 					info[i].board_name.assign("SRB-G"); break;
 				case CBUS_BOARD_MIDI_ORCHESTRA_MIDI3:
