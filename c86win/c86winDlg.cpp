@@ -240,8 +240,8 @@ unsigned int WINAPI C86winDlg::PlayerThread(LPVOID param)
 		}
 	}
 
-
-	//tick = 10000;
+	// RESET‘Ò‚¿.
+	Sleep(500);
 		
 
 	tpus = (INT)(pThis->s98data.getTimerPrec() * 1000.0);
@@ -340,8 +340,11 @@ void C86winDlg::OnBnClickedButtonPlay()
 			hThread = (HANDLE)_beginthreadex( NULL, 0, C86winDlg::PlayerThread, this, 0, &threadID );
 			SetThreadPriority(hThread, THREAD_PRIORITY_ABOVE_NORMAL);
 		}
+		SetTimer(0, 100, NULL);
+	}else{
+		OnBnClickedButtonStop();
 	}
-	SetTimer(0, 100, NULL);
+
 }
 
 
