@@ -350,6 +350,8 @@ int C86WinUSB::devWrite( LPCVOID data )
 
 void C86WinUSB::out(UCHAR idx, UINT addr, UCHAR data)
 {
+	while(!rbuff.remain());
+
 	uint32_t d = (idx<<17) | (addr&0x1ff)<<8 | data;
 	rbuff.push(d);
 }
