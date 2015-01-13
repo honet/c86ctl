@@ -17,7 +17,7 @@
 
 namespace c86ctl{
 
-class LogicalDevice : public IRealChip2, public IGimic2, public IC86Box
+class LogicalDevice : public IRealChip3, public IGimic2, public IC86Box
 {
 public:
 	LogicalDevice();
@@ -35,12 +35,19 @@ public:
 		}else if( ::IsEqualIID( riid, IID_IRealChip2 ) ){
 			*ppvObj = static_cast<IRealChip2*>(this);
 			return NOERROR;
+		}else if( ::IsEqualIID( riid, IID_IRealChip3 ) ){
+			*ppvObj = static_cast<IRealChip3*>(this);
+			return NOERROR;
 		}else if( ::IsEqualIID( riid, IID_IGimic ) ){
 			*ppvObj = static_cast<IGimic*>(this);
 			return NOERROR;
 		}else if( ::IsEqualIID( riid, IID_IGimic2 ) ){
 			*ppvObj = static_cast<IGimic2*>(this);
 			return NOERROR;
+		//TODO: まだ中身実装してない。
+		//}else if( ::IsEqualIID( riid, IID_IC86BOX ) ){
+		//	*ppvObj = static_cast<IC86Box*>(this);
+		//	return NOERROR;
 		}
 		*ppvObj = NULL;
 		return E_NOINTERFACE;
@@ -55,11 +62,11 @@ public:
 	virtual int __stdcall reset(void);
 	virtual void __stdcall out( UINT addr, UCHAR data);
 	virtual UCHAR __stdcall in( UINT addr );
-
-public:
 	// IRealChip2
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status );
 	virtual void __stdcall directOut(UINT addr, UCHAR data);
+	// IRealChip3
+	virtual int __stdcall getChipType( enum ChipType *type );
 	
 public:
 	// IGimic

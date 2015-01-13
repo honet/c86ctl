@@ -86,6 +86,22 @@ void LogicalDevice::directOut(UINT addr, UCHAR data)
 		streams[i]->module->directOut(addr, data);
 	}
 }
+
+int LogicalDevice::getChipType( enum ChipType *type )
+{
+	if (streams.size()<=0)
+		return C86CTL_ERR_NODEVICE;
+	if (type==NULL)
+		return C86CTL_ERR_INVALID_PARAM;
+
+	*type = streams[0]->module->getChipType();
+	return C86CTL_ERR_NONE;
+}
+
+int LogicalDevice::getModuleType(enum ChipType *type)
+{
+	return getChipType(type);
+}
 	
 int LogicalDevice::setSSGVolume(UCHAR vol)
 {
@@ -207,16 +223,6 @@ int LogicalDevice::getModuleInfo(struct Devinfo *info)
 	return C86CTL_ERR_UNSUPPORTED;
 }
 
-int LogicalDevice::getModuleType(enum ChipType *type)
-{
-	if (streams.size()<=0)
-		return C86CTL_ERR_NODEVICE;
-	if (type==NULL)
-		return C86CTL_ERR_INVALID_PARAM;
-
-	*type = streams[0]->module->getChipType();
-	return C86CTL_ERR_NONE;
-}
 
 // IC86Box
 int LogicalDevice::getBoardType(CBUS_BOARD_TYPE *boardType)
