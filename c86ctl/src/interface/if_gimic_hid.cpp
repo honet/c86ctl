@@ -296,7 +296,10 @@ int GimicHID::init(void)
 	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
 		chiptype = CHIP_OPL3;
 		chip = new COPL3();
-//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
+	}else if( !memcmp( info.Devname, "GMC-OPLMN", 9 ) ){
+		chiptype = CHIP_OPN3L;
+		chip = new COPN3L(this);
+	//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	
 	// 値をキャッシュさせるためのダミー呼び出し

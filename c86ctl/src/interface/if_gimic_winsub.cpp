@@ -182,7 +182,14 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 		}else if( chiptype != CHIP_OPL3 ){
 			goto MODULE_CHANGED;
 		}
-//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
+	}else if( !memcmp( info.Devname, "GMC-OPLMN", 9 ) ){
+		if( chiptype == 0 && chip == 0 ){
+			chiptype = CHIP_OPN3L;
+			chip = new COPN3L(this);
+		}else if( chiptype != CHIP_OPN3L ){
+			goto MODULE_CHANGED;
+		}
+	//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
 	}
 	
 	// 値をキャッシュさせるためのダミー呼び出し

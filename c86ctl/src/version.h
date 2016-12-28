@@ -11,9 +11,9 @@
 #define VERSION_MAJOR      1
 #define VERSION_MINOR      4
 #define VERSION_REVISION   4
-#define VERSION_BUILD      1023
-#define VERSION_STRING     "1, 4, 4, 1023"
-#define VERSION_MESSAGE    "VER 1.4.4.1023(RELEASE)"
+#define VERSION_BUILD      1024
+#define VERSION_STRING     "1, 4, 5, 1024"
+#define VERSION_MESSAGE    "VER 1.4.5.1024(RELEASE)"
 
 
 // DON'T CHANGE FOLLOWINGS. (for DLL resorce) ---------------------
