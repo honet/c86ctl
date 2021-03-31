@@ -810,6 +810,7 @@ void CVisC86OPMKey::onKeyDown(DWORD keycode)
 // --------------------------------------------------------
 CVisC86KeyPtr c86ctl::vis::visC86KeyViewFactory(Chip *pchip, int id)
 {
+	if (!pchip) return 0;
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86KeyPtr( new CVisC86OPNAKey(dynamic_cast<COPNA*>(pchip), id ) );
 	}else if( typeid(*pchip) == typeid(COPN3L) ){

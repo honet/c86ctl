@@ -22,9 +22,6 @@
     <None Include="..\..\src\win\c86ctl.def">
       <Filter>core</Filter>
     </None>
-    <None Include="..\..\src\win\res\c86ctl.rc2">
-      <Filter>resource</Filter>
-    </None>
     <None Include="..\..\src\win\res\skin.png">
       <Filter>resource</Filter>
     </None>

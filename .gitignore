@@ -26,3 +26,22 @@
 *.exe
 *.out
 *.app
+
+# Compiled
+x64/
+Win32/
+ipch/
+.git
+.vs
+
+
+#backup file
+*~
+*.bak
+*.tmp
+
+#visual studio
+*.user
+*.sdf
+*.suo
+

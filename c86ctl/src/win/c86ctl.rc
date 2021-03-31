@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "..\version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -8,7 +9,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-#include "res\\c86ctl.rc2"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -25,8 +25,8 @@ LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,2,954
- PRODUCTVERSION 1,4,2,954
+ FILEVERSION    __C86CTL_DLL_FILEVERSION
+ PRODUCTVERSION __C86CTL_DLL_PRODUCTVERSION
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -44,11 +44,11 @@ BEGIN
             VALUE "Comments", "C86CTL"
             VALUE "CompanyName", "honet"
             VALUE "FileDescription", "C86CTL dynamic link library"
-            VALUE "FileVersion", "1, 4, 2, 954"
+            VALUE "FileVersion",     __C86CTL_DLL_FILEVERSION_STRING
             VALUE "InternalName", "C86CTL"
             VALUE "LegalCopyright", "Copyright (C) 2011~2013 honet"
             VALUE "ProductName", "C86CTL dynamic link library"
-            VALUE "ProductVersion", "1, 4, 2, 954"
+            VALUE "ProductVersion",  __C86CTL_DLL_PRODUCTVERSION_STRING
         END
     END
     BLOCK "VarFileInfo"

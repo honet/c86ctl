@@ -68,65 +68,73 @@ bool CVisC86Main::update()
 		TCHAR key[KEYBUFLEN];
 		Chip *pchip = gimics[i]->getChip();
 		hwinfo *pinfo = &info[i];
-		
+		if (!pchip || !pinfo) continue;
+
 		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
-		pinfo->regView = visC86RegViewFactory(pchip, i);
 		pinfo->regView->closeEvent.push_back(
 			[pinfo](CVisWnd* h){
 				pinfo->checkReg->setCheck(0, false);
 			});
 		
 		pinfo->checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
-		pinfo->checkReg->changeEvent.push_back(
-			[this, pinfo, i](CVisWidget* w){
-				TCHAR key[KEYBUFLEN];
-				_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
-				
-				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-					if( pinfo->regView )
-						pinfo->regView->create(hWnd);
-					gConfig.writeInt( windowClass.c_str(), key, 1 );
-				}else{
-					if( pinfo->regView )
-						pinfo->regView->close();
-					gConfig.writeInt( windowClass.c_str(), key, 0 );
-				}
-			} );
-		widgets.push_back(pinfo->checkReg);
-		if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
-			info[i].checkReg->setCheck(1, true);
+		if (pinfo->checkReg) {
+			pinfo->checkReg->changeEvent.push_back(
+				[this, pinfo, i](CVisWidget* w) {
+					TCHAR key[KEYBUFLEN];
+					_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
+
+					if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
+						if (pinfo->regView)
+							pinfo->regView->create(hWnd);
+						gConfig.writeInt(windowClass.c_str(), key, 1);
+					}
+					else {
+						if (pinfo->regView)
+							pinfo->regView->close();
+						gConfig.writeInt(windowClass.c_str(), key, 0);
+					}
+				});
+			widgets.push_back(pinfo->checkReg);
+			if (gConfig.getInt(windowClass.c_str(), key, 0)) {
+				info[i].checkReg->setCheck(1, true);
+			}
 		}
 
-		if( info[i].chiptype == CHIP_OPNA ||
-			info[i].chiptype == CHIP_OPN3L ||
-			info[i].chiptype == CHIP_OPM ){
+		if( pinfo->chiptype == CHIP_OPNA ||
+			pinfo->chiptype == CHIP_OPN3L ||
+			pinfo->chiptype == CHIP_OPM ){
 
 			_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
 			pinfo->keyView = visC86KeyViewFactory(pchip, i);
-			pinfo->keyView->closeEvent.push_back(
-				[pinfo](CVisWnd* h){
-					pinfo->checkKey->setCheck(0, false);
-				});
+			if (pinfo->keyView) {
+				pinfo->keyView->closeEvent.push_back(
+					[pinfo](CVisWnd* h) {
+						pinfo->checkKey->setCheck(0, false);
+					});
+			}
 			
 			pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
-			pinfo->checkKey->changeEvent.push_back(
-				[this, pinfo, i](CVisWidget* w){
-					TCHAR key[KEYBUFLEN];
-					_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
+			if (pinfo->checkKey) {
+				pinfo->checkKey->changeEvent.push_back(
+					[this, pinfo, i](CVisWidget* w) {
+						TCHAR key[KEYBUFLEN];
+						_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
 
-					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-						if( pinfo->keyView )
-							pinfo->keyView->create(hWnd);
-						gConfig.writeInt( windowClass.c_str(), key, 1 );
-					}else{
-						if( pinfo->keyView )
-							pinfo->keyView->close();
-						gConfig.writeInt( windowClass.c_str(), key, 0 );
-					}
-				} );
-			widgets.push_back(info[i].checkKey);
-			if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
-				info[i].checkKey->setCheck(1, true);
+						if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
+							if (pinfo->keyView)
+								pinfo->keyView->create(hWnd);
+							gConfig.writeInt(windowClass.c_str(), key, 1);
+						}
+						else {
+							if (pinfo->keyView)
+								pinfo->keyView->close();
+							gConfig.writeInt(windowClass.c_str(), key, 0);
+						}
+					});
+				widgets.push_back(pinfo->checkKey);
+				if (gConfig.getInt(windowClass.c_str(), key, 0)) {
+					pinfo->checkKey->setCheck(1, true);
+				}
 			}
 
 			int nch = 6;
@@ -139,30 +147,33 @@ bool CVisC86Main::update()
 				
 				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
 				pinfo->fmView[ch] = visC86FmViewFactory(pchip, i, ch);
-				pinfo->fmView[ch]->closeEvent.push_back(
-					[pinfo, ch](CVisWnd* h){
-						pinfo->checkFM[ch]->setCheck(0, false);
-					});
-				
-				pinfo->checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this,180 + 40*(ch%3), y+((ch/3)+1)*14, str));
-				pinfo->checkFM[ch]->changeEvent.push_back(
-					[this, pinfo, i, ch](CVisWidget* w){
-						TCHAR key[KEYBUFLEN];
-						_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
-						
-						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-							if( pinfo->fmView[ch] )
-								pinfo->fmView[ch]->create(hWnd);
-							gConfig.writeInt( windowClass.c_str(), key, 1 );
-						}else{
-							if( pinfo->fmView[ch] )
-								pinfo->fmView[ch]->close();
-							gConfig.writeInt( windowClass.c_str(), key, 0 );
-						}
-					} );
-				widgets.push_back(info[i].checkFM[ch]);
-				if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
-					info[i].checkFM[ch]->setCheck(1, true);
+				if (pinfo->fmView[ch]) {
+					pinfo->fmView[ch]->closeEvent.push_back(
+						[pinfo, ch](CVisWnd* h) {
+							pinfo->checkFM[ch]->setCheck(0, false);
+						});
+
+					pinfo->checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this, 180 + 40 * (ch % 3), y + ((ch / 3) + 1) * 14, str));
+					pinfo->checkFM[ch]->changeEvent.push_back(
+						[this, pinfo, i, ch](CVisWidget* w) {
+							TCHAR key[KEYBUFLEN];
+							_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch + 1);
+
+							if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
+								if (pinfo->fmView[ch])
+									pinfo->fmView[ch]->create(hWnd);
+								gConfig.writeInt(windowClass.c_str(), key, 1);
+							}
+							else {
+								if (pinfo->fmView[ch])
+									pinfo->fmView[ch]->close();
+								gConfig.writeInt(windowClass.c_str(), key, 0);
+							}
+						});
+					widgets.push_back(info[i].checkFM[ch]);
+					if (gConfig.getInt(windowClass.c_str(), key, 0)) {
+						info[i].checkFM[ch]->setCheck(1, true);
+					}
 				}
 			}
 		}
@@ -221,7 +232,7 @@ void CVisC86Main::onPaintClient()
 	
 	// ロゴ・バージョン
 	skin->drawLogo( clientCanvas, 2, 2 );
-	skin->drawStr( clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86USB" );
+	skin->drawStr( clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86BOX" );
 	skin->drawStr( clientCanvas, 0, 130, 17, "(C)HONET " VERSION_MESSAGE );
 
 	// 横線

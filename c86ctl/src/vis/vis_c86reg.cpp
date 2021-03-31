@@ -132,6 +132,7 @@ void CVisC86OPL3Reg::onPaintClient()
 // --------------------------------------------------------
 CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
 {
+	if (!pchip) return 0;
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86RegPtr( new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id ) );
 	}else if( typeid(*pchip) == typeid(COPN3L) ){

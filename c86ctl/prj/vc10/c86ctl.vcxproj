@@ -166,7 +166,6 @@
     <None Include="..\..\ReadMe.txt" />
     <None Include="..\..\src\win\c86ctl.def" />
     <None Include="..\..\src\win\res\c86ctl.ico" />
-    <None Include="..\..\src\win\res\c86ctl.rc2" />
     <None Include="..\..\src\win\res\skin.png" />
     <None Include="res\c86ctl.ico" />
   </ItemGroup>
