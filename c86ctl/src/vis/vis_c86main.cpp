@@ -71,11 +71,14 @@ bool CVisC86Main::update()
 		if (!pchip || !pinfo) continue;
 
 		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
-		pinfo->regView->closeEvent.push_back(
-			[pinfo](CVisWnd* h){
-				pinfo->checkReg->setCheck(0, false);
-			});
-		
+		pinfo->regView = visC86RegViewFactory(pchip, i);
+		if (pinfo->regView) {
+			pinfo->regView->closeEvent.push_back(
+				[pinfo](CVisWnd* h) {
+					pinfo->checkReg->setCheck(0, false);
+				});
+		}
+
 		pinfo->checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
 		if (pinfo->checkReg) {
 			pinfo->checkReg->changeEvent.push_back(
