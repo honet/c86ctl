@@ -90,7 +90,7 @@ HINSTANCE C86CtlMain::getInstanceHandle()
 //	return gIF;
 //}
 
-Stream* C86CtlMain::getStream(int index)
+Stream* C86CtlMain::getStream(size_t index)
 {
 	if(index<gStream.size())
 		return gStream[index].get();
@@ -116,10 +116,12 @@ void C86CtlMain::updateMapping(void)
 //		}
 //	}
 	
-	for(int devidx=0; devidx<gIF.size(); devidx++){
+	for(size_t devidx=0; devidx<gIF.size(); devidx++){
 		for(int modidx=0; modidx<gIF[devidx]->getNumberOfModules(); modidx++){
 			
 			BaseSoundModule *module = gIF[devidx]->getModule(modidx);
+			if (module==NULL) continue;
+
 			UINT_PTR module_address = (UINT_PTR)module;
 			// フィルタグラフが構築されているか？
 			auto it = std::find_if( gStream.begin(), gStream.end(),
@@ -127,7 +129,7 @@ void C86CtlMain::updateMapping(void)
 					return (s->module == module ) ? true : false;
 			} );
 			if ( it == gStream.end() ){
-				Stream *stream = Stream::Build(gIF[devidx]->getModule(modidx));
+				Stream *stream = Stream::Build(module);
 				if(stream){
 					gStream.push_back( StreamPtr(stream) );
 
@@ -170,6 +172,8 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		pwnd->createMainWnd(param);
 		pThis->mainThreadReady = true;
 
+		SetTimer(0, 0, 50, 0);	// per 50msec
+
 		// メッセージループ
 		while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
 			if( b==-1 ) break;
@@ -186,6 +190,20 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 				C86WinUSB::UpdateInstances(pThis->gIF);
 				pThis->updateMapping();
 				pwnd->deviceUpdate();
+				break;
+
+			case WM_TIMER:
+				{ // update statistics.
+					size_t ssz = pThis->gStream.size();
+					size_t ifsz = pThis->gIF.size();
+
+					for (size_t i=0; i<ssz; i++) {
+						pThis->gStream[i]->chip->update();
+					};
+					for (size_t i=0; i<ifsz; i++) {
+						pThis->gIF[i]->update();
+					};
+				}
 				break;
 			}
 
@@ -247,19 +265,9 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			size_t ifsz = pThis->gIF.size(); 
 
 			// update
-			for( size_t i=0; i<ssz; i++ ){ pThis->gStream[i]->delay->tick(); };
-			for( size_t i=0; i<ifsz; i++ ){ pThis->gIF[i]->tick(); };
+			for (size_t i=0; i<ssz; i++){ pThis->gStream[i]->delay->tick(); }
+			for (size_t i=0; i<ifsz; i++){ pThis->gIF[i]->tick(); }
 			
-			// per 50msec
-			if( nextSec10 < now ){
-				nextSec10 += 50;
-				for( size_t i=0; i<ssz; i++ ){
-					pThis->gStream[i]->chip->update();
-				};
-				for( size_t i=0; i<ifsz; i++ ){
-					pThis->gIF[i]->update();
-				};
-			}
 		}
 
 		pThis->senderThreadReady = false;
@@ -369,6 +377,7 @@ int C86CtlMain::deinitialize(void)
 	// インスタンス削除
 	// note: このタイミングで終了処理が行われる。
 	//       gIF/gLogicalDevicesを参照する演奏・描画スレッドは終了していなければならない。
+	gStream.clear();
 	gIF.clear();
 	gLogicalDevices.clear();
 

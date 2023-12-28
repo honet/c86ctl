@@ -243,10 +243,11 @@ void CVisDlgConfig::onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 		if( isInit ){
 			auto ctrl = GetC86CtlMain();
 			int n = ctrl->getNumberOfChip();
+			int index = static_cast<int>(id);
 
-			if(id>=n)
+			if (index>=n)
 				return;
-			auto stream = ctrl->getStream(id);
+			auto stream = ctrl->getStream(index);
 			if (!stream->module->isValid())
 				return;
 
@@ -268,10 +269,11 @@ void CVisDlgConfig::onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 		if( isInit ){
 			auto ctrl = GetC86CtlMain();
 			int n = ctrl->getNumberOfChip();
+			int index = static_cast<int>(id);
 
-			if(id>=n)
+			if (index>=n)
 				return;
-			auto stream = ctrl->getStream(id);
+			auto stream = ctrl->getStream(index);
 			if (!stream->module->isValid())
 				return;
 
@@ -299,9 +301,11 @@ void CVisDlgConfig::onPLLClockCmbNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 		if( isInit ){
 			auto ctrl = GetC86CtlMain();
 			int n = ctrl->getNumberOfChip();
-			if(id>=n)
+			int index = static_cast<int>(id);
+
+			if (index>=n)
 				return;
-			auto stream = ctrl->getStream(id);
+			auto stream = ctrl->getStream(index);
 			if (!stream->module->isValid())
 				return;
 

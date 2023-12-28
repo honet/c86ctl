@@ -265,6 +265,14 @@ void CVisC86Skin::drawStr( IVisBitmap *canvas, int type, int x, int y, const cha
 		}
 	}
 }
+void CVisC86Skin::drawColoredStr(IVisBitmap *canvas, int colno, int x, int y, const char *str)
+{
+	int cx = 6;
+	int cy = 8;
+	int len = (int)strlen(str);
+	visFillRect(canvas, x, y, cx*len, cy-1, getColTbl(colno));
+	drawStr(canvas, 2, x, y, str);
+}
 
 // 縦文字描画
 void CVisC86Skin::drawVStr( IVisBitmap *canvas, int type, int x, int y, const char *str )

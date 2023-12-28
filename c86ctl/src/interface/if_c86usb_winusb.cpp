@@ -190,7 +190,9 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 	for (int i=0; i<2; i++){
 		BOARD_INFO binfo;
 		int ret = getBoardInfo(i, &binfo);
-		for (int k=0; k<binfo.nchips; k++){
+		if (ret<0)
+			continue;
+		for (UINT k=0; k<binfo.nchips; k++){
 			ChipType newtype = static_cast<ChipType>(binfo.chiptype[k]);
 			if (modules[n]==0){
 				C86WinUSB::C86ModuleWinUSB *module =  new C86ModuleWinUSB(this, i, k, newtype);

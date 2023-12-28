@@ -43,10 +43,12 @@ Stream* Stream::Build(BaseSoundModule *module)
 		chip = new COPM();
 		break;
 	case CHIP_OPNA:
+	case CHIP_YMF297_OPN3L:
 	case CHIP_YM2608NOADPCM:
 		chip = new COPNA();
 		break;
 	case CHIP_OPL3:
+	case CHIP_YMF297_OPL3:
 		chip = new COPL3();
 		break;
 	case CHIP_OPLL:
@@ -69,7 +71,6 @@ Stream* Stream::Build(BaseSoundModule *module)
 	case CHIP_YMF271:
 	case CHIP_YMF278B:
 	case CHIP_YMZ280B:
-	case CHIP_YMF297:
 	case CHIP_YM2610B:
 	case CHIP_YM3438:
 		chip = new CGenericChipBank2();

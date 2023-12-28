@@ -28,6 +28,7 @@ public:
 	void deinit(void);
 	
 	void drawStr( IVisBitmap *canvas, int type, int x, int y, const char *str );
+	void drawColoredStr(IVisBitmap *canvas, int colno, int x, int y, const char *str);
 	void drawVStr( IVisBitmap *canvas, int type, int x, int y, const char *str );
 	void drawNanoNumStr( IVisBitmap *canvas, int x, int y, const char *str );
 	void drawNumStr1( IVisBitmap *canvas, int x, int y, const char *str );

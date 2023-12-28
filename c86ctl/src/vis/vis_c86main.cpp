@@ -69,7 +69,7 @@ bool CVisC86Main::update()
 #endif
 	
 	info.resize(sz);
-	for( int i=0; i<sz; i++ ){
+	for( size_t i=0; i<sz; i++ ){
 		Stream *s = GetC86CtlMain()->getStream(i);
 		
 		info[i].chiptype = s->module->getChipType();
@@ -83,13 +83,62 @@ bool CVisC86Main::update()
 			info[i].verstr.assign(str);
 		}
 
-		
+
+		switch (info[i].chiptype) {
+		case CHIP_YM2608:
+			info[i].module_name.assign("YM2608"); break;
+		case CHIP_YM2608NOADPCM:
+			info[i].module_name.assign("YM2608(NOADPCM)"); break;
+		case CHIP_YM2151:
+			info[i].module_name.assign("YM2151"); break;
+		case CHIP_YMF288:
+			info[i].module_name.assign("YMF288"); break;
+		case CHIP_YMF262:
+			info[i].module_name.assign("YMF262"); break;
+		case CHIP_YM2413:
+			info[i].module_name.assign("YMF2413"); break;
+		case CHIP_SN76489:
+			info[i].module_name.assign("SN76489"); break;
+		case CHIP_SN76496:
+			info[i].module_name.assign("SN76496"); break;
+		case CHIP_AY38910:
+			info[i].module_name.assign("AY-3-8910"); break;
+		case CHIP_YM2149:
+			info[i].module_name.assign("YM2149"); break;
+		case CHIP_YM2203:
+			info[i].module_name.assign("YM2203"); break;
+		case CHIP_YM2612:
+			info[i].module_name.assign("YM2612"); break;
+		case CHIP_YM3526:
+			info[i].module_name.assign("YM3526"); break;
+		case CHIP_YM3812:
+			info[i].module_name.assign("YM3812"); break;
+		case CHIP_YMF271:
+			info[i].module_name.assign("YMF271"); break;
+		case CHIP_YMF278B:
+			info[i].module_name.assign("YMF278"); break;
+		case CHIP_YMZ280B:
+			info[i].module_name.assign("YMZ280"); break;
+		case CHIP_YMF297_OPN3L:
+			info[i].module_name.assign("YMF297(OPN3L)"); break;
+		case CHIP_YMF297_OPL3:
+			info[i].module_name.assign("YMF297(OPL3)"); break;
+		case CHIP_YM2610B:
+			info[i].module_name.assign("YM2610B"); break;
+		case CHIP_Y8950:
+			info[i].module_name.assign("Y8950"); break;
+		case CHIP_Y8950ADPCM:
+			info[i].module_name.assign("Y8950 (w/ADPCM)"); break;
+		case CHIP_YM3438:
+			info[i].module_name.assign("YM3438"); break;
+		}
+
 		GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module);
 		if (gimic_module){
 			Devinfo chipinfo;
 			gimic_module->getModuleInfo(&chipinfo);
 			sprintf(str, "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev );
-			info[i].module_name.assign(str);
+			info[i].board_name.assign(str);
 
 			GimicWinUSB *gimic_dev = dynamic_cast<GimicWinUSB*>(s->module->getParentDevice());
 			if (gimic_dev){
@@ -99,53 +148,6 @@ bool CVisC86Main::update()
 				info[i].device_name.assign(str);
 			}
 		}else{
-			switch(info[i].chiptype){
-			case CHIP_YM2608:
-				info[i].module_name.assign("YM2608"); break;
-			case CHIP_YM2608NOADPCM:
-				info[i].module_name.assign("YM2608(NOADPCM)"); break;
-			case CHIP_YM2151:
-				info[i].module_name.assign("YM2151"); break;
-			case CHIP_YMF288:
-				info[i].module_name.assign("YMF288"); break;
-			case CHIP_YMF262:
-				info[i].module_name.assign("YMF262"); break;
-			case CHIP_YM2413:
-				info[i].module_name.assign("YMF2413"); break;
-			case CHIP_SN76489:
-				info[i].module_name.assign("SN76489"); break;
-			case CHIP_SN76496:
-				info[i].module_name.assign("SN76496"); break;
-			case CHIP_AY38910:
-				info[i].module_name.assign("AY-3-8910"); break;
-			case CHIP_YM2149:
-				info[i].module_name.assign("YM2149"); break;
-			case CHIP_YM2203:
-				info[i].module_name.assign("YM2203"); break;
-			case CHIP_YM2612:
-				info[i].module_name.assign("YM2612"); break;
-			case CHIP_YM3526:
-				info[i].module_name.assign("YM3526"); break;
-			case CHIP_YM3812:
-				info[i].module_name.assign("YM3812"); break;
-			case CHIP_YMF271:
-				info[i].module_name.assign("YMF271"); break;
-			case CHIP_YMF278B:
-				info[i].module_name.assign("YMF278"); break;
-			case CHIP_YMZ280B:
-				info[i].module_name.assign("YMZ280"); break;
-			case CHIP_YMF297:
-				info[i].module_name.assign("YMZ297"); break;
-			case CHIP_YM2610B:
-				info[i].module_name.assign("YM2610B"); break;
-			case CHIP_Y8950:
-				info[i].module_name.assign("Y8950"); break;
-			case CHIP_Y8950ADPCM:
-				info[i].module_name.assign("Y8950 (w/ADPCM)"); break;
-			case CHIP_YM3438:
-				info[i].module_name.assign("YM3438"); break;
-			}
-
 			C86WinUSB::C86ModuleWinUSB *c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
 			if(c86){
 				char slotname[] = {'A', 'B', 'C', 'D'};
@@ -256,7 +258,7 @@ bool CVisC86Main::update()
 	
 	int y=40+modHeight*st;
 	
-	for( int i=st; i<sz; i++ ){
+	for( size_t i=st; i<sz; i++ ){
 		Stream *s = GetC86CtlMain()->getStream(i);
 
 		TCHAR key[KEYBUFLEN];
@@ -322,6 +324,10 @@ bool CVisC86Main::update()
 			if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
 				info[i].checkKey->setCheck(1, true);
 			}
+		}
+
+		if (info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_YM2608NOADPCM ||
+			info[i].chiptype == CHIP_OPN3L || info[i].chiptype == CHIP_OPM) {
 
 			int nch = 6;
 			if( info[i].chiptype == CHIP_OPM )
@@ -447,12 +453,8 @@ void CVisC86Main::onPaintClient()
 			sprintf( str, "FW-VER : %s", info[i].verstr.c_str() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			// バスボード名
-			C86WinUSB::C86ModuleWinUSB *c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(module);
-			if (c86){
-				sprintf(str, "BOARD  : %s", info[i].board_name.c_str() );
-				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-			}
-
+			sprintf(str, "BOARD  : %s", info[i].board_name.c_str() );
+			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			// MODULE名
 			sprintf(str, "CHIP   : %s", info[i].module_name.c_str() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
@@ -464,13 +466,13 @@ void CVisC86Main::onPaintClient()
 				// PLL Clock
 				sprintf(str, "CLOCK  : %d Hz", param->clock );
 				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-				// SSG-Volume
-				sprintf(str, "SSG-VOL: %d", param->ssgVol );
-				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+				// SSG-Volume(書くところ足りない)
+				//sprintf(str, "SSG-VOL: %d", param->ssgVol );
+				//skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			}
 
-			// カロリー(w
-			sprintf(str, "CALORIE: %d CPS", dev->getCPS() );
+			// speed
+			sprintf(str, "SPEED  : %d CPS", dev->getCPS() );
 			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 		}else{
 			sprintf(str, "MODULE%d: DISCONNECTED", i );
@@ -478,8 +480,8 @@ void CVisC86Main::onPaintClient()
 			skin->drawStr( clientCanvas, 1, 15, y+dy, "FW-VER :" ); dy+=10;
 			skin->drawStr( clientCanvas, 1, 15, y+dy, "CHIP   :" ); dy+=10;
 			skin->drawStr( clientCanvas, 1, 15, y+dy, "CLOCK  :" ); dy+=10;
-			skin->drawStr( clientCanvas, 1, 15, y+dy, "SSG-VOL:" ); dy+=10;
-			skin->drawStr( clientCanvas, 1, 15, y+dy, "CALORIE:" ); dy+=10;
+			//skin->drawStr( clientCanvas, 1, 15, y+dy, "SSG-VOL:" ); dy+=10;
+			skin->drawStr( clientCanvas, 1, 15, y+dy, "SPEED  :" ); dy+=10;
 		}
 		y+=modHeight;
 	}

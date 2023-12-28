@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <memory>
 
 namespace c86ctl{
 namespace vis {

@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -81,7 +81,7 @@ private:
 	
 
 public:
-	Stream* getStream(int index);
+	Stream* getStream(size_t index);
 	size_t getNStreams();
 	
 private:
@@ -92,6 +92,7 @@ private:
 	HANDLE hMainThread;
 	UINT mainThreadID;
 	volatile bool mainThreadReady;
+
 	HANDLE hSenderThread;
 	UINT senderThreadID;
 	volatile bool senderThreadReady;

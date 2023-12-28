@@ -41,7 +41,7 @@ LogicalDevice::~LogicalDevice()
 int LogicalDevice::reset(void)
 {
 	int ret = C86CTL_ERR_NODEVICE;
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		// １デバイスに複数のモジュールが接続されている場合に
 		// リセット処理が重複してしまうが、目をつぶる。
 		ret = streams[i]->module->getParentDevice()->reset();
@@ -53,7 +53,7 @@ int LogicalDevice::reset(void)
 
 void LogicalDevice::out( UINT addr, UCHAR data)
 {
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		streams[i]->delay->byteOut(addr, data);
 	}
 }
@@ -73,7 +73,7 @@ int LogicalDevice::getChipStatus( UINT addr, UCHAR *status )
 
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		if(gimic) return gimic->getChipStatus(addr, status);
 	}
@@ -82,7 +82,7 @@ int LogicalDevice::getChipStatus( UINT addr, UCHAR *status )
 
 void LogicalDevice::directOut(UINT addr, UCHAR data)
 {
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		streams[i]->module->directOut(addr, data);
 	}
 }
@@ -106,7 +106,7 @@ int LogicalDevice::getModuleType(enum ChipType *type)
 int LogicalDevice::setSSGVolume(UCHAR vol)
 {
 	int ret = C86CTL_ERR_NONE;
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		if(gimic){
 			ret = gimic->setSSGVolume(vol);
@@ -123,7 +123,7 @@ int LogicalDevice::getSSGVolume(UCHAR *vol)
 
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		if(gimic){
 			return gimic->getSSGVolume(vol);
@@ -136,7 +136,7 @@ int LogicalDevice::getSSGVolume(UCHAR *vol)
 int LogicalDevice::setPLLClock(UINT clock)
 {
 	int ret = C86CTL_ERR_NONE;
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		Chip *chip = streams[i]->chip;
 		
@@ -157,7 +157,7 @@ int LogicalDevice::getPLLClock(UINT *clock)
 	
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		Chip *chip = streams[i]->chip;
 		
@@ -178,7 +178,7 @@ int LogicalDevice::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 	
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		IFirmwareVersionInfo *verinfo = dynamic_cast<IFirmwareVersionInfo*>(streams[i]->module->getParentDevice());
 		if(verinfo){
 			return verinfo->getFWVer(major, minor, rev, build);
@@ -196,7 +196,7 @@ int LogicalDevice::getMBInfo(struct Devinfo *info)
 	
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB *gimic = dynamic_cast<GimicWinUSB*>(streams[i]->module->getParentDevice());
 		if(gimic){
 			return gimic->getMBInfo(info);
@@ -214,7 +214,7 @@ int LogicalDevice::getModuleInfo(struct Devinfo *info)
 	
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		if(gimic){
 			return gimic->getModuleInfo(info);
@@ -242,7 +242,7 @@ int LogicalDevice::writeBoardControl(UINT index, UINT val)
 
 int LogicalDevice::isValid(void)
 {
-	for (int i=0; i<streams.size(); i++){
+	for (size_t i=0; i<streams.size(); i++){
 		if (!streams[i]->module->isValid())
 			return false;
 	}

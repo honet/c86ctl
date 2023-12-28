@@ -27,13 +27,12 @@ DelayFilter::~DelayFilter()
 void DelayFilter::byteOut(UINT addr, UCHAR data)
 {
 	if( 0<delay ){
-		REQ r = { ::timeGetTime()+delay, addr, data };
+		REQ r = { ::timeGetTime()+delay, static_cast<USHORT>(addr), data };
 		dqueue.push(r);
 		return;
 	}else{
 		ds->byteOut(addr,data);
 	}
-
 }
 
 void DelayFilter::reset(void)

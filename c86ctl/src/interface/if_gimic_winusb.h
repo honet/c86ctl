@@ -37,7 +37,7 @@ public:
 	class GimicModuleWinUSB : public BaseSoundModule
 	{
 	public:
-		GimicModuleWinUSB(GimicWinUSB *device, int idx, ChipType chipType);
+		GimicModuleWinUSB(GimicWinUSB *device, int boardidx, int chipidx, ChipType chipType);
 		virtual ~GimicModuleWinUSB();
 
 	public:
@@ -76,6 +76,8 @@ public:
 	private:
 		GimicWinUSB *devif;
 		int devidx;
+		int boardidx;
+		int chipidx;
 		
 	private:
 		//Chip *chip;

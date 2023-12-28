@@ -55,6 +55,8 @@ enum ChipType {
 	CHIP_YMF278B		= 0x0000d,
 	CHIP_YMZ280B		= 0x0000e,
 	CHIP_YMF297			= 0x0000f,
+	CHIP_YMF297_OPN3L	= 0x0000f,
+	CHIP_YMF297_OPL3	= 0x2000f,
 	CHIP_YM2610B		= 0x00010,
 	CHIP_Y8950			= 0x00020,
 	CHIP_Y8950ADPCM 	= 0x10020,
@@ -106,6 +108,12 @@ static const GUID IID_IRealChip2 =
 
 interface IRealChip2 : public IRealChip
 {
+	//IRealChipより継承
+	//public:
+	//	virtual int __stdcall reset(void) = 0;
+	//	virtual void __stdcall out(UINT addr, UCHAR data) = 0;
+	//	virtual UCHAR __stdcall in(UINT addr) = 0;
+public:
 	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status ) = 0;
 	virtual void __stdcall directOut(UINT addr, UCHAR data) = 0;
 };
@@ -116,6 +124,15 @@ static const GUID IID_IRealChip3 =
 
 interface IRealChip3 : public IRealChip2
 {
+	//IRealChip2より継承
+	//public:
+	//	virtual int __stdcall reset(void) = 0;
+	//	virtual void __stdcall out(UINT addr, UCHAR data) = 0;
+	//	virtual UCHAR __stdcall in(UINT addr) = 0;
+	//public:
+	//	virtual int __stdcall getChipStatus(UINT addr, UCHAR *status) = 0;
+	//	virtual void __stdcall directOut(UINT addr, UCHAR data) = 0;
+public:
 	virtual int __stdcall getChipType( enum ChipType *type ) = 0;
 };
 
