@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86win
 	
 	Copyright (c) 2009-2010, honet. All rights reserved.
@@ -7,7 +7,7 @@
 	honet.kk(at)gmail.com
 
 	note: honet
-	Œ³X S98‚ÌƒGƒfƒBƒ^—p‚Éì‚Á‚½ƒNƒ‰ƒX‚È‚Ì‚Åd‚¢•‚¢‚ë‚¢‚ëç’·‚Å‚·B
+	å…ƒã€… S98ã®ã‚¨ãƒ‡ã‚£ã‚¿ç”¨ã«ä½œã£ãŸã‚¯ãƒ©ã‚¹ãªã®ã§é‡ã„ï¼†ã„ã‚ã„ã‚å†—é•·ã§ã™ã€‚
 */
 #pragma once
 
@@ -261,7 +261,7 @@ public:
 		auto it = row.begin();
 		for( ; it != row.end() && tit != lst.end(); ){
 			if( idx == *tit ){
-				// ––”ö‚ÌEND/LOOP‚Ííœ‹Ö~
+				// æœ«å°¾ã®END/LOOPã¯å‰Šé™¤ç¦æ­¢
 				if( it != row.end()-1 || it->cmd != 0xfd ){
 					it = row.erase( it );
 					tit++;
@@ -288,7 +288,7 @@ public:
 	INT loadFile(CString &fname);
 	INT saveFile(CString &fname);
 
-	// tick“–‚½‚è‚ÌŠÔ‚ğ•Ô‚·B’PˆÊ:ms
+	// tickå½“ãŸã‚Šã®æ™‚é–“ã‚’è¿”ã™ã€‚å˜ä½:ms
 	DOUBLE getTimerPrec()
 	{
 		int numerator = header.timer_info[0] == 0 ? 10 : header.timer_info[0];

@@ -1,4 +1,4 @@
-/***
+ï»¿/***
 	c86win
 	
 	Copyright (c) 2009-2010, honet. All rights reserved.
@@ -7,7 +7,7 @@
 	honet.kk(at)gmail.com
 
 	note: honet
-	Œ³X S98‚ÌƒGƒfƒBƒ^—p‚Éì‚Á‚½ƒNƒ‰ƒX‚È‚Ì‚Åd‚¢•‚¢‚ë‚¢‚ëç’·‚Å‚·B
+	å…ƒã€… S98ã®ã‚¨ãƒ‡ã‚£ã‚¿ç”¨ã«ä½œã£ãŸã‚¯ãƒ©ã‚¹ãªã®ã§é‡ã„ï¼†ã„ã‚ã„ã‚å†—é•·ã§ã™ã€‚
 */
 #include "stdafx.h"
 #include "CS98Data.h"
@@ -110,19 +110,19 @@ BOOL CS98Data::loadFile( CString &fname )
 		size_t fs = (size_t)ifs.seekg(0,std::ios::end).tellg();
 		ifs.seekg( header.offset_to_dump, ios::beg );
 		CDumpRow r;
-		int last = header.offset_to_tag < header.offset_to_dump ? fs : header.offset_to_tag;
-		int offset = header.offset_to_dump;
+		uint32_t last = header.offset_to_tag < header.offset_to_dump ? static_cast<uint32_t>(fs) : header.offset_to_tag;
+		uint32_t offset = header.offset_to_dump;
 		loopidx = 0;
-		do{
+		do {
 			ifs >> r;
 			offset += r.len;
 			row.push_back(r);
-			if( offset == header.offset_to_loop_point ){
-				loopidx = row.size() - 1;
+			if (offset == header.offset_to_loop_point){
+				loopidx = static_cast<uint32_t>(row.size() - 1);
 			}
-		}while( !ifs.eof() && (ifs.tellg() < last ) );
+		} while(!ifs.eof() && (ifs.tellg() < last ));
 
-		if( header.version == '3' ){
+		if (header.version == '3'){
 			if( header.offset_to_tag ){
 				size_t sz = fs - header.offset_to_tag;
 				ifs.seekg( header.offset_to_tag, ios::beg );
@@ -147,19 +147,19 @@ BOOL CS98Data::saveFile( CString &fname )
 		ofs.exceptions( ios::failbit | ios::badbit | ios::eofbit );
 		ofs.open(fname, ios::out | ios::binary );
 
-		// TODO: ƒwƒbƒ_‚ÌC³
+		// TODO: ãƒ˜ãƒƒãƒ€ã®ä¿®æ­£
 		if( header.version == '1' ){
 			header.offset_to_tag = 0x40;
-			header.offset_to_dump = header.offset_to_tag + songinfo.size();
-			header.offset_to_loop_point = header.offset_to_dump + getLoopOffsetPoint();
+			header.offset_to_dump = static_cast<uint32_t>(header.offset_to_tag + songinfo.size());
+			header.offset_to_loop_point = static_cast<uint32_t>(header.offset_to_dump + getLoopOffsetPoint());
 			ofs << header;
 			ofs.write( &songinfo[0], songinfo.size() );
 			for_each( row.begin(), row.end(), [&ofs](CDumpRow &d){ ofs << d; } );
 		}
 		else if( header.version == '3' ){
-			header.offset_to_dump = 0x1c + 16*devinfo.size();
-			header.offset_to_tag = header.offset_to_dump + getTotalRowSize();
-			header.offset_to_loop_point = header.offset_to_dump + getLoopOffsetPoint();
+			header.offset_to_dump = static_cast<uint32_t>(0x1c + 16*devinfo.size());
+			header.offset_to_tag = static_cast<uint32_t>(header.offset_to_dump + getTotalRowSize());
+			header.offset_to_loop_point = static_cast<uint32_t>(header.offset_to_dump + getLoopOffsetPoint());
 			ofs << header;
 			for_each( devinfo.begin(), devinfo.end(), [&ofs](DeviceInfo &d){ ofs << d.first; } );
 			for_each( row.begin(), row.end(), [&ofs](CDumpRow &d){ ofs << d; } );

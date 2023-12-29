@@ -1,5 +1,5 @@
-
-// c86win.h : PROJECT_NAME ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒƒCƒ“ ƒwƒbƒ_[ ƒtƒ@ƒCƒ‹‚Å‚·B
+ï»¿
+// c86win.h : PROJECT_NAME ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã®ãƒ¡ã‚¤ãƒ³ ãƒ˜ãƒƒãƒ€ãƒ¼ ãƒ•ã‚¡ã‚¤ãƒ«ã§ã™ã€‚
 //
 
 #pragma once
@@ -7,14 +7,14 @@
 #include "c86ctl.h"
 
 #ifndef __AFXWIN_H__
-	#error "PCH ‚É‘Î‚µ‚Ä‚±‚Ìƒtƒ@ƒCƒ‹‚ðƒCƒ“ƒNƒ‹[ƒh‚·‚é‘O‚É 'stdafx.h' ‚ðƒCƒ“ƒNƒ‹[ƒh‚µ‚Ä‚­‚¾‚³‚¢"
+	#error "PCH ã«å¯¾ã—ã¦ã“ã®ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰ã™ã‚‹å‰ã« 'stdafx.h' ã‚’ã‚¤ãƒ³ã‚¯ãƒ«ãƒ¼ãƒ‰ã—ã¦ãã ã•ã„"
 #endif
 
-#include "resource.h"		// ƒƒCƒ“ ƒVƒ“ƒ{ƒ‹
+#include "resource.h"		// ãƒ¡ã‚¤ãƒ³ ã‚·ãƒ³ãƒœãƒ«
 
 
 // C86winApp:
-// ‚±‚ÌƒNƒ‰ƒX‚ÌŽÀ‘•‚É‚Â‚¢‚Ä‚ÍAc86win.cpp ‚ðŽQÆ‚µ‚Ä‚­‚¾‚³‚¢B
+// ã“ã®ã‚¯ãƒ©ã‚¹ã®å®Ÿè£…ã«ã¤ã„ã¦ã¯ã€c86win.cpp ã‚’å‚ç…§ã—ã¦ãã ã•ã„ã€‚
 //
 
 class C86winApp : public CWinApp
@@ -22,11 +22,11 @@ class C86winApp : public CWinApp
 public:
 	C86winApp();
 
-// ƒI[ƒo[ƒ‰ƒCƒh
+// ã‚ªãƒ¼ãƒãƒ¼ãƒ©ã‚¤ãƒ‰
 public:
 	virtual BOOL InitInstance();
 
-// ŽÀ‘•
+// å®Ÿè£…
 public:
 	HMODULE hC86DLL;
 	c86ctl::IRealChipBase *pChipBase;

@@ -1,4 +1,4 @@
-
+﻿
 #pragma once
 
 #define	MAXDEVICE	64

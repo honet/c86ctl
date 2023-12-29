@@ -198,7 +198,7 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 				C86WinUSB::C86ModuleWinUSB *module =  new C86ModuleWinUSB(this, i, k, newtype);
 				if (module)
 					modules[n++] = module;
-			}else if( modules[n++]->getChipType() != newtype ){
+			} else if (modules[n++]->getChipType() != newtype) {
 				goto MODULE_CHANGED;
 			}
 		}
@@ -388,7 +388,7 @@ void C86WinUSB::tick(void)
 {
 	int ret;
 	
-	LARGE_INTEGER et, ct;
+	LARGE_INTEGER et;
 	::QueryPerformanceCounter(&et);
 	et.QuadPart += freq.QuadPart;
 
@@ -421,6 +421,7 @@ void C86WinUSB::tick(void)
 			cal+=64;
 
 		// 1tickの処理が1msを超えたら一回抜ける
+		//LARGE_INTEGER ct;
 		//::QueryPerformanceCounter(&ct);
 		//if( et.QuadPart<ct.QuadPart ){
 		//	break;
