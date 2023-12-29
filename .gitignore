@@ -1,3 +1,68 @@
+# backupfile
+*~
+*.bak
+\#*
+Thumbs.db
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+#*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Chutzpah Test files
+_Chutzpah*
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio S2022 Settings
+*/Properties/launchsettings.json
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
+# Visual Studio 2017 auto generated files
+Generated\ Files/
+
 # Compiled Object files
 *.slo
 *.lo
@@ -26,6 +91,7 @@
 *.exe
 *.out
 *.app
+
 #
 c86ctl/import/ddk/*.h
 c86ctl/import/ddk/x64/*.lib

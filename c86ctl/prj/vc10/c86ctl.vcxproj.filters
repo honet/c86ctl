@@ -243,6 +243,9 @@
     <ClInclude Include="..\..\src\chip\generic.h">
       <Filter>module</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\chip\tms3631.h">
+      <Filter>module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\win\c86ctl.rc">
