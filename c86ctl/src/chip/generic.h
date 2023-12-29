@@ -16,13 +16,13 @@ namespace c86ctl{
 class CGenericChipBank1 : public Chip
 {
 public:
-	CGenericChipBank1(){ reset(); };
-	virtual ~CGenericChipBank1(){};
+	CGenericChipBank1(){ reset(); }
+	virtual ~CGenericChipBank1(){}
 
 	void reset(){
 		memset( reg, 0, 256 );
 		memset( regATime, 0, 256 );
-	};
+	}
 	
 	void update(){
 		int dc = 8;
@@ -33,20 +33,20 @@ public:
 				regATime[i] = 64<c? c : 64;
 			}
 		}
-	};
+	}
 
 public:
 	void byteOut( UINT addr, UCHAR data ){
 		if(setReg(addr,data))
 			if(ds) ds->byteOut(addr,data);
-	};
+	}
 	
 	UCHAR getReg( UINT addr ){
 		if( addr < 0x100 )
 			return reg[addr&0xff];
 		return 0;
-	};
-	virtual void setMasterClock( UINT clock ){};
+	}
+	virtual void setMasterClock( UINT clock ){}
 
 private:
 	bool setReg( UINT addr, UCHAR data ){
@@ -60,7 +60,7 @@ private:
 		regATime[addr] = 255<c ? 255 : c;
 		return true;
 		//return false;
-	};
+	}
 
 public:
 	UCHAR reg[256];
@@ -72,13 +72,13 @@ public:
 class CGenericChipBank2 : public Chip
 {
 public:
-	CGenericChipBank2(){ reset(); };
-	virtual ~CGenericChipBank2(){};
+	CGenericChipBank2(){ reset(); }
+	virtual ~CGenericChipBank2(){}
 
 	void reset(){
 		memset( reg, 0, 256*2 );
 		memset( regATime, 0, 256*2 );
-	};
+	}
 	
 	void update(){
 		int dc = 8;
@@ -91,13 +91,13 @@ public:
 				}
 			}
 		}
-	};
+	}
 
 public:
 	void byteOut( UINT addr, UCHAR data ){
 		if(setReg(addr,data))
 			if(ds) ds->byteOut(addr,data);
-	};
+	}
 	
 	UCHAR getReg( UINT addr ){
 		if( addr < 0x100 )
@@ -105,8 +105,8 @@ public:
 		else if( addr < 0x200 )
 			return reg[1][addr&0xff];
 		return 0;
-	};
-	virtual void setMasterClock( UINT clock ){};
+	}
+	virtual void setMasterClock( UINT clock ){}
 
 private:
 	bool setReg( UINT addr, UCHAR data ){
@@ -123,7 +123,7 @@ private:
 		c+=64;
 		regATime[idx][addr] = 255<c ? 255 : c;
 		return true;
-	};
+	}
 
 public:
 	UCHAR reg[2][256];

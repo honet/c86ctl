@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -29,13 +29,13 @@ public:
 	{
 		_windowWidth = 284;
 		_windowHeight = 350;
-	};
-	~CVisC86Reg(void){};
+	}
+	~CVisC86Reg(void){}
 
 public:
 	virtual bool create( HWND parent = 0 );
 	virtual void close(void);
-	virtual int getId(void){ return id; };
+	virtual int getId(void){ return id; }
 
 protected:
 	void drawRegView( IVisBitmap *canvas, int ltx, int lty, const UCHAR *regval, const UCHAR *regatime );
@@ -59,8 +59,8 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPNA REGISTER VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86OPNAReg(void){};
+	}
+	~CVisC86OPNAReg(void){}
 
 protected:
 	virtual void onPaintClient(void);
@@ -81,8 +81,8 @@ public:
 		windowTitle = str;
 		
 		_windowHeight = 180;
-	};
-	~CVisC86OPMReg(void){};
+	}
+	~CVisC86OPMReg(void){}
 
 protected:
 	virtual void onPaintClient(void);
@@ -101,8 +101,8 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPN3L REGISTER VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86OPN3LReg(){};
+	}
+	~CVisC86OPN3LReg(){}
 
 protected:
 	virtual void onPaintClient(void);
@@ -121,8 +121,8 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPL3 REGISTER VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86OPL3Reg(){};
+	}
+	~CVisC86OPL3Reg(){}
 
 protected:
 	virtual void onPaintClient(void);
@@ -181,8 +181,8 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86Generic2Reg(){};
+	}
+	~CVisC86Generic2Reg(){}
 
 protected:
 	virtual void onPaintClient(void);

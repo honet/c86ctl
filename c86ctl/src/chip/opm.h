@@ -22,23 +22,23 @@ public:
 	COPMFmCh(){
 		setMasterClock(3579545);
 		reset();
-	};
+	}
 	virtual ~COPMFmCh(void){
-	};
+	}
 
 	virtual void reset(){
 		COPXFmCh::reset();
 		kcoct = 0;
 		kcnote = 0;
 		kfcent = 0;
-	};
+	}
 
 public:
 	virtual void getNote(int &oct, int &note);
 	void setMasterClock( UINT clock );
-	UCHAR getKeyCodeOct(){ return kcoct; };
-	UCHAR getKeyCodeNote(){ return kcnote; };
-	UCHAR getKeyFraction(){ return kfcent; };
+	UCHAR getKeyCodeOct(){ return kcoct; }
+	UCHAR getKeyCodeNote(){ return kcnote; }
+	UCHAR getKeyFraction(){ return kfcent; }
 	
 protected:
 	virtual void keyOn( UCHAR slotsw ){
@@ -51,15 +51,15 @@ protected:
 			}
 			slotsw >>= 1;
 		}
-	};
+	}
 
 	void setKeyCode( UCHAR kc ){
 		kcoct = (kc>>4)&0x7;
 		kcnote = kc&0xf;
-	};
+	}
 	void setKeyFraction( UCHAR kf ){
 		kfcent = (kf >> 2);
-	};
+	}
 
 protected:
 	uint32_t mclk;
@@ -80,29 +80,29 @@ public:
 		for( int i=0; i<9; i++ )
 			ch[i] = new COPMFmCh();
 		reset();
-	};
+	}
 	virtual ~COPMFm(){
 		for( int i=0; i<9; i++ )
 			if(ch[i]) delete ch[i];
-	};
+	}
 	
 	void reset(){
 		lfo = 0;
 		lfo_sw = false;
 		for( int i=0; i<9; i++ )
 			ch[i]->reset();
-	};
+	}
 	
 	void update(){
 		for( int i=0; i<9; i++ )
 			ch[i]->update();
-	};
+	}
 	
 public:
-	int getLFO(){ return lfo; };
+	int getLFO(){ return lfo; }
 	
 protected:
-	bool isLFOOn(){ return lfo_sw; };
+	bool isLFOOn(){ return lfo_sw; }
 	bool setReg( UCHAR addr, UCHAR data );
 	
 
@@ -125,10 +125,10 @@ public:
 		partMask = 0;
 		partSolo = 0;
 		reset();
-	};
+	}
 	virtual ~COPM(){
 		if(fm) delete fm;
-	};
+	}
 	
 	void reset(){
 		memset( reg, 0, 256 );
@@ -139,16 +139,16 @@ public:
 public:
 	virtual void byteOut( UINT addr, UCHAR data );
 	virtual UCHAR getReg( UINT addr );
-	virtual void setMasterClock( UINT clock ){};
+	virtual void setMasterClock( UINT clock ){}
 	
 	void setPartMask(int ch, bool mask);
 	void setPartSolo(int ch, bool mask);
-	bool getPartMask(int ch){ return partMask&(1<<ch) ? true : false; };
-	bool getPartSolo(int ch){ return partSolo&(1<<ch) ? true : false; };
+	bool getPartMask(int ch){ return partMask&(1<<ch) ? true : false; }
+	bool getPartSolo(int ch){ return partSolo&(1<<ch) ? true : false; }
 	bool getMixedMask(int ch){
 		if( partSolo ) return (((~partSolo) | partMask) & (1<<ch)) ? true : false;
 		else return getPartMask(ch);
-	};
+	}
 
 
 private:
@@ -165,7 +165,7 @@ public:
 			}
 		}
 		fm->update();
-	};
+	}
 
 public:
 	UCHAR reg[256];

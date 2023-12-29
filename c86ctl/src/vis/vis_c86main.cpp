@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -40,8 +40,8 @@ static const int modHeight = 74;
 
 bool CVisC86Main::update()
 {
-	size_t sz = GetC86CtlMain()->getNStreams();
-	size_t st = info.size();
+	int sz = static_cast<int>(GetC86CtlMain()->getNStreams());
+	int st = static_cast<int>(info.size());
 	
 	if( sz == st )
 		return true;
@@ -258,14 +258,14 @@ bool CVisC86Main::update()
 	
 	int y=40+modHeight*st;
 	
-	for( size_t i=st; i<sz; i++ ){
+	for( int i=st; i<sz; i++ ){
 		Stream *s = GetC86CtlMain()->getStream(i);
 
 		TCHAR key[KEYBUFLEN];
 		//Chip *pchip = s->chip;
 		hwinfo *pinfo = &info[i];
 		
-		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
+		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
 		pinfo->regView = visC86RegViewFactory(s->chip, i);
 		pinfo->regView->closeEvent.push_back(
 			[pinfo](CVisWnd* h){
@@ -276,7 +276,7 @@ bool CVisC86Main::update()
 		pinfo->checkReg->changeEvent.push_back(
 			[this, pinfo, i](CVisWidget* w){
 				TCHAR key[KEYBUFLEN];
-				_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, i);
+				_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
 				
 				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 					if( pinfo->regView )
@@ -308,7 +308,7 @@ bool CVisC86Main::update()
 			pinfo->checkKey->changeEvent.push_back(
 				[this, pinfo, i](CVisWidget* w){
 					TCHAR key[KEYBUFLEN];
-					_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
+					_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, static_cast<int>(i));
 
 					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 						if( pinfo->keyView )
@@ -337,7 +337,7 @@ bool CVisC86Main::update()
 				char str[10];
 				sprintf(str, "FM%d", ch+1);
 				
-				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
+				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch+1);
 				pinfo->fmView[ch] = visC86FmViewFactory(s->chip, i, ch);
 				pinfo->fmView[ch]->closeEvent.push_back(
 					[pinfo, ch](CVisWnd* h){
@@ -348,7 +348,7 @@ bool CVisC86Main::update()
 				pinfo->checkFM[ch]->changeEvent.push_back(
 					[this, pinfo, i, ch](CVisWidget* w){
 						TCHAR key[KEYBUFLEN];
-						_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, i, ch+1);
+						_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch+1);
 						
 						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
 							if( pinfo->fmView[ch] )
@@ -436,7 +436,7 @@ void CVisC86Main::onPaintClient()
 	tick++;
 
 	int y=40;
-	for( size_t i=0; i<sz; i++ ){
+	for (int i=0; i<static_cast<int>(sz); i++){
 		int dy=0;
 		// 枠線
 		visFillRect( clientCanvas, 5, y-2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID) );
@@ -526,7 +526,7 @@ void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 		C86CtlMainWnd::getInstance()->openConfigDialog();
 		break;
 	case ID_POPUP_SHOWVIS:
-		::PostMessage(hMaster, WM_COMMAND, (notifyCode<<16)|id, (DWORD)hwnd);
+		::PostMessage(hMaster, WM_COMMAND, (notifyCode<<16)|id, (LPARAM)hwnd);
 
 		break;
 	}

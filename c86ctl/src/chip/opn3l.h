@@ -26,12 +26,12 @@ public:
 		partMask = 0;
 		partSolo = 0;
 		reset();
-	};
+	}
 	virtual ~COPN3L(){
 		if(fm) delete fm;
 		if(ssg) delete ssg;
 		if(rhythm) delete rhythm;
-	};
+	}
 
 	void reset(){
 		for( int i=0; i<2; i++ ){
@@ -60,7 +60,7 @@ public:
 
 		for( int i=0; i<13; i++ )
 			applyMask(i);
-	};
+	}
 	
 	
 public:
@@ -78,7 +78,7 @@ public:
 		fm->update();
 		ssg->update();
 		rhythm->update();
-	};
+	}
 
 public:
 	virtual void byteOut( UINT addr, UCHAR data );
@@ -86,7 +86,7 @@ public:
 	virtual void setMasterClock( UINT clock ){
 		fm->setMasterClock(clock);
 		ssg->setMasterClock(clock);
-	};
+	}
 	
 	void setPartMask(int ch, bool mask);
 	void setPartSolo(int ch, bool mask);
@@ -95,11 +95,11 @@ public:
 	bool getMixedMask(int ch){
 		if( partSolo ) return (((~partSolo) | partMask) & (1<<ch)) ? true : false;
 		else return getPartMask(ch);
-	};
+	}
 	
 
-	int getTimerA(){ return timerA; };
-	int getTimerB(){ return timerB; };
+	int getTimerA(){ return timerA; }
+	int getTimerB(){ return timerB; }
 
 private:
 	bool setReg( UINT addr, UCHAR data );

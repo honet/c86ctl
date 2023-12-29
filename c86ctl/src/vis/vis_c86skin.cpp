@@ -487,7 +487,7 @@ void CVisC86Skin::drawHBar( IVisBitmap *bmp, int xs, int ys, int level, int peak
 		pd2 = pd;
 		if( x<=level || x == peak ){
 			for( int y=0; y<20; y++ ){
-				*pd2 = high;;
+				*pd2 = high;
 				pd2 += step;
 			}
 		}else{

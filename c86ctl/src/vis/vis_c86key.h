@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -27,12 +27,12 @@ public:
 	{
 		_windowWidth = 290+64+3+4;// 334;
 		_windowHeight = 530;
-	};
-	~CVisC86Key(){};
+	}
+	~CVisC86Key(){}
 
 public:
-	virtual bool create( HWND parent = 0 ){ return false; };
-	virtual int getId(void){ return id; };
+	virtual bool create( HWND parent = 0 ){ return false; }
+	virtual int getId(void){ return id; }
 	
 protected:
 	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo, int fmNo, bool isMute, COPNFmCh *pFMCh );
@@ -62,8 +62,8 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPNA KEYBOARD VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86OPNAKey(){};
+	}
+	~CVisC86OPNAKey(){}
 
 protected:
 	virtual bool create( HWND parent = 0 );
@@ -95,8 +95,8 @@ public:
 		windowTitle = str;
 		
 		_windowHeight = 495;
-	};
-	~CVisC86OPN3LKey(){};
+	}
+	~CVisC86OPN3LKey(){}
 
 protected:
 	virtual bool create( HWND parent = 0 );
@@ -125,8 +125,8 @@ public:
 		windowTitle = str;
 
 		_windowHeight = 315;
-	};
-	~CVisC86OPMKey(){};
+	}
+	~CVisC86OPMKey(){}
 	
 protected:
 	virtual bool create( HWND parent = 0 );

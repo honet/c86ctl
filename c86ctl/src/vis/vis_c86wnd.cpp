@@ -68,7 +68,7 @@ void CVisWnd::onPaint()
 	
 	HDC hdc = ::GetDC(hWnd);
 
-	int l = ::WideCharToMultiByte(CP_THREAD_ACP, 0, windowTitle.c_str(), windowTitle.size(), str, maxlen, NULL, NULL);
+	int l = ::WideCharToMultiByte(CP_THREAD_ACP, 0, windowTitle.c_str(), static_cast<int>(windowTitle.size()), str, maxlen, NULL, NULL);
 	if( 0<l ){ str[l] = 0; }else{ str[0] = 0; };
 
 	int type = 0;

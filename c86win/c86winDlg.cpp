@@ -516,7 +516,7 @@ void C86winDlg::OnBnClickedButtonGetFwver()
 	C86winApp *pApp = (C86winApp*)AfxGetApp();
 	IGimic *pGimicModule;
 	if( S_OK == pApp->pChipBase->getChipInterface( 0, IID_IGimic, (void**)&pGimicModule ) ){
-		UINT clock;
+		//UINT clock;
 		UINT major=0, minor=0, rev=0, build=0;
 		pGimicModule->getFWVer( &major, &minor, &rev, &build );
 		CString str;

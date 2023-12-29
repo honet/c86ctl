@@ -16,13 +16,13 @@ namespace c86ctl{
 class COPL3 : public Chip
 {
 public:
-	COPL3(){ reset(); };
-	virtual ~COPL3(){};
+	COPL3(){ reset(); }
+	virtual ~COPL3(){}
 
 	void reset(){
 		memset( reg, 0, 256*2 );
 		memset( regATime, 0, 256*2 );
-	};
+	}
 	
 	void update(){
 		int dc = 8;
@@ -35,20 +35,20 @@ public:
 				}
 			}
 		}
-	};
+	}
 
 public:
 	void byteOut( UINT addr, UCHAR data ){
 		if(setReg(addr,data))
 			if(ds) ds->byteOut(addr,data);
-	};
+	}
 
 	UCHAR getReg( UINT addr ){
 		if( addr < 0x200 )
 			return reg[addr>>8][addr&0xff];
 		return 0;
-	};
-	virtual void setMasterClock( UINT clock ){};
+	}
+	virtual void setMasterClock( UINT clock ){}
 
 private:
 	bool setReg( UINT addr, UCHAR data ){

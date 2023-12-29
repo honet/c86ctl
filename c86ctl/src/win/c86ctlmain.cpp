@@ -314,7 +314,7 @@ int C86CtlMain::initialize(void)
 	//gGIMIC = GimicMIDI::CreateInstances(); // deprecated.
 	C86WinUSB::UpdateInstances(gIF);
 	updateMapping();
-	
+
 	// タイマ分解能設定
 	TIMECAPS timeCaps;
 	if( ::timeGetDevCaps(&timeCaps, sizeof(timeCaps)) == TIMERR_NOERROR ){
@@ -396,8 +396,8 @@ void C86CtlMain::loadConfig(void)
 	TCHAR key[128];
 	int val=0;
 
-	for( size_t i=0; i<gIF.size(); i++ ){
-		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
+	for (int i=0; i<static_cast<int>(gIF.size()); i++){
+		_sntprintf(key, sizeof(key), INIKEY_DELAY, static_cast<int>(i));
 		val = gConfig.getInt(INISC_MAIN, key, -1);
 //		if( val>=0 ) gIF[i]->setDelay(val);
 
@@ -415,7 +415,7 @@ void C86CtlMain::loadConfig(void)
 void C86CtlMain::saveConfig(void)
 {
 	TCHAR key[128];
-	for( size_t i=0; i<gIF.size(); i++ ){
+	for (int i=0; i<static_cast<int>(gIF.size()); i++) {
 		int delay=0;
 //		gIF[i]->getDelay(&delay);
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);

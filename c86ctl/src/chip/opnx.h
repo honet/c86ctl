@@ -44,14 +44,14 @@ public:
 	};
 
 public:
-	int getExMode(){ return exmode; };
+	int getExMode(){ return exmode; }
 
-	int getFNum(){ return fnum[3]; };
+	int getFNum(){ return fnum[3]; }
 	int getFNumEx(int slotno ){ 
 		if( !exmode ) slotno = 3;
 		return fnum[slotno];
-	};
-	int getFBlock(){ return fblock[3]; };
+	}
+	int getFBlock(){ return fblock[3]; }
 	int getFBlockEx(int slotno){ 
 		if( !exmode ) slotno = 3;
 		return fblock[slotno];
@@ -63,8 +63,8 @@ public:
 		b = 0<b ? 1<<(b-1) : 1;
 		double mag = (8*10e6) / (144 * (double)(1<<20));
 		return n*b*mag;
-	};
-	double getFreq(){ return getFreqEx(3); };
+	}
+	double getFreq(){ return getFreqEx(3); }
 
 public:
 	void getNoteEx(int exNo, int &oct, int &note){
@@ -94,15 +94,15 @@ public:
 		int i;
 		for( i=0; ftable[i]<=n; i++ );
 		note = i;
-	};
+	}
 
 	virtual void getNote(int &oct, int &note){
 		getNoteEx(3, oct, note);
-	};
+	}
 
 	void setMasterClock( UINT clock ){
 		mclk = clock;
-	};
+	}
 	
 protected:
 	virtual void keyOn( UCHAR slotsw ){
@@ -118,20 +118,20 @@ protected:
 		if( !exmode ){
 			keyOnLevel[3] = (127-getMixLevel())>>2;
 		}
-	};
+	}
 	void setExMode(int mode){ exmode = mode; };
 	void setFExLo(int slotno, UCHAR data){
 		fpacked[slotno] = (fpacked[slotno] & 0xff00) | data;
 		fnum[slotno] = fpacked[slotno] & 0x7ff;
 		fblock[slotno] = fpacked[slotno]>>11 & 0x7;
-	};
+	}
 	void setFExHi(int slotno, UCHAR data){
 		fpacked[slotno] = ((int)data<<8) | (fpacked[slotno] & 0xff);
 		fnum[slotno] = fpacked[slotno] & 0x7ff;
 		fblock[slotno] = fpacked[slotno]>>11 & 0x7;
-	};
-	void setFLo(UCHAR data){ setFExLo(3, data); };
-	void setFHi(UCHAR data){ setFExHi(3, data); };
+	}
+	void setFLo(UCHAR data){ setFExLo(3, data); }
+	void setFHi(UCHAR data){ setFExHi(3, data); }
 	
 
 protected:
@@ -152,32 +152,32 @@ public:
 		for( int i=0; i<6; i++ )
 			ch[i] = new COPNFmCh();
 		reset();
-	};
+	}
 	virtual ~COPNFm(){
 		for( int i=0; i<6; i++ )
 			if(ch[i]) delete ch[i];
-	};
+	}
 	
 	void reset(){
 		lfo = 0;
 		lfo_sw = false;
 		for( int i=0; i<6; i++ )
 			ch[i]->reset();
-	};
+	}
 	void update(){
 		for( int i=0; i<6; i++ )
 			ch[i]->update();
-	};
+	}
 	
 public:
-	int getLFO(){ return lfo; };
+	int getLFO(){ return lfo; }
 	void setMasterClock( UINT clock ){
 		for( int i=0; i<6; i++ )
 			ch[i]->setMasterClock(clock);
-	};
+	}
 	
 protected:
-	bool isLFOOn(){ return lfo_sw; };
+	bool isLFOOn(){ return lfo_sw; }
 	bool setReg( UCHAR bank, UCHAR addr, UCHAR data );
 	
 
@@ -197,8 +197,8 @@ class COPNSsgCh{
 	friend class COPNSsg;
 
 public:
-	COPNSsgCh() : mclk(7987200ULL) { reset(); };
-	virtual ~COPNSsgCh(){};
+	COPNSsgCh() : mclk(7987200ULL) { reset(); }
+	virtual ~COPNSsgCh(){}
 
 	void reset(){
 		fineTune = 0;
@@ -208,24 +208,24 @@ public:
 		tone = false;
 		noise = false;
 		keyOnLevel = 0;
-	};
+	}
 	void update(){
 		if(keyOnLevel) keyOnLevel--;
-	};
-	int getKeyOnLevel(){ return keyOnLevel; };
+	}
+	int getKeyOnLevel(){ return keyOnLevel; }
 
 public:
-	int getFineTune(){ return fineTune; };
-	int getCoarseTune(){ return coarseTune; };
-	int getTune(){ return (coarseTune<<8 | fineTune); }; // 12bit
+	int getFineTune(){ return fineTune; }
+	int getCoarseTune(){ return coarseTune; }
+	int getTune(){ return (coarseTune<<8 | fineTune); } // 12bit
 	
-	int getLevel(){ return level; };
-	bool isUseEnv(){ return useEnv; };
+	int getLevel(){ return level; }
+	bool isUseEnv(){ return useEnv; }
 	
-	bool isToneOn(){ return tone; };
+	bool isToneOn(){ return tone; }
 	
-	bool isNoiseOn(){ return noise; };
-	bool isOn(){ return (tone|noise); };
+	bool isNoiseOn(){ return noise; }
+	bool isOn(){ return (tone|noise); }
 
 	void getNote(int &oct, int &note){
 		// tp = M/(f*64) より
@@ -251,22 +251,22 @@ public:
 		int i;
 		for( i=0; ftable[i]<=n; i++ );
 		note = i;
-	};
+	}
 	
 	void setMasterClock( UINT clock ){
 		mclk = clock;
 	};
 	
 protected:
-	void setFineTune(int ft){ fineTune = ft; };
-	void setCoarseTune(int ct){ coarseTune = ct; };
-	void setLevel(int l){ level = l; keyOnLevel = (l<<1)|1; };
-	void setUseEnv( bool use ){ useEnv = use; };
+	void setFineTune(int ft){ fineTune = ft; }
+	void setCoarseTune(int ct){ coarseTune = ct; }
+	void setLevel(int l){ level = l; keyOnLevel = (l<<1)|1; }
+	void setUseEnv( bool use ){ useEnv = use; }
 
-	void toneOn(){ tone = true; keyOnLevel = (level<<1)|1; };
-	void toneOff(){ tone = false; };
-	void noiseOn(){ noise = true; keyOnLevel = (level<<1)|1; };
-	void noiseOff(){ noise = false; };
+	void toneOn(){ tone = true; keyOnLevel = (level<<1)|1; }
+	void toneOff(){ tone = false; }
+	void noiseOn(){ noise = true; keyOnLevel = (level<<1)|1; }
+	void noiseOff(){ noise = false; }
 	
 protected:
 	uint64_t mclk;
@@ -289,11 +289,11 @@ public:
 		for( int i=0; i<3; i++ )
 			ch[i] = new COPNSsgCh();
 		reset();
-	};
+	}
 	virtual ~COPNSsg(){
 		for( int i=0; i<3; i++ )
 			if( ch[i] ) delete ch[i];
-	};
+	}
 
 	void reset(){
 		for( int i=0; i<3; i++ )
@@ -302,20 +302,20 @@ public:
 		envCoarseTune=0;
 		envType=0;
 		noisePeriod=0;
-	};
+	}
 	void update(){
 		for( int i=0; i<3; i++ )
 			ch[i]->update();
-	};
+	}
 
 public:
 	COPNSsgCh *ch[3];
 
 public:
-	int getEnvFineTune(){ return envFineTune; };
-	int getEnvCoarseTune(){ return envCoarseTune; };
-	int getEnvType(){ return envType; };
-	int getNoisePeriod(){ return noisePeriod; };
+	int getEnvFineTune(){ return envFineTune; }
+	int getEnvCoarseTune(){ return envCoarseTune; }
+	int getEnvType(){ return envType; }
+	int getNoisePeriod(){ return noisePeriod; }
 	
 	void setMasterClock( UINT clock ){
 		mclk = clock;
@@ -346,13 +346,13 @@ public:
 		int i;
 		for( i=0; ftable[i]<=n; i++ );
 		note = i;
-	};
+	}
 
 protected:
-	void setEnvFineTune(int ft){ envFineTune = ft; };
-	void setEnvCoarseTune(int ct){ envCoarseTune = ct; };
-	void setEnvType(int type){ envType = type&0x7; };
-	void setNoisePeriod(int np){ noisePeriod = np&0x1f; };
+	void setEnvFineTune(int ft){ envFineTune = ft; }
+	void setEnvCoarseTune(int ct){ envCoarseTune = ct; }
+	void setEnvType(int type){ envType = type&0x7; }
+	void setNoisePeriod(int np){ noisePeriod = np&0x1f; }
 	bool setReg( UCHAR addr, UCHAR data );
 	
 protected:
@@ -370,8 +370,8 @@ class COPNRhythmCh{
 	friend class COPN3L;
 
 public:
-	COPNRhythmCh(){ reset(); };
-	virtual ~COPNRhythmCh(){};
+	COPNRhythmCh(){ reset(); }
+	virtual ~COPNRhythmCh(){}
 
 	void reset(){
 		left=false;
@@ -379,24 +379,24 @@ public:
 		level=0;
 		sw=false;
 		keyOnLevel=0;
-	};
+	}
 	
 public:
-	int getLevel(){ return level; };
-	bool isOn(){ return sw; };
-	void getLR( bool &l, bool &r ){ l=left; r=right; };
+	int getLevel(){ return level; }
+	bool isOn(){ return sw; }
+	void getLR( bool &l, bool &r ){ l=left; r=right; }
 	void update(){
 		if( 0<limit ) limit--;
 		if( 0<keyOnLevel ) keyOnLevel--;
 		else sw = false;
-	};
-	int getKeyOnLevel(){ return keyOnLevel; };
+	}
+	int getKeyOnLevel(){ return keyOnLevel; }
 
 protected:
-	void setLevel(int l){ level = l; };
-	void on(){ sw = true; limit = 3; keyOnLevel = level; };
-	void off(){ sw = false; };
-	void setLR( bool l, bool r ){ left=l; right=r; };
+	void setLevel(int l){ level = l; }
+	void on(){ sw = true; limit = 3; keyOnLevel = level; }
+	void off(){ sw = false; }
+	void setLR( bool l, bool r ){ left=l; right=r; }
 	
 protected:
 	int level;
@@ -421,7 +421,7 @@ public:
 		sd = new COPNRhythmCh();
 		bd = new COPNRhythmCh();
 		reset();
-	};
+	}
 	virtual ~COPNRhythm(){
 		if(rim) delete rim;
 		if(tom) delete tom;
@@ -429,7 +429,7 @@ public:
 		if(top) delete top;
 		if(sd) delete sd;
 		if(bd) delete bd;
-	};
+	}
 
 	void reset(){
 		rim->reset();
@@ -439,7 +439,7 @@ public:
 		sd->reset();
 		bd->reset();
 		tl=0;
-	};
+	}
 	void update(){
 		rim->update();
 		tom->update();
@@ -447,7 +447,7 @@ public:
 		top->update();
 		sd->update();
 		bd->update();
-	};
+	}
 	
 	int getTotalLevel(){ return tl; };
 	int getKeyOnLevel(){
@@ -459,7 +459,7 @@ public:
 		x = sd->getKeyOnLevel();  if(level<x) level=x;
 		x = bd->getKeyOnLevel();  if(level<x) level=x;
 		return level;
-	};
+	}
 
 public:
 	COPNRhythmCh *rim;

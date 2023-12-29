@@ -21,23 +21,25 @@ class CVisWidget
 {
 public:
 	CVisWidget(CVisWnd *parentWnd)
-		: parent(parentWnd), sx(0), sy(0), ex(0), ey(0){};
-	~CVisWidget(){};
+		: parent(parentWnd), sx(0), sy(0), ex(0), ey(0){}
+	~CVisWidget(){}
 	
 public:
 	// message handler
-	virtual void onPaint(IVisBitmap *canvas){};
-	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){};
+	virtual void onPaint(IVisBitmap *canvas){}
+	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){}
 	virtual void getWindowRect(RECT &rc){
 		rc.left = sx;
 		rc.top = sy;
 		rc.right = ex;
 		rc.bottom = ey;
-	};
+	}
+
+	CVisWnd* getParent() { return parent; }
 
 protected:
+	CVisWnd* parent;
 	int sx, sy, ex, ey;
-	CVisWnd *parent;
 };
 typedef std::shared_ptr<CVisWidget> CVisWidgetPtr;
 
@@ -52,8 +54,8 @@ public:
 		sy = y;
 		ex = x + 15;
 		ey = y + 15;
-	};
-	~CVisCloseButton(){};
+	}
+	~CVisCloseButton(){}
 
 public:
 	virtual void onPaint(IVisBitmap *canvas);
@@ -76,8 +78,8 @@ public:
 		sy = y;
 		ex = x + 10 + 6*static_cast<int>(str.length());
 		ey = y + 8;
-	};
-	~CVisCheckBox(){};
+	}
+	~CVisCheckBox(){}
 
 public:
 	virtual void onPaint(IVisBitmap *canvas);
@@ -109,11 +111,11 @@ public:
 			sy = y;
 			ex = x+w;
 			ey = y+h;
-		};
-	~CVisSwitchBase(){};
+		}
+	~CVisSwitchBase(){}
 
 public:
-	virtual void onPaint(IVisBitmap *canvas){};
+	virtual void onPaint(IVisBitmap *canvas){}
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
 	
 public:
@@ -128,8 +130,8 @@ class CVisDipSw : public CVisSwitchBase
 {
 public:
 	CVisDipSw( CVisWnd *parentWnd, int x, int y )
-		: CVisSwitchBase(parentWnd, x, y, 11, 20){};
-	~CVisDipSw(){};
+		: CVisSwitchBase(parentWnd, x, y, 11, 20){}
+	~CVisDipSw(){}
 public:
 	virtual void onPaint(IVisBitmap *canvas);
 };
@@ -141,8 +143,8 @@ class CVisMuteSw : public CVisSwitchBase
 {
 public:
 	CVisMuteSw( CVisWnd *parentWnd, int x, int y )
-		: CVisSwitchBase(parentWnd, x, y, 13, 11){};
-	~CVisMuteSw(){};
+		: CVisSwitchBase(parentWnd, x, y, 13, 11){}
+	~CVisMuteSw(){}
 
 public:
 	virtual void onPaint(IVisBitmap *canvas);
@@ -155,8 +157,8 @@ class CVisSoloSw : public CVisSwitchBase
 {
 public:
 	CVisSoloSw( CVisWnd *parentWnd, int x, int y )
-		: CVisSwitchBase(parentWnd, x, y, 13, 11){};
-	~CVisSoloSw(){};
+		: CVisSwitchBase(parentWnd, x, y, 13, 11){}
+	~CVisSoloSw(){}
 public:
 	virtual void onPaint(IVisBitmap *canvas);
 };
@@ -174,8 +176,8 @@ public:
 		sy = y;
 		ex = sx+22;
 		ey = sy+22;
-	};
-	~CVisKnob(){};
+	}
+	~CVisKnob(){}
 
 public:
 	virtual void onPaint(IVisBitmap *canvas);
@@ -184,7 +186,7 @@ public:
 	void setRange(int minv, int maxv){
 		minval = minv;
 		maxval = maxv;
-	};
+	}
 	
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
@@ -211,8 +213,8 @@ public:
 			sy=y;
 			ex=x+52;
 			ey=11;
-		};
-	~CVisSSGEGGraph(){};
+		}
+	~CVisSSGEGGraph(){}
 	
 public:
 	virtual void onPaint(IVisBitmap *canvas);

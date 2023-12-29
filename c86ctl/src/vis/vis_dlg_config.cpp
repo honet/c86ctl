@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2013, honet. All rights reserved.
@@ -315,7 +315,7 @@ void CVisDlgConfig::onPLLClockCmbNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 
 			
 			int idx = ComboBox_GetCurSel(hwnd);
-			int clk = ComboBox_GetItemData(hwnd, idx);
+			int clk = static_cast<int>(ComboBox_GetItemData(hwnd, idx));
 			gimic_module->setPLLClock(clk);
 			stream->chip->setMasterClock(clk);
 		}
