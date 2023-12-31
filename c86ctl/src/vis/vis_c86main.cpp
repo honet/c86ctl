@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -131,6 +131,8 @@ bool CVisC86Main::update()
 			info[i].module_name.assign("Y8950 (w/ADPCM)"); break;
 		case CHIP_YM3438:
 			info[i].module_name.assign("YM3438"); break;
+		case CHIP_TMS3631RI104:
+			info[i].module_name.assign("TMS3631-RI104(REMAP)"); break;
 		}
 
 		GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module);
@@ -295,7 +297,7 @@ bool CVisC86Main::update()
 
 		if( info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_YM2608NOADPCM ||
 			info[i].chiptype == CHIP_OPN3L ||
-			info[i].chiptype == CHIP_OPM ){
+			info[i].chiptype == CHIP_OPM || info[i].chiptype == CHIP_TMS3631RI104 ){
 
 			_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
 			pinfo->keyView = visC86KeyViewFactory(s->chip, i);

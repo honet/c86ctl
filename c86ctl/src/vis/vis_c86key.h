@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -11,6 +11,7 @@
 #include "chip/opna.h"
 #include "chip/opn3l.h"
 #include "chip/opm.h"
+#include "chip/tms3631.h"
 #include "vis_c86wnd.h"
 
 namespace c86ctl{
@@ -141,6 +142,43 @@ protected:
 	CVisSoloSwPtr soloSw[8];
 protected:
 	COPM *pOPM;
+};
+
+// --------------------------------------------------------
+class CVisC86TMS3631Key : public CVisC86Key
+{
+public:
+	CVisC86TMS3631Key(CTMS3631* pchip, int id) : CVisC86Key(id), pChip(pchip)
+	{
+		_windowWidth = 290 + 64 + 3 + 4;// 334;
+		_windowHeight = 310;
+
+		TCHAR str[40];
+		_stprintf_s(str, _T("TMS3631 KEY%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] TMS3631 KEYBOARD VIEW"), id);
+		windowTitle = str;
+	}
+	~CVisC86TMS3631Key() {}
+
+protected:
+	virtual bool create(HWND parent = 0);
+	virtual int getId(void) { return id; }
+	virtual void onPaintClient(void);
+
+protected:
+	void drawTrackView(IVisBitmap* canvas, int ltx, int lty, int trNo, bool isMute);
+
+protected:
+	int id;
+	int _windowWidth;
+	int _windowHeight;
+
+	CTMS3631* pChip;
+
+//protected:
+//	CVisMuteSwPtr muteSw[14];
+//	CVisSoloSwPtr soloSw[14];
 };
 
 // --------------------------------------------------------

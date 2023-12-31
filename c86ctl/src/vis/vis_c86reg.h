@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -13,6 +13,7 @@
 #include "chip/opn3l.h"
 #include "chip/opl3.h"
 #include "chip/opll.h"
+#include "chip/tms3631.h"
 #include "chip/generic.h"
 #include "vis_c86wnd.h"
 
@@ -38,7 +39,7 @@ public:
 	virtual int getId(void){ return id; }
 
 protected:
-	void drawRegView( IVisBitmap *canvas, int ltx, int lty, const UCHAR *regval, const UCHAR *regatime );
+	void drawRegView(IVisBitmap *canvas, int ltx, int lty, const UCHAR *regval, const UCHAR *regatime, int ynum = 16);
 
 protected:
 	int id;
@@ -141,14 +142,37 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] OPLL REGISTER VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86OPLLReg(){};
+	}
+	~CVisC86OPLLReg(){}
 
 protected:
 	virtual void onPaintClient(void);
 	
 private:
 	COPLL *pOPLL;
+};
+
+// --------------------------------------------------------
+class CVisC86TMS3631Reg : public CVisC86Reg
+{
+public:
+	CVisC86TMS3631Reg(CTMS3631* pchip, int id) : CVisC86Reg(id), pChip(pchip) {
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86 TMS3631 REG%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
+		windowTitle = str;
+
+		_windowWidth = 284;
+		_windowHeight = 64;
+	}
+	~CVisC86TMS3631Reg() {}
+
+protected:
+	virtual void onPaintClient(void);
+
+private:
+	CTMS3631* pChip;
 };
 
 // --------------------------------------------------------
@@ -161,8 +185,11 @@ public:
 		windowClass = str;
 		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
 		windowTitle = str;
-	};
-	~CVisC86Generic1Reg(){};
+
+		_windowWidth = 284;
+		_windowHeight = 172;
+	}
+	~CVisC86Generic1Reg(){}
 
 protected:
 	virtual void onPaintClient(void);

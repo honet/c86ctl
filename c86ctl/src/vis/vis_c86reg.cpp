@@ -21,7 +21,7 @@ using namespace c86ctl::vis;
 
 // --------------------------------------------------------
 void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
-							  const UCHAR *regval, const UCHAR *regatime )
+							  const UCHAR *regval, const UCHAR *regatime, int ynum )
 {
 	const int dc = 8;
 	CHAR str[64];
@@ -37,7 +37,7 @@ void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 
 		skin->drawStr( canvas, 1, sx, sy, str );
 	}
-	for( int y=0; y<16; y++ ){
+	for( int y=0; y<ynum; y++ ){
 		sprintf( str, "%02X", y*16 );
 		int sx = ltx+ox;
 		int sy = lty+oy+cy*(y+1);
@@ -46,7 +46,7 @@ void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 	
 	ox = cx*2+4;
 	oy = cy;
-	for( int y=0; y<16; y++ ){
+	for( int y=0; y<ynum; y++ ){
 		for( int x=0; x<16; x++ ){
 			int a = y*16+x;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 			int v = regval[a];
@@ -140,6 +140,17 @@ void CVisC86OPLLReg::onPaintClient()
 	}
 }
 
+void CVisC86TMS3631Reg::onPaintClient()
+{
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
+
+	if (pChip) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pChip->reg, pChip->regATime, 2);
+	}
+}
+
 void CVisC86Generic1Reg::onPaintClient()
 {
 	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
@@ -167,20 +178,22 @@ void CVisC86Generic2Reg::onPaintClient()
 // --------------------------------------------------------
 CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
 {
-	if( typeid(*pchip) == typeid(COPNA) ){
-		return CVisC86RegPtr( new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id ) );
-	}else if( typeid(*pchip) == typeid(COPN3L) ){
-		return CVisC86RegPtr( new CVisC86OPN3LReg(dynamic_cast<COPN3L*>(pchip), id) );
-	}else if( typeid(*pchip) == typeid(COPM) ){
-		return CVisC86RegPtr( new CVisC86OPMReg(dynamic_cast<COPM*>(pchip), id) );
-	}else if( typeid(*pchip) == typeid(COPL3) ){
-		return CVisC86RegPtr( new CVisC86OPL3Reg(dynamic_cast<COPL3*>(pchip), id) );
-	}else if( typeid(*pchip) == typeid(COPLL) ){
-		return CVisC86RegPtr( new CVisC86OPLLReg(dynamic_cast<COPLL*>(pchip), id) );
-	}else if( typeid(*pchip) == typeid(CGenericChipBank1) ){
-		return CVisC86RegPtr( new CVisC86Generic1Reg(dynamic_cast<CGenericChipBank1*>(pchip), id) );
-	}else if( typeid(*pchip) == typeid(CGenericChipBank2) ){
-		return CVisC86RegPtr( new CVisC86Generic2Reg(dynamic_cast<CGenericChipBank2*>(pchip), id) );
+	if (typeid(*pchip) == typeid(COPNA)){
+		return CVisC86RegPtr( new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id ));
+	} else if (typeid(*pchip) == typeid(COPN3L)){
+		return CVisC86RegPtr( new CVisC86OPN3LReg(dynamic_cast<COPN3L*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPM)){
+		return CVisC86RegPtr( new CVisC86OPMReg(dynamic_cast<COPM*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPL3)){
+		return CVisC86RegPtr( new CVisC86OPL3Reg(dynamic_cast<COPL3*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPLL)){
+		return CVisC86RegPtr( new CVisC86OPLLReg(dynamic_cast<COPLL*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CTMS3631)) {
+		return CVisC86RegPtr(new CVisC86TMS3631Reg(dynamic_cast<CTMS3631*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CGenericChipBank1)){
+		return CVisC86RegPtr( new CVisC86Generic1Reg(dynamic_cast<CGenericChipBank1*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CGenericChipBank2)){
+		return CVisC86RegPtr( new CVisC86Generic2Reg(dynamic_cast<CGenericChipBank2*>(pchip), id));
 	}
 	return 0;
 }

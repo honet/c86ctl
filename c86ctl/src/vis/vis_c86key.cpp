@@ -806,16 +806,85 @@ void CVisC86OPMKey::onKeyDown(DWORD keycode)
 	}
 }
 
+// --------------------------------------------------------
+bool CVisC86TMS3631Key::create(HWND parent)
+{
+	if (!CVisWnd::create(_windowWidth, _windowHeight,
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent))
+		return false;
+
+	::ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+
+	return true;
+}
+
+void CVisC86TMS3631Key::onPaintClient(void)
+{
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
+
+	if (pChip) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		int tr = 0;
+		for (int i = 0; i < 8; i++) {
+			drawTrackView(clientCanvas, sx, sy, tr, false);
+			sy += 35; tr++;
+		}
+
+	}
+}
+void CVisC86TMS3631Key::drawTrackView(IVisBitmap* canvas, int ltx, int lty, int trNo, bool isMute)
+{
+	int sy = 0;
+	int cx = 6, cy = 8;
+	char str[64];
+	CVisC86Skin* skin = &gVisSkin;
+
+	int onlevel = 0;
+	sprintf(str, "%02d", trNo + 1);
+	skin->drawNumStr1(canvas, ltx + 5, lty + sy + 2, str);
+	switch(trNo) {
+	case 0: strcpy_s(str, "[LR] f2-only"); onlevel = 31; break;
+	case 1: strcpy_s(str, "[LR]"); onlevel = 31; break;
+	case 2: case 3: case 4: strcpy_s(str, "[L]"); onlevel = pChip->getReg(0x10) >> 3; break;
+	case 5: case 6: case 7: strcpy_s(str, "[R]"); onlevel = pChip->getReg(0x10) >> 3; break;
+	}
+	skin->drawStr(canvas, 0, ltx + 5 + cx * 10, lty + sy + 5, str);
+
+	bool ison = (pChip->getReg(0x12) & (0x01 << trNo)) != 0;
+	UCHAR note = pChip->getReg(trNo);
+	int level = 0;
+
+	if (!isMute) {
+		skin->drawKeyboard(canvas, ltx, lty + sy + 15);
+		skin->drawStr(canvas, 0, ltx + 5 + cx * 47, lty + sy + 5, "NOTE:");
+
+		if (ison) {
+			int oct = 4 + (note >> 4);
+			note = (note & 0xf) - 1;
+			skin->drawHilightKey(canvas, ltx, lty + sy + 15, oct, note);
+			sprintf(str, "O%d%s", oct, noteStr[note]);
+			skin->drawStr(canvas, 0, ltx + 5 + cx * 52, lty + sy + 5, str);
+			level = onlevel;
+		}
+		skin->drawHBar(canvas, 290, lty + sy + 15, level, 0);
+	}
+	else {
+		skin->drawDarkKeyboard(canvas, ltx, lty + sy + 15);
+		skin->drawHBar(canvas, 290, lty + sy + 15, 0, 0);
+	}
+}
 
 // --------------------------------------------------------
 CVisC86KeyPtr c86ctl::vis::visC86KeyViewFactory(Chip *pchip, int id)
 {
-	if( typeid(*pchip) == typeid(COPNA) ){
-		return CVisC86KeyPtr( new CVisC86OPNAKey(dynamic_cast<COPNA*>(pchip), id ) );
-	}else if( typeid(*pchip) == typeid(COPN3L) ){
-		return CVisC86KeyPtr( new CVisC86OPN3LKey(dynamic_cast<COPN3L*>(pchip), id) );
-	}else if( typeid(*pchip) == typeid(COPM) ){
-		return CVisC86KeyPtr( new CVisC86OPMKey(dynamic_cast<COPM*>(pchip), id) );
+	if (typeid(*pchip) == typeid(COPNA)){
+		return CVisC86KeyPtr(new CVisC86OPNAKey(dynamic_cast<COPNA*>(pchip), id ));
+	} else if (typeid(*pchip) == typeid(COPN3L)){
+		return CVisC86KeyPtr(new CVisC86OPN3LKey(dynamic_cast<COPN3L*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPM)){
+		return CVisC86KeyPtr(new CVisC86OPMKey(dynamic_cast<COPM*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CTMS3631)) {
+		return CVisC86KeyPtr(new CVisC86TMS3631Key(dynamic_cast<CTMS3631*>(pchip), id));
 	}
 	return 0;
 }
