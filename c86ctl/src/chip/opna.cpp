@@ -16,23 +16,26 @@
 
 using namespace c86ctl;
 
-bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
+bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 {
 	bool handled = true;
+	UINT	shift, complement;
+	static bool isPlayed = false;
+	reg[adrs] = data;
 
-	switch(adrs){
+	switch (adrs) {
 	case 0x00: // control 1
 		control1 = data;
-		
-		if((data&0xa0) == 0xa0){	// start & mem
-			keyOnLevel = level>>3;
+		if ((data & 0xa0) == 0xa0) {	// start & mem
+			keyOnLevel = level >> 3;
 			sw = true;
+			isPlayed = true;
 		}
-		if(data&0x01){		// reset
+		if (data & 0x01) {		// reset
 			keyOnLevel = 0;
 			sw = false;
 		}
-		if(!(data&0x80)){ // !start
+		if (!(data & 0x80)) { // !start
 			sw = false;
 		}
 		//(data&0x80) // start
@@ -42,11 +45,11 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		//(data&0x08);// sp off
 		//(data&0x01);// reset
 		break;
-		
+
 	case 0x01: // control 2
 		control2 = data;
-		if( data & 0xc0 )
-			setLR( ((data&0x80)?true:false), ((data&0x40)?true:false) );
+		if (data & 0xc0)
+			setLR(((data & 0x80) ? true : false), ((data & 0x40) ? true : false));
 		//data&0x80; // L
 		//data&0x40; // R
 		//data&0x08; // SAMPLE
@@ -54,69 +57,68 @@ bool COPNAAdpcm::setReg( UCHAR adrs, UCHAR data )
 		//data&0x02; // RAM TYPE
 		//data&0x01; // ROM/DRAM
 		break;
-		
+
 	case 0x02: /// start addr (L)
-		startAddr = (startAddr & 0x3e000) | ((UINT)data<<5);
-		currentAddr = startAddr;
-		break;
 	case 0x03: /// start addr (H)
-		startAddr = (((UINT)data<<13)&0x3e000) | (startAddr & 0x1fe0);
+		shift = (reg[0x01] & 0x03)? 5 : 2;
+		startAddr = ((reg[0x03] << 8) | reg[0x02]) << shift;
 		currentAddr = startAddr;
 		break;
-		
 	case 0x04: /// stop addr (L)
-		stopAddr = (stopAddr & 0x3e000) | ((UINT)data<<5);
-		break;
 	case 0x05: /// stop addr (H)
-		stopAddr = (((UINT)data<<13)&0x3e000) | (stopAddr & 0x1fe0);
+		shift = (reg[0x01] & 0x03) ? 5 : 2;
+		complement = (reg[0x01] & 0x03) ? 0x1f : 0x03;
+		stopAddr = (((reg[0x05] << 8) | reg[0x04]) << shift) | complement;
+		break;
+	case 0x06: // prescale(L)
+	case 0x07: // prescale(H)
+		prescale = (reg[0x07] << 8) | reg[0x06];
 		break;
 
-	case 0x06: // prescale(L)
-		prescale = (prescale&0xff00) | data;
-		break;
-	case 0x07: // prescale(H)
-		prescale = ((UINT)data<<8) | (prescale&0xff);
-		break;
-		
 	case 0x08: // adpcm data.
-		if( control1 & 0x60 ){
-			if( 0 <= currentAddr && currentAddr < ramsize ){ // 念のため
+		if (isPlayed) {
+			memset(minimap, 0, minimapsize);
+			isPlayed = false;
+		}
+		if (control1 & 0x60) {
+			if (0 <= currentAddr && currentAddr < ramsize) { // 念のため
 				dram[currentAddr] = data;
 				map[currentAddr] |= 0x01;
-				minimap[currentAddr>>9] |= 0x01;
+				minimap[currentAddr >> 9] |= 0x01;
 			}
-			if( stopAddr > currentAddr ){
-				if( limitAddr > currentAddr ){
+			if (stopAddr > currentAddr) {
+				if (limitAddr > currentAddr) {
 					currentAddr++;
-				}else{
-					currentAddr=0;
+				}
+				else {
+					currentAddr = 0;
 				}
 			}
 		}
 		break;
-		
+
 	case 0x09: // delta-N(L)
-		deltaN = (deltaN&0xff00) | data;
 	case 0x0a: // delta-N(H)
-		deltaN = ((int)data<<8) | (deltaN&0xff);
+		deltaN = (reg[0x0a] << 8) | reg[0x09];
+		break;
 
 	case 0x0b: // level
 		level = data;
 		break;
-		
+
 	case 0x0c: /// limit addr (L)
-		limitAddr = (limitAddr&0x3e000) | ((UINT)data<<5);
-		break;
 	case 0x0d: /// limit addr (H)
-		limitAddr = (((UINT)data<<13)&0x3e000) | (limitAddr&0x1fe0);
+		shift = (reg[0x01] & 0x03) ? 5 : 2;
+		complement = (reg[0x01] & 0x03) ? 0x1f : 0x03;
+		limitAddr = (((reg[0x0d] << 8) | reg[0x0c]) << shift) | complement;
 		break;
 
 	case 0x0e: // dac data.
 	case 0x0f: // pcm data.
 		break;
 
-	//case 0x10: // flag control
-	//	break;
+		//case 0x10: // flag control
+		//	break;
 
 	default:
 		handled = false;

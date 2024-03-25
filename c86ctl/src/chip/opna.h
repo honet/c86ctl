@@ -50,6 +50,7 @@ public:
 		memset(map,0,ramsize);
 		memset(wav,0,ramsize*2*2);
 		memset(minimap,0,minimapsize);
+		memset(reg, 0, 256);
 	}
 	void update(){
 		if(keyOnLevel) keyOnLevel--;
@@ -88,7 +89,8 @@ protected:
 	
 	UCHAR control1;
 	UCHAR control2;
-	
+	UCHAR reg[256];
+
 	bool left;
 	bool right;
 	bool sw;
