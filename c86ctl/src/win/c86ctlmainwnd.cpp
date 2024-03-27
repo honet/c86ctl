@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -54,9 +54,9 @@ using namespace c86ctl::vis;
 
 
 // ------------------------------------------------------------------
-#define WM_THREADEXIT       (WM_APP+10)
-#define WM_TASKTRAY_EVENT   (WM_APP+11)
-#define WM_CHANGEVIS_STATE  (WM_APP+12)
+//#define WM_THREADEXIT       (WM_APP+10)
+//#define WM_TASKTRAY_EVENT   (WM_APP+11)
+//#define WM_CHANGEVIS_STATE  (WM_APP+12)
 
 
 C86CtlMainWnd *C86CtlMainWnd::pthis = 0;

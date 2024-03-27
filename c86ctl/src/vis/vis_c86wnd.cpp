@@ -172,6 +172,11 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		onCommand((HWND)lp, wp & 0xffff, (wp >> 16) & 0xffff);
 		break;
 
+	case WM_MYCLOSEREQ: {
+		CVisWnd *wnd = CVisManager::getInstance()->find((HWND)wp);
+		if (wnd) wnd->close();
+		break;
+	}
 //	case WM_LBUTTONDOWN:
 //		break;
 #if 0
@@ -316,7 +321,7 @@ bool CVisWnd::create(int width, int height, DWORD exstyle, DWORD style, HWND par
 	auto closeButton = std::make_shared<CVisCloseButton>(this, width - 17, 2);
 	closeButton->pushEvent.push_back(
 		[this](CVisWidget* w) {
-		this->close();
+		PostMessage(this->hParent, WM_MYCLOSEREQ, (WPARAM)this->getHWND(), 0);
 	});
 	sysWidgets.push_back(closeButton);
 

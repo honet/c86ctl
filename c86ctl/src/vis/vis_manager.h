@@ -47,6 +47,7 @@ public:
 	void draw(void);
 	void add(CVisWnd* wnd);
 	void del(CVisWnd* wnd);
+	CVisWnd* find(HWND hwnd);
 
 	double getCurrentFPS() {
 		return fps;

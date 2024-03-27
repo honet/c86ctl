@@ -20,6 +20,7 @@
 #define WM_TASKTRAY_EVENT   (WM_APP+11)
 #define WM_MYDEVCHANGE      (WM_APP+12)
 #define WM_MYDEVUPDATED     (WM_APP+13)
+#define WM_MYCLOSEREQ       (WM_APP+14)
 
 
 // ------------------------------------------------------------------

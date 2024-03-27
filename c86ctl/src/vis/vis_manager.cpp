@@ -44,3 +44,12 @@ void CVisManager::draw(void)
 	fps = counter.getFPS();
 }
 
+CVisWnd* CVisManager::find(HWND hwnd)
+{
+	auto it = std::find_if(clients.begin(), clients.end(), [hwnd](CVisWnd* w) { return w->getHWND() == hwnd; });
+
+	if (it != clients.end()) {
+		return *it;
+	}
+	return NULL;
+}
