@@ -10,30 +10,30 @@
 #pragma once
 #include <list>
 
-namespace c86ctl{
+namespace c86ctl {
 
-class FPSCounter{
+class FPSCounter {
 public:
 	FPSCounter();
 	~FPSCounter();
 
 	double getFPS();
-	void setNSample(int n){
+	void setNSample(int n) {
 		sample.resize(n, 0.0);
 		nsamples = n;
 		dsum = 0;
-	};
-	
+	}
+
 private:
 	double update(double d);
-	
+
 private:
 	UINT lastcount;
-	
+
 	std::list<double> sample;
 	int nsamples;
 	double dsum;
 };
 
-};
+}
 

@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -99,8 +99,8 @@ interface IRealChip : public IUnknown
 {
 public:
 	virtual int __stdcall reset(void) = 0;
-	virtual void __stdcall out( UINT addr, UCHAR data ) = 0;
-	virtual UCHAR __stdcall in( UINT addr ) = 0;
+	virtual void __stdcall out(UINT addr, UCHAR data) = 0;
+	virtual UCHAR __stdcall in(UINT addr) = 0;
 };
 
 // DEPRECATED. use IRealChip3 instead.
@@ -116,12 +116,12 @@ interface IRealChip2 : public IRealChip
 	//	virtual void __stdcall out(UINT addr, UCHAR data) = 0;
 	//	virtual UCHAR __stdcall in(UINT addr) = 0;
 public:
-	virtual int __stdcall getChipStatus( UINT addr, UCHAR *status ) = 0;
+	virtual int __stdcall getChipStatus(UINT addr, UCHAR* status) = 0;
 	virtual void __stdcall directOut(UINT addr, UCHAR data) = 0;
 };
 
 // IRealChip3 {761DB10B-2432-4747-AC75-0EA6D9336797}
-static const GUID IID_IRealChip3 = 
+static const GUID IID_IRealChip3 =
 { 0x761db10b, 0x2432, 0x4747, { 0xac, 0x75, 0xe, 0xa6, 0xd9, 0x33, 0x67, 0x97 } };
 
 interface IRealChip3 : public IRealChip2
@@ -135,7 +135,7 @@ interface IRealChip3 : public IRealChip2
 	//	virtual int __stdcall getChipStatus(UINT addr, UCHAR *status) = 0;
 	//	virtual void __stdcall directOut(UINT addr, UCHAR data) = 0;
 public:
-	virtual int __stdcall getChipType( enum ChipType *type ) = 0;
+	virtual int __stdcall getChipType(enum ChipType* type) = 0;
 };
 
 
@@ -146,13 +146,13 @@ static const GUID IID_IGimic =
 { 0x175c7da0, 0x8aa5, 0x4173, { 0x96, 0xda, 0xbb, 0x43, 0xb8, 0xeb, 0x8f, 0x17 } };
 interface IGimic : public IUnknown
 {
-	virtual int __stdcall getFWVer( UINT *major, UINT *minor, UINT *revision, UINT *build ) = 0;
-	virtual int __stdcall getMBInfo( struct Devinfo *info ) = 0;
-	virtual int __stdcall getModuleInfo( struct Devinfo *info ) = 0;
+	virtual int __stdcall getFWVer(UINT* major, UINT* minor, UINT* revision, UINT* build) = 0;
+	virtual int __stdcall getMBInfo(struct Devinfo* info) = 0;
+	virtual int __stdcall getModuleInfo(struct Devinfo* info) = 0;
 	virtual int __stdcall setSSGVolume(UCHAR vol) = 0;
-	virtual int __stdcall getSSGVolume(UCHAR *vol) = 0;
+	virtual int __stdcall getSSGVolume(UCHAR* vol) = 0;
 	virtual int __stdcall setPLLClock(UINT clock) = 0;
-	virtual int __stdcall getPLLClock(UINT *clock) = 0;
+	virtual int __stdcall getPLLClock(UINT* clock) = 0;
 };
 
 // IGimic2 {47141A01-15F5-4BF5-9554-CA7AACD54BB8}
@@ -197,8 +197,8 @@ UCHAR WINAPI c86ctl_in( UINT addr );				// DEPRECATED
 
 
 #ifdef __cplusplus
-};
-};
+}
+}
 #endif
 
 #endif

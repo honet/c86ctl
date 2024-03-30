@@ -33,8 +33,8 @@ public:
 	{
 		windowClass = TEXT("C86CTL");
 		windowTitle = TEXT("C86 CONTROL");
-	};
-	~CVisC86Main(){};
+	}
+	~CVisC86Main(){}
 
 public:
 	virtual bool create(HWND parent);
@@ -73,6 +73,6 @@ protected:
 	UINT tick;
 };
 
-};
-};
+}
+}
 

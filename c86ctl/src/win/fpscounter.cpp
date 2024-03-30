@@ -35,9 +35,9 @@ FPSCounter::~FPSCounter()
 double FPSCounter::getFPS()
 {
 	UINT d = ::timeGetTime();
-	double fps = update( d-lastcount );
+	double fps = update(d - lastcount);
 
-	lastcount = d;	
+	lastcount = d;
 	return fps;
 }
 
@@ -48,7 +48,7 @@ double FPSCounter::update(double d)
 	sample.push_back(d);
 	dsum += d;
 
-	return dsum>0 ? (1000.0 * nsamples / dsum ) : 0;
+	return dsum > 0 ? (1000.0 * nsamples / dsum) : 0;
 }
 
 

@@ -27,12 +27,12 @@ public:
 	{
 		_windowWidth = 330+4;
 		_windowHeight = 75*5+4+15;
-	};
-	~CVisC86Fm(){};
+	}
+	~CVisC86Fm(){}
 
 public:
-	virtual bool create(HWND parent = 0 ){ return false; };
-	virtual int getId(void){ return id; };
+	virtual bool create(HWND parent = 0 ){ return false; }
+	virtual int getId(void){ return id; }
 
 
 protected:
@@ -72,28 +72,27 @@ typedef std::shared_ptr<CVisC86Fm> CVisC86FmPtr;
 class CVisC86OPNAFm : public CVisC86Fm
 {
 public:
-	CVisC86OPNAFm(COPNA *chip, int id, int channel)
+	CVisC86OPNAFm(COPNA* chip, int id, int channel)
 		: CVisC86Fm(id),
-		  pOPNA(chip), ch(channel)
+		pOPNA(chip), ch(channel)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPNA%dFM%d"), id,ch);
+		_stprintf_s(str, _T("C86OPNA%dFM%d"), id, ch);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPNA FM CH%d PARAMETER VIEW"), id, ch+1);
+		_stprintf_s(str, _T("[%d] OPNA FM CH%d PARAMETER VIEW"), id, ch + 1);
 		windowTitle = str;
-	};
-	~CVisC86OPNAFm(){};
+	}
+	~CVisC86OPNAFm() {}
 
 public:
-	virtual bool create(HWND parent = 0 );
-	
+	virtual bool create(HWND parent = 0);
+
 protected:
 	virtual void onPaintClient(void);
 
 private:
-	COPNA *pOPNA;
+	COPNA* pOPNA;
 	int ch;
-
 
 };
 
@@ -101,26 +100,26 @@ private:
 class CVisC86OPN3LFm : public CVisC86Fm
 {
 public:
-	CVisC86OPN3LFm(COPN3L *chip, int id, int channel)
+	CVisC86OPN3LFm(COPN3L* chip, int id, int channel)
 		: CVisC86Fm(id),
-		  pOPN3L(chip), ch(channel)
+		pOPN3L(chip), ch(channel)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPN3L%dFM%d"), id,ch);
+		_stprintf_s(str, _T("C86OPN3L%dFM%d"), id, ch);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPN3L FM CH%d PARAMETER VIEW"), id, ch+1);
+		_stprintf_s(str, _T("[%d] OPN3L FM CH%d PARAMETER VIEW"), id, ch + 1);
 		windowTitle = str;
-	};
-	~CVisC86OPN3LFm(){};
+	}
+	~CVisC86OPN3LFm() {}
 
 public:
-	virtual bool create(HWND parent = 0 );
-	
+	virtual bool create(HWND parent = 0);
+
 protected:
 	virtual void onPaintClient(void);
-	
+
 private:
-	COPN3L *pOPN3L;
+	COPN3L* pOPN3L;
 	int ch;
 };
 
@@ -128,28 +127,28 @@ private:
 class CVisC86OPMFm : public CVisC86Fm
 {
 public:
-	CVisC86OPMFm(COPM *chip, int id, int channel)
+	CVisC86OPMFm(COPM* chip, int id, int channel)
 		: CVisC86Fm(id),
-		  pOPM(chip), ch(channel)
+		pOPM(chip), ch(channel)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPM%dFM%d"), id,ch);
+		_stprintf_s(str, _T("C86OPM%dFM%d"), id, ch);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPM FM CH%d PARAMETER VIEW"), id, ch+1);
+		_stprintf_s(str, _T("[%d] OPM FM CH%d PARAMETER VIEW"), id, ch + 1);
 		windowTitle = str;
-	};
-	~CVisC86OPMFm(){};
+	}
+	~CVisC86OPMFm() {}
 
 public:
-	virtual bool create(HWND parent = 0 );
-	
+	virtual bool create(HWND parent = 0);
+
 protected:
 	virtual void onPaintClient(void);
-	bool createFmView(COPMFmCh *pFmCh);
-	void drawFMView( IVisBitmap *canvas, int x, int y, COPMFmCh *pFmCh );
-	
+	bool createFmView(COPMFmCh* pFmCh);
+	void drawFMView(IVisBitmap* canvas, int x, int y, COPMFmCh* pFmCh);
+
 private:
-	COPM *pOPM;
+	COPM* pOPM;
 	int ch;
 };
 
@@ -157,5 +156,5 @@ private:
 // factory
 CVisC86FmPtr visC86FmViewFactory(Chip *pchip, int id, int ch);
 
-};
-};
+}
+}

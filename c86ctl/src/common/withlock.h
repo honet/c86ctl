@@ -8,7 +8,7 @@
  */
 #pragma once
 
-namespace c86ctl{
+namespace c86ctl {
 
 class critical_section
 {
@@ -16,13 +16,13 @@ public:
 	critical_section()
 	{
 		::InitializeCriticalSection(&cs);
-	};
+	}
 
-	critical_section(critical_section &obj)
+	critical_section(critical_section& obj)
 	{
 		::InitializeCriticalSection(&cs);
-	};
-	
+	}
+
 	virtual ~critical_section()
 	{
 		::DeleteCriticalSection(&cs);
@@ -30,14 +30,14 @@ public:
 
 
 public:
-	void lock(){
+	void lock() {
 		::EnterCriticalSection(&cs);
-	};
-	
-	void unlock(){
+	}
+
+	void unlock() {
 		::LeaveCriticalSection(&cs);
-	};
-	
+	}
+
 private:
 	CRITICAL_SECTION cs;
 };
@@ -47,22 +47,22 @@ template<class T>
 class withlock : public T
 {
 public:
-	withlock(){};
-	virtual ~withlock(){};
-	
+	withlock() {}
+	virtual ~withlock() {}
+
 public:
-	void lock(){
+	void lock() {
 		cs.lock();
-	};
-	
-	void unlock(){
+	}
+
+	void unlock() {
 		cs.unlock();
-	};
-	
+	}
+
 private:
 	critical_section cs;
 };
 
 
-};
+}
 

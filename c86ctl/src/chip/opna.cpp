@@ -60,7 +60,7 @@ bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 
 	case 0x02: /// start addr (L)
 	case 0x03: /// start addr (H)
-		shift = (reg[0x01] & 0x03)? 5 : 2;
+		shift = (reg[0x01] & 0x03) ? 5 : 2;
 		startAddr = ((reg[0x03] << 8) | reg[0x02]) << shift;
 		currentAddr = startAddr;
 		break;
@@ -89,8 +89,7 @@ bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 			if (stopAddr > currentAddr) {
 				if (limitAddr > currentAddr) {
 					currentAddr++;
-				}
-				else {
+				} else {
 					currentAddr = 0;
 				}
 			}
@@ -129,13 +128,12 @@ bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 
 
 
-
-void COPNA::byteOut( UINT addr, UCHAR data )
+void COPNA::byteOut(UINT addr, UCHAR data)
 {
 	int ch;
-	if( 0x200 <= addr ) return;
+	if (0x200 <= addr) return;
 
-	switch( addr ){
+	switch (addr) {
 	case 0x29: // SCH/IRQ ENABLE
 		data |= 0x80;
 		break;
@@ -152,98 +150,98 @@ void COPNA::byteOut( UINT addr, UCHAR data )
 	case 0xb5:
 	case 0xb6:
 		ch = addr - 0xb4;
-		if( getMixedMask( ch ) )
+		if (getMixedMask(ch))
 			data &= 0x3f;
 		//if(!modeOPNA)
 		//	*data = 0xc0;
 		break;
-			
+
 	case 0x1b4: // FM -- LR, AMS, PMS
 	case 0x1b5:
 	case 0x1b6:
 		ch = addr - 0x1b4;
-		if( getMixedMask( 6+ch ) )
+		if (getMixedMask(6 + ch))
 			data &= 0x3f;
 		break;
 
 	case 0x08: // SSG amp level
 	case 0x09:
 	case 0x0a:
-		ch = addr-0x08;
-		if( getMixedMask( 9+ch ) )
+		ch = addr - 0x08;
+		if (getMixedMask(9 + ch))
 			data &= 0xf0;
 		break;
-		
+
 	case 0x10: // Rhythm key on
-		if( getMixedMask( 13 ) ){
+		if (getMixedMask(13)) {
 			return;
 		}
 		break;
 	case 0x11: // Rhythm total level
-		if( getMixedMask( 13 ) )
+		if (getMixedMask(13))
 			data = 0;
 		break;
 
 	case 0x10b: // ADPCM level control
-		if( getMixedMask( 12 ) )
+		if (getMixedMask(12))
 			data = 0;
 		break;
 	}
 
-	if(setReg(addr,data))
-		if(ds) ds->byteOut(addr,data);
+	if (setReg(addr, data))
+		if (ds) ds->byteOut(addr, data);
 }
 
-bool COPNA::setReg( UINT addr, UCHAR data ){
-	if( 0x200 <= addr ) return false;
+bool COPNA::setReg(UINT addr, UCHAR data) {
+	if (0x200 <= addr) return false;
 	int idx = 0;
-	if( 0x100 <= addr ){
+	if (0x100 <= addr) {
 		addr -= 0x100;
 		idx = 1;
 	}
 	reg[idx][addr] = data;
 	INT c = regATime[idx][addr];
-	c+=64;
-	regATime[idx][addr] = 255<c ? 255 : c;
+	c += 64;
+	regATime[idx][addr] = 255 < c ? 255 : c;
 
 // TODO: DEBUG ME!!
 // Filter the Timer Control
 //if(0x24<=addr && addr<=0x27)
 //	return false;
 
-	if( idx == 0 ){
-		if( ssg->setReg( addr, data ) )
+	if (idx == 0) {
+		if (ssg->setReg(addr, data))
 			return true;
-		if( rhythm->setReg( addr, data ) )
+		if (rhythm->setReg(addr, data))
 			return true;
-		if( fmCommonRegHandling( addr, data ) )
+		if (fmCommonRegHandling(addr, data))
 			return true;
-	}else{
-		if( adpcm->setReg( addr, data ) )
+	} else {
+		if (adpcm->setReg(addr, data))
 			return true;
 	}
-	if( fm->setReg( idx, addr, data ) )
+	if (fm->setReg(idx, addr, data))
 		return true;
 
 	return false;
-};
+}
 
-UCHAR COPNA::getReg( UINT addr ){
-	if( 0x200 <= addr ) return 0;
+UCHAR COPNA::getReg(UINT addr) {
+	if (0x200 <= addr) return 0;
 	int idx = 0;
-	if( 0x100 <= addr ){
+	if (0x100 <= addr) {
 		addr -= 0x100;
 		idx = 1;
 	}
 	return reg[idx][addr];
-};
+}
 
 
-bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
+bool COPNA::fmCommonRegHandling(UCHAR adrs, UCHAR data)
 {
 	bool handled = true;
-	
-	switch(adrs){
+
+	switch (adrs) {
 	case 0x10:	// STATUS MASK
 		//data&0x80; // IRQ RESET
 		//data&0x10; // MASK ZERO (ADPCM)
@@ -252,7 +250,7 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 		//data&0x02; // MASK TIMER-B
 		//data&0x01; // MASK TIMER-A
 		break;
-		
+
 	// prescaler
 	case 0x2d:
 		prescale_fm = 6;
@@ -278,7 +276,6 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 		//	modeOPNA = (data&0x80) ? true : false;
 		//	return true;
 	//}
-		
 
 	default:
 		handled = false;
@@ -291,71 +288,71 @@ bool COPNA::fmCommonRegHandling( UCHAR adrs, UCHAR data )
 void COPNA::applyMask(int ch)
 {
 	UCHAR data;
-	if(!ds) return;
+	if (!ds) return;
 
 	bool mask = getMixedMask(ch);
-	
-	if( 0<=ch && ch<=2 ){ // FM 1~3
+
+	if (0 <= ch && ch <= 2) { // FM 1~3
 		int fmNo = ch;
-		data = (fm->ch[fmNo]->getAMS()<<4) | fm->ch[fmNo]->getPMS();
-		if( !mask ){
-			bool l,r;
-			fm->ch[fmNo]->getLR( l,r );
-			data |= (l?0x80:0) | (r?0x40:0);
+		data = (fm->ch[fmNo]->getAMS() << 4) | fm->ch[fmNo]->getPMS();
+		if (!mask) {
+			bool l, r;
+			fm->ch[fmNo]->getLR(l, r);
+			data |= (l ? 0x80 : 0) | (r ? 0x40 : 0);
 		}
-		ds->byteOut( 0xb4+ch, data );
+		ds->byteOut(0xb4 + ch, data);
 		//pIF->directOut( 0xb4+ch, data );
-	}
-	else if( 6<=ch && ch<=8 ){ // FM 4~6
+
+	} else if (6 <= ch && ch <= 8) { // FM 4~6
 		int fmNo = ch - 3;
-		data = (fm->ch[fmNo]->getAMS()<<4) | fm->ch[fmNo]->getPMS();
-		if( !mask ){
-			bool l,r;
-			fm->ch[fmNo]->getLR( l,r );
-			data |= (l?0x80:0) | (r?0x40:0);
+		data = (fm->ch[fmNo]->getAMS() << 4) | fm->ch[fmNo]->getPMS();
+		if (!mask) {
+			bool l, r;
+			fm->ch[fmNo]->getLR(l, r);
+			data |= (l ? 0x80 : 0) | (r ? 0x40 : 0);
 		}
-		ds->byteOut( 0x1b4+(ch-6), data );
+		ds->byteOut(0x1b4 + (ch - 6), data);
 		//pIF->directOut( 0x1b4+(ch-6), data );
-	}
-	else if( 9<=ch && ch<=11 ){ // SSG 1~3
-		int ssgNo = ch-9;
+
+	} else if (9 <= ch && ch <= 11) { // SSG 1~3
+		int ssgNo = ch - 9;
 		data = mask ? 0 : ssg->ch[ssgNo]->getLevel();
 		data |= ssg->ch[ssgNo]->isUseEnv() ? 0x10 : 0;
-		ds->byteOut( 0x08+ssgNo, data );
+		ds->byteOut(0x08 + ssgNo, data);
 		//pIF->directOut( 0x08+ssgNo, data );
-	}
-	else if( ch == 12 ){ // ADPCM
+
+	} else if (ch == 12) { // ADPCM
 		data = mask ? 0 : adpcm->getLevel();
-		ds->byteOut( 0x10b, data );
+		ds->byteOut(0x10b, data);
 		//pIF->directOut( 0x10b, data );
-	}
-	else if( ch == 13 ){ // RHYTHM
+
+	} else if (ch == 13) { // RHYTHM
 		data = mask ? 0 : rhythm->getTotalLevel();
-		ds->byteOut( 0x11, data );
+		ds->byteOut(0x11, data);
 		//pIF->directOut( 0x11, data );
 	}
 }
 
 void COPNA::setPartMask(int ch, bool mask)
 {
-	if( ch<0 || 14<=ch ) return;
+	if (ch < 0 || 14 <= ch) return;
 
-	if( mask ){
-		partMask |= 1<<ch;
-	}else{
-		partMask &= ~(1<<ch);
+	if (mask) {
+		partMask |= 1 << ch;
+	} else {
+		partMask &= ~(1 << ch);
 	}
 	applyMask(ch);
 }
 
 void COPNA::setPartSolo(int ch, bool mask)
 {
-	if( ch<0 || 14<=ch ) return;
-	
-	if( mask )	partSolo |= 1<<ch;
-	else		partSolo &= ~(1<<ch);
-	
-	for( int i=0; i<14; i++ )
+	if (ch < 0 || 14 <= ch) return;
+
+	if (mask)	partSolo |= 1 << ch;
+	else		partSolo &= ~(1 << ch);
+
+	for (int i = 0; i < 14; i++)
 		applyMask(i);
 }
 

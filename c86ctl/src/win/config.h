@@ -39,22 +39,22 @@ protected:
 public:
 	void init(HMODULE hModule);
 	
-	UINT get( LPCTSTR section, LPCTSTR key, LPCTSTR defstr, LPTSTR val, UINT sz_val ){
-		return GetPrivateProfileString( section, key, defstr, val, sz_val, inipath );
-	};
+	UINT get(LPCTSTR section, LPCTSTR key, LPCTSTR defstr, LPTSTR val, UINT sz_val) {
+		return GetPrivateProfileString(section, key, defstr, val, sz_val, inipath);
+	}
 	
-	BOOL write( LPCTSTR section, LPCTSTR key, LPCTSTR val ){
-		return WritePrivateProfileString( section, key, val, inipath );
-	};
+	BOOL write(LPCTSTR section, LPCTSTR key, LPCTSTR val) {
+		return WritePrivateProfileString(section, key, val, inipath);
+	}
 	
-	int getInt( LPCTSTR section, LPCTSTR key, int defval ){
-		return GetPrivateProfileInt( section, key, defval, inipath );
-	};
+	int getInt(LPCTSTR section, LPCTSTR key, int defval) {
+		return GetPrivateProfileInt(section, key, defval, inipath);
+	}
 	
-	BOOL writeInt( LPCTSTR section, LPCTSTR key, INT val );
+	BOOL writeInt(LPCTSTR section, LPCTSTR key, INT val);
 };
 
-}; // namespace c86ctl
+} // namespace c86ctl
 
 extern class c86ctl::CC86CtlConfig gConfig;
 

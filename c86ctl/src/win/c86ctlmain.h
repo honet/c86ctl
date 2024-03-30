@@ -40,12 +40,12 @@ public:
 		terminateFlag(false),
 		refCount(0)
 	{
-	};
-	~C86CtlMain(){};
+	}
+	~C86CtlMain(){}
 
 public:
 	// IUnknown
-	virtual HRESULT __stdcall QueryInterface( REFIID riid, LPVOID *ppvObj );
+	virtual HRESULT __stdcall QueryInterface(REFIID riid, LPVOID* ppvObj);
 	virtual ULONG __stdcall AddRef(VOID);
 	virtual ULONG __stdcall Release(VOID);
 
@@ -54,18 +54,18 @@ public:
 	virtual int __stdcall initialize(void);
 	virtual int __stdcall deinitialize(void);
 	virtual int __stdcall getNumberOfChip(void);
-	virtual HRESULT __stdcall getChipInterface( int id, REFIID riid, void** ppi );
+	virtual HRESULT __stdcall getChipInterface(int id, REFIID riid, void** ppi);
 
 public:
 	int reset(void);
-	void out( UINT addr, UCHAR data );
-	UCHAR in( UINT addr );
+	void out(UINT addr, UCHAR data);
+	UCHAR in(UINT addr);
 
 public:
 	static INT init(HINSTANCE h);
 	static INT deinit(void);
 	static HINSTANCE getInstanceHandle();
-	static void setActiveDlg(HWND dlg){ hActiveDlg = dlg; };
+	static void setActiveDlg(HWND dlg){ hActiveDlg = dlg; }
 
 public:
 	void loadConfig(void);
@@ -111,5 +111,5 @@ private:
 
 C86CtlMain* GetC86CtlMain(void);
 
-};
+}
 

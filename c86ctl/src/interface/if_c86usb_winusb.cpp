@@ -97,13 +97,13 @@ using namespace c86ctl;
 ----------------------------------------------------------------------------*/
 C86WinUSB::C86WinUSB()
 	: hDev(0), hWinUsb(0), cps(0), cal(0), calcount(0),
-	  inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0), nmodules(0)
+	inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0), nmodules(0)
 {
-	rbuff.alloc( PIPE_BUFFER_SIZE );
+	rbuff.alloc(PIPE_BUFFER_SIZE);
 	::InitializeCriticalSection(&csection);
 
 	::QueryPerformanceFrequency(&freq);
-	freq.QuadPart/=1000; // 1ms
+	freq.QuadPart /= 1000; // 1ms
 
 	memset(modules, 0, sizeof(modules));
 }
@@ -118,10 +118,9 @@ C86WinUSB::~C86WinUSB(void)
 	WinUsb_Free(hWinUsb);
 	hDev = NULL;
 	hWinUsb = NULL;
-	for(int i=0; i<nmodules; i++)
-		if(modules[i])
+	for (int i = 0; i < nmodules; i++)
+		if (modules[i])
 			delete modules[i];
-
 }
 
 /*----------------------------------------------------------------------------
@@ -131,40 +130,40 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 {
 	HANDLE hNewDev = CreateFile(
 		devpath.c_str(),
-		GENERIC_READ|GENERIC_WRITE,
+		GENERIC_READ | GENERIC_WRITE,
 		0 /*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
 		NULL,
 		OPEN_EXISTING,
 		FILE_FLAG_OVERLAPPED, //FILE_FLAG_NO_BUFFERING,
 		NULL);
 
-	if(hNewDev == INVALID_HANDLE_VALUE)
+	if (hNewDev == INVALID_HANDLE_VALUE)
 		return false;
 
 	HANDLE hNewWinUsb = NULL;
-	if (!WinUsb_Initialize(hNewDev, &hNewWinUsb)){
+	if (!WinUsb_Initialize(hNewDev, &hNewWinUsb)) {
 		//DWORD err = GetLastError();
 		CloseHandle(hNewDev);
 		return false;
 	}
-	
+
 	// エンドポイント情報取得
 	USB_INTERFACE_DESCRIPTOR desc;
-	if (!WinUsb_QueryInterfaceSettings(hNewWinUsb, 0, &desc)){
+	if (!WinUsb_QueryInterfaceSettings(hNewWinUsb, 0, &desc)) {
 		WinUsb_Free(hNewWinUsb);
 		CloseHandle(hNewDev);
 		return false;
 	}
 
-	for ( int i=0; i<desc.bNumEndpoints; i++ ){
+	for (int i = 0; i < desc.bNumEndpoints; i++) {
 		WINUSB_PIPE_INFORMATION pipeInfo;
-		if (WinUsb_QueryPipe(hNewWinUsb, 0, (UCHAR)i, &pipeInfo)){
-			if( pipeInfo.PipeType == UsbdPipeTypeBulk &&
-				USB_ENDPOINT_DIRECTION_OUT(pipeInfo.PipeId) ){
+		if (WinUsb_QueryPipe(hNewWinUsb, 0, (UCHAR)i, &pipeInfo)) {
+			if (pipeInfo.PipeType == UsbdPipeTypeBulk &&
+				USB_ENDPOINT_DIRECTION_OUT(pipeInfo.PipeId)) {
 				outPipeId = pipeInfo.PipeId;
 				outPipeMaxPktSize = pipeInfo.MaximumPacketSize;
-			}else if ( pipeInfo.PipeType == UsbdPipeTypeBulk &&
-				USB_ENDPOINT_DIRECTION_IN(pipeInfo.PipeId) ){
+			} else if (pipeInfo.PipeType == UsbdPipeTypeBulk &&
+				USB_ENDPOINT_DIRECTION_IN(pipeInfo.PipeId)) {
 				inPipeId = pipeInfo.PipeId;
 				inPipeMaxPktSize = pipeInfo.MaximumPacketSize;
 			}
@@ -173,8 +172,8 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 
 	// タイムアウト設定
 	ULONG timeout = 5000; //ms
-	::WinUsb_SetPipePolicy( hNewWinUsb, outPipeId, PIPE_TRANSFER_TIMEOUT, sizeof(ULONG), &timeout );
-	::WinUsb_SetPipePolicy( hNewWinUsb, inPipeId, PIPE_TRANSFER_TIMEOUT, sizeof(ULONG), &timeout );
+	::WinUsb_SetPipePolicy(hNewWinUsb, outPipeId, PIPE_TRANSFER_TIMEOUT, sizeof(ULONG), &timeout);
+	::WinUsb_SetPipePolicy(hNewWinUsb, inPipeId, PIPE_TRANSFER_TIMEOUT, sizeof(ULONG), &timeout);
 
 	// ここでハンドル更新
 	hDev = hNewDev;
@@ -187,15 +186,15 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 	// Module情報取得 -----------
 	// TODO: とりあえず。
 	int n = 0;
-	for (int i=0; i<2; i++){
+	for (int i = 0; i < 2; i++) {
 		BOARD_INFO binfo;
 		int ret = getBoardInfo(i, &binfo);
-		if (ret<0)
+		if (ret < 0)
 			continue;
-		for (UINT k=0; k<binfo.nchips; k++){
+		for (UINT k = 0; k < binfo.nchips; k++) {
 			ChipType newtype = static_cast<ChipType>(binfo.chiptype[k]);
-			if (modules[n]==0){
-				C86WinUSB::C86ModuleWinUSB *module =  new C86ModuleWinUSB(this, i, k, newtype);
+			if (modules[n] == 0) {
+				C86WinUSB::C86ModuleWinUSB* module = new C86ModuleWinUSB(this, i, k, newtype);
 				if (module)
 					modules[n++] = module;
 			} else if (modules[n++]->getChipType() != newtype) {
@@ -219,13 +218,13 @@ MODULE_CHANGED:
 /*----------------------------------------------------------------------------
 	factory
 ----------------------------------------------------------------------------*/
-int C86WinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSoundDevice> > > &devices)
+int C86WinUSB::UpdateInstances(withlock< std::vector< std::shared_ptr<BaseSoundDevice> > >& devices)
 {
 	devices.lock();
-	std::for_each( devices.begin(), devices.end(), []( std::shared_ptr<BaseSoundDevice> x ){ x->checkConnection(); } );
+	std::for_each(devices.begin(), devices.end(), [](std::shared_ptr<BaseSoundDevice> x) { x->checkConnection(); });
 
 	BOOL bResult = TRUE;
-	
+
 	HDEVINFO devinf = INVALID_HANDLE_VALUE;
 	SP_DEVICE_INTERFACE_DATA spid;
 
@@ -236,12 +235,12 @@ int C86WinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSound
 		0,
 		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
-	if( devinf ){
-		for ( int i=0; ;i++ ){
+	if (devinf) {
+		for (int i = 0; ; i++) {
 			ZeroMemory(&spid, sizeof(spid));
 			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-			if ( !SetupDiEnumDeviceInterfaces(devinf, NULL,
-				  (LPGUID) &GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET, i, &spid) ){
+			if (!SetupDiEnumDeviceInterfaces(devinf, NULL,
+				(LPGUID)&GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET, i, &spid)) {
 				break;
 			}
 
@@ -254,7 +253,7 @@ int C86WinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSound
 			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
 			// デバイスノード取得
-			if (!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, NULL)){
+			if (!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, NULL)) {
 				free(dev_det);
 				break;
 			}
@@ -264,42 +263,40 @@ int C86WinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSound
 			dev_det = NULL;
 
 			// 既にインスタンスがあるかどうか検索
-			auto it = std::find_if( devices.begin(), devices.end(),
+			auto it = std::find_if(devices.begin(), devices.end(),
 				[devpath](std::shared_ptr<BaseSoundDevice> x) -> bool {
-					C86WinUSB *gdev = dynamic_cast<C86WinUSB*>(x.get());
-					if(!gdev) return false;
-					if(gdev->devPath != devpath ) return false;
-					return true;
-				}
-			);
-			
-			if( it == devices.end() ){
-				C86WinUSB *dev = new C86WinUSB();
-				if( dev ){
-					if( dev->OpenDevice(devpath) ){
-						devices.push_back( BaseSoundDevicePtr(dev) );
-					}else{
+				C86WinUSB* gdev = dynamic_cast<C86WinUSB*>(x.get());
+				if (!gdev) return false;
+				if (gdev->devPath != devpath) return false;
+				return true;
+			});
+
+			if (it == devices.end()) {
+				C86WinUSB* dev = new C86WinUSB();
+				if (dev) {
+					if (dev->OpenDevice(devpath)) {
+						devices.push_back(BaseSoundDevicePtr(dev));
+					} else {
 						delete dev;
 					}
 				}
-			}
-			else if (!(*it)->isValid()){
-				C86WinUSB *dev = dynamic_cast<C86WinUSB*>(it->get());
-				if( !dev->OpenDevice(devpath) ){
+			} else if (!(*it)->isValid()) {
+				C86WinUSB* dev = dynamic_cast<C86WinUSB*>(it->get());
+				if (!dev->OpenDevice(devpath)) {
 					// OpenDeviceが失敗した場合は音源モジュールが前回接続時と
 					// 異なっているため、別インスタンスを生成する
-					C86WinUSB *newdev = new C86WinUSB();
-					if( newdev ){
-						if( newdev->OpenDevice(devpath) ){
-							devices.push_back( BaseSoundDevicePtr(newdev) );
-						}else{
+					C86WinUSB* newdev = new C86WinUSB();
+					if (newdev) {
+						if (newdev->OpenDevice(devpath)) {
+							devices.push_back(BaseSoundDevicePtr(newdev));
+						} else {
 							delete newdev;
 						}
 					}
 				}
 			}
 		}
-		
+
 		SetupDiDestroyDeviceInfoList(devinf);
 	}
 
@@ -311,16 +308,16 @@ int C86WinUSB::UpdateInstances( withlock< std::vector< std::shared_ptr<BaseSound
 /*----------------------------------------------------------------------------
 	internal.
 ----------------------------------------------------------------------------*/
-int C86WinUSB::sendMsg( UINT *data, UINT sz )
+int C86WinUSB::sendMsg(UINT* data, UINT sz)
 {
 	UCHAR buff[66];
 	int ret = C86CTL_ERR_UNKNOWN;
 
-	sz<<=2;
-	if( 0<sz ){
-		memcpy( &buff[0], data, sz );
-		if( sz<64 )
-			memset( &buff[sz], 0xff, 64-sz );
+	sz <<= 2;
+	if (0 < sz) {
+		memcpy(&buff[0], data, sz);
+		if (sz < 64)
+			memset(&buff[sz], 0xff, 64 - sz);
 
 		::EnterCriticalSection(&csection);
 		ret = devWrite(buff);
@@ -330,17 +327,17 @@ int C86WinUSB::sendMsg( UINT *data, UINT sz )
 	return ret;
 }
 
-int C86WinUSB::devWrite( LPCVOID data )
+int C86WinUSB::devWrite(LPCVOID data)
 {
-	if( !hDev || !hWinUsb )
+	if (!hDev || !hWinUsb)
 		return C86CTL_ERR_NODEVICE;
-	
+
 	DWORD wlen;
 	DWORD err = ::GetLastError();
-	BOOL ret = WinUsb_WritePipe( hWinUsb, outPipeId, (UCHAR*)data, 64, &wlen, 0);
+	BOOL ret = WinUsb_WritePipe(hWinUsb, outPipeId, (UCHAR*)data, 64, &wlen, 0);
 	err = ::GetLastError();
 
-	if(ret == FALSE || 64 != wlen){
+	if (ret == FALSE || 64 != wlen) {
 		WinUsb_Free(hWinUsb);
 		hWinUsb = NULL;
 		CloseHandle(hDev);
@@ -352,9 +349,9 @@ int C86WinUSB::devWrite( LPCVOID data )
 
 void C86WinUSB::out(UCHAR idx, UINT addr, UCHAR data)
 {
-	while(!rbuff.remain());
+	while (!rbuff.remain());
 
-	uint32_t d = (idx<<17) | (addr&0x1ff)<<8 | data;
+	uint32_t d = (idx << 17) | (addr & 0x1ff) << 8 | data;
 	rbuff.push(d);
 }
 
@@ -373,10 +370,10 @@ int C86WinUSB::reset(void)
 	setup.Length = 0;
 
 	::EnterCriticalSection(&csection);
-	retval = ::WinUsb_ControlTransfer( hWinUsb, setup, NULL, 0, NULL, NULL );
+	retval = ::WinUsb_ControlTransfer(hWinUsb, setup, NULL, 0, NULL, NULL);
 	::LeaveCriticalSection(&csection);
 
-	return (retval==TRUE) ? C86CTL_ERR_NONE : C86CTL_ERR_UNKNOWN;
+	return (retval == TRUE) ? C86CTL_ERR_NONE : C86CTL_ERR_UNKNOWN;
 }
 
 int C86WinUSB::isValid(void)
@@ -387,27 +384,27 @@ int C86WinUSB::isValid(void)
 void C86WinUSB::tick(void)
 {
 	int ret;
-	
+
 	LARGE_INTEGER et;
 	::QueryPerformanceCounter(&et);
 	et.QuadPart += freq.QuadPart;
 
-	while( !rbuff.isempty() ){
+	while (!rbuff.isempty()) {
 		UINT buff[32];
-		UINT sz=0, i=0;
+		UINT sz = 0, i = 0;
 
-		for (sz=0; sz<16; ){
-			if( !rbuff.pop(&buff[sz++]) )
+		for (sz = 0; sz < 16; ) {
+			if (!rbuff.pop(&buff[sz++]))
 				break;
-			if( rbuff.isempty() )
+			if (rbuff.isempty())
 				break;
 		}
 
-		if( sz<16 ){
+		if (sz < 16) {
 			// add sync
 			buff[sz++] = 0xfe000000;
-			if(sz!=16)
-				memset( &buff[sz], 0xff, (16-sz)*4 );
+			if (sz != 16)
+				memset(&buff[sz], 0xff, (16 - sz) * 4);
 		}
 
 		// WriteFileがスレッドセーフかどうかよく分からないので
@@ -417,8 +414,8 @@ void C86WinUSB::tick(void)
 		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);
 
-		if( ret == C86CTL_ERR_NONE )
-			cal+=64;
+		if (ret == C86CTL_ERR_NONE)
+			cal += 64;
 
 		// 1tickの処理が1msを超えたら一回抜ける
 		//LARGE_INTEGER ct;
@@ -433,7 +430,7 @@ void C86WinUSB::tick(void)
 
 void C86WinUSB::update(void)
 {
-	if( 1 <= calcount++ ){
+	if (1 <= calcount++) {
 		cps = cal;
 		cal = 0;
 		calcount = 0;
@@ -444,14 +441,14 @@ void C86WinUSB::checkConnection(void)
 {
 	UCHAR buff[65];
 	buff[0] = 0;
-	memset( buff, 0, 65 );
+	memset(buff, 0, 65);
 
 	::EnterCriticalSection(&csection);
 	devWrite(buff);
 	::LeaveCriticalSection(&csection);
 };
 
-int C86WinUSB::getBoardInfo(int boardIdx, BOARD_INFO *binfo)
+int C86WinUSB::getBoardInfo(int boardIdx, BOARD_INFO* binfo)
 {
 	if (boardIdx < 0 || boardIdx > 3)
 		return C86CTL_ERR_INVALID_PARAM;
@@ -459,71 +456,71 @@ int C86WinUSB::getBoardInfo(int boardIdx, BOARD_INFO *binfo)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	USHORT msg_sz = 24;
-	UCHAR *msg = new UCHAR[msg_sz];
+	UCHAR* msg = new UCHAR[msg_sz];
 	if (!msg) return C86CTL_ERR_UNKNOWN;
-	
+
 	WINUSB_SETUP_PACKET setup;
 	setup.RequestType = 0xc0;
 	setup.Request = C86_VENDOR_GET_BOARD_INFO;
 	setup.Index = boardIdx;
 	setup.Value = 0;
 	setup.Length = msg_sz;
-	
+
 	ULONG ntransferred;
-	
+
 	::EnterCriticalSection(&csection);
-	BOOL retval = ::WinUsb_ControlTransfer( hWinUsb, setup, msg, msg_sz, &ntransferred, NULL );
+	BOOL retval = ::WinUsb_ControlTransfer(hWinUsb, setup, msg, msg_sz, &ntransferred, NULL);
 	::LeaveCriticalSection(&csection);
 
-	if (retval == TRUE && ntransferred == msg_sz){
-		binfo->type = *reinterpret_cast<uint32_t*>(msg+0);
-		binfo->nchips = *reinterpret_cast<uint32_t*>(msg+4);
-		for (int i=0; i<NMAXCHIPS; i++){
-			binfo->chiptype[i] = *reinterpret_cast<uint32_t*>(msg+8+(i*4));
+	if (retval == TRUE && ntransferred == msg_sz) {
+		binfo->type = *reinterpret_cast<uint32_t*>(msg + 0);
+		binfo->nchips = *reinterpret_cast<uint32_t*>(msg + 4);
+		for (int i = 0; i < NMAXCHIPS; i++) {
+			binfo->chiptype[i] = *reinterpret_cast<uint32_t*>(msg + 8 + (i * 4));
 		}
-	}else{
+	} else {
 		retval = FALSE;
 	}
-	
+
 	delete[] msg;
-	
-	return (retval==TRUE) ? C86CTL_ERR_NONE : C86CTL_ERR_UNKNOWN;
+
+	return (retval == TRUE) ? C86CTL_ERR_NONE : C86CTL_ERR_UNKNOWN;
 }
 
-int C86WinUSB::getFWVer(UINT *major, UINT *minor, UINT *rev, UINT *build )
+int C86WinUSB::getFWVer(UINT* major, UINT* minor, UINT* rev, UINT* build)
 {
 	USHORT msg_sz = 4;
 	UCHAR msg[4];
-	
+
 	WINUSB_SETUP_PACKET setup;
 	setup.RequestType = 0xc0;
 	setup.Request = C86_VENDOR_GET_FW_VER;
 	setup.Index = 0;
 	setup.Value = 0;
 	setup.Length = msg_sz;
-	
+
 	ULONG ntransferred;
-	
+
 	::EnterCriticalSection(&csection);
-	BOOL retval = ::WinUsb_ControlTransfer( hWinUsb, setup, msg, msg_sz, &ntransferred, NULL );
+	BOOL retval = ::WinUsb_ControlTransfer(hWinUsb, setup, msg, msg_sz, &ntransferred, NULL);
 	::LeaveCriticalSection(&csection);
 
-	if (retval == TRUE && ntransferred == msg_sz){
+	if (retval == TRUE && ntransferred == msg_sz) {
 		*major = msg[3];
 		*minor = msg[2];
-		*rev   = msg[1];
+		*rev = msg[1];
 		*build = msg[0];
 		return C86CTL_ERR_NONE;
-	}else{
+	} else {
 		return C86CTL_ERR_UNKNOWN;
 	}
 }
 
 
 // -------------------------------------------------------------------------------
-C86WinUSB::C86ModuleWinUSB::C86ModuleWinUSB(C86WinUSB *device, int slotidx, int chipidx, ChipType chipType)
+C86WinUSB::C86ModuleWinUSB::C86ModuleWinUSB(C86WinUSB* device, int slotidx, int chipidx, ChipType chipType)
 	: devif(device), chiptype(chipType), slotidx(slotidx), chipidx(chipidx),
-	  devidx( ((slotidx&0x3)<<3) | (chipidx&0x7) )
+	devidx(((slotidx & 0x3) << 3) | (chipidx & 0x7))
 {
 }
 
@@ -531,7 +528,7 @@ C86WinUSB::C86ModuleWinUSB::~C86ModuleWinUSB()
 {
 }
 
-void C86WinUSB::C86ModuleWinUSB::byteOut( UINT addr, UCHAR data )
+void C86WinUSB::C86ModuleWinUSB::byteOut(UINT addr, UCHAR data)
 {
 	devif->out(devidx, addr, data);
 }
@@ -546,9 +543,9 @@ void C86WinUSB::C86ModuleWinUSB::directOut(UINT addr, UCHAR data)
 CBUS_BOARD_TYPE C86WinUSB::C86ModuleWinUSB::getBoardType()
 {
 	BOARD_INFO binfo;
-	if (C86CTL_ERR_NONE == devif->getBoardInfo(slotidx, &binfo)){
+	if (C86CTL_ERR_NONE == devif->getBoardInfo(slotidx, &binfo)) {
 		return static_cast<CBUS_BOARD_TYPE>(binfo.type);
-	}else
+	} else
 		return CBUS_BOARD_UNKNOWN;
 }
 

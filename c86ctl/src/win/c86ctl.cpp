@@ -49,10 +49,10 @@ BOOL APIENTRY DllMain(
 
 // ----------------------------------------------------------------------
 // 外部インターフェイス
-HRESULT WINAPI CreateInstance( REFIID riid, void** ppi )
+HRESULT WINAPI CreateInstance(REFIID riid, void** ppi)
 {
 	// C86Ctlが単一インスタンスなので手抜き実装。
-	return c86ctl::GetC86CtlMain()->QueryInterface(riid,ppi);
+	return c86ctl::GetC86CtlMain()->QueryInterface(riid, ppi);
 }
 
 // ---------------------------------------------------
@@ -72,13 +72,13 @@ int WINAPI c86ctl_reset(void)
 	return c86ctl::GetC86CtlMain()->reset();
 }
 
-void WINAPI c86ctl_out( UINT addr, UCHAR data )
+void WINAPI c86ctl_out(UINT addr, UCHAR data)
 {
-	c86ctl::GetC86CtlMain()->out( addr, data );
+	c86ctl::GetC86CtlMain()->out(addr, data);
 }
 
-UCHAR WINAPI c86ctl_in( UINT addr )
+UCHAR WINAPI c86ctl_in(UINT addr)
 {
-	return c86ctl::GetC86CtlMain()->in( addr );
+	return c86ctl::GetC86CtlMain()->in(addr);
 }
 

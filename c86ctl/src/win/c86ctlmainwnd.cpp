@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -83,7 +83,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 	wndclass.lpszClassName = szAppName;
 	wndclass.hIconSm       = LoadIcon (NULL, IDI_APPLICATION);
 
-	if( !RegisterClassEx(&wndclass) )
+	if (!RegisterClassEx(&wndclass))
 		return -1;
 
 	hwnd = ::CreateWindowEx(
@@ -91,7 +91,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		CW_USEDEFAULT, CW_USEDEFAULT,CW_USEDEFAULT, CW_USEDEFAULT,
 		HWND_MESSAGE, NULL, hinst, NULL);
 	
-	if(!hwnd)
+	if (!hwnd)
 		return -1;
 
 	// タスクトレイアイコンの登録
@@ -101,13 +101,13 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 	notifyIcon.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
 	notifyIcon.hIcon = ::LoadIcon(hinst, MAKEINTRESOURCE(IDI_ICON_C86CTL));
 	notifyIcon.uCallbackMessage = WM_TASKTRAY_EVENT;
-	lstrcpy( notifyIcon.szTip, _T("C86CTL") );
-	::Shell_NotifyIcon( NIM_ADD, &notifyIcon );
+	lstrcpy(notifyIcon.szTip, _T("C86CTL"));
+	::Shell_NotifyIcon(NIM_ADD, &notifyIcon);
 
 
 	// デバイス挿抜監視登録
 	DEV_BROADCAST_DEVICEINTERFACE *pFilterData = (DEV_BROADCAST_DEVICEINTERFACE*)_alloca(sizeof(DEV_BROADCAST_DEVICEINTERFACE));
-	if( pFilterData ){
+	if (pFilterData) {
 		ZeroMemory(pFilterData, sizeof(DEV_BROADCAST_DEVICEINTERFACE));
 
 		pFilterData->dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
@@ -125,7 +125,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		hNotifyWinUSBDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 	}
 
-	if( gConfig.getInt(INISC_MAIN, _T("GUI"), 1) )
+	if (gConfig.getInt(INISC_MAIN, _T("GUI"), 1))
 		startVis();
 
 
@@ -134,7 +134,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 
 int C86CtlMainWnd::deviceUpdate()
 {
-	if( mainVisWnd ){
+	if (mainVisWnd) {
 		mainVisWnd->update();
 	}
 	return 0;
@@ -142,14 +142,14 @@ int C86CtlMainWnd::deviceUpdate()
 
 int C86CtlMainWnd::destroyMainWnd(LPVOID param)
 {
-	if(hNotifyHIDDevNode){
+	if (hNotifyHIDDevNode) {
 		::UnregisterDeviceNotification(hNotifyHIDDevNode);
 	}
-	if(hNotifyWinUSBDevNode){
+	if (hNotifyWinUSBDevNode) {
 		::UnregisterDeviceNotification(hNotifyWinUSBDevNode);
 	}
-	if(hwnd){
-		::Shell_NotifyIcon( NIM_DELETE, &notifyIcon );
+	if (hwnd) {
+		::Shell_NotifyIcon(NIM_DELETE, &notifyIcon);
 		::DestroyWindow(hwnd);
 		HINSTANCE hinst = C86CtlMain::getInstanceHandle();
 		::UnregisterClass(szAppName, hinst);
@@ -174,54 +174,53 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 		break;
 
 	case WM_DEVICECHANGE:
-		::PostThreadMessage( ::GetCurrentThreadId(), WM_MYDEVCHANGE, wParam, lParam );
+		::PostThreadMessage(::GetCurrentThreadId(), WM_MYDEVCHANGE, wParam, lParam);
 		break;
 
-	case WM_TASKTRAY_EVENT:
-		{
-			POINT point;
-			GetCursorPos(&point);
+	case WM_TASKTRAY_EVENT:	{
+		POINT point;
+		GetCursorPos(&point);
 
-			if( lParam == WM_RBUTTONDOWN ){
-				::SetForegroundWindow(hwnd);
+		if (lParam == WM_RBUTTONDOWN) {
+			::SetForegroundWindow(hwnd);
 
-				HMENU hMenu = ::LoadMenu(C86CtlMain::getInstanceHandle(), MAKEINTRESOURCE(IDR_MENU_SYSPOPUP));
-				if( !hMenu )
-					break;
-				HMENU hSubMenu = ::GetSubMenu(hMenu, 0);
-				if( !hSubMenu ){
-					::DestroyMenu(hMenu);
-					break;
-				}
-				if( pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible() )
-					::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED );
-
-				TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, point.x, point.y, 0, hwnd, NULL);
+			HMENU hMenu = ::LoadMenu(C86CtlMain::getInstanceHandle(), MAKEINTRESOURCE(IDR_MENU_SYSPOPUP));
+			if (!hMenu)
+				break;
+			HMENU hSubMenu = ::GetSubMenu(hMenu, 0);
+			if (!hSubMenu) {
 				::DestroyMenu(hMenu);
+				break;
 			}
+			if (pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible())
+				::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED);
+
+			TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, point.x, point.y, 0, hwnd, NULL);
+			::DestroyMenu(hMenu);
 		}
 		break;
+	}
 
 	case WM_COMMAND:
-		switch(LOWORD(wParam)){
+		switch (LOWORD(wParam)) {
 		case ID_POPUP_CONFIG:
 			pThis->openConfigDialog();
 			break;
 		case ID_POPUP_SHOWVIS:
-			if( pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible() ){
+			if (pThis->mainVisWnd && pThis->mainVisWnd->isWindowVisible()) {
 				pThis->stopVis();
-			}else{
+			} else {
 				pThis->startVis();
 			}
 			break;
 		}
 
 	default:
-		if( iMsg == taskbarRestartMsg ){
+		if (iMsg == taskbarRestartMsg) {
 			// タスクトレイアイコンの再登録
-			::Shell_NotifyIcon( NIM_ADD, &pThis->notifyIcon );
+			::Shell_NotifyIcon(NIM_ADD, &pThis->notifyIcon);
 
-		}else{
+		} else {
 			return DefWindowProc(hwnd, iMsg, wParam, lParam);
 		}
 	}
@@ -232,13 +231,13 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 int C86CtlMainWnd::startVis()
 {
 	stopVis();
-	
+
 	mainVisWnd = new CVisC86Main();
 	mainVisWnd->create(getHWND());
 
 	// 描画スレッド開始
-	hVisThread = (HANDLE)_beginthreadex( NULL, 0, &threadVis, 0/*wm*/, 0, &visThreadID );
-	if( !hVisThread ){
+	hVisThread = (HANDLE)_beginthreadex(NULL, 0, &threadVis, 0/*wm*/, 0, &visThreadID);
+	if (!hVisThread) {
 		stopVis();
 	}
 	return 0;
@@ -252,16 +251,16 @@ int C86CtlMainWnd::updateVis()
 int C86CtlMainWnd::stopVis()
 {
 	// 描画スレッド終了
-	if( hVisThread ){
-		::PostThreadMessage( visThreadID, WM_THREADEXIT, 0, 0 );
+	if (hVisThread) {
+		::PostThreadMessage(visThreadID, WM_THREADEXIT, 0, 0);
 		::OutputDebugStringA("stopVis\r\n");
-		::WaitForSingleObject( hVisThread, INFINITE );
+		::WaitForSingleObject(hVisThread, INFINITE);
 
 		hVisThread = NULL;
 		visThreadID = 0;
 	}
-	
-	if( mainVisWnd ){
+
+	if (mainVisWnd) {
 		mainVisWnd->close();
 		delete mainVisWnd;
 		mainVisWnd = 0;
@@ -287,34 +286,33 @@ unsigned int WINAPI C86CtlMainWnd::threadVis(LPVOID param)
 	ZeroMemory(&msg, sizeof(msg));
 	::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-	DWORD next = ::timeGetTime()*6 + 100;
-	while(1){
-		CVisManager *pwm = CVisManager::getInstance();
+	DWORD next = ::timeGetTime() * 6 + 100;
+	while (1) {
+		CVisManager* pwm = CVisManager::getInstance();
 
 		// message proc
-		if( ::PeekMessage(&msg , NULL , 0 , 0, PM_REMOVE )) {
-			if( msg.message == WM_THREADEXIT ){
+		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			if (msg.message == WM_THREADEXIT) {
 				::OutputDebugStringA("thiredVis:Exit\r\n");
 				break;
 			}
-		}else{
+		} else {
 			// fps management
 			DWORD now = ::timeGetTime() * 6;
-			if(now < next){
+			if (now < next) {
 				Sleep(1);
 				continue;
 			}
 			next += 100;
-			if( next < now ){
+			if (next < now) {
 				//next = now;
-				while(next<now) next += 100;
+				while (next < now) next += 100;
 			}
 
 			//update
 			pwm->draw();
 		}
 	}
-	
+
 	return 0;
 }
-

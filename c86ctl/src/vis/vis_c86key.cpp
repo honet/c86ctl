@@ -760,12 +760,12 @@ void CVisC86OPMKey::onKeyDown(DWORD keycode)
 			pOPM->setPartSolo(7, sw?false:true);
 			break;
 		case '0': //全クリア
-			for( int i=0; i<8; i++ )
+			for (int i=0; i<8; i++)
 				pOPM->setPartSolo(i, false);
 			break;
 		}
-	}else{
-		switch(keycode){
+	} else {
+		switch (keycode) {
 		case '1': //FM1
 			sw = pOPM->getPartMask(0);
 			pOPM->setPartMask(0, sw?false:true);
@@ -799,7 +799,7 @@ void CVisC86OPMKey::onKeyDown(DWORD keycode)
 			pOPM->setPartMask(7, sw?false:true);
 			break;
 		case '0': //全クリア
-			for( int i=0; i<8; i++ )
+			for (int i=0; i<8; i++)
 				pOPM->setPartMask(i, false);
 			break;
 		}

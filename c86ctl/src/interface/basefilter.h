@@ -9,19 +9,19 @@
 #pragma once
 #include "interface/if.h"
 
-namespace c86ctl{
+namespace c86ctl {
 
 class BaseFilter : public IByteInput
 {
 public:
 	BaseFilter() : ds(0) {
-	};
+	}
 
 public:
-	virtual void reset(){};
-	virtual void update(){};
-	
-	virtual void connect(IByteInput *downstream)
+	virtual void reset() {}
+	virtual void update() {}
+
+	virtual void connect(IByteInput* downstream)
 	{
 		ds = downstream;
 	}
@@ -31,14 +31,14 @@ public:
 	}
 
 public:
-	virtual void byteOut(UINT addr, UCHAR data){
-		if(ds) ds->byteOut(addr, data);
-	};
+	virtual void byteOut(UINT addr, UCHAR data) {
+		if (ds) ds->byteOut(addr, data);
+	}
 
 protected:
 	IByteInput* ds;
 };
 
-};
+}
 
 

@@ -22,11 +22,11 @@ using namespace c86ctl;
 
 class c86ctl::CC86CtlConfig gConfig;
 
-BOOL CC86CtlConfig::writeInt( LPCTSTR section, LPCTSTR key, INT val )
+BOOL CC86CtlConfig::writeInt(LPCTSTR section, LPCTSTR key, INT val)
 {
 	TCHAR cfg[128];
-	_stprintf_s( cfg, TEXT("%d"), val );
-	return ::WritePrivateProfileString( section, key, cfg, inipath );
+	_stprintf_s(cfg, TEXT("%d"), val);
+	return ::WritePrivateProfileString(section, key, cfg, inipath);
 }
 
 
@@ -72,10 +72,10 @@ void CC86CtlConfig::init(HMODULE hModule)
 	TCHAR modulePath[_MAX_PATH];
 	TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
 
-	::GetModuleFileName( hModule, modulePath, _MAX_PATH );
-	_tsplitpath( modulePath, drv, dir, fname, ext );
-	_tcsncat( inipath, drv, _MAX_PATH );
-	_tcsncat( inipath, dir, _MAX_PATH );
-	_tcsncat( inipath, TEXT("c86ctl.ini"), _MAX_PATH );
+	::GetModuleFileName(hModule, modulePath, _MAX_PATH);
+	_tsplitpath(modulePath, drv, dir, fname, ext);
+	_tcsncat(inipath, drv, _MAX_PATH);
+	_tcsncat(inipath, dir, _MAX_PATH);
+	_tcsncat(inipath, TEXT("c86ctl.ini"), _MAX_PATH);
 #endif
 };

@@ -20,15 +20,15 @@ namespace vis {
 class CVisWidget
 {
 public:
-	CVisWidget(CVisWnd *parentWnd)
-		: parent(parentWnd), sx(0), sy(0), ex(0), ey(0){}
-	~CVisWidget(){}
-	
+	CVisWidget(CVisWnd* parentWnd)
+		: parent(parentWnd), sx(0), sy(0), ex(0), ey(0) {}
+	~CVisWidget() {}
+
 public:
 	// message handler
-	virtual void onPaint(IVisBitmap *canvas){}
-	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp){}
-	virtual void getWindowRect(RECT &rc){
+	virtual void onPaint(IVisBitmap* canvas) {}
+	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp) {}
+	virtual void getWindowRect(RECT& rc) {
 		rc.left = sx;
 		rc.top = sy;
 		rc.right = ex;
@@ -48,17 +48,17 @@ typedef std::shared_ptr<CVisWidget> CVisWidgetPtr;
 class CVisCloseButton : public CVisWidget
 {
 public:
-	CVisCloseButton( CVisWnd *parentWnd, int x, int y )
-		: CVisWidget(parentWnd){
+	CVisCloseButton(CVisWnd* parentWnd, int x, int y)
+		: CVisWidget(parentWnd) {
 		sx = x;
 		sy = y;
 		ex = x + 15;
 		ey = y + 15;
 	}
-	~CVisCloseButton(){}
+	~CVisCloseButton() {}
 
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
 
 public:
@@ -72,26 +72,26 @@ typedef std::shared_ptr<CVisCloseButton> CVisCloseButtonPtr;
 class CVisCheckBox : public CVisWidget
 {
 public:
-	CVisCheckBox( CVisWnd *parentWnd, int x, int y, char *title )
-		: CVisWidget(parentWnd), sw(0), str(title){
+	CVisCheckBox(CVisWnd* parentWnd, int x, int y, char* title)
+		: CVisWidget(parentWnd), sw(0), str(title) {
 		sx = x;
 		sy = y;
-		ex = x + 10 + 6*static_cast<int>(str.length());
+		ex = x + 10 + 6 * static_cast<int>(str.length());
 		ey = y + 8;
 	}
-	~CVisCheckBox(){}
+	~CVisCheckBox() {}
 
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void setCheck(int newval, bool pulseEvent);
 
 public:
-	int getValue(){ return sw; };
+	int getValue() { return sw; }
 
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
-	
+
 protected:
 	int sw;
 	std::string str;
@@ -105,19 +105,19 @@ typedef std::shared_ptr<CVisCheckBox> CVisCheckBoxPtr;
 class CVisSwitchBase : public CVisWidget
 {
 public:
-	CVisSwitchBase( CVisWnd *parentWnd, int x, int y, int w, int h )
-		: CVisWidget(parentWnd){
-			sx = x;
-			sy = y;
-			ex = x+w;
-			ey = y+h;
-		}
-	~CVisSwitchBase(){}
+	CVisSwitchBase(CVisWnd* parentWnd, int x, int y, int w, int h)
+		: CVisWidget(parentWnd) {
+		sx = x;
+		sy = y;
+		ex = x + w;
+		ey = y + h;
+	}
+	~CVisSwitchBase() {}
 
 public:
-	virtual void onPaint(IVisBitmap *canvas){}
+	virtual void onPaint(IVisBitmap* canvas) {}
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
-	
+
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
 	std::function< int() > getter;
@@ -129,11 +129,11 @@ public:
 class CVisDipSw : public CVisSwitchBase
 {
 public:
-	CVisDipSw( CVisWnd *parentWnd, int x, int y )
-		: CVisSwitchBase(parentWnd, x, y, 11, 20){}
-	~CVisDipSw(){}
+	CVisDipSw(CVisWnd* parentWnd, int x, int y)
+		: CVisSwitchBase(parentWnd, x, y, 11, 20) {}
+	~CVisDipSw() {}
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 };
 typedef std::shared_ptr<CVisDipSw> CVisDipSwPtr;
 
@@ -142,12 +142,12 @@ typedef std::shared_ptr<CVisDipSw> CVisDipSwPtr;
 class CVisMuteSw : public CVisSwitchBase
 {
 public:
-	CVisMuteSw( CVisWnd *parentWnd, int x, int y )
-		: CVisSwitchBase(parentWnd, x, y, 13, 11){}
-	~CVisMuteSw(){}
+	CVisMuteSw(CVisWnd* parentWnd, int x, int y)
+		: CVisSwitchBase(parentWnd, x, y, 13, 11) {}
+	~CVisMuteSw() {}
 
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 };
 typedef std::shared_ptr<CVisMuteSw> CVisMuteSwPtr;
 
@@ -156,11 +156,11 @@ typedef std::shared_ptr<CVisMuteSw> CVisMuteSwPtr;
 class CVisSoloSw : public CVisSwitchBase
 {
 public:
-	CVisSoloSw( CVisWnd *parentWnd, int x, int y )
-		: CVisSwitchBase(parentWnd, x, y, 13, 11){}
-	~CVisSoloSw(){}
+	CVisSoloSw(CVisWnd* parentWnd, int x, int y)
+		: CVisSwitchBase(parentWnd, x, y, 13, 11) {}
+	~CVisSoloSw() {}
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 };
 typedef std::shared_ptr<CVisSoloSw> CVisSoloSwPtr;
 
@@ -169,30 +169,30 @@ typedef std::shared_ptr<CVisSoloSw> CVisSoloSwPtr;
 class CVisKnob : public CVisWidget
 {
 public:
-	CVisKnob( CVisWnd *parentWnd, int x, int y )
+	CVisKnob(CVisWnd* parentWnd, int x, int y)
 		: CVisWidget(parentWnd), minval(0), maxval(127),
-		  bMoving(false){
+		bMoving(false) {
 		sx = x;
 		sy = y;
-		ex = sx+22;
-		ey = sy+22;
+		ex = sx + 22;
+		ey = sy + 22;
 	}
-	~CVisKnob(){}
+	~CVisKnob() {}
 
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 	virtual void onMouseEvent(UINT msg, WPARAM wp, LPARAM lp);
 
-	void setRange(int minv, int maxv){
+	void setRange(int minv, int maxv) {
 		minval = minv;
 		maxval = maxv;
 	}
-	
+
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
 	std::function< int() > getter;
 	std::function< void(int) > setter;
-	
+
 protected:
 	int maxval;
 	int minval;
@@ -207,17 +207,17 @@ typedef std::shared_ptr<CVisKnob> CVisKnobPtr;
 class CVisSSGEGGraph : public CVisWidget
 {
 public:
-	CVisSSGEGGraph( CVisWnd *parentWnd, int x, int y )
-		: CVisWidget(parentWnd){
-			sx=x;
-			sy=y;
-			ex=x+52;
-			ey=11;
-		}
-	~CVisSSGEGGraph(){}
-	
+	CVisSSGEGGraph(CVisWnd* parentWnd, int x, int y)
+		: CVisWidget(parentWnd) {
+		sx = x;
+		sy = y;
+		ex = x + 52;
+		ey = 11;
+	}
+	~CVisSSGEGGraph() {}
+
 public:
-	virtual void onPaint(IVisBitmap *canvas);
+	virtual void onPaint(IVisBitmap* canvas);
 
 public:
 	std::list< std::function< void(CVisWidget*) > > changeEvent;
@@ -226,8 +226,8 @@ public:
 };
 typedef std::shared_ptr<CVisSSGEGGraph> CVisSSGEGGraphPtr;
 
-}; // namespace vis
-}; // namespace c86ctl
+} // namespace vis
+} // namespace c86ctl
 
 
 // ---------------------------------------------------------------------------

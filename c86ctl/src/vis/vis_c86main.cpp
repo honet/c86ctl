@@ -42,8 +42,8 @@ bool CVisC86Main::update()
 {
 	int sz = static_cast<int>(GetC86CtlMain()->getNStreams());
 	int st = static_cast<int>(info.size());
-	
-	if( sz == st )
+
+	if (sz == st)
 		return true;
 
 #if 0
@@ -51,35 +51,35 @@ bool CVisC86Main::update()
 	int sz = static_cast<int>(info.size());
 	int st = sz;
 
-	if( sz == devices.size() )
+	if (sz == devices.size())
 		return true;
-	
+
 	// TODO:listで管理に
 	auto it = info.begin();
-	for( int i=0; i<sz; i++ ){
+	for (int i = 0; i < sz; i++) {
 		int nmodule = devices[i]->getNumberOfModules();
-		for (int k=0; k<nmodule; k++){
-			if( it->id != devices[i]->nodeid ){
+		for (int k = 0; k < nmodule; k++) {
+			if (it->id != devices[i]->nodeid) {
 				// 新しいデバイス
-				info.insert( it, newinfo );
+				info.insert(it, newinfo);
 			}
 			it++;
 		}
 	}
 #endif
-	
+
 	info.resize(sz);
-	for( size_t i=0; i<sz; i++ ){
-		Stream *s = GetC86CtlMain()->getStream(i);
-		
+	for (size_t i = 0; i < sz; i++) {
+		Stream* s = GetC86CtlMain()->getStream(i);
+
 		info[i].chiptype = s->module->getChipType();
-		char str[128];		
-			
-		IFirmwareVersionInfo *fwinfo = dynamic_cast<IFirmwareVersionInfo*>(s->module->getParentDevice());
-		if(fwinfo){
+		char str[128];
+
+		IFirmwareVersionInfo* fwinfo = dynamic_cast<IFirmwareVersionInfo*>(s->module->getParentDevice());
+		if (fwinfo) {
 			UINT major, minor, rev, build;
 			fwinfo->getFWVer(&major, &minor, &rev, &build);
-			sprintf( str, "%d.%d.%d.%d", major, minor, rev, build );
+			sprintf(str, "%d.%d.%d.%d", major, minor, rev, build);
 			info[i].verstr.assign(str);
 		}
 
@@ -135,28 +135,28 @@ bool CVisC86Main::update()
 			info[i].module_name.assign("TMS3631-RI104(REMAP)"); break;
 		}
 
-		GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module);
-		if (gimic_module){
+		GimicWinUSB::GimicModuleWinUSB* gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module);
+		if (gimic_module) {
 			Devinfo chipinfo;
 			gimic_module->getModuleInfo(&chipinfo);
-			sprintf(str, "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev );
+			sprintf(str, "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev);
 			info[i].board_name.assign(str);
 
-			GimicWinUSB *gimic_dev = dynamic_cast<GimicWinUSB*>(s->module->getParentDevice());
-			if (gimic_dev){
+			GimicWinUSB* gimic_dev = dynamic_cast<GimicWinUSB*>(s->module->getParentDevice());
+			if (gimic_dev) {
 				Devinfo mbinfo;
 				gimic_dev->getMBInfo(&mbinfo);
-				sprintf(str, "%s Rev.%c", &mbinfo.Devname[0], mbinfo.Rev );
+				sprintf(str, "%s Rev.%c", &mbinfo.Devname[0], mbinfo.Rev);
 				info[i].device_name.assign(str);
 			}
-		}else{
-			C86WinUSB::C86ModuleWinUSB *c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
-			if(c86){
-				char slotname[] = {'A', 'B', 'C', 'D'};
-				sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex() );
+		} else {
+			C86WinUSB::C86ModuleWinUSB* c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
+			if (c86) {
+				char slotname[] = { 'A', 'B', 'C', 'D' };
+				sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
 				info[i].device_name.assign(str);
 
-				switch(c86->getBoardType()&0xffff){
+				switch (c86->getBoardType() & 0xffff) {
 				case CBUS_BOARD_UNKNOWN:
 					info[i].board_name.assign("UNKNOWN"); break;
 				case CBUS_BOARD_14:
@@ -250,80 +250,80 @@ bool CVisC86Main::update()
 		}
 
 	}
-	
+
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
-	int windowHeight = 19+40+modHeight*sz+10;
+	int windowHeight = 19 + 40 + modHeight * sz + 10;
 	int windowWidth = 334;
 
-	if( !CVisWnd::resize( windowWidth, windowHeight ) )
+	if (!CVisWnd::resize(windowWidth, windowHeight))
 		return false;
-	
-	int y=40+modHeight*st;
-	
-	for( int i=st; i<sz; i++ ){
-		Stream *s = GetC86CtlMain()->getStream(i);
+
+	int y = 40 + modHeight * st;
+
+	for (int i = st; i < sz; i++) {
+		Stream* s = GetC86CtlMain()->getStream(i);
 
 		TCHAR key[KEYBUFLEN];
 		//Chip *pchip = s->chip;
-		hwinfo *pinfo = &info[i];
-		
+		hwinfo* pinfo = &info[i];
+
 		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
 		pinfo->regView = visC86RegViewFactory(s->chip, i);
 		pinfo->regView->closeEvent.push_back(
-			[pinfo](CVisWnd* h){
-				pinfo->checkReg->setCheck(0, false);
-			});
-		
-		pinfo->checkReg = CVisCheckBoxPtr(new CVisCheckBox(this,260,y, "REGISTER"));
+			[pinfo](CVisWnd* h) {
+			pinfo->checkReg->setCheck(0, false);
+		});
+
+		pinfo->checkReg = CVisCheckBoxPtr(new CVisCheckBox(this, 260, y, "REGISTER"));
 		pinfo->checkReg->changeEvent.push_back(
-			[this, pinfo, i](CVisWidget* w){
-				TCHAR key[KEYBUFLEN];
-				_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
-				
-				if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-					if( pinfo->regView )
-						pinfo->regView->create(hWnd);
-					gConfig.writeInt( windowClass.c_str(), key, 1 );
-				}else{
-					if( pinfo->regView )
-						pinfo->regView->close();
-					gConfig.writeInt( windowClass.c_str(), key, 0 );
-				}
-			} );
+			[this, pinfo, i](CVisWidget* w) {
+			TCHAR key[KEYBUFLEN];
+			_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
+
+			if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
+				if (pinfo->regView)
+					pinfo->regView->create(hWnd);
+				gConfig.writeInt(windowClass.c_str(), key, 1);
+			} else {
+				if (pinfo->regView)
+					pinfo->regView->close();
+				gConfig.writeInt(windowClass.c_str(), key, 0);
+			}
+		});
 		widgets.push_back(pinfo->checkReg);
-		if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
+		if (gConfig.getInt(windowClass.c_str(), key, 0)) {
 			info[i].checkReg->setCheck(1, true);
 		}
 
-		if( info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_YM2608NOADPCM ||
+		if (info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_YM2608NOADPCM ||
 			info[i].chiptype == CHIP_OPN3L ||
-			info[i].chiptype == CHIP_OPM || info[i].chiptype == CHIP_TMS3631RI104 ){
+			info[i].chiptype == CHIP_OPM || info[i].chiptype == CHIP_TMS3631RI104) {
 
 			_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
 			pinfo->keyView = visC86KeyViewFactory(s->chip, i);
 			pinfo->keyView->closeEvent.push_back(
-				[pinfo](CVisWnd* h){
-					pinfo->checkKey->setCheck(0, false);
-				});
-			
-			pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this,180,y, "KEYBOARD"));
-			pinfo->checkKey->changeEvent.push_back(
-				[this, pinfo, i](CVisWidget* w){
-					TCHAR key[KEYBUFLEN];
-					_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, static_cast<int>(i));
+				[pinfo](CVisWnd* h) {
+				pinfo->checkKey->setCheck(0, false);
+			});
 
-					if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-						if( pinfo->keyView )
-							pinfo->keyView->create(hWnd);
-						gConfig.writeInt( windowClass.c_str(), key, 1 );
-					}else{
-						if( pinfo->keyView )
-							pinfo->keyView->close();
-						gConfig.writeInt( windowClass.c_str(), key, 0 );
-					}
-				} );
+			pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this, 180, y, "KEYBOARD"));
+			pinfo->checkKey->changeEvent.push_back(
+				[this, pinfo, i](CVisWidget* w) {
+				TCHAR key[KEYBUFLEN];
+				_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, static_cast<int>(i));
+
+				if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
+					if (pinfo->keyView)
+						pinfo->keyView->create(hWnd);
+					gConfig.writeInt(windowClass.c_str(), key, 1);
+				} else {
+					if (pinfo->keyView)
+						pinfo->keyView->close();
+					gConfig.writeInt(windowClass.c_str(), key, 0);
+				}
+			});
 			widgets.push_back(info[i].checkKey);
-			if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
+			if (gConfig.getInt(windowClass.c_str(), key, 0)) {
 				info[i].checkKey->setCheck(1, true);
 			}
 		}
@@ -332,38 +332,38 @@ bool CVisC86Main::update()
 			info[i].chiptype == CHIP_OPN3L || info[i].chiptype == CHIP_OPM) {
 
 			int nch = 6;
-			if( info[i].chiptype == CHIP_OPM )
+			if (info[i].chiptype == CHIP_OPM)
 				nch = 8;
-			
-			for( int ch=0; ch<nch; ch++ ){
+
+			for (int ch = 0; ch < nch; ch++) {
 				char str[10];
-				sprintf(str, "FM%d", ch+1);
-				
-				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch+1);
+				sprintf(str, "FM%d", ch + 1);
+
+				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch + 1);
 				pinfo->fmView[ch] = visC86FmViewFactory(s->chip, i, ch);
 				pinfo->fmView[ch]->closeEvent.push_back(
-					[pinfo, ch](CVisWnd* h){
-						pinfo->checkFM[ch]->setCheck(0, false);
-					});
-				
-				pinfo->checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this,180 + 40*(ch%3), y+((ch/3)+1)*14, str));
+					[pinfo, ch](CVisWnd* h) {
+					pinfo->checkFM[ch]->setCheck(0, false);
+				});
+
+				pinfo->checkFM[ch] = CVisCheckBoxPtr(new CVisCheckBox(this, 180 + 40 * (ch % 3), y + ((ch / 3) + 1) * 14, str));
 				pinfo->checkFM[ch]->changeEvent.push_back(
-					[this, pinfo, i, ch](CVisWidget* w){
-						TCHAR key[KEYBUFLEN];
-						_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch+1);
-						
-						if( dynamic_cast<CVisCheckBox*>(w)->getValue() ){
-							if( pinfo->fmView[ch] )
-								pinfo->fmView[ch]->create(hWnd);
-							gConfig.writeInt( windowClass.c_str(), key, 1 );
-						}else{
-							if( pinfo->fmView[ch] )
-								pinfo->fmView[ch]->close();
-							gConfig.writeInt( windowClass.c_str(), key, 0 );
-						}
-					} );
+					[this, pinfo, i, ch](CVisWidget* w) {
+					TCHAR key[KEYBUFLEN];
+					_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch + 1);
+
+					if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
+						if (pinfo->fmView[ch])
+							pinfo->fmView[ch]->create(hWnd);
+						gConfig.writeInt(windowClass.c_str(), key, 1);
+					} else {
+						if (pinfo->fmView[ch])
+							pinfo->fmView[ch]->close();
+						gConfig.writeInt(windowClass.c_str(), key, 0);
+					}
+				});
 				widgets.push_back(info[i].checkFM[ch]);
-				if( gConfig.getInt( windowClass.c_str(), key, 0 ) ){
+				if (gConfig.getInt(windowClass.c_str(), key, 0)) {
 					info[i].checkFM[ch]->setCheck(1, true);
 				}
 			}
@@ -380,7 +380,7 @@ bool CVisC86Main::update()
 		widgets.push_back(info[i].checkADPCM);
 		 */
 
-		y+=modHeight;
+		y += modHeight;
 	}
 
 	return true;
@@ -390,16 +390,16 @@ bool CVisC86Main::create(HWND parent)
 {
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
 	int sz = static_cast<int>(info.size());
-	int windowHeight = 19+40+modHeight*sz+10;
+	int windowHeight = 19 + 40 + modHeight * sz + 10;
 	int windowWidth = 334;
-	
-	if ( !CVisWnd::create( windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN, NULL ) ){
+
+	if (!CVisWnd::create(windowWidth, windowHeight, 0, WS_POPUP | WS_CLIPCHILDREN, NULL)) {
 		return false;
 	}
 	hMaster = parent;
 
 	update();
-	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
+	::ShowWindow(hWnd, SW_SHOWNOACTIVATE);
 
 	return true;
 }
@@ -409,7 +409,7 @@ void CVisC86Main::onPaintClient()
 	// NOTE: devices.size != info.size() となることがあるので注意
 	size_t sz = info.size();
 
-	CVisC86Skin *skin = &gVisSkin;
+	CVisC86Skin* skin = &gVisSkin;
 	const int maxlen = 256;
 	char str[maxlen];
 
@@ -417,84 +417,84 @@ void CVisC86Main::onPaintClient()
 	int ch = clientCanvas->getHeight();
 
 	// 背景消去
-	visFillRect( clientCanvas, 0, 0, cw, ch, ARGB(255,0,0,0) );
-	
+	visFillRect(clientCanvas, 0, 0, cw, ch, ARGB(255, 0, 0, 0));
+
 	// ロゴ・バージョン
-	skin->drawLogo( clientCanvas, 2, 2 );
-	skin->drawStr( clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86BOX" );
-	skin->drawStr( clientCanvas, 0, 130, 17, "(C)HONET " VERSION_MESSAGE );
+	skin->drawLogo(clientCanvas, 2, 2);
+	skin->drawStr(clientCanvas, 0, 130, 7, "OPx STATUS DISP FOR GIMIC/C86BOX");
+	skin->drawStr(clientCanvas, 0, 130, 17, "(C)HONET " VERSION_MESSAGE);
 
 	// 横線
-	int w = clientCanvas->getWidth()-4;
-	UINT *p = (UINT*)clientCanvas->getPtr(2,28);
-	int step = clientCanvas->getStep()/2;
-	int r=199,g=200,b=255;
-	for( int x=0; x<w; x++ ){
-		int d = tick*2+(w-x);
-		int a = abs(d%512 - 255);
-		*p = *(p+step) = ARGB(255,(r*a)>>8,(g*a)>>8,(b*a)>>8);
+	int w = clientCanvas->getWidth() - 4;
+	UINT* p = (UINT*)clientCanvas->getPtr(2, 28);
+	int step = clientCanvas->getStep() / 2;
+	int r = 199, g = 200, b = 255;
+	for (int x = 0; x < w; x++) {
+		int d = tick * 2 + (w - x);
+		int a = abs(d % 512 - 255);
+		*p = *(p + step) = ARGB(255, (r * a) >> 8, (g * a) >> 8, (b * a) >> 8);
 		p++;
 	}
 	tick++;
 
-	int y=40;
-	for (int i=0; i<static_cast<int>(sz); i++){
-		int dy=0;
+	int y = 40;
+	for (int i = 0; i < static_cast<int>(sz); i++) {
+		int dy = 0;
 		// 枠線
-		visFillRect( clientCanvas, 5, y-2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID) );
-		visFillRect( clientCanvas, 5, y+64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID) );
+		visFillRect(clientCanvas, 5, y - 2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID));
+		visFillRect(clientCanvas, 5, y + 64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID));
 
-		BaseSoundModule *module = GetC86CtlMain()->getStream(i)->module;
-		BaseSoundDevice *dev = module->getParentDevice();
+		BaseSoundModule* module = GetC86CtlMain()->getStream(i)->module;
+		BaseSoundDevice* dev = module->getParentDevice();
 
-		if (module->isValid()){
+		if (module->isValid()) {
 			// デバイス名
-			sprintf(str, "MODULE%d: %s", i, info[i].device_name.c_str() );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			sprintf(str, "MODULE%d: %s", i, info[i].device_name.c_str());
+			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			// Firmware version
-			sprintf( str, "FW-VER : %s", info[i].verstr.c_str() );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			sprintf(str, "FW-VER : %s", info[i].verstr.c_str());
+			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			// バスボード名
-			sprintf(str, "BOARD  : %s", info[i].board_name.c_str() );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			sprintf(str, "BOARD  : %s", info[i].board_name.c_str());
+			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			// MODULE名
-			sprintf(str, "CHIP   : %s", info[i].module_name.c_str() );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+			sprintf(str, "CHIP   : %s", info[i].module_name.c_str());
+			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 
-			GimicWinUSB::GimicModuleWinUSB *gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(module);
-			if (gimic){
-				const GimicParam *param = gimic->getGimicParam();
+			GimicWinUSB::GimicModuleWinUSB* gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(module);
+			if (gimic) {
+				const GimicParam* param = gimic->getGimicParam();
 
 				// PLL Clock
-				sprintf(str, "CLOCK  : %d Hz", param->clock );
-				skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
+				sprintf(str, "CLOCK  : %d Hz", param->clock);
+				skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 				// SSG-Volume(書くところ足りない)
 				//sprintf(str, "SSG-VOL: %d", param->ssgVol );
 				//skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			}
 
 			// speed
-			sprintf(str, "SPEED  : %d CPS", dev->getCPS() );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-		}else{
-			sprintf(str, "MODULE%d: DISCONNECTED", i );
-			skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
-			skin->drawStr( clientCanvas, 1, 15, y+dy, "FW-VER :" ); dy+=10;
-			skin->drawStr( clientCanvas, 1, 15, y+dy, "CHIP   :" ); dy+=10;
-			skin->drawStr( clientCanvas, 1, 15, y+dy, "CLOCK  :" ); dy+=10;
+			sprintf(str, "SPEED  : %d CPS", dev->getCPS());
+			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
+		} else {
+			sprintf(str, "MODULE%d: DISCONNECTED", i);
+			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
+			skin->drawStr(clientCanvas, 1, 15, y + dy, "FW-VER :"); dy += 10;
+			skin->drawStr(clientCanvas, 1, 15, y + dy, "CHIP   :"); dy += 10;
+			skin->drawStr(clientCanvas, 1, 15, y + dy, "CLOCK  :"); dy += 10;
 			//skin->drawStr( clientCanvas, 1, 15, y+dy, "SSG-VOL:" ); dy+=10;
-			skin->drawStr( clientCanvas, 1, 15, y+dy, "SPEED  :" ); dy+=10;
+			skin->drawStr(clientCanvas, 1, 15, y + dy, "SPEED  :"); dy += 10;
 		}
-		y+=modHeight;
+		y += modHeight;
 	}
 
-	if( sz == 0 ){
-		skin->drawStr( clientCanvas, 0, 5, ch-12, "NO DEVICE!" );
+	if (sz == 0) {
+		skin->drawStr(clientCanvas, 0, 5, ch - 12, "NO DEVICE!");
 	}
 
 	// FPS
-	sprintf(str, "FPS: %0.1f", CVisManager::getInstance()->getCurrentFPS() );
-	skin->drawStr( clientCanvas, 0, 260, ch-12, str );
+	sprintf(str, "FPS: %0.1f", CVisManager::getInstance()->getCurrentFPS());
+	skin->drawStr(clientCanvas, 0, 260, ch - 12, str);
 
 }
 
@@ -503,33 +503,33 @@ void CVisC86Main::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)
 	POINT point;
 	GetCursorPos(&point);
 
-	switch(msg){
+	switch (msg) {
 	case WM_RBUTTONUP:
 		::SetForegroundWindow(hWnd);
-		
+
 		HMENU hMenu = ::LoadMenu(C86CtlMain::getInstanceHandle(), MAKEINTRESOURCE(IDR_MENU_SYSPOPUP));
-		if( !hMenu )
+		if (!hMenu)
 			break;
 		HMENU hSubMenu = ::GetSubMenu(hMenu, 0);
-		if( !hSubMenu ){
+		if (!hSubMenu) {
 			::DestroyMenu(hMenu);
 			break;
 		}
-		::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED );
-		
+		::CheckMenuItem(hMenu, ID_POPUP_SHOWVIS, MF_BYCOMMAND | MFS_CHECKED);
+
 		TrackPopupMenu(hSubMenu, TPM_LEFTALIGN, point.x, point.y, 0, hWnd, NULL);
 		::DestroyMenu(hMenu);
 	}
 }
+
 void CVisC86Main::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	switch(id){
+	switch (id) {
 	case ID_POPUP_CONFIG:
 		C86CtlMainWnd::getInstance()->openConfigDialog();
 		break;
 	case ID_POPUP_SHOWVIS:
-		::PostMessage(hMaster, WM_COMMAND, (notifyCode<<16)|id, (LPARAM)hwnd);
-
+		::PostMessage(hMaster, WM_COMMAND, (notifyCode << 16) | id, (LPARAM)hwnd);
 		break;
 	}
 }

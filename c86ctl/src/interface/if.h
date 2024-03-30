@@ -58,7 +58,7 @@ public:
 interface IFirmwareVersionInfo
 {
 public:
-	virtual int getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build ) = 0;
+	virtual int getFWVer(UINT* major, UINT* minor, UINT* rev, UINT* build) = 0;
 };
 
 
@@ -69,18 +69,18 @@ class BaseSoundDevice;
 class BaseSoundModule : public IByteInput
 {
 public:
-	BaseSoundModule(){};
+	BaseSoundModule() {}
 public:
 	// IByteInput
-	virtual void byteOut(UINT addr, UCHAR data){};
-	virtual void directOut( UINT addr, UCHAR data ){};
-	
+	virtual void byteOut(UINT addr, UCHAR data) {}
+	virtual void directOut(UINT addr, UCHAR data) {}
+
 public:
-	virtual enum ChipType getChipType(){ return CHIP_UNKNOWN; };
-	virtual int isValid(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	//virtual std::basic_string<TCHAR> getNodeId(){ return std::basic_string<TCHAR>(); };
-	
-	virtual BaseSoundDevice* getParentDevice(){ return 0; };
+	virtual enum ChipType getChipType() { return CHIP_UNKNOWN; }
+	virtual int isValid(void) { return C86CTL_ERR_NOT_IMPLEMENTED; }
+	//virtual std::basic_string<TCHAR> getNodeId(){ return std::basic_string<TCHAR>(); }
+
+	virtual BaseSoundDevice* getParentDevice() { return 0; }
 
 };
 
@@ -88,20 +88,20 @@ public:
 class BaseSoundDevice
 {
 public:
-	BaseSoundDevice(){};
-	
+	BaseSoundDevice() {}
+
 public:
-	virtual int reset(){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual void tick(void){};
-	virtual void update(void){};
-	virtual UINT getCPS(void){ return 0; };
-	
-	virtual int isValid(void){ return C86CTL_ERR_NOT_IMPLEMENTED; };
-	virtual void checkConnection(void){};
-	//virtual std::basic_string<TCHAR> getNodeId(){ return std::basic_string<TCHAR>(); };
-	
-	virtual BaseSoundModule* getModule(int id){ return NULL; };
-	virtual int getNumberOfModules(){ return 0; };
+	virtual int reset() { return C86CTL_ERR_NOT_IMPLEMENTED; }
+	virtual void tick(void) {}
+	virtual void update(void) {}
+	virtual UINT getCPS(void) { return 0; }
+
+	virtual int isValid(void) { return C86CTL_ERR_NOT_IMPLEMENTED; }
+	virtual void checkConnection(void) {}
+	//virtual std::basic_string<TCHAR> getNodeId(){ return std::basic_string<TCHAR>(); }
+
+	virtual BaseSoundModule* getModule(int id) { return NULL; }
+	virtual int getNumberOfModules() { return 0; }
 };
 
 typedef std::shared_ptr<BaseSoundDevice> BaseSoundDevicePtr;
@@ -110,7 +110,7 @@ class GimicParam
 {
 public:
 	GimicParam() : ssgVol(0), clock(0) {
-	};
+	}
 
 	UCHAR ssgVol;
 	UINT clock;

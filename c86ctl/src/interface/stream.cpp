@@ -20,23 +20,22 @@
 #include "chip/generic.h"
 #include "stream.h"
 
-namespace c86ctl{
+namespace c86ctl {
 
 Stream::Stream() : module(0), chip(0), delay(0)
 {
 }
 Stream::~Stream()
 {
-	if(chip) delete chip;
-	if(delay) delete delay;
+	if (chip) delete chip;
+	if (delay) delete delay;
 }
 
-Stream* Stream::Build(BaseSoundModule *module)
+Stream* Stream::Build(BaseSoundModule* module)
 {
-	Chip *chip = NULL;
+	Chip* chip = NULL;
 	ChipType type = module->getChipType();
-	switch(type)
-	{
+	switch (type) {
 	case CHIP_OPN3L:
 		chip = new COPN3L();
 		break;
@@ -82,16 +81,16 @@ Stream* Stream::Build(BaseSoundModule *module)
 		break;
 	}
 	// 未対応モジュールの場合を考慮
-	if(!chip)
+	if (!chip)
 		return NULL;
-	
 
-	Stream *s = new Stream();
-	if(s){
+
+	Stream* s = new Stream();
+	if (s) {
 		s->module = module;
 		s->chip = chip;
 		s->delay = new DelayFilter();
-	
+
 		s->delay->connect(chip);
 		s->chip->connect(module);
 	}
@@ -99,5 +98,5 @@ Stream* Stream::Build(BaseSoundModule *module)
 	return s;
 }
 
-};
+}
 

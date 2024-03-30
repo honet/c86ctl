@@ -10,63 +10,63 @@
 #pragma once
 #include "chip.h"
 
-namespace c86ctl{
+namespace c86ctl {
 
 // ---------------------------------------------------------------------------------------
 class COPL3 : public Chip
 {
 public:
-	COPL3(){ reset(); }
-	virtual ~COPL3(){}
+	COPL3() { reset(); }
+	virtual ~COPL3() {}
 
-	void reset(){
-		memset( reg, 0, 256*2 );
-		memset( regATime, 0, 256*2 );
+	void reset() {
+		memset(reg, 0, 256 * 2);
+		memset(regATime, 0, 256 * 2);
 	}
-	
-	void update(){
+
+	void update() {
 		int dc = 8;
-		for( int j=0; j<2; j++ ){
-			for( int i=0; i<256; i++ ){
-				UCHAR c=regATime[j][i];
-				if( 64<c ){
-					c-=dc;
-					regATime[j][i] = 64<c? c : 64;
+		for (int j = 0; j < 2; j++) {
+			for (int i = 0; i < 256; i++) {
+				UCHAR c = regATime[j][i];
+				if (64 < c) {
+					c -= dc;
+					regATime[j][i] = 64 < c ? c : 64;
 				}
 			}
 		}
 	}
 
 public:
-	void byteOut( UINT addr, UCHAR data ){
-		if(setReg(addr,data))
-			if(ds) ds->byteOut(addr,data);
+	void byteOut(UINT addr, UCHAR data) {
+		if (setReg(addr, data))
+			if (ds) ds->byteOut(addr, data);
 	}
 
-	UCHAR getReg( UINT addr ){
-		if( addr < 0x200 )
-			return reg[addr>>8][addr&0xff];
+	UCHAR getReg(UINT addr) {
+		if (addr < 0x200)
+			return reg[addr >> 8][addr & 0xff];
 		return 0;
 	}
-	virtual void setMasterClock( UINT clock ){}
+	virtual void setMasterClock(UINT clock) {}
 
 private:
-	bool setReg( UINT addr, UCHAR data ){
-		if( 0x200 <= addr )
+	bool setReg(UINT addr, UCHAR data) {
+		if (0x200 <= addr)
 			return false;
-		
-		int bank = addr>>8;
+
+		int bank = addr >> 8;
 		addr &= 0xff;
 		reg[bank][addr] = data;
 		regATime[bank][addr] = 255;
 		return true;
 		//return false;
 	}
-	
+
 public:
 	UCHAR reg[2][256];
 	UCHAR regATime[2][256];
 };
 
-};
+}
 

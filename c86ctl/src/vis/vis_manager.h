@@ -26,35 +26,35 @@ private:
 	CVisManager(void) : fps(0) {
 		InitializeCriticalSection(&cs);
 		gVisSkin.init();
-	};
-	virtual ~CVisManager(void){
+	}
+	virtual ~CVisManager(void) {
 		DeleteCriticalSection(&cs);
 		gVisSkin.deinit();
-	};
-	
+	}
+
 public:
-	static CVisManager* getInstance(void){
-		if(!pInstance){
+	static CVisManager* getInstance(void) {
+		if (!pInstance) {
 			pInstance = new CVisManager();
 		}
 		return pInstance;
-	};
-	static void shutdown(void){
+	}
+	static void shutdown(void) {
 		delete getInstance();
 		pInstance = 0;
 	}
 
 	void draw(void);
-	void add( CVisWnd *wnd );
-	void del( CVisWnd *wnd );
+	void add(CVisWnd* wnd);
+	void del(CVisWnd* wnd);
 
-	double getCurrentFPS(){
+	double getCurrentFPS() {
 		return fps;
-	};
+	}
 
 private:
-	static CVisManager *pInstance;
-	
+	static CVisManager* pInstance;
+
 	std::vector<CVisWnd*> clients;
 	CRITICAL_SECTION cs;
 
@@ -62,5 +62,5 @@ private:
 	double fps;
 };
 
-};
-};
+}
+}

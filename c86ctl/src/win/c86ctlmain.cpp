@@ -92,7 +92,7 @@ HINSTANCE C86CtlMain::getInstanceHandle()
 
 Stream* C86CtlMain::getStream(size_t index)
 {
-	if(index<gStream.size())
+	if (index < gStream.size())
 		return gStream[index].get();
 	return NULL;
 }
@@ -107,67 +107,66 @@ void C86CtlMain::updateMapping(void)
 	gIF.lock();
 	gLogicalDevices.lock();
 
-// TODO: マッパーGUI作ってこういうことをしたいというメモ書き
-//	for_each( definedList ){
-//		if(matched){
-//			if(!already generated){
-//				gLogicalDevice.push_back( new LogicalDevice() );
-//			}
-//		}
-//	}
-	
-	for(size_t devidx=0; devidx<gIF.size(); devidx++){
-		for(int modidx=0; modidx<gIF[devidx]->getNumberOfModules(); modidx++){
-			
-			BaseSoundModule *module = gIF[devidx]->getModule(modidx);
-			if (module==NULL) continue;
+	// TODO: マッパーGUI作ってこういうことをしたいというメモ書き
+	//	for_each( definedList ){
+	//		if(matched){
+	//			if(!already generated){
+	//				gLogicalDevice.push_back( new LogicalDevice() );
+	//			}
+	//		}
+	//	}
+
+	for (size_t devidx = 0; devidx < gIF.size(); devidx++) {
+		for (int modidx = 0; modidx < gIF[devidx]->getNumberOfModules(); modidx++) {
+
+			BaseSoundModule* module = gIF[devidx]->getModule(modidx);
+			if (module == NULL) continue;
 
 			UINT_PTR module_address = (UINT_PTR)module;
 			// フィルタグラフが構築されているか？
-			auto it = std::find_if( gStream.begin(), gStream.end(),
-				[module]( StreamPtr s ) -> bool {
-					return (s->module == module ) ? true : false;
-			} );
-			if ( it == gStream.end() ){
-				Stream *stream = Stream::Build(module);
-				if(stream){
-					gStream.push_back( StreamPtr(stream) );
+			auto it = std::find_if(gStream.begin(), gStream.end(),
+				[module](StreamPtr s) -> bool {
+				return (s->module == module) ? true : false;
+			});
+			if (it == gStream.end()) {
+				Stream* stream = Stream::Build(module);
+				if (stream) {
+					gStream.push_back(StreamPtr(stream));
 
-					LogicalDevice *ldev = new LogicalDevice();
+					LogicalDevice* ldev = new LogicalDevice();
 					ldev->connect(stream);
-					gLogicalDevices.push_back( LogicalDevicePtr(ldev) );
+					gLogicalDevices.push_back(LogicalDevicePtr(ldev));
 				}
 			}
-			else{
+			else {
 				//CHECKME: 挿抜されるとここに来る
 				//assert(0);
 			}
 		}
 	}
 
-	
-	
+
 	gLogicalDevices.unlock();
 	gIF.unlock();
-	
+
 }
 
 // ---------------------------------------------------------
 // UIメッセージ処理スレッド
 unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 {
-	C86CtlMain *pThis = reinterpret_cast<C86CtlMain*>(param);
+	C86CtlMain* pThis = reinterpret_cast<C86CtlMain*>(param);
 	MSG msg;
 	BOOL b;
 
 	ZeroMemory(&msg, sizeof(msg));
 	::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 
-	try{
-		if( Gdiplus::Ok != Gdiplus::GdiplusStartup(&gdiToken, &gdiInput, NULL) )
+	try {
+		if (Gdiplus::Ok != Gdiplus::GdiplusStartup(&gdiToken, &gdiInput, NULL))
 			throw "failed to initialize GDI+";
 
-		C86CtlMainWnd *pwnd = C86CtlMainWnd::getInstance();
+		C86CtlMainWnd* pwnd = C86CtlMainWnd::getInstance();
 
 		pwnd->createMainWnd(param);
 		pThis->mainThreadReady = true;
@@ -175,9 +174,9 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		SetTimer(0, 0, 50, 0);	// per 50msec
 
 		// メッセージループ
-		while( (b = ::GetMessage(&msg, NULL, 0, 0)) ){
-			if( b==-1 ) break;
-			switch( msg.message ){
+		while ((b = ::GetMessage(&msg, NULL, 0, 0))) {
+			if (b == -1) break;
+			switch (msg.message) {
 			case WM_THREADEXIT:
 				::OutputDebugStringA("threadMain: request destroyMainWnd\r\n");
 				pwnd->destroyMainWnd(param);
@@ -193,21 +192,21 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 				break;
 
 			case WM_TIMER:
-				{ // update statistics.
-					size_t ssz = pThis->gStream.size();
-					size_t ifsz = pThis->gIF.size();
+			{ // update statistics.
+				size_t ssz = pThis->gStream.size();
+				size_t ifsz = pThis->gIF.size();
 
-					for (size_t i=0; i<ssz; i++) {
-						pThis->gStream[i]->chip->update();
-					};
-					for (size_t i=0; i<ifsz; i++) {
-						pThis->gIF[i]->update();
-					};
+				for (size_t i = 0; i < ssz; i++) {
+					pThis->gStream[i]->chip->update();
+				}
+				for (size_t i = 0; i < ifsz; i++) {
+					pThis->gIF[i]->update();
 				}
 				break;
 			}
+			}
 
-			if( !hActiveDlg || !IsDialogMessage(hActiveDlg, &msg) ){
+			if (!hActiveDlg || !IsDialogMessage(hActiveDlg, &msg)) {
 				::TranslateMessage(&msg);
 				::DispatchMessage(&msg);
 			}
@@ -217,11 +216,10 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		Gdiplus::GdiplusShutdown(gdiToken);
 
 		pThis->mainThreadReady = false;
-	}
-	catch(...){
+	} catch (...) {
 		::OutputDebugString(_T("ERROR\r\n"));
 	}
-	
+
 	return (DWORD)msg.wParam;
 }
 
@@ -234,24 +232,24 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 //       再入されるのが怖かったので自前ループにした
 unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 {
-	try{
+	try {
 		const UINT period = 1;
 		UINT now = ::timeGetTime();
 		UINT next = now + period;
 		UINT nextSec10 = now + 50;
-		C86CtlMain *pThis = reinterpret_cast<C86CtlMain*>(param);
+		C86CtlMain* pThis = reinterpret_cast<C86CtlMain*>(param);
 
 		pThis->senderThreadReady = true;
 
-		while(1){
-			if( pThis->terminateFlag )
+		while (1) {
+			if (pThis->terminateFlag)
 				break;
-		
+
 			now = ::timeGetTime();
-			if(now < next){
-				if( pThis->terminateFlag ) break;
+			if (now < next) {
+				if (pThis->terminateFlag) break;
 				Sleep(1); // 0の方がいいかなぁ？
-				
+
 				//LARGE_INTEGER d;
 				//d.QuadPart = 1000; // 100ns-units = 0.1ms
 				//NtDelayExecution(FALSE, &d); // delay 100ns-units. <-非公開関数@ntdll.dll
@@ -262,26 +260,26 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			// ここでループ内サイズ確定。
 			// 別スレッドでサイズ拡張される事があるので注意。
 			size_t ssz = pThis->gStream.size();
-			size_t ifsz = pThis->gIF.size(); 
+			size_t ifsz = pThis->gIF.size();
 
 			// update
-			for (size_t i=0; i<ssz; i++){ pThis->gStream[i]->delay->tick(); }
-			for (size_t i=0; i<ifsz; i++){ pThis->gIF[i]->tick(); }
-			
+			for (size_t i = 0; i < ssz; i++) { pThis->gStream[i]->delay->tick(); }
+			for (size_t i = 0; i < ifsz; i++) { pThis->gIF[i]->tick(); }
+
 		}
 
 		pThis->senderThreadReady = false;
-	}catch(...){
+	} catch (...) {
 	}
-	
+
 	return 0;
 }
 
 
 // ---------------------------------------------------------
-HRESULT C86CtlMain::QueryInterface( REFIID riid, LPVOID *ppvObj )
+HRESULT C86CtlMain::QueryInterface(REFIID riid, LPVOID* ppvObj)
 {
-	if( ::IsEqualGUID( riid, IID_IRealChipBase ) ){
+	if (::IsEqualGUID(riid, IID_IRealChipBase)) {
 		*ppvObj = (LPVOID)this;
 		return NOERROR;
 	}
@@ -303,11 +301,11 @@ ULONG C86CtlMain::Release(VOID)
 int C86CtlMain::initialize(void)
 {
 	int tout;
-	const int TIMEOUT=100;
+	const int TIMEOUT = 100;
 
-	if( isInitialized )
+	if (isInitialized)
 		return C86CTL_ERR_UNKNOWN;
-	
+
 	// インスタンス生成
 	//GimicHID::UpdateInstances(gIF);
 	GimicWinUSB::UpdateInstances(gIF);
@@ -317,31 +315,31 @@ int C86CtlMain::initialize(void)
 
 	// タイマ分解能設定
 	TIMECAPS timeCaps;
-	if( ::timeGetDevCaps(&timeCaps, sizeof(timeCaps)) == TIMERR_NOERROR ){
+	if (::timeGetDevCaps(&timeCaps, sizeof(timeCaps)) == TIMERR_NOERROR) {
 		::timeBeginPeriod(timeCaps.wPeriodMin);
 		timerPeriod = timeCaps.wPeriodMin;
 	}
 
 	// 描画/UIスレッド開始
-	hMainThread = (HANDLE)_beginthreadex( NULL, 0, &threadMain, this, 0, &mainThreadID );
-	if( !hMainThread )
+	hMainThread = (HANDLE)_beginthreadex(NULL, 0, &threadMain, this, 0, &mainThreadID);
+	if (!hMainThread)
 		return C86CTL_ERR_UNKNOWN;
 
- 	for(tout=0; !mainThreadReady && (tout<TIMEOUT); tout++)
+	for (tout = 0; !mainThreadReady && (tout < TIMEOUT); tout++)
 		Sleep(10);
 
 	// 演奏スレッド開始
-	hSenderThread = (HANDLE)_beginthreadex( NULL, 0, &threadSender, this, 0, &senderThreadID );
-	if( !hSenderThread ){
-		::PostThreadMessage( mainThreadID, WM_THREADEXIT, 0, 0 );
-		::WaitForSingleObject( hMainThread, INFINITE );
+	hSenderThread = (HANDLE)_beginthreadex(NULL, 0, &threadSender, this, 0, &senderThreadID);
+	if (!hSenderThread) {
+		::PostThreadMessage(mainThreadID, WM_THREADEXIT, 0, 0);
+		::WaitForSingleObject(hMainThread, INFINITE);
 		return C86CTL_ERR_UNKNOWN;
 	}
 
- 	for(tout=0; !senderThreadReady && (tout<TIMEOUT); tout++)
+	for (tout = 0; !senderThreadReady && (tout < TIMEOUT); tout++)
 		Sleep(10);
 
-	SetThreadPriority( hSenderThread, THREAD_PRIORITY_ABOVE_NORMAL );
+	SetThreadPriority(hSenderThread, THREAD_PRIORITY_ABOVE_NORMAL);
 
 	loadConfig();
 
@@ -352,23 +350,23 @@ int C86CtlMain::initialize(void)
 
 int C86CtlMain::deinitialize(void)
 {
-	if( !isInitialized )
+	if (!isInitialized)
 		return C86CTL_ERR_UNKNOWN;
 
 	reset();
 
 	// 各種スレッド終了
 
-	if( hMainThread ){
-		::PostThreadMessage( mainThreadID, WM_THREADEXIT, 0, 0 );
-		::WaitForSingleObject( hMainThread, INFINITE );
+	if (hMainThread) {
+		::PostThreadMessage(mainThreadID, WM_THREADEXIT, 0, 0);
+		::WaitForSingleObject(hMainThread, INFINITE);
 		hMainThread = NULL;
 		mainThreadID = 0;
 	}
 
-	if( hSenderThread ){
+	if (hSenderThread) {
 		terminateFlag = true;
-		::WaitForSingleObject( hSenderThread, INFINITE );
+		::WaitForSingleObject(hSenderThread, INFINITE);
 		hSenderThread = NULL;
 		senderThreadID = 0;
 	}
@@ -384,7 +382,7 @@ int C86CtlMain::deinitialize(void)
 	// タイマ分解能設定解除
 	::timeEndPeriod(timerPeriod);
 	isInitialized = false;
-	
+
 	mainThreadReady = false;
 	senderThreadReady = false;
 
@@ -394,9 +392,9 @@ int C86CtlMain::deinitialize(void)
 void C86CtlMain::loadConfig(void)
 {
 	TCHAR key[128];
-	int val=0;
+	int val = 0;
 
-	for (int i=0; i<static_cast<int>(gIF.size()); i++){
+	for (int i = 0; i < static_cast<int>(gIF.size()); i++) {
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, static_cast<int>(i));
 		val = gConfig.getInt(INISC_MAIN, key, -1);
 //		if( val>=0 ) gIF[i]->setDelay(val);
@@ -415,8 +413,8 @@ void C86CtlMain::loadConfig(void)
 void C86CtlMain::saveConfig(void)
 {
 	TCHAR key[128];
-	for (int i=0; i<static_cast<int>(gIF.size()); i++) {
-		int delay=0;
+	for (int i = 0; i < static_cast<int>(gIF.size()); i++) {
+		int delay = 0;
 //		gIF[i]->getDelay(&delay);
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
 		gConfig.writeInt(INISC_MAIN, key, delay);
@@ -442,7 +440,7 @@ int C86CtlMain::reset(void)
 //	std::for_each( gIF.begin(), gIF.end(), [](std::shared_ptr<BaseSoundDevice> x){ x->reset(); } );
 //	gIF.unlock();
 	gLogicalDevices.lock();
-	std::for_each( gLogicalDevices.begin(), gLogicalDevices.end(), [](LogicalDevicePtr x){ x->reset(); } );
+	std::for_each(gLogicalDevices.begin(), gLogicalDevices.end(), [](LogicalDevicePtr x) { x->reset(); });
 	gLogicalDevices.unlock();
 
 	return 0;
@@ -453,31 +451,31 @@ int C86CtlMain::getNumberOfChip(void)
 	return static_cast<int>(gLogicalDevices.size());
 }
 
-HRESULT C86CtlMain::getChipInterface( int id, REFIID riid, void** ppi )
+HRESULT C86CtlMain::getChipInterface(int id, REFIID riid, void** ppi)
 {
 	HRESULT result = E_NOINTERFACE;
-	
+
 	gLogicalDevices.lock();
-	if( id < static_cast<int>(gLogicalDevices.size()) ){
-		result = gLogicalDevices[id]->QueryInterface( riid, ppi );
+	if (id < static_cast<int>(gLogicalDevices.size())) {
+		result = gLogicalDevices[id]->QueryInterface(riid, ppi);
 	}
 	gLogicalDevices.unlock();
-	
+
 	return result;
 }
 
-void C86CtlMain::out( UINT addr, UCHAR data )
+void C86CtlMain::out(UINT addr, UCHAR data)
 {
-	if( gLogicalDevices.size() ){
-		gLogicalDevices[0]->out(addr,data);
+	if (gLogicalDevices.size()) {
+		gLogicalDevices[0]->out(addr, data);
 	}
 }
 
-UCHAR C86CtlMain::in( UINT addr )
+UCHAR C86CtlMain::in(UINT addr)
 {
-	if( gLogicalDevices.size() ){
+	if (gLogicalDevices.size()) {
 		return gLogicalDevices[0]->in(addr);
-	}else
+	} else
 		return 0;
 }
 

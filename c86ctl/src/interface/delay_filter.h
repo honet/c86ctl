@@ -13,7 +13,7 @@
 #include "basefilter.h"
 
 
-namespace c86ctl{
+namespace c86ctl {
 
 class DelayFilter : public BaseFilter
 {
@@ -24,7 +24,7 @@ public:
 public:
 	void reset(void);
 	void tick(void);
-	int getDelay(int *d);
+	int getDelay(int* d);
 	int setDelay(int d);
 
 public:
@@ -43,5 +43,5 @@ private:
 };
 
 typedef std::shared_ptr<DelayFilter> DelayFilterPtr;
-};
+}
 

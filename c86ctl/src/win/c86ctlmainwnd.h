@@ -21,35 +21,35 @@ private:
 		  visThreadID(0),
 		  hNotifyHIDDevNode(0),
 		  hNotifyWinUSBDevNode(0)
-	{};
-	virtual ~C86CtlMainWnd(){
-		if( mainVisWnd ){
+	{}
+	virtual ~C86CtlMainWnd() {
+		if (mainVisWnd) {
 			mainVisWnd->close();
 
 			delete mainVisWnd;
 		}
-	};
+	}
 
 public:
-	static C86CtlMainWnd* getInstance(){
-		if( !pthis ){
+	static C86CtlMainWnd* getInstance() {
+		if (!pthis) {
 			pthis = new C86CtlMainWnd();
 		}
 		return pthis;
-	};
+	}
 
-	static void shutdown(){
-		if( pthis ){
+	static void shutdown() {
+		if (pthis) {
 			delete pthis;
 			pthis = NULL;
 		}
-	};
+	}
 	
 public:
 	int createMainWnd(LPVOID param);
 	int destroyMainWnd(LPVOID param);
 	int deviceUpdate(void);
-	HWND getHWND(void){ return hwnd; };
+	HWND getHWND(void) { return hwnd; }
 
 private:
 	static unsigned int WINAPI threadVis(LPVOID param);
@@ -77,6 +77,6 @@ private:
 	static C86CtlMainWnd *pthis;
 };
 
-};
+}
 
 
