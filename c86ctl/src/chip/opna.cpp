@@ -228,6 +228,7 @@ bool COPNA::setReg(UINT addr, UCHAR data) {
 
 UCHAR COPNA::getReg(UINT addr) {
 	if (0x200 <= addr) return 0;
+	if (0x0ff == addr) return 1; // ID reg.
 	int idx = 0;
 	if (0x100 <= addr) {
 		addr -= 0x100;

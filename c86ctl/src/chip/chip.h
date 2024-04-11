@@ -23,7 +23,7 @@ public:
 
 public:
 	virtual void byteOut(UINT addr, UCHAR data) {}
-	virtual UCHAR getReg(int addr) { return 0; }
+	virtual UCHAR getReg(UINT addr) { return 0; }
 	virtual void setMasterClock(UINT clock) {}
 	virtual UINT getMasterClock() { return 0; }
 };
