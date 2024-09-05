@@ -395,16 +395,16 @@ void C86CtlMain::loadConfig(void)
 	int val = 0;
 
 	for (int i = 0; i < static_cast<int>(gIF.size()); i++) {
-		_sntprintf(key, sizeof(key), INIKEY_DELAY, static_cast<int>(i));
+		_snwprintf_s(key, _countof(key), _TRUNCATE, INIKEY_DELAY, static_cast<int>(i));
 		val = gConfig.getInt(INISC_MAIN, key, -1);
 //		if( val>=0 ) gIF[i]->setDelay(val);
 
 	// TODO: なおす
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+//		_snwprintf_s(key, _countof(key), _TRUNCATE, INIKEY_GIMIC_SSGVOL, i);
 //		val = gConfig.getInt(INISC_MAIN, key, -1);
 //		if( val>=0 ) gIF[i]->setSSGVolume((UCHAR)val);
 
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+//		_snwprintf_s(key, _countof(key), _TRUNCATE, INIKEY_GIMIC_PLLCLK, i);
 //		val = gConfig.getInt(INISC_MAIN, key, -1);
 //		if( val>=0 ) gIF[i]->setPLLClock((UINT)val);
 	}
@@ -416,18 +416,18 @@ void C86CtlMain::saveConfig(void)
 	for (int i = 0; i < static_cast<int>(gIF.size()); i++) {
 		int delay = 0;
 //		gIF[i]->getDelay(&delay);
-		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
+		_snwprintf_s(key, _countof(key), _TRUNCATE, INIKEY_DELAY, i);
 		gConfig.writeInt(INISC_MAIN, key, delay);
 
 	// TODO: なおす
 //		UCHAR vol=0;
 //		gGIMIC[i]->getSSGVolume(&vol);
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+//		_snwprintf_s(key, _countof(key), _TRUNCATE, INIKEY_GIMIC_SSGVOL, i);
 //		gConfig.writeInt(INISC_MAIN, key, vol);
 
 //		UINT clock=0;
 //		gGIMIC[i]->getPLLClock(&clock);
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+//		_snwprintf_s(key, _countof(key), _TRUNCATE, INIKEY_GIMIC_PLLCLK, i);
 //		gConfig.writeInt(INISC_MAIN, key, clock);
 		
 	}

@@ -59,9 +59,9 @@ public:
 		, pOPNA(pchip)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPNAKEY%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPNAKEY%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPNA KEYBOARD VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPNA KEYBOARD VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86OPNAKey(){}
@@ -90,9 +90,9 @@ public:
 		, pOPN3L(pchip)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPN3LKEY%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPN3LKEY%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPN3L KEYBOARD VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPN3L KEYBOARD VIEW"), id);
 		windowTitle = str;
 		
 		_windowHeight = 495;
@@ -120,9 +120,9 @@ public:
 		, pOPM(pchip)
 	{
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPMKEY%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPMKEY%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPM KEYBOARD VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPM KEYBOARD VIEW"), id);
 		windowTitle = str;
 
 		_windowHeight = 315;
@@ -154,9 +154,9 @@ public:
 		_windowHeight = 310;
 
 		TCHAR str[40];
-		_stprintf_s(str, _T("TMS3631 KEY%d"), id);
+		_stprintf_s(str, _countof(str), _T("TMS3631 KEY%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] TMS3631 KEYBOARD VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] TMS3631 KEYBOARD VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86TMS3631Key() {}

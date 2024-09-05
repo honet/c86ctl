@@ -79,7 +79,7 @@ bool CVisC86Main::update()
 		if (fwinfo) {
 			UINT major, minor, rev, build;
 			fwinfo->getFWVer(&major, &minor, &rev, &build);
-			sprintf(str, "%d.%d.%d.%d", major, minor, rev, build);
+			sprintf_s(str, sizeof(str), "%u.%u.%u.%u", major, minor, rev, build);
 			info[i].verstr.assign(str);
 		}
 
@@ -118,7 +118,7 @@ bool CVisC86Main::update()
 		case CHIP_YMF278B:
 			info[i].module_name.assign("YMF278"); break;
 		case CHIP_YMZ280B:
-			info[i].module_name.assign("YMZ280"); break;
+			info[i].module_name.assign("YMZ280B"); break;
 		case CHIP_YMF297_OPN3L:
 			info[i].module_name.assign("YMF297(OPN3L)"); break;
 		case CHIP_YMF297_OPL3:
@@ -139,21 +139,21 @@ bool CVisC86Main::update()
 		if (gimic_module) {
 			Devinfo chipinfo;
 			gimic_module->getModuleInfo(&chipinfo);
-			sprintf(str, "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev);
+			sprintf_s(str, sizeof(str), "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev);
 			info[i].board_name.assign(str);
 
 			GimicWinUSB* gimic_dev = dynamic_cast<GimicWinUSB*>(s->module->getParentDevice());
 			if (gimic_dev) {
 				Devinfo mbinfo;
 				gimic_dev->getMBInfo(&mbinfo);
-				sprintf(str, "%s Rev.%c", &mbinfo.Devname[0], mbinfo.Rev);
+				sprintf_s(str, sizeof(str), "%s Rev.%c", &mbinfo.Devname[0], mbinfo.Rev);
 				info[i].device_name.assign(str);
 			}
 		} else {
 			C86WinUSB::C86ModuleWinUSB* c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
 			if (c86) {
 				char slotname[] = { 'A', 'B', 'C', 'D' };
-				sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
+				sprintf_s(str, sizeof(str), "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
 				info[i].device_name.assign(str);
 
 				switch (c86->getBoardType() & 0xffff) {
@@ -267,7 +267,7 @@ bool CVisC86Main::update()
 		//Chip *pchip = s->chip;
 		hwinfo* pinfo = &info[i];
 
-		_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
+		_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
 		pinfo->regView = visC86RegViewFactory(s->chip, i);
 		pinfo->regView->closeEvent.push_back(
 			[pinfo](CVisWnd* h) {
@@ -278,7 +278,7 @@ bool CVisC86Main::update()
 		pinfo->checkReg->changeEvent.push_back(
 			[this, pinfo, i](CVisWidget* w) {
 			TCHAR key[KEYBUFLEN];
-			_sntprintf(key, KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
+			_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_REGWND, static_cast<int>(i));
 
 			if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
 				if (pinfo->regView)
@@ -299,7 +299,7 @@ bool CVisC86Main::update()
 			info[i].chiptype == CHIP_OPN3L ||
 			info[i].chiptype == CHIP_OPM || info[i].chiptype == CHIP_TMS3631RI104) {
 
-			_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, i);
+			_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_KEYWND, i);
 			pinfo->keyView = visC86KeyViewFactory(s->chip, i);
 			pinfo->keyView->closeEvent.push_back(
 				[pinfo](CVisWnd* h) {
@@ -310,7 +310,7 @@ bool CVisC86Main::update()
 			pinfo->checkKey->changeEvent.push_back(
 				[this, pinfo, i](CVisWidget* w) {
 				TCHAR key[KEYBUFLEN];
-				_sntprintf(key, KEYBUFLEN, INIKEY_KEYWND, static_cast<int>(i));
+				_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_KEYWND, static_cast<int>(i));
 
 				if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
 					if (pinfo->keyView)
@@ -337,9 +337,9 @@ bool CVisC86Main::update()
 
 			for (int ch = 0; ch < nch; ch++) {
 				char str[10];
-				sprintf(str, "FM%d", ch + 1);
+				sprintf_s(str, sizeof(str), "FM%d", ch + 1);
 
-				_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch + 1);
+				_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch + 1);
 				pinfo->fmView[ch] = visC86FmViewFactory(s->chip, i, ch);
 				pinfo->fmView[ch]->closeEvent.push_back(
 					[pinfo, ch](CVisWnd* h) {
@@ -350,7 +350,7 @@ bool CVisC86Main::update()
 				pinfo->checkFM[ch]->changeEvent.push_back(
 					[this, pinfo, i, ch](CVisWidget* w) {
 					TCHAR key[KEYBUFLEN];
-					_sntprintf(key, KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch + 1);
+					_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_FMWND, static_cast<int>(i), ch + 1);
 
 					if (dynamic_cast<CVisCheckBox*>(w)->getValue()) {
 						if (pinfo->fmView[ch])
@@ -449,16 +449,16 @@ void CVisC86Main::onPaintClient()
 
 		if (module->isValid()) {
 			// デバイス名
-			sprintf(str, "MODULE%d: %s", i, info[i].device_name.c_str());
+			sprintf_s(str, sizeof(str), "MODULE%d: %s", i, info[i].device_name.c_str());
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			// Firmware version
-			sprintf(str, "FW-VER : %s", info[i].verstr.c_str());
+			sprintf_s(str, sizeof(str), "FW-VER : %s", info[i].verstr.c_str());
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			// バスボード名
-			sprintf(str, "BOARD  : %s", info[i].board_name.c_str());
+			sprintf_s(str, sizeof(str), "BOARD  : %s", info[i].board_name.c_str());
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			// MODULE名
-			sprintf(str, "CHIP   : %s", info[i].module_name.c_str());
+			sprintf_s(str, sizeof(str), "CHIP   : %s", info[i].module_name.c_str());
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 
 			GimicWinUSB::GimicModuleWinUSB* gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(module);
@@ -466,18 +466,18 @@ void CVisC86Main::onPaintClient()
 				const GimicParam* param = gimic->getGimicParam();
 
 				// PLL Clock
-				sprintf(str, "CLOCK  : %d Hz", param->clock);
+				sprintf_s(str, sizeof(str), "CLOCK  : %d Hz", param->clock);
 				skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 				// SSG-Volume(書くところ足りない)
-				//sprintf(str, "SSG-VOL: %d", param->ssgVol );
+				//sprintf_s(str, sizeof(str), "SSG-VOL: %d", param->ssgVol );
 				//skin->drawStr( clientCanvas, 1, 15, y+dy, str ); dy+=10;
 			}
 
 			// speed
-			sprintf(str, "SPEED  : %d CPS", dev->getCPS());
+			sprintf_s(str, sizeof(str), "SPEED  : %d CPS", dev->getCPS());
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 		} else {
-			sprintf(str, "MODULE%d: DISCONNECTED", i);
+			sprintf_s(str, sizeof(str), "MODULE%d: DISCONNECTED", i);
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 			skin->drawStr(clientCanvas, 1, 15, y + dy, "FW-VER :"); dy += 10;
 			skin->drawStr(clientCanvas, 1, 15, y + dy, "CHIP   :"); dy += 10;
@@ -493,7 +493,7 @@ void CVisC86Main::onPaintClient()
 	}
 
 	// FPS
-	sprintf(str, "FPS: %0.1f", CVisManager::getInstance()->getCurrentFPS());
+	sprintf_s(str, sizeof(str), "FPS: %0.1f", CVisManager::getInstance()->getCurrentFPS());
 	skin->drawStr(clientCanvas, 0, 260, ch - 12, str);
 
 }

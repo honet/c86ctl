@@ -27,26 +27,26 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 	int cx=6, cy=8;
 	CVisC86Skin *skin = &gVisSkin;
 
-	sprintf( str, "%02d", trNo+1 );
+	sprintf_s( str, sizeof(str), "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
-	sprintf( str, "FM-CH%d", fmNo+1 );
+	sprintf_s( str, sizeof(str), "FM-CH%d", fmNo+1 );
 	skin->drawStr( canvas, 0, ltx+5+cx*10, lty+sy+5, str );
 
 	if( !isMute ){
-		strcpy(str, "SLOT:");
+		strcpy_s(str, sizeof(str), "SLOT:");
 		for( int i=0; i<4; i++ ){
 			int sw = pFMCh->slot[i]->isOn();
-			sprintf( tmp, "%d", i );
-			if( sw ) strncat( str, tmp, 64 );
-			else  strncat( str, "_", 64 );
+			sprintf_s( tmp, sizeof(tmp), "%d", i );
+			if( sw ) strncat_s( str, sizeof(str), tmp, 64 );
+			else  strncat_s( str, sizeof(str), "_", 64 );
 		}
 		skin->drawStr( canvas, 0, ltx+5+cx*24, lty+sy+5, str );
 
 		if( !pFMCh->getExMode() ){
 			int fblock = pFMCh->getFBlock();
 			int fnum = pFMCh->getFNum();
-			//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
-			sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
+			//sprintf_s( str, sizeof(str), "BLK:%d  FNUM:%04d", fblock, fnum );
+			sprintf_s( str, sizeof(str), "B/F:%d+%04d  NOTE:", fblock, fnum );
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
@@ -54,15 +54,15 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 				int oct, note;
 				pFMCh->getNote( oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
-				sprintf( str, "O%d%s", oct, noteStr[note] );
+				sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 				skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 			}
 			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
 		}else{
 			int fblock = pFMCh->getFBlockEx(0);
 			int fnum = pFMCh->getFNumEx(0);
-			//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
-			sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
+			//sprintf_s( str, sizeof(str), "BLK:%d  FNUM:%04d", fblock, fnum );
+			sprintf_s( str, sizeof(str), "B/F:%d+%04d  NOTE:", fblock, fnum );
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
@@ -70,7 +70,7 @@ void CVisC86Key::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 				int oct, note;
 				pFMCh->getNoteEx( 0, oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
-				sprintf( str, "O%d%s", oct, noteStr[note] );
+				sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 				skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 			}
 			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevelEx(0), 0 );
@@ -93,17 +93,17 @@ void CVisC86Key::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 	lty+=35; trNo++;
 
 	for( int exNo=1; exNo<4; exNo++, trNo++, lty+=35 ){
-		sprintf( str, "%02d", trNo+1 );
+		sprintf_s( str, sizeof(str), "%02d", trNo+1 );
 		skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
-		sprintf( str, "FM-CH%dEX%d", 3, exNo );
+		sprintf_s( str, sizeof(str), "FM-CH%dEX%d", 3, exNo );
 		skin->drawStr( canvas, 0, ltx+5+60, lty+sy+5, str );
 		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
 		if( pFMCh->getExMode() && !isMute ){
 			int fblock = pFMCh->getFBlockEx(exNo);
 			int fnum = pFMCh->getFNumEx(exNo);
-			//sprintf( str, "BLK:%d  FNUM:%04d", fblock, fnum );
-			sprintf( str, "B/F:%d+%04d  NOTE:", fblock, fnum );
+			//sprintf_s( str, sizeof(str), "BLK:%d  FNUM:%04d", fblock, fnum );
+			sprintf_s( str, sizeof(str), "B/F:%d+%04d  NOTE:", fblock, fnum );
 			skin->drawStr( canvas, 0, ltx+5+cx*35, lty+sy+5, str );
 
 			skin->drawKeyboard( canvas, ltx, lty+sy+15 );
@@ -111,7 +111,7 @@ void CVisC86Key::drawFM3EXTrackView( IVisBitmap *canvas, int ltx, int lty,
 				int oct, note;
 				pFMCh->getNoteEx( exNo, oct, note );
 				skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
-				sprintf( str, "O%d%s", oct, noteStr[note] );
+				sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 				skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 			}
 			skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevelEx(exNo), 0 );
@@ -130,9 +130,9 @@ void CVisC86Key::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty,
 	char str[64];
 	CVisC86Skin *skin = &gVisSkin;
 	
-	sprintf( str, "%02d", trNo+1 );
+	sprintf_s( str, sizeof(str), "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
-	sprintf( str, "SSG-CH%d", ssgNo+1 );
+	sprintf_s( str, sizeof(str), "SSG-CH%d", ssgNo+1 );
 	skin->drawStr( canvas, 0, ltx+5+cx*10, lty+sy+5, str );
 
 	int period = pSsg->getNoisePeriod();
@@ -146,12 +146,12 @@ void CVisC86Key::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty,
 		skin->drawStr( canvas, 0, ltx+5+cx*47, lty+sy+5, "NOTE:" );
 		
 		if( pSsgCh->isNoiseOn() ){
-			sprintf( str, "%04d", period );
+			sprintf_s( str, sizeof(str), "%04d", period );
 			skin->drawStr( canvas, 0, ltx+5+cx*30, lty+sy+5, str );
 		}
 		if( pSsgCh->isToneOn() ){
 			int tune = pSsgCh->getTune();
-			sprintf( str, "%04d", tune );
+			sprintf_s( str, sizeof(str), "%04d", tune );
 			skin->drawStr( canvas, 0, ltx+5+cx*40, lty+sy+5, str );
 		}
 		if( pSsgCh->isOn() && pSsgCh->getLevel()!=0 ){
@@ -162,7 +162,7 @@ void CVisC86Key::drawSSGTrackView( IVisBitmap *canvas, int ltx, int lty,
 				pSsg->getNoiseNote( oct, note );
 			
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
-			sprintf( str, "O%d%s", oct, noteStr[note] );
+			sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 			skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 		}
 		skin->drawHBar( canvas, 290, lty+sy+15, pSsgCh->getKeyOnLevel(), 0 );
@@ -180,9 +180,9 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 	//const int cx=6;
 
 	COPNAAdpcm *adpcm = pOPNA->adpcm;
-	sprintf( str, "%02d", trNo+1 );
+	sprintf_s( str, sizeof(str), "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
-	sprintf( str, "ADPCM" );
+	sprintf_s( str, sizeof(str), "ADPCM" );
 	skin->drawStr( canvas, 0, ltx+5+60, lty+sy+5, str );
 
 	UINT col_mid = skin->getPal(CVisC86Skin::IDCOL_MID);
@@ -204,7 +204,7 @@ void CVisC86OPNAKey::drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, i
 				visDrawLine( canvas, ltx+i, lty+sy+5+10, ltx+i, lty+sy+5+30, col_light);
 		}
 	}
-	//sprintf( str, "ST:%02x ED:%02x", stAddr, edAddr);
+	//sprintf_s( str, sizeof(str), "ST:%02x ED:%02x", stAddr, edAddr);
 	//skin->drawStr( canvas, 0, ltx+5+60+cx*10, lty+sy+5, str );
 
 	if( !pOPNA->getMixedMask(trNo) ){
@@ -229,9 +229,9 @@ void CVisC86Key::drawRhythmTrackView( IVisBitmap *canvas, int ltx, int lty,
 	UINT col_mid = skin->getPal(CVisC86Skin::IDCOL_MID);
 	UINT col_light = skin->getPal(CVisC86Skin::IDCOL_LIGHT);
 	
-	sprintf( str, "%02d", trNo+1 );
+	sprintf_s( str, sizeof(str), "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
-	sprintf( str, "RHYTHM" );
+	sprintf_s( str, sizeof(str), "RHYTHM" );
 	skin->drawStr( canvas, 0, ltx+5+60, lty+sy+5, str );
 
 	visDrawLine( canvas, ltx    , lty+sy+5+10, ltx+280, lty+sy+5+10, col_mid );
@@ -686,25 +686,25 @@ void CVisC86OPMKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 	int cx=6, cy=8;
 	CVisC86Skin *skin = &gVisSkin;
 
-	sprintf( str, "%02d", trNo+1 );
+	sprintf_s( str, sizeof(str), "%02d", trNo+1 );
 	skin->drawNumStr1( canvas, ltx+5, lty+sy+2, str );
-	sprintf( str, "FM-CH%d", fmNo+1 );
+	sprintf_s( str, sizeof(str), "FM-CH%d", fmNo+1 );
 	skin->drawStr( canvas, 0, ltx+5+cx*10, lty+sy+5, str );
 
 	if( !isMute ){
-		strcpy(str, "SLOT:");
+		strcpy_s(str, sizeof(str), "SLOT:");
 		for( int i=0; i<4; i++ ){
 			int sw = pFMCh->slot[i]->isOn();
-			sprintf( tmp, "%d", i );
-			if( sw ) strncat( str, tmp, 64 );
-			else  strncat( str, "_", 64 );
+			sprintf_s( tmp, sizeof(tmp), "%d", i );
+			if( sw ) strncat_s( str, sizeof(str), tmp, 64 );
+			else  strncat_s( str, sizeof(str), "_", 64 );
 		}
 		skin->drawStr( canvas, 0, ltx+5+cx*18, lty+sy+5, str );
 
 		int kcoct = pFMCh->getKeyCodeOct();
 		int kcnote = pFMCh->getKeyCodeNote();
 		int kf = pFMCh->getKeyFraction();
-		sprintf( str, "KC:%02d-%02d KF:%02d     NOTE:", kcoct, kcnote, kf );
+		sprintf_s( str, sizeof(str), "KC:%02d-%02d KF:%02d     NOTE:", kcoct, kcnote, kf );
 		skin->drawStr( canvas, 0, ltx+5+cx*28, lty+sy+5, str );
 		skin->drawKeyboard( canvas, ltx, lty+sy+15 );
 
@@ -712,7 +712,7 @@ void CVisC86OPMKey::drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
 			int oct=0, note=0;
 			pFMCh->getNote( oct, note );
 			skin->drawHilightKey( canvas, ltx, lty+sy+15, oct, note );
-			sprintf( str, "O%d%s", oct, noteStr[note] );
+			sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 			skin->drawStr( canvas, 0, ltx+5+cx*52, lty+sy+5, str );
 		}
 		skin->drawHBar( canvas, 290, lty+sy+15, pFMCh->getKeyOnLevel(), 0 );
@@ -840,7 +840,7 @@ void CVisC86TMS3631Key::drawTrackView(IVisBitmap* canvas, int ltx, int lty, int 
 	CVisC86Skin* skin = &gVisSkin;
 
 	int onlevel = 0;
-	sprintf(str, "%02d", trNo + 1);
+	sprintf_s(str, sizeof(str),  "%02d", trNo + 1);
 	skin->drawNumStr1(canvas, ltx + 5, lty + sy + 2, str);
 	switch(trNo) {
 	case 0: strcpy_s(str, "[LR] f2-only"); onlevel = 31; break;
@@ -862,7 +862,7 @@ void CVisC86TMS3631Key::drawTrackView(IVisBitmap* canvas, int ltx, int lty, int 
 			int oct = 4 + (note >> 4);
 			note = (note & 0xf) - 1;
 			skin->drawHilightKey(canvas, ltx, lty + sy + 15, oct, note);
-			sprintf(str, "O%d%s", oct, noteStr[note]);
+			sprintf_s(str, sizeof(str),  "O%d%s", oct, noteStr[note]);
 			skin->drawStr(canvas, 0, ltx + 5 + cx * 52, lty + sy + 5, str);
 			level = onlevel;
 		}

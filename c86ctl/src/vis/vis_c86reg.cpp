@@ -31,14 +31,14 @@ void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 	int oy = 0;
 	int cx=6, cy=8;
 	for( int x=0; x<16; x++ ){
-		sprintf( str, "+%X", x );
+		sprintf_s( str, sizeof(str), "+%X", x );
 		int sx = ltx+ox+(cx*2+4)*(x+1);
 		int sy = lty+oy;
 
 		skin->drawStr( canvas, 1, sx, sy, str );
 	}
 	for( int y=0; y<ynum; y++ ){
-		sprintf( str, "%02X", y*16 );
+		sprintf_s( str, sizeof(str), "%02X", y*16 );
 		int sx = ltx+ox;
 		int sy = lty+oy+cy*(y+1);
 		skin->drawStr( canvas, 1, sx, sy, str );
@@ -52,7 +52,7 @@ void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
 			int v = regval[a];
 			int c = regatime[a];
 
-			sprintf( str,"%02X", v );
+			sprintf_s(str, sizeof(str), "%02X", v );
 			int sx = ltx+ox+(cx*2+4)*x;
 			int sy = lty+oy+cy*y;
 			

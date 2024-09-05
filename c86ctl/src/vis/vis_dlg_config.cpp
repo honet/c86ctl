@@ -154,7 +154,7 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 
 			int delay=0;
 			stream->delay->getDelay(&delay);
-			_sntprintf(str, bufsz, _T("%d"), delay);
+			_snwprintf_s(str, bufsz, _TRUNCATE, _T("%d"), delay);
 			hedit = GetDlgItem(hWnd, delay_editid[i]);
 			EnableWindow(hedit,TRUE);
 			Edit_SetText(hedit, str);
@@ -168,7 +168,7 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 				SendMessage(hspin, UDM_SETRANGE32, 0, 127);
 				
 				gimic_module->getSSGVolume(&vol);
-				_sntprintf(str, bufsz, _T("%d"), vol);
+				_snwprintf_s(str, bufsz, _TRUNCATE, _T("%d"), vol);
 				hedit = GetDlgItem(hWnd, ssgvol_editid[i]);
 				EnableWindow(hedit,TRUE);
 				Edit_SetText(hedit, str);
@@ -190,7 +190,7 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 					EnableWindow(hcmb, TRUE);
 					for(int i=0;;i++){
 						if( clklist[i]<0 ) break;
-						_sntprintf(str, bufsz, _T("%d Hz"), clklist[i]);
+						_snwprintf_s(str, bufsz, _TRUNCATE, _T("%d Hz"), clklist[i]);
 						int idx = ComboBox_AddItemData( hcmb, str );
 						if( idx != CB_ERR && idx != CB_ERRSPACE )
 							ComboBox_SetItemData( hcmb, idx, clklist[i] );
@@ -254,7 +254,7 @@ void CVisDlgConfig::onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 			TCHAR buff[256];
 			int delay=0;
 			
-			Edit_GetText(hwnd, buff, sizeof(buff));
+			Edit_GetText(hwnd, buff, _countof(buff));
 			delay = _ttoi(buff);
 			stream->delay->setDelay(delay);
 		}
@@ -284,7 +284,7 @@ void CVisDlgConfig::onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 			TCHAR buff[256];
 			UCHAR vol=0;
 			
-			Edit_GetText(hwnd, buff, sizeof(buff));
+			Edit_GetText(hwnd, buff, _countof(buff));
 			vol = (UCHAR)_ttoi(buff);
 			if( vol<0 ) vol = 0;
 			if( vol>127 ) vol = 127;

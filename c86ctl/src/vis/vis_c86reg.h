@@ -56,9 +56,9 @@ class CVisC86OPNAReg : public CVisC86Reg
 public:
 	CVisC86OPNAReg(COPNA* pchip, int id) : CVisC86Reg(id), pOPNA(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPNAREG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPNAREG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPNA REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPNA REGISTER VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86OPNAReg(void) {}
@@ -76,9 +76,9 @@ class CVisC86OPMReg : public CVisC86Reg
 public:
 	CVisC86OPMReg(COPM* pchip, int id) : CVisC86Reg(id), pOPM(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPMREG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPMREG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPM REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPM REGISTER VIEW"), id);
 		windowTitle = str;
 
 		_windowHeight = 180;
@@ -98,9 +98,9 @@ class CVisC86OPN3LReg : public CVisC86Reg
 public:
 	CVisC86OPN3LReg(COPN3L* pchip, int id) : CVisC86Reg(id), pOPN3L(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPN3LREG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPN3LREG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPN3L REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPN3L REGISTER VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86OPN3LReg() {}
@@ -118,9 +118,9 @@ class CVisC86OPL3Reg : public CVisC86Reg
 public:
 	CVisC86OPL3Reg(COPL3* pchip, int id) : CVisC86Reg(id), pOPL3(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPL3REG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPL3REG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPL3 REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPL3 REGISTER VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86OPL3Reg() {}
@@ -138,9 +138,9 @@ class CVisC86OPLLReg : public CVisC86Reg
 public:
 	CVisC86OPLLReg(COPLL* pchip, int id) : CVisC86Reg(id), pOPLL(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86OPLLREG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86OPLLREG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] OPLL REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] OPLL REGISTER VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86OPLLReg() {}
@@ -158,9 +158,9 @@ class CVisC86TMS3631Reg : public CVisC86Reg
 public:
 	CVisC86TMS3631Reg(CTMS3631* pchip, int id) : CVisC86Reg(id), pChip(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86 TMS3631 REG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86 TMS3631 REG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] REGISTER VIEW"), id);
 		windowTitle = str;
 
 		_windowWidth = 284;
@@ -181,9 +181,9 @@ class CVisC86Generic1Reg : public CVisC86Reg
 public:
 	CVisC86Generic1Reg(CGenericChipBank1* pchip, int id) : CVisC86Reg(id), pChip(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86 GENERIC1REG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86 GENERIC1REG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] REGISTER VIEW"), id);
 		windowTitle = str;
 
 		_windowWidth = 284;
@@ -204,9 +204,9 @@ class CVisC86Generic2Reg : public CVisC86Reg
 public:
 	CVisC86Generic2Reg(CGenericChipBank2* pchip, int id) : CVisC86Reg(id), pChip(pchip) {
 		TCHAR str[40];
-		_stprintf_s(str, _T("C86 GENERIC2REG%d"), id);
+		_stprintf_s(str, _countof(str), _T("C86 GENERIC2REG%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _T("[%d] REGISTER VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] REGISTER VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86Generic2Reg() {}

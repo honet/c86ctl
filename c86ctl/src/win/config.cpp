@@ -59,23 +59,17 @@ void CC86CtlConfig::init(HMODULE hModule)
 	if ( ::PathFileExists(szPath) ){
 		_tcscpy( inipath, szPath );
 	}else{
-		TCHAR modulePath[_MAX_PATH];
-		TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
+		TCHAR drv[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME];
 
-		::GetModuleFileName( hModule, modulePath, _MAX_PATH );
-		_tsplitpath( modulePath, drv, dir, fname, ext );
-		_tcsncat( inipath, drv, _MAX_PATH );
-		_tcsncat( inipath, dir, _MAX_PATH );
-		_tcsncat( inipath, TEXT("c86ctl.ini"), _MAX_PATH );
+		::GetModuleFileName(hModule, inipath, _MAX_PATH);
+		_tsplitpath_s(inipath, drv, _MAX_DRIVE, dir, _MAX_DIR, fname, _MAX_FNAME, NULL, 0);
+		_tmakepath_s(inipath, _MAX_PATH, drv, dir, fname, _T(".ini"));
 	}
 #else
-	TCHAR modulePath[_MAX_PATH];
-	TCHAR drv[_MAX_PATH], dir[_MAX_PATH], fname[_MAX_PATH], ext[_MAX_PATH];
+	TCHAR drv[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME];
 
-	::GetModuleFileName(hModule, modulePath, _MAX_PATH);
-	_tsplitpath(modulePath, drv, dir, fname, ext);
-	_tcsncat(inipath, drv, _MAX_PATH);
-	_tcsncat(inipath, dir, _MAX_PATH);
-	_tcsncat(inipath, TEXT("c86ctl.ini"), _MAX_PATH);
+	::GetModuleFileName(hModule, inipath, _MAX_PATH);
+	_tsplitpath_s(inipath, drv, _MAX_DRIVE, dir, _MAX_DIR, fname, _MAX_FNAME, NULL, 0);
+	_tmakepath_s(inipath, _MAX_PATH, drv, dir, fname, _T(".ini"));
 #endif
 };

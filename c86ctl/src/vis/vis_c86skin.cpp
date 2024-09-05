@@ -412,7 +412,7 @@ void CVisC86Skin::drawKnob(IVisBitmap *canvas, int x, int y, int minval, int max
 		skinbmp, reg_l.left, reg_l.top,
 		skinbmp, reg_t.left, reg_t.top, minval, maxval );
 
-	sprintf( buff, "%d", numval );
+	sprintf_s( buff, sizeof(buff), "%d", numval );
 	if( numval < 10 )       x+=9;
 	else if( numval < 100 ) x+=7;
 	else if( numval < 300 ) x+=3;

@@ -150,12 +150,12 @@ void CVisC86Fm::drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh )
 		if( pFmCh->isKeyOn() && pFmCh->getMixLevel()!=127 ){
 			int oct=0, note=0;
 			pFmCh->getNote( oct, note );
-			sprintf( str, "O%d%s", oct, noteStr[note] );
+			sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 			skin->drawStr( canvas, 0, 186+5*7, 6, str );
 		}
 		// FREQ
 		double freq = pFmCh->getFreq();
-		sprintf( str, "FREQ: % 8.1f Hz", freq );
+		sprintf_s( str, sizeof(str), "FREQ: % 8.1f Hz", freq );
 		skin->drawStr( canvas, 0, 186, 6+12, str );
 	}else{
 		const char *modestr[] = { "EFF", "CSM", "EFF" };
@@ -163,7 +163,7 @@ void CVisC86Fm::drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh )
 		
 		for( int i=0; i<4; i++ ){
 			double freq = pFmCh->getFreqEx(i);
-			sprintf( str, "FREQ: % 8.1f Hz", freq );
+			sprintf_s( str, sizeof(str), "FREQ: % 8.1f Hz", freq );
 			skin->drawStr( canvas, 0, 186, 6+12*i, str );
 		}
 	}
@@ -176,7 +176,7 @@ void CVisC86Fm::drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pS
 
 	// index
 	char str[10];
-	sprintf(str, "%d", slotidx+1);
+	sprintf_s(str, sizeof(str), "%d", slotidx+1);
 	skin->drawVStr( canvas, 0, x+8, y+20, str );
 	
 #if 1
@@ -374,7 +374,7 @@ void CVisC86OPMFm::drawFMView( IVisBitmap *canvas, int x, int y, COPMFmCh *pFmCh
 	if( pFmCh->isKeyOn() && pFmCh->getMixLevel()!=127 ){
 		int oct=0, note=0;
 		pFmCh->getNote( oct, note );
-		sprintf( str, "O%d%s", oct, noteStr[note] );
+		sprintf_s( str, sizeof(str), "O%d%s", oct, noteStr[note] );
 		skin->drawStr( canvas, 0, 186+5*7, 6, str );
 	}
 
@@ -382,9 +382,9 @@ void CVisC86OPMFm::drawFMView( IVisBitmap *canvas, int x, int y, COPMFmCh *pFmCh
 	int kcoct = pFmCh->getKeyCodeOct();
 	int kcnote = pFmCh->getKeyCodeNote();
 	int kf = pFmCh->getKeyFraction();
-	sprintf( str, "KC  : %02d-%02d", kcoct, kcnote );
+	sprintf_s( str, sizeof(str), "KC  : %02d-%02d", kcoct, kcnote );
 	skin->drawStr( canvas, 0, 186, 6+12, str );
-	sprintf( str, "KF  : %02d", kf );
+	sprintf_s( str, sizeof(str), "KF  : %02d", kf );
 	skin->drawStr( canvas, 0, 186, 6+12*2, str );
 
 }

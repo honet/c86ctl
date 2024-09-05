@@ -772,6 +772,7 @@ std::basic_string<TCHAR> GimicWinUSB::GimicModuleWinUSB::getNodeId()
 {
 	TCHAR buf[128];
 	_sntprintf(buf, 128, _T("\\%d"), devidx);
+//	_sntprintf_s(buf, 128, _TRUNCATE, _T("\\%d"), devidx);	// Not tested
 	return devif->getNodeId() + buf;
 }
 
