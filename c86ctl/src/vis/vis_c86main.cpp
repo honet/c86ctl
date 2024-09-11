@@ -34,7 +34,7 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
-static const int modHeight = 74;
+static const int modHeight = 94;
 
 #define KEYBUFLEN 32
 
@@ -135,8 +135,10 @@ bool CVisC86Main::update()
 			info[i].module_name.assign("TMS3631-RI104(REMAP)"); break;
 		}
 
-		GimicWinUSB::GimicModuleWinUSB* gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module);
-		if (gimic_module) {
+		GimicWinUSB::GimicModuleWinUSB* gimic_module = NULL;
+		C86WinUSB::C86ModuleWinUSB* c86 = NULL;
+
+		if (gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(s->module)) {
 			Devinfo chipinfo;
 			gimic_module->getModuleInfo(&chipinfo);
 			sprintf_s(str, sizeof(str), "%s Rev.%c", &chipinfo.Devname[0], chipinfo.Rev);
@@ -149,106 +151,102 @@ bool CVisC86Main::update()
 				sprintf_s(str, sizeof(str), "%s Rev.%c", &mbinfo.Devname[0], mbinfo.Rev);
 				info[i].device_name.assign(str);
 			}
-		} else {
-			C86WinUSB::C86ModuleWinUSB* c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
-			if (c86) {
-				char slotname[] = { 'A', 'B', 'C', 'D' };
-				sprintf_s(str, sizeof(str), "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
-				info[i].device_name.assign(str);
+		} else if (c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module)) {
+			char slotname[] = { 'A', 'B', 'C', 'D' };
+			sprintf_s(str, sizeof(str), "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
+			info[i].device_name.assign(str);
 
-				switch (c86->getBoardType() & 0xffff) {
-				case CBUS_BOARD_UNKNOWN:
-					info[i].board_name.assign("UNKNOWN"); break;
-				case CBUS_BOARD_14:
-					info[i].board_name.assign("PC-9801-14"); break;
-				case CBUS_BOARD_26:
-					info[i].board_name.assign("PC-9801-26K"); break;
-				case CBUS_BOARD_SOUND_ORCHESTRA:
-					info[i].board_name.assign("ORCHESTRA"); break;
-				case CBUS_BOARD_SOUND_ORCHESTRA_L:
-					info[i].board_name.assign("ORCHESTRA-L"); break;
-				case CBUS_BOARD_SOUND_ORCHESTRA_V:
-					info[i].board_name.assign("ORCHESTRA-V"); break;
-				case CBUS_BOARD_SOUND_ORCHESTRA_VS:
-					info[i].board_name.assign("ORCHESTRA-VS"); break;
-				case CBUS_BOARD_SOUND_ORCHESTRA_LS:
-					info[i].board_name.assign("ORCHESTRA-LS"); break;
-				case CBUS_BOARD_SOUND_ORCHESTRA_MATE:
-					info[i].board_name.assign("ORCHESTRA-MATE"); break;
-				case CBUS_BOARD_MULTIMEDIA_ORCHESTRA:
-					info[i].board_name.assign("MMO"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA:
-					info[i].board_name.assign("LITTLE"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA_L:
-					info[i].board_name.assign("LITTLE-L"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA_RS:
-					info[i].board_name.assign("LITTLE-RS"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA_LS:
-					info[i].board_name.assign("LITTLE-LS"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA_SS:
-					info[i].board_name.assign("LITTLE-SS"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA_MATE:
-					info[i].board_name.assign("LITTLE-MATE"); break;
-				case CBUS_BOARD_LITTLE_ORCHESTRA_FELLOW:
-					info[i].board_name.assign("LITTLE-FELLOW"); break;
-				case CBUS_BOARD_JOY2:
-					info[i].board_name.assign("JOY2"); break;
-				case CBUS_BOARD_SOUND_GRANPRI:
-					info[i].board_name.assign("GRANPRI"); break;
-				case CBUS_BOARD_TN_F3FM:
-					info[i].board_name.assign("TN-F3FM"); break;
-				case CBUS_BOARD_73:
-					info[i].board_name.assign("PC-9801-73"); break;
-				case CBUS_BOARD_86:
-					info[i].board_name.assign("PC-9801-86"); break;
-				case CBUS_BOARD_ASB01:
-					info[i].board_name.assign("ASB-01"); break;
-				case CBUS_BOARD_SPEAKBOARD:
-					info[i].board_name.assign("SPEAKBOARD"); break;
-				case CBUS_BOARD_SOUNDPLAYER98:
-					info[i].board_name.assign("SPB98"); break;
-				case CBUS_BOARD_SECONDBUS86:
-					info[i].board_name.assign("SB86"); break;
-				case CBUS_BOARD_SOUNDEDGE:
-					info[i].board_name.assign("SOUNDEDGE"); break;
-				case CBUS_BOARD_WINDUO:
-					info[i].board_name.assign("WINDUO"); break;
-				case CBUS_BOARD_OTOMI:
-					info[i].board_name.assign("OTOMI"); break;
-				case CBUS_BOARD_WAVEMASTER:
-					info[i].board_name.assign("WAVEMASTER"); break;
-				case CBUS_BOARD_WAVESMIT:
-					info[i].board_name.assign("WAVESIMIT"); break;
-				case CBUS_BOARD_WAVESTAR:
-					info[i].board_name.assign("WAVESTAR"); break;
-				case CBUS_BOARD_WSN_A4F:
-					info[i].board_name.assign("WSN-A4F"); break;
-				case CBUS_BOARD_SB16:
-					info[i].board_name.assign("SB16"); break;
-				case CBUS_BOARD_SB16_2203:
-					info[i].board_name.assign("SB16"); break;
-				case CBUS_BOARD_SB16VALUE:
-					info[i].board_name.assign("SB16VALUE"); break;
-				case CBUS_BOARD_POWERWINDOW_T64S:
-					info[i].board_name.assign("PW-T64S"); break;
-				case CBUS_BOARD_PCSB2:
-					info[i].board_name.assign("PC-SB2"); break;
-				case CBUS_BOARD_WGS98S:
-					info[i].board_name.assign("WGS98S"); break;
-				case CBUS_BOARD_SXM_F:
-					info[i].board_name.assign("SXM-F"); break;
-				case CBUS_BOARD_SRB_G:
-					info[i].board_name.assign("SRB-G"); break;
-				case CBUS_BOARD_MIDI_ORCHESTRA_MIDI3:
-					info[i].board_name.assign("MIDI-3"); break;
-				case CBUS_BOARD_SB_AWE32:
-					info[i].board_name.assign("SB-AWE32"); break;
-				case CBUS_BOARD_118:
-					info[i].board_name.assign("PC-9801-118"); break;
-				}
+			switch (c86->getBoardType() & 0xffff) {
+			case CBUS_BOARD_UNKNOWN:
+				info[i].board_name.assign("UNKNOWN"); break;
+			case CBUS_BOARD_14:
+				info[i].board_name.assign("PC-9801-14"); break;
+			case CBUS_BOARD_26:
+				info[i].board_name.assign("PC-9801-26K"); break;
+			case CBUS_BOARD_SOUND_ORCHESTRA:
+				info[i].board_name.assign("ORCHESTRA"); break;
+			case CBUS_BOARD_SOUND_ORCHESTRA_L:
+				info[i].board_name.assign("ORCHESTRA-L"); break;
+			case CBUS_BOARD_SOUND_ORCHESTRA_V:
+				info[i].board_name.assign("ORCHESTRA-V"); break;
+			case CBUS_BOARD_SOUND_ORCHESTRA_VS:
+				info[i].board_name.assign("ORCHESTRA-VS"); break;
+			case CBUS_BOARD_SOUND_ORCHESTRA_LS:
+				info[i].board_name.assign("ORCHESTRA-LS"); break;
+			case CBUS_BOARD_SOUND_ORCHESTRA_MATE:
+				info[i].board_name.assign("ORCHESTRA-MATE"); break;
+			case CBUS_BOARD_MULTIMEDIA_ORCHESTRA:
+				info[i].board_name.assign("MMO"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA:
+				info[i].board_name.assign("LITTLE"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA_L:
+				info[i].board_name.assign("LITTLE-L"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA_RS:
+				info[i].board_name.assign("LITTLE-RS"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA_LS:
+				info[i].board_name.assign("LITTLE-LS"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA_SS:
+				info[i].board_name.assign("LITTLE-SS"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA_MATE:
+				info[i].board_name.assign("LITTLE-MATE"); break;
+			case CBUS_BOARD_LITTLE_ORCHESTRA_FELLOW:
+				info[i].board_name.assign("LITTLE-FELLOW"); break;
+			case CBUS_BOARD_JOY2:
+				info[i].board_name.assign("JOY2"); break;
+			case CBUS_BOARD_SOUND_GRANPRI:
+				info[i].board_name.assign("GRANPRI"); break;
+			case CBUS_BOARD_TN_F3FM:
+				info[i].board_name.assign("TN-F3FM"); break;
+			case CBUS_BOARD_73:
+				info[i].board_name.assign("PC-9801-73"); break;
+			case CBUS_BOARD_86:
+				info[i].board_name.assign("PC-9801-86"); break;
+			case CBUS_BOARD_ASB01:
+				info[i].board_name.assign("ASB-01"); break;
+			case CBUS_BOARD_SPEAKBOARD:
+				info[i].board_name.assign("SPEAKBOARD"); break;
+			case CBUS_BOARD_SOUNDPLAYER98:
+				info[i].board_name.assign("SPB98"); break;
+			case CBUS_BOARD_SECONDBUS86:
+				info[i].board_name.assign("SB86"); break;
+			case CBUS_BOARD_SOUNDEDGE:
+				info[i].board_name.assign("SOUNDEDGE"); break;
+			case CBUS_BOARD_WINDUO:
+				info[i].board_name.assign("WINDUO"); break;
+			case CBUS_BOARD_OTOMI:
+				info[i].board_name.assign("OTOMI"); break;
+			case CBUS_BOARD_WAVEMASTER:
+				info[i].board_name.assign("WAVEMASTER"); break;
+			case CBUS_BOARD_WAVESMIT:
+				info[i].board_name.assign("WAVESIMIT"); break;
+			case CBUS_BOARD_WAVESTAR:
+				info[i].board_name.assign("WAVESTAR"); break;
+			case CBUS_BOARD_WSN_A4F:
+				info[i].board_name.assign("WSN-A4F"); break;
+			case CBUS_BOARD_SB16:
+				info[i].board_name.assign("SB16"); break;
+			case CBUS_BOARD_SB16_2203:
+				info[i].board_name.assign("SB16"); break;
+			case CBUS_BOARD_SB16VALUE:
+				info[i].board_name.assign("SB16VALUE"); break;
+			case CBUS_BOARD_POWERWINDOW_T64S:
+				info[i].board_name.assign("PW-T64S"); break;
+			case CBUS_BOARD_PCSB2:
+				info[i].board_name.assign("PC-SB2"); break;
+			case CBUS_BOARD_WGS98S:
+				info[i].board_name.assign("WGS98S"); break;
+			case CBUS_BOARD_SXM_F:
+				info[i].board_name.assign("SXM-F"); break;
+			case CBUS_BOARD_SRB_G:
+				info[i].board_name.assign("SRB-G"); break;
+			case CBUS_BOARD_MIDI_ORCHESTRA_MIDI3:
+				info[i].board_name.assign("MIDI-3"); break;
+			case CBUS_BOARD_SB_AWE32:
+				info[i].board_name.assign("SB-AWE32"); break;
+			case CBUS_BOARD_118:
+				info[i].board_name.assign("PC-9801-118"); break;
 			}
 		}
-
 	}
 
 	// frame=19 + topinfo=40 + module=74*N + bottominfo=10
@@ -441,8 +439,10 @@ void CVisC86Main::onPaintClient()
 	for (int i = 0; i < static_cast<int>(sz); i++) {
 		int dy = 0;
 		// 枠線
-		visFillRect(clientCanvas, 5, y - 2, 5, 68, skin->getPal(CVisC86Skin::IDCOL_MID));
-		visFillRect(clientCanvas, 5, y + 64, 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID));
+		if (modHeight >= 14) {
+			visFillRect(clientCanvas, 5, y - 2, 5, (modHeight - 6), skin->getPal(CVisC86Skin::IDCOL_MID));
+			visFillRect(clientCanvas, 5, y + (modHeight - 10), 320, 2, skin->getPal(CVisC86Skin::IDCOL_MID));
+		}
 
 		BaseSoundModule* module = GetC86CtlMain()->getStream(i)->module;
 		BaseSoundDevice* dev = module->getParentDevice();
@@ -466,7 +466,7 @@ void CVisC86Main::onPaintClient()
 				const GimicParam* param = gimic->getGimicParam();
 
 				// PLL Clock
-				sprintf_s(str, sizeof(str), "CLOCK  : %d Hz", param->clock);
+				sprintf_s(str, sizeof(str), "CLOCK  : %u Hz", param->clock);
 				skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 				// SSG-Volume(書くところ足りない)
 				//sprintf_s(str, sizeof(str), "SSG-VOL: %d", param->ssgVol );
@@ -474,22 +474,22 @@ void CVisC86Main::onPaintClient()
 			}
 
 			// speed
-			sprintf_s(str, sizeof(str), "SPEED  : %d CPS", dev->getCPS());
+			sprintf_s(str, sizeof(str), "SPEED  : %7u CPS", dev->getCPS());
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
 		} else {
 			sprintf_s(str, sizeof(str), "MODULE%d: DISCONNECTED", i);
 			skin->drawStr(clientCanvas, 1, 15, y + dy, str); dy += 10;
-			skin->drawStr(clientCanvas, 1, 15, y + dy, "FW-VER :"); dy += 10;
-			skin->drawStr(clientCanvas, 1, 15, y + dy, "CHIP   :"); dy += 10;
-			skin->drawStr(clientCanvas, 1, 15, y + dy, "CLOCK  :"); dy += 10;
+			//skin->drawStr(clientCanvas, 1, 15, y + dy, "FW-VER :"); dy += 10;
+			//skin->drawStr(clientCanvas, 1, 15, y + dy, "CHIP   :"); dy += 10;
+			//skin->drawStr(clientCanvas, 1, 15, y + dy, "CLOCK  :"); dy += 10;
 			//skin->drawStr( clientCanvas, 1, 15, y+dy, "SSG-VOL:" ); dy+=10;
-			skin->drawStr(clientCanvas, 1, 15, y + dy, "SPEED  :"); dy += 10;
+			//skin->drawStr(clientCanvas, 1, 15, y + dy, "SPEED  :"); dy += 10;
 		}
 		y += modHeight;
 	}
 
 	if (sz == 0) {
-		skin->drawStr(clientCanvas, 0, 5, ch - 12, "NO DEVICE!");
+		skin->drawStr(clientCanvas, 0, 5, ch - 12, "NO DEVICE FOUND.");
 	}
 
 	// FPS
