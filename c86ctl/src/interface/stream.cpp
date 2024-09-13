@@ -17,6 +17,7 @@
 #include "chip/opl3.h"
 #include "chip/opll.h"
 #include "chip/tms3631.h"
+#include "chip/ymz280b.h"
 #include "chip/generic.h"
 #include "stream.h"
 
@@ -65,7 +66,8 @@ Stream* Stream::Build(BaseSoundModule* module)
 	case CHIP_Y8950ADPCM:
 	case CHIP_YM3526:
 	case CHIP_YM3812:
-	case CHIP_YMZ280B:
+	case CHIP_YMZ770C:
+	case CHIP_YMZ771:
 		chip = new CGenericChipBank1();
 		break;
 	case CHIP_YM2612:
@@ -78,6 +80,10 @@ Stream* Stream::Build(BaseSoundModule* module)
 
 	case CHIP_TMS3631RI104:
 		chip = new CTMS3631();
+		break;
+
+	case CHIP_YMZ280B:
+		chip = new CYMZ280B();
 		break;
 	}
 	// 未対応モジュールの場合を考慮

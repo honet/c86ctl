@@ -14,6 +14,7 @@
 #include "chip/opl3.h"
 #include "chip/opll.h"
 #include "chip/tms3631.h"
+#include "chip/ymz280b.h"
 #include "chip/generic.h"
 #include "vis_c86wnd.h"
 
@@ -173,6 +174,29 @@ protected:
 
 private:
 	CTMS3631* pChip;
+};
+
+// --------------------------------------------------------
+class CVisC86YMZ280BReg : public CVisC86Reg
+{
+public:
+	CVisC86YMZ280BReg(CYMZ280B* pchip, int id) : CVisC86Reg(id), pChip(pchip) {
+		TCHAR str[40];
+		_stprintf_s(str, _T("C86 YMZ280B REG%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _T("[%d] YMZ280B REGISTER VIEW"), id);
+		windowTitle = str;
+
+		_windowWidth = 284;
+		_windowHeight = 172;
+	}
+	~CVisC86YMZ280BReg() {}
+
+protected:
+	virtual void onPaintClient(void);
+
+private:
+	CYMZ280B* pChip;
 };
 
 // --------------------------------------------------------

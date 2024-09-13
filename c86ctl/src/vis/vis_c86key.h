@@ -12,6 +12,7 @@
 #include "chip/opn3l.h"
 #include "chip/opm.h"
 #include "chip/tms3631.h"
+#include "chip/ymz280b.h"
 #include "vis_c86wnd.h"
 
 namespace c86ctl{
@@ -179,6 +180,44 @@ protected:
 //protected:
 //	CVisMuteSwPtr muteSw[14];
 //	CVisSoloSwPtr soloSw[14];
+};
+
+// --------------------------------------------------------
+class CVisC86YMZ280BKey : public CVisC86Key
+{
+public:
+	CVisC86YMZ280BKey(CYMZ280B* pchip, int id) : CVisC86Key(id), pChip(pchip)
+	{
+		_windowWidth = 290 + 64 + 3 + 4;// 334;
+		_windowHeight = 310;
+
+		TCHAR str[40];
+		_stprintf_s(str, _countof(str), _T("YMZ280B KEY%d"), id);
+		windowClass = str;
+		_stprintf_s(str, _countof(str), _T("[%d] YMZ280B KEYBOARD VIEW"), id);
+		windowTitle = str;
+	}
+	~CVisC86YMZ280BKey() {}
+
+protected:
+	virtual bool create(HWND parent = 0);
+	virtual int getId(void) { return id; }
+	virtual void onPaintClient(void);
+	virtual void onKeyDown(DWORD keycode);
+
+protected:
+	void drawADPCMTrackView(IVisBitmap* canvas, int ltx, int lty, int trNo, bool isMute);
+
+protected:
+	//	int id;
+	int _windowWidth;
+	int _windowHeight;
+
+protected:
+	CVisMuteSwPtr muteSw[8];
+	CVisSoloSwPtr soloSw[8];
+
+	CYMZ280B* pChip;
 };
 
 // --------------------------------------------------------

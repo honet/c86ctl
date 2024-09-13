@@ -151,6 +151,17 @@ void CVisC86TMS3631Reg::onPaintClient()
 	}
 }
 
+void c86ctl::vis::CVisC86YMZ280BReg::onPaintClient(void)
+{
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
+
+	if (pChip) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pChip->reg, pChip->regATime);
+	}
+}
+
 void CVisC86Generic1Reg::onPaintClient()
 {
 	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
@@ -190,6 +201,8 @@ CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
 		return CVisC86RegPtr( new CVisC86OPLLReg(dynamic_cast<COPLL*>(pchip), id));
 	} else if (typeid(*pchip) == typeid(CTMS3631)) {
 		return CVisC86RegPtr(new CVisC86TMS3631Reg(dynamic_cast<CTMS3631*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CYMZ280B)) {
+		return CVisC86RegPtr(new CVisC86YMZ280BReg(dynamic_cast<CYMZ280B*>(pchip), id));
 	} else if (typeid(*pchip) == typeid(CGenericChipBank1)){
 		return CVisC86RegPtr( new CVisC86Generic1Reg(dynamic_cast<CGenericChipBank1*>(pchip), id));
 	} else if (typeid(*pchip) == typeid(CGenericChipBank2)){

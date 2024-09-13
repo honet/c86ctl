@@ -133,6 +133,10 @@ bool CVisC86Main::update()
 			info[i].module_name.assign("YM3438"); break;
 		case CHIP_TMS3631RI104:
 			info[i].module_name.assign("TMS3631-RI104(REMAP)"); break;
+		case CHIP_YMZ770C:
+			info[i].module_name.assign("YMZ770C"); break;
+		case CHIP_YMZ771:
+			info[i].module_name.assign("YMZ771"); break;
 		}
 
 		GimicWinUSB::GimicModuleWinUSB* gimic_module = NULL;
@@ -295,7 +299,9 @@ bool CVisC86Main::update()
 
 		if (info[i].chiptype == CHIP_OPNA || info[i].chiptype == CHIP_YM2608NOADPCM ||
 			info[i].chiptype == CHIP_OPN3L ||
-			info[i].chiptype == CHIP_OPM || info[i].chiptype == CHIP_TMS3631RI104) {
+			info[i].chiptype == CHIP_OPM || info[i].chiptype == CHIP_TMS3631RI104
+			|| info[i].chiptype == CHIP_YMZ280B
+			) {
 
 			_sntprintf_s(key, _countof(key), KEYBUFLEN, INIKEY_KEYWND, i);
 			pinfo->keyView = visC86KeyViewFactory(s->chip, i);
@@ -304,7 +310,13 @@ bool CVisC86Main::update()
 				pinfo->checkKey->setCheck(0, false);
 			});
 
-			pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this, 180, y, "KEYBOARD"));
+			switch (info[i].chiptype) {
+			case CHIP_YMZ280B:
+				pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this, 180, y, "TRACK"));
+				break;
+			default:
+				pinfo->checkKey = CVisCheckBoxPtr(new CVisCheckBox(this, 180, y, "KEYBOARD"));
+			}
 			pinfo->checkKey->changeEvent.push_back(
 				[this, pinfo, i](CVisWidget* w) {
 				TCHAR key[KEYBUFLEN];

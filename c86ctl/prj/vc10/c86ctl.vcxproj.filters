@@ -124,6 +124,9 @@
     <ClCompile Include="..\..\src\interface\if_c86usb_winusb.cpp">
       <Filter>interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\chip\ymz280b.cpp">
+      <Filter>module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\win\config.h">
@@ -244,6 +247,9 @@
       <Filter>module</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\chip\tms3631.h">
+      <Filter>module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\chip\ymz280b.h">
       <Filter>module</Filter>
     </ClInclude>
   </ItemGroup>

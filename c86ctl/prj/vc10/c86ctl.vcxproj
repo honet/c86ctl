@@ -185,6 +185,7 @@ c:\ruby\bin\ruby verup.rb</Command>
     <ClCompile Include="..\..\src\chip\opna.cpp" />
     <ClCompile Include="..\..\src\chip\opnx.cpp" />
     <ClCompile Include="..\..\src\chip\opx.cpp" />
+    <ClCompile Include="..\..\src\chip\ymz280b.cpp" />
     <ClCompile Include="..\..\src\common\ringbuff.cpp" />
     <ClCompile Include="..\..\src\interface\delay_filter.cpp" />
     <ClCompile Include="..\..\src\interface\if_c86usb_winusb.cpp" />
@@ -222,6 +223,7 @@ c:\ruby\bin\ruby verup.rb</Command>
     <ClInclude Include="..\..\src\chip\opnx.h" />
     <ClInclude Include="..\..\src\chip\opx.h" />
     <ClInclude Include="..\..\src\chip\tms3631.h" />
+    <ClInclude Include="..\..\src\chip\ymz280b.h" />
     <ClInclude Include="..\..\src\common\mydef.h" />
     <ClInclude Include="..\..\src\common\ringbuff.h" />
     <ClInclude Include="..\..\src\common\withlock.h" />

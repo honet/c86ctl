@@ -875,6 +875,127 @@ void CVisC86TMS3631Key::drawTrackView(IVisBitmap* canvas, int ltx, int lty, int 
 }
 
 // --------------------------------------------------------
+bool CVisC86YMZ280BKey::create(HWND parent)
+{
+	if (!CVisWnd::create(_windowWidth, _windowHeight,
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent))
+		return false;
+
+	::ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+
+	for (int i = 0; i < 8; i++) {
+		muteSw[i] = CVisMuteSwPtr(new CVisMuteSw(this, 5 + 28, 7 + i * 35));
+		muteSw[i]->getter = [this, i]()-> int { return this->pChip->getPartMask(i); };
+		muteSw[i]->setter = [this, i](int mask) { this->pChip->setPartMask(i, mask ? true : false); };
+		widgets.push_back(muteSw[i]);
+
+		soloSw[i] = CVisSoloSwPtr(new CVisSoloSw(this, 5 + 28 + 16, 7 + i * 35));
+		soloSw[i]->getter = [this, i]()-> int { return this->pChip->getPartSolo(i); };
+		soloSw[i]->setter = [this, i](int mask) { this->pChip->setPartSolo(i, mask ? true : false); };
+		widgets.push_back(soloSw[i]);
+	}
+	return true;
+}
+
+void CVisC86YMZ280BKey::onPaintClient(void)
+{
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
+
+	if (pChip) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		int tr = 0;
+		for (int i = 0; i < 8; i++) {
+			drawADPCMTrackView(clientCanvas, sx, sy, tr, false);
+			sy += 35; tr++;
+		}
+	}
+}
+
+void CVisC86YMZ280BKey::onKeyDown(DWORD keycode)
+{
+	bool sw;
+	int partID;
+
+	if (::GetAsyncKeyState(VK_SHIFT) < 0) {
+		switch (keycode) {
+		case '1': //PCM1
+		case '2': //PCM2
+		case '3': //PCM3
+		case '4': //PCM4
+		case '5': //PCM5
+		case '6': //PCM6
+		case '7': //PCM7
+		case '8': //PCM8
+			partID = (int)keycode - '1';
+			sw = pChip->getPartSolo(partID);
+			pChip->setPartSolo(partID, sw ? false : true);
+			break;
+		case '0': //全クリア
+			for (int i = 0; i < 8; i++)
+				pChip->setPartSolo(i, false);
+			break;
+		}
+	}
+	else {
+		switch (keycode) {
+		case '1': //PCM1
+		case '2': //PCM2
+		case '3': //PCM3
+		case '4': //PCM4
+		case '5': //PCM5
+		case '6': //PCM6
+		case '7': //PCM7
+		case '8': //PCM8
+			partID = (int)keycode - '1';
+			sw = pChip->getPartMask(partID);
+			pChip->setPartMask(partID, sw ? false : true);
+			break;
+		case '0': //全クリア
+			for (int i = 0; i < 8; i++)
+				pChip->setPartMask(i, false);
+			break;
+		}
+	}
+}
+
+void c86ctl::vis::CVisC86YMZ280BKey::drawADPCMTrackView(IVisBitmap* canvas, int ltx, int lty, int trNo, bool isMute)
+{
+	int sy = 0, level;
+	char str[64];
+	CVisC86Skin* skin = &gVisSkin;
+	//const int cx=6;
+
+	CYMZ280BAdpcm* adpcm = pChip->adpcm;
+	sprintf_s(str, sizeof(str), "%02d", trNo + 1);
+	skin->drawNumStr1(canvas, ltx + 5, lty + sy + 2, str);
+	sprintf_s(str, sizeof(str), "PCM/ADPCM-CH%d", trNo + 1);
+	skin->drawStr(canvas, 0, ltx + 5 + 60, lty + sy + 5, str);
+
+	UINT col_mid = skin->getPal(CVisC86Skin::IDCOL_MID);
+	UINT col_light = skin->getPal(CVisC86Skin::IDCOL_KEYLIGHT);
+
+	visDrawLine(canvas, ltx, lty + sy + 5 + 10, ltx + 280, lty + sy + 5 + 10, col_mid);
+	visDrawLine(canvas, ltx + 280, lty + sy + 5 + 10, ltx + 280, lty + sy + 5 + 30, col_mid);
+	visDrawLine(canvas, ltx + 280, lty + sy + 5 + 30, ltx, lty + sy + 5 + 30, col_mid);
+	visDrawLine(canvas, ltx, lty + sy + 5 + 30, ltx, lty + sy + 5 + 10, col_mid);
+
+	UINT stAddr = adpcm->getStartAddr((UCHAR)trNo) * 280 / (1024 * 1024 * 16);
+	UINT edAddr = adpcm->getEndAddr((UCHAR)trNo) * 280 / (1024 * 1024 * 16);
+	for (int i = 0; i < 280; i++) {
+		if (adpcm->minimap[i * 512 / 280] & 0x1) {
+			visDrawLine(canvas, ltx + i, lty + sy + 5 + 10, ltx + i, lty + sy + 5 + 30, col_mid);
+		}
+		if (adpcm->isOn((UCHAR)trNo)) {
+			if (stAddr <= (UINT)i && (UINT)i <= edAddr)
+				visDrawLine(canvas, ltx + i, lty + sy + 5 + 10, ltx + i, lty + sy + 5 + 30, col_light);
+		}
+	}
+
+	level = (pChip->getMixedMask(trNo)) ? 0 : adpcm->getKeyOnLevel((UCHAR)trNo);
+	skin->drawHBar(canvas, 290, lty + sy + 15, level, 0);
+}
+
+// --------------------------------------------------------
 CVisC86KeyPtr c86ctl::vis::visC86KeyViewFactory(Chip *pchip, int id)
 {
 	if (typeid(*pchip) == typeid(COPNA)){
@@ -885,6 +1006,8 @@ CVisC86KeyPtr c86ctl::vis::visC86KeyViewFactory(Chip *pchip, int id)
 		return CVisC86KeyPtr(new CVisC86OPMKey(dynamic_cast<COPM*>(pchip), id));
 	} else if (typeid(*pchip) == typeid(CTMS3631)) {
 		return CVisC86KeyPtr(new CVisC86TMS3631Key(dynamic_cast<CTMS3631*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CYMZ280B)) {
+		return CVisC86KeyPtr(new CVisC86YMZ280BKey(dynamic_cast<CYMZ280B*>(pchip), id));
 	}
 	return 0;
 }

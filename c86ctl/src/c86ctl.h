@@ -63,6 +63,9 @@ enum ChipType {
     CHIP_YM3438         = 0x00021,
 
 	CHIP_TMS3631RI104   = 0x00023,
+
+	CHIP_YMZ770C        = 0x00030,
+	CHIP_YMZ771         = 0x00031,
 };
 
 
