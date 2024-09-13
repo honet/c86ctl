@@ -194,7 +194,7 @@ public:
 		TCHAR str[40];
 		_stprintf_s(str, _countof(str), _T("YMZ280B KEY%d"), id);
 		windowClass = str;
-		_stprintf_s(str, _countof(str), _T("[%d] YMZ280B KEYBOARD VIEW"), id);
+		_stprintf_s(str, _countof(str), _T("[%d] YMZ280B TRACK VIEW"), id);
 		windowTitle = str;
 	}
 	~CVisC86YMZ280BKey() {}
