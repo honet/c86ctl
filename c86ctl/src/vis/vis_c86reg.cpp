@@ -176,24 +176,24 @@ void CVisC86Generic2Reg::onPaintClient()
 }
 
 // --------------------------------------------------------
-CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip *pchip, int id)
+CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip* pchip, int id)
 {
-	if (typeid(*pchip) == typeid(COPNA)){
-		return CVisC86RegPtr( new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id ));
-	} else if (typeid(*pchip) == typeid(COPN3L)){
-		return CVisC86RegPtr( new CVisC86OPN3LReg(dynamic_cast<COPN3L*>(pchip), id));
-	} else if (typeid(*pchip) == typeid(COPM)){
-		return CVisC86RegPtr( new CVisC86OPMReg(dynamic_cast<COPM*>(pchip), id));
-	} else if (typeid(*pchip) == typeid(COPL3)){
-		return CVisC86RegPtr( new CVisC86OPL3Reg(dynamic_cast<COPL3*>(pchip), id));
-	} else if (typeid(*pchip) == typeid(COPLL)){
-		return CVisC86RegPtr( new CVisC86OPLLReg(dynamic_cast<COPLL*>(pchip), id));
+	if (typeid(*pchip) == typeid(COPNA)) {
+		return CVisC86RegPtr(new CVisC86OPNAReg(dynamic_cast<COPNA*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPN3L)) {
+		return CVisC86RegPtr(new CVisC86OPN3LReg(dynamic_cast<COPN3L*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPM)) {
+		return CVisC86RegPtr(new CVisC86OPMReg(dynamic_cast<COPM*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPL3)) {
+		return CVisC86RegPtr(new CVisC86OPL3Reg(dynamic_cast<COPL3*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPLL)) {
+		return CVisC86RegPtr(new CVisC86OPLLReg(dynamic_cast<COPLL*>(pchip), id));
 	} else if (typeid(*pchip) == typeid(CTMS3631)) {
 		return CVisC86RegPtr(new CVisC86TMS3631Reg(dynamic_cast<CTMS3631*>(pchip), id));
-	} else if (typeid(*pchip) == typeid(CGenericChipBank1)){
-		return CVisC86RegPtr( new CVisC86Generic1Reg(dynamic_cast<CGenericChipBank1*>(pchip), id));
-	} else if (typeid(*pchip) == typeid(CGenericChipBank2)){
-		return CVisC86RegPtr( new CVisC86Generic2Reg(dynamic_cast<CGenericChipBank2*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CGenericChipBank1)) {
+		return CVisC86RegPtr(new CVisC86Generic1Reg(dynamic_cast<CGenericChipBank1*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(CGenericChipBank2)) {
+		return CVisC86RegPtr(new CVisC86Generic2Reg(dynamic_cast<CGenericChipBank2*>(pchip), id));
 	}
 	return 0;
 }

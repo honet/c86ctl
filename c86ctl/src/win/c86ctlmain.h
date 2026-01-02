@@ -59,8 +59,8 @@ public:
 
 public:
 	int reset(void);
-	void out(UINT addr, UCHAR data);
-	UCHAR in(UINT addr);
+	void out(UINT chipidx, UINT addr, UCHAR data);
+	UCHAR in(UINT chipidx, UINT addr);
 
 public:
 	static INT init(HINSTANCE h);

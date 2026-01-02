@@ -464,20 +464,18 @@ HRESULT C86CtlMain::getChipInterface(int id, REFIID riid, void** ppi)
 	return result;
 }
 
-void C86CtlMain::out(UINT addr, UCHAR data)
+void C86CtlMain::out(UINT chipidx, UINT addr, UCHAR data)
 {
-	if (gLogicalDevices.size()) {
-		gLogicalDevices[0]->out(addr, data);
+	if (chipidx < gLogicalDevices.size()) {
+		gLogicalDevices[chipidx]->out(addr, data);
 	}
 }
 
-UCHAR C86CtlMain::in(UINT addr)
+UCHAR C86CtlMain::in(UINT chipidx, UINT addr)
 {
-	if (gLogicalDevices.size()) {
-		return gLogicalDevices[0]->in(addr);
+	if (chipidx < gLogicalDevices.size()) {
+		return gLogicalDevices[chipidx]->in(addr);
 	} else
 		return 0;
 }
-
-
 

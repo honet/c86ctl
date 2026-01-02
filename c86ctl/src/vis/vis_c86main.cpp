@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -152,8 +152,15 @@ bool CVisC86Main::update()
 		} else {
 			C86WinUSB::C86ModuleWinUSB* c86 = dynamic_cast<C86WinUSB::C86ModuleWinUSB*>(s->module);
 			if (c86) {
-				char slotname[] = { 'A', 'B', 'C', 'D' };
-				sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
+				int devtype = c86->getDeviceType();
+				if (devtype == 0) {
+					char slotname[] = { 'A', 'B', 'C', 'D' };
+					sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
+				} else if (devtype == 1) {
+					sprintf(str, "picoC86(%d)", c86->getChipIndex());
+				} else {
+					sprintf(str, "unknown C86WinUsb");
+				}
 				info[i].device_name.assign(str);
 
 				switch (c86->getBoardType() & 0xffff) {
@@ -237,6 +244,8 @@ bool CVisC86Main::update()
 					info[i].board_name.assign("WGS98S"); break;
 				case CBUS_BOARD_SXM_F:
 					info[i].board_name.assign("SXM-F"); break;
+				case CBUS_BOARD_SRN_F:
+					info[i].board_name.assign("SRN-F"); break;
 				case CBUS_BOARD_SRB_G:
 					info[i].board_name.assign("SRB-G"); break;
 				case CBUS_BOARD_MIDI_ORCHESTRA_MIDI3:

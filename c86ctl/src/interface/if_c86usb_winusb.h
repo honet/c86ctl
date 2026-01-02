@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	gimic コントロール WinUSB版
 	
@@ -29,6 +29,11 @@ namespace c86ctl {
 // {b0320d09-0791-4c3f-a741-9ef97c8885d6}
 DEFINE_GUID(GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET,
 	0xb0320d09, 0x0791, 0x4c3f, 0xa7, 0x41, 0x9e, 0xf9, 0x7c, 0x88, 0x85, 0xd6);
+
+// picoC86 {66daa8f4-3ef9-403c-b7e3-beee0c02ad3e}
+DEFINE_GUID(GUID_DEVINTERFACE_PICOC86_WINUSB_TARGET,
+	0x66daa8f4, 0x3ef9, 0x403c, 0xb7, 0xe3, 0xbe, 0xee, 0x0c, 0x02, 0xad, 0x3e);
+
 
 class C86WinUSB : public BaseSoundDevice, public IFirmwareVersionInfo
 {
@@ -62,6 +67,8 @@ public:
 		int getSlotIndex() { return slotidx; }
 		int getChipIndex() { return chipidx; }
 		CBUS_BOARD_TYPE getBoardType();
+
+		int getDeviceType() { return devif->getDeviceType(); }
 
 	private:
 		C86WinUSB* devif;
@@ -144,6 +151,11 @@ private:
 	UINT cps, cal, calcount;
 
 	LARGE_INTEGER freq;
+
+private:
+	int deviceType;
+public:
+	int getDeviceType() { return deviceType; }
 
 private:
 	static const int NMAXCHIP = 8;

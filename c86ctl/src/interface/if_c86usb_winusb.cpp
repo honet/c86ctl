@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	C86USB コントロール WinUSB版
 	
@@ -97,7 +97,7 @@ using namespace c86ctl;
 ----------------------------------------------------------------------------*/
 C86WinUSB::C86WinUSB()
 	: hDev(0), hWinUsb(0), cps(0), cal(0), calcount(0),
-	inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0), nmodules(0)
+	inPipeId(0), outPipeId(0), inPipeMaxPktSize(0), outPipeMaxPktSize(0), nmodules(0), deviceType(0)
 {
 	rbuff.alloc(PIPE_BUFFER_SIZE);
 	::InitializeCriticalSection(&csection);
@@ -155,6 +155,23 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 		return false;
 	}
 
+	ULONG lengthTransferred;
+	BYTE buffer[512];
+	int nslot = 2;
+	deviceType = 0;
+	BOOL success = WinUsb_GetDescriptor(hNewWinUsb, USB_STRING_DESCRIPTOR_TYPE,
+		desc.iInterface, 0x0409/*LanguageID*/, &buffer[0], sizeof(buffer), &lengthTransferred);
+
+	if (success) {
+		USB_STRING_DESCRIPTOR* pstrDescriptor = (USB_STRING_DESCRIPTOR*)&buffer[0];
+		std::wstring str = std::wstring(pstrDescriptor->bString, (pstrDescriptor->bLength - 2) / 2);
+		if (str.rfind(L"picoC86") == 0) {
+			deviceType = 1;
+			nslot = 1;
+		}
+	}
+
+
 	for (int i = 0; i < desc.bNumEndpoints; i++) {
 		WINUSB_PIPE_INFORMATION pipeInfo;
 		if (WinUsb_QueryPipe(hNewWinUsb, 0, (UCHAR)i, &pipeInfo)) {
@@ -186,7 +203,7 @@ bool C86WinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 	// Module情報取得 -----------
 	// TODO: とりあえず。
 	int n = 0;
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < nslot; i++) {
 		BOARD_INFO binfo;
 		int ret = getBoardInfo(i, &binfo);
 		if (ret < 0)
@@ -223,81 +240,79 @@ int C86WinUSB::UpdateInstances(withlock< std::vector< std::shared_ptr<BaseSoundD
 	devices.lock();
 	std::for_each(devices.begin(), devices.end(), [](std::shared_ptr<BaseSoundDevice> x) { x->checkConnection(); });
 
-	BOOL bResult = TRUE;
-
-	HDEVINFO devinf = INVALID_HANDLE_VALUE;
-	SP_DEVICE_INTERFACE_DATA spid;
-
-
-	devinf = SetupDiGetClassDevs(
+	LPGUID guids[] = {
 		(LPGUID)&GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET,
-		NULL,
-		0,
-		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+		(LPGUID)&GUID_DEVINTERFACE_PICOC86_WINUSB_TARGET
+	};
 
-	if (devinf) {
-		for (int i = 0; ; i++) {
-			ZeroMemory(&spid, sizeof(spid));
-			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-			if (!SetupDiEnumDeviceInterfaces(devinf, NULL,
-				(LPGUID)&GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET, i, &spid)) {
-				break;
-			}
+	int nguids = sizeof(guids) / sizeof(guids[0]);
+	for (int k=0; k<nguids; k++) {
+		HDEVINFO devinf = SetupDiGetClassDevs(guids[k], NULL, 0, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
-			unsigned long sz;
-			std::basic_string<TCHAR> devpath;
-
-			// 必要なバッファサイズ取得
-			bResult = SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, NULL);
-			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
-			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
-
-			// デバイスノード取得
-			if (!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, NULL)) {
-				free(dev_det);
-				break;
-			}
-
-			devpath = dev_det->DevicePath;
-			free(dev_det);
-			dev_det = NULL;
-
-			// 既にインスタンスがあるかどうか検索
-			auto it = std::find_if(devices.begin(), devices.end(),
-				[devpath](std::shared_ptr<BaseSoundDevice> x) -> bool {
-				C86WinUSB* gdev = dynamic_cast<C86WinUSB*>(x.get());
-				if (!gdev) return false;
-				if (gdev->devPath != devpath) return false;
-				return true;
-			});
-
-			if (it == devices.end()) {
-				C86WinUSB* dev = new C86WinUSB();
-				if (dev) {
-					if (dev->OpenDevice(devpath)) {
-						devices.push_back(BaseSoundDevicePtr(dev));
-					} else {
-						delete dev;
-					}
+		if (devinf) {
+			for (int i = 0; ; i++) {
+				SP_DEVICE_INTERFACE_DATA spid;
+				ZeroMemory(&spid, sizeof(spid));
+				spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+				if (!SetupDiEnumDeviceInterfaces(devinf, NULL, guids[k], i, &spid)) {
+					break;
 				}
-			} else if (!(*it)->isValid()) {
-				C86WinUSB* dev = dynamic_cast<C86WinUSB*>(it->get());
-				if (!dev->OpenDevice(devpath)) {
-					// OpenDeviceが失敗した場合は音源モジュールが前回接続時と
-					// 異なっているため、別インスタンスを生成する
-					C86WinUSB* newdev = new C86WinUSB();
-					if (newdev) {
-						if (newdev->OpenDevice(devpath)) {
-							devices.push_back(BaseSoundDevicePtr(newdev));
+
+				unsigned long sz;
+				std::basic_string<TCHAR> devpath;
+
+				// 必要なバッファサイズ取得
+				BOOL bResult = SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, NULL);
+				PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
+				dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
+
+				// デバイスノード取得
+				if (!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, NULL)) {
+					free(dev_det);
+					break;
+				}
+
+				devpath = dev_det->DevicePath;
+				free(dev_det);
+				dev_det = NULL;
+
+				// 既にインスタンスがあるかどうか検索
+				auto it = std::find_if(devices.begin(), devices.end(),
+					[devpath](std::shared_ptr<BaseSoundDevice> x) -> bool {
+					C86WinUSB* gdev = dynamic_cast<C86WinUSB*>(x.get());
+					if (!gdev) return false;
+					if (gdev->devPath != devpath) return false;
+					return true;
+				});
+
+				if (it == devices.end()) {
+					C86WinUSB* dev = new C86WinUSB();
+					if (dev) {
+						if (dev->OpenDevice(devpath)) {
+							devices.push_back(BaseSoundDevicePtr(dev));
 						} else {
-							delete newdev;
+							delete dev;
+						}
+					}
+				} else if (!(*it)->isValid()) {
+					C86WinUSB* dev = dynamic_cast<C86WinUSB*>(it->get());
+					if (!dev->OpenDevice(devpath)) {
+						// OpenDeviceが失敗した場合は音源モジュールが前回接続時と
+						// 異なっているため、別インスタンスを生成する
+						C86WinUSB* newdev = new C86WinUSB();
+						if (newdev) {
+							if (newdev->OpenDevice(devpath)) {
+								devices.push_back(BaseSoundDevicePtr(newdev));
+							} else {
+								delete newdev;
+							}
 						}
 					}
 				}
 			}
-		}
 
-		SetupDiDestroyDeviceInfoList(devinf);
+			SetupDiDestroyDeviceInfoList(devinf);
+		}
 	}
 
 	devices.unlock();

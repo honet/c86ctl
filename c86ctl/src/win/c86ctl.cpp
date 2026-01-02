@@ -48,7 +48,7 @@ BOOL APIENTRY DllMain(
 
 
 // ----------------------------------------------------------------------
-// 外部インターフェイス
+// 外部インターフェイス(C++)
 HRESULT WINAPI CreateInstance(REFIID riid, void** ppi)
 {
 	// C86Ctlが単一インスタンスなので手抜き実装。
@@ -56,7 +56,7 @@ HRESULT WINAPI CreateInstance(REFIID riid, void** ppi)
 }
 
 // ---------------------------------------------------
-// 以下は後方互換のためのnative I/F
+// Cインタフェイス
 int WINAPI c86ctl_initialize(void)
 {
 	return c86ctl::GetC86CtlMain()->initialize();
@@ -72,13 +72,48 @@ int WINAPI c86ctl_reset(void)
 	return c86ctl::GetC86CtlMain()->reset();
 }
 
+int WINAPI c86ctl_get_num_chips()
+{
+	c86ctl::C86CtlMain *c86 = c86ctl::GetC86CtlMain();
+	return c86->getNumberOfChip();
+}
+
+int WINAPI c86ctl_get_chip_type(int chipidx)
+{
+	c86ctl::C86CtlMain *c86 = c86ctl::GetC86CtlMain();
+	if (chipidx<0 || c86->getNumberOfChip()<=chipidx)
+		return -1;
+
+	c86ctl::ChipType type = c86ctl::ChipType::CHIP_UNKNOWN;
+	c86ctl::IRealChip3 *chip = 0;
+	if (NOERROR == c86->getChipInterface(chipidx, c86ctl::IID_IRealChip3, (void**)&chip)) {
+		chip->getChipType(&type);
+		chip->Release();
+	} else {
+		return -1;
+	}
+	return type;
+}
+
+void WINAPI c86ctl_outex(UINT chipidx, UINT addr, UCHAR data)
+{
+	c86ctl::GetC86CtlMain()->out(chipidx, addr, data);
+}
+
+int WINAPI c86ctl_inex(UINT chipidx, UINT addr, UCHAR data)
+{
+	return c86ctl::GetC86CtlMain()->in(chipidx, addr);
+}
+
+// ---------------------------------------------------
+// 以下は後方互換のためのnative I/F
 void WINAPI c86ctl_out(UINT addr, UCHAR data)
 {
-	c86ctl::GetC86CtlMain()->out(addr, data);
+	c86ctl::GetC86CtlMain()->out(0, addr, data);
 }
 
 UCHAR WINAPI c86ctl_in(UINT addr)
 {
-	return c86ctl::GetC86CtlMain()->in(addr);
+	return c86ctl::GetC86CtlMain()->in(0, addr);
 }
 

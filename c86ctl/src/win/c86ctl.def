@@ -6,4 +6,8 @@ EXPORTS
 	c86ctl_reset
 	c86ctl_out
 	c86ctl_in
+	c86ctl_get_num_chips
+	c86ctl_get_chip_type
+	c86ctl_outex
+	c86ctl_inex
 

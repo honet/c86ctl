@@ -187,10 +187,14 @@ extern "C" {
 
 HRESULT WINAPI CreateInstance( REFIID riid, void** ppi );
 
+int WINAPI c86ctl_initialize(void);
+int WINAPI c86ctl_deinitialize(void);
+int WINAPI c86ctl_reset(void);
+int WINAPI c86ctl_get_num_chips();
+int WINAPI c86ctl_get_chip_type(int chipidx);
+int WINAPI c86ctl_outex(UINT chipidx, UINT addr, UCHAR data);
+int WINAPI c86ctl_inex(UINT chipidx, UINT addr, UCHAR data);
 
-int WINAPI c86ctl_initialize(void);					// DEPRECATED
-int WINAPI c86ctl_deinitialize(void);				// DEPRECATED
-int WINAPI c86ctl_reset(void);						// DEPRECATED
 void WINAPI c86ctl_out( UINT addr, UCHAR data );	// DEPRECATED
 UCHAR WINAPI c86ctl_in( UINT addr );				// DEPRECATED
 
