@@ -78,11 +78,11 @@ const int opl3_clocklist[] = {
 };
 
 
-INT_PTR CALLBACK CVisDlgConfig::dlgProc(HWND hWnd , UINT msg , WPARAM wp , LPARAM lp)
+INT_PTR CALLBACK CVisDlgConfig::dlgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg) {
 	case WM_ACTIVATE:
-		switch(LOWORD(wp)){
+		switch (LOWORD(wp)) {
 		case WA_CLICKACTIVE:
 		case WA_ACTIVE:
 			C86CtlMain::setActiveDlg(hDlg);
@@ -96,21 +96,20 @@ INT_PTR CALLBACK CVisDlgConfig::dlgProc(HWND hWnd , UINT msg , WPARAM wp , LPARA
 		break;
 
 	case WM_COMMAND:
-		onCommand((HWND)lp, wp&0xffff, (wp>>16)&0xffff);
+		onCommand((HWND)lp, wp & 0xffff, (wp >> 16) & 0xffff);
 		break;
 
-	case WM_NOTIFY:
-		{
-			NMHDR *nmhdr = reinterpret_cast<NMHDR*>(lp);
-			if (nmhdr->idFrom == IDC_TAB_DEVICE) {
-				switch(nmhdr->code){
-				case TCN_SELCHANGE:
-					break;
-				}
+	case WM_NOTIFY: {
+		NMHDR* nmhdr = reinterpret_cast<NMHDR*>(lp);
+		if (nmhdr->idFrom == IDC_TAB_DEVICE) {
+			switch (nmhdr->code) {
+			case TCN_SELCHANGE:
+				break;
 			}
 		}
-		break;
-		
+	}
+	break;
+
 	case WM_INITDIALOG:
 		onInitDialog(hWnd);
 		break;
@@ -134,39 +133,40 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 	TCHAR str[bufsz];
 
 	Button_SetCheck(GetDlgItem(hWnd, IDC_CHECK_SHOWVIS), BST_CHECKED);
-	
+
 	const int nMaxModules = 4;
-	const UINT delay_editid[nMaxModules] = { IDC_EDIT_DELAY0, IDC_EDIT_DELAY1, IDC_EDIT_DELAY2, IDC_EDIT_DELAY3 };
-	const UINT delay_spinid[nMaxModules] = { IDC_SPIN_DELAY0, IDC_SPIN_DELAY1, IDC_SPIN_DELAY2, IDC_SPIN_DELAY3 };
-	const UINT ssgvol_editid[nMaxModules] = { IDC_EDIT_SSGVOL0, IDC_EDIT_SSGVOL1, IDC_EDIT_SSGVOL2, IDC_EDIT_SSGVOL3 };
-	const UINT ssgvol_spinid[nMaxModules] = { IDC_SPIN_SSGVOL0, IDC_SPIN_SSGVOL1, IDC_SPIN_SSGVOL2, IDC_SPIN_SSGVOL3 };
-	const UINT clocks_cmbid[nMaxModules] = { IDC_COMBO_PLLCLOCK0, IDC_COMBO_PLLCLOCK1, IDC_COMBO_PLLCLOCK2, IDC_COMBO_PLLCLOCK3 };
+	const UINT delay_editid[nMaxModules] = {IDC_EDIT_DELAY0, IDC_EDIT_DELAY1, IDC_EDIT_DELAY2, IDC_EDIT_DELAY3};
+	const UINT delay_spinid[nMaxModules] = {IDC_SPIN_DELAY0, IDC_SPIN_DELAY1, IDC_SPIN_DELAY2, IDC_SPIN_DELAY3};
+	const UINT ssgvol_editid[nMaxModules] = {IDC_EDIT_SSGVOL0, IDC_EDIT_SSGVOL1, IDC_EDIT_SSGVOL2, IDC_EDIT_SSGVOL3};
+	const UINT ssgvol_spinid[nMaxModules] = {IDC_SPIN_SSGVOL0, IDC_SPIN_SSGVOL1, IDC_SPIN_SSGVOL2, IDC_SPIN_SSGVOL3};
+	const UINT clocks_cmbid[nMaxModules] = {
+		IDC_COMBO_PLLCLOCK0, IDC_COMBO_PLLCLOCK1, IDC_COMBO_PLLCLOCK2, IDC_COMBO_PLLCLOCK3
+	};
 
-	for( int i=0; i<nMaxModules; i++ ){
-
-		if(i<n){
+	for (int i = 0; i < nMaxModules; i++) {
+		if (i < n) {
 			auto stream = ctrl->getStream(i);
 			HWND hspin, hedit;
-			
+
 			hspin = GetDlgItem(hWnd, delay_spinid[i]);
 			EnableWindow(hspin,TRUE);
 			SendMessage(hspin, UDM_SETRANGE32, 0, 5000);
 
-			int delay=0;
+			int delay = 0;
 			stream->delay->getDelay(&delay);
 			_sntprintf(str, bufsz, _T("%d"), delay);
 			hedit = GetDlgItem(hWnd, delay_editid[i]);
 			EnableWindow(hedit,TRUE);
 			Edit_SetText(hedit, str);
 
-			UCHAR vol=0;
-			GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
-			if(gimic_module){
-
+			UCHAR vol = 0;
+			GimicWinUSB::GimicModuleWinUSB* gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->
+				module);
+			if (gimic_module) {
 				hspin = GetDlgItem(hWnd, ssgvol_spinid[i]);
 				EnableWindow(hspin,TRUE);
 				SendMessage(hspin, UDM_SETRANGE32, 0, 127);
-				
+
 				gimic_module->getSSGVolume(&vol);
 				_sntprintf(str, bufsz, _T("%d"), vol);
 				hedit = GetDlgItem(hWnd, ssgvol_editid[i]);
@@ -175,40 +175,40 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 
 
 				ChipType type = stream->module->getChipType();
-				const int *clklist = NULL;
-				switch(type){
-				case CHIP_OPM:  clklist = opm_clocklist; break;
+				const int* clklist = NULL;
+				switch (type) {
+				case CHIP_OPM: clklist = opm_clocklist; break;
 				case CHIP_OPNA: clklist = opna_clocklist; break;
 				case CHIP_OPL3: clklist = opl3_clocklist; break;
 				case CHIP_OPN3L: break; // unsupported.
-				case CHIP_OPLL:  break; // unsupported.
+				case CHIP_OPLL: break; // unsupported.
 				}
 
-			
+
 				HWND hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);
-				if( clklist ){
+				if (clklist) {
 					EnableWindow(hcmb, TRUE);
-					for(int i=0;;i++){
-						if( clklist[i]<0 ) break;
+					for (int i = 0;; i++) {
+						if (clklist[i] < 0) break;
 						_sntprintf(str, bufsz, _T("%d Hz"), clklist[i]);
-						int idx = ComboBox_AddItemData( hcmb, str );
-						if( idx != CB_ERR && idx != CB_ERRSPACE )
-							ComboBox_SetItemData( hcmb, idx, clklist[i] );
+						int idx = ComboBox_AddItemData(hcmb, str);
+						if (idx != CB_ERR && idx != CB_ERRSPACE)
+							ComboBox_SetItemData(hcmb, idx, clklist[i]);
 					}
-					
+
 					UINT clk;
 					gimic_module->getPLLClock(&clk);
-					for(int i=0;;i++){
-						if( clklist[i]<0 ) break;
-						if( clklist[i]==clk ){
+					for (int i = 0;; i++) {
+						if (clklist[i] < 0) break;
+						if (clklist[i] == clk) {
 							ComboBox_SetCurSel(hcmb, i);
 							break;
 						}
 					}
-				}else{
+				} else {
 					EnableWindow(hcmb, FALSE);
 				}
-			}else{
+			} else {
 				hspin = GetDlgItem(hWnd, ssgvol_spinid[i]);
 				EnableWindow(hspin,FALSE);
 				hedit = GetDlgItem(hWnd, ssgvol_editid[i]);
@@ -216,9 +216,8 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 				HWND hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);
 				EnableWindow(hcmb, FALSE);
 			}
-
-		}else{
-			HWND hspin,hedit,hcmb;
+		} else {
+			HWND hspin, hedit, hcmb;
 			hspin = GetDlgItem(hWnd, delay_spinid[i]);
 			EnableWindow(hspin, FALSE);
 			hedit = GetDlgItem(hWnd, delay_editid[i]);
@@ -230,7 +229,6 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 			hcmb = GetDlgItem(hWnd, clocks_cmbid[i]);
 			EnableWindow(hcmb,FALSE);
 		}
-
 	}
 	isInit = true;
 }
@@ -238,22 +236,22 @@ void CVisDlgConfig::onInitDialog(HWND hWnd)
 
 void CVisDlgConfig::onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	switch(notifyCode){
+	switch (notifyCode) {
 	case EN_CHANGE:
-		if( isInit ){
+		if (isInit) {
 			auto ctrl = GetC86CtlMain();
 			int n = ctrl->getNumberOfChip();
 			int index = static_cast<int>(id);
 
-			if (index>=n)
+			if (index >= n)
 				return;
 			auto stream = ctrl->getStream(index);
 			if (!stream->module->isValid())
 				return;
 
 			TCHAR buff[256];
-			int delay=0;
-			
+			int delay = 0;
+
 			Edit_GetText(hwnd, buff, sizeof(buff));
 			delay = _ttoi(buff);
 			stream->delay->setDelay(delay);
@@ -264,30 +262,30 @@ void CVisDlgConfig::onDelayEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 
 void CVisDlgConfig::onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	switch(notifyCode){
+	switch (notifyCode) {
 	case EN_CHANGE:
-		if( isInit ){
+		if (isInit) {
 			auto ctrl = GetC86CtlMain();
 			int n = ctrl->getNumberOfChip();
 			int index = static_cast<int>(id);
 
-			if (index>=n)
+			if (index >= n)
 				return;
 			auto stream = ctrl->getStream(index);
 			if (!stream->module->isValid())
 				return;
 
-			GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
-			if(!gimic_module)
+			GimicWinUSB::GimicModuleWinUSB* gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
+			if (!gimic_module)
 				return;
 
 			TCHAR buff[256];
-			UCHAR vol=0;
-			
+			UCHAR vol = 0;
+
 			Edit_GetText(hwnd, buff, sizeof(buff));
 			vol = (UCHAR)_ttoi(buff);
-			if( vol<0 ) vol = 0;
-			if( vol>127 ) vol = 127;
+			if (vol < 0) vol = 0;
+			if (vol > 127) vol = 127;
 			gimic_module->setSSGVolume(vol);
 		}
 		break;
@@ -296,24 +294,24 @@ void CVisDlgConfig::onSSGVolEditNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 
 void CVisDlgConfig::onPLLClockCmbNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	switch(notifyCode){
+	switch (notifyCode) {
 	case CBN_SELCHANGE:
-		if( isInit ){
+		if (isInit) {
 			auto ctrl = GetC86CtlMain();
 			int n = ctrl->getNumberOfChip();
 			int index = static_cast<int>(id);
 
-			if (index>=n)
+			if (index >= n)
 				return;
 			auto stream = ctrl->getStream(index);
 			if (!stream->module->isValid())
 				return;
 
-			GimicWinUSB::GimicModuleWinUSB *gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
-			if(!gimic_module)
+			GimicWinUSB::GimicModuleWinUSB* gimic_module = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(stream->module);
+			if (!gimic_module)
 				return;
 
-			
+
 			int idx = ComboBox_GetCurSel(hwnd);
 			int clk = static_cast<int>(ComboBox_GetItemData(hwnd, idx));
 			gimic_module->setPLLClock(clk);
@@ -325,14 +323,14 @@ void CVisDlgConfig::onPLLClockCmbNotify(HWND hwnd, DWORD id, DWORD notifyCode)
 
 void CVisDlgConfig::onShowVisCheckNotify(HWND hwnd, DWORD notifyCode)
 {
-	switch(notifyCode){
+	switch (notifyCode) {
 	case BN_CLICKED:
-		if( isInit ){
+		if (isInit) {
 			LRESULT state = Button_GetCheck(hwnd);
-			C86CtlMainWnd *pwnd = C86CtlMainWnd::getInstance();
-			if( state == BST_CHECKED ){
+			C86CtlMainWnd* pwnd = C86CtlMainWnd::getInstance();
+			if (state == BST_CHECKED) {
 				pwnd->startVis();
-			}else{
+			} else {
 				pwnd->stopVis();
 			}
 		}
@@ -343,8 +341,7 @@ void CVisDlgConfig::onShowVisCheckNotify(HWND hwnd, DWORD notifyCode)
 
 void CVisDlgConfig::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 {
-	
-	switch(id){
+	switch (id) {
 	case IDOK:
 		SendMessage(hDlg, WM_CLOSE, 0, 0);
 		break;
@@ -352,7 +349,7 @@ void CVisDlgConfig::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 	case IDC_CHECK_SHOWVIS:
 		onShowVisCheckNotify(hwnd, notifyCode);
 		break;
-		
+
 	case IDC_EDIT_DELAY0:
 		onDelayEditNotify(hwnd, 0, notifyCode);
 		break;
@@ -365,7 +362,7 @@ void CVisDlgConfig::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 	case IDC_EDIT_DELAY3:
 		onDelayEditNotify(hwnd, 3, notifyCode);
 		break;
-		
+
 	case IDC_EDIT_SSGVOL0:
 		onSSGVolEditNotify(hwnd, 0, notifyCode);
 		break;
@@ -396,21 +393,19 @@ void CVisDlgConfig::onCommand(HWND hwnd, DWORD id, DWORD notifyCode)
 
 void CVisDlgConfig::create(HWND hParent)
 {
-	if( !hDlg ){
+	if (!hDlg) {
 		hDlg = CreateDialog(C86CtlMain::getInstanceHandle(),
-							MAKEINTRESOURCE(IDD_C86CTL_CONFIG), hParent, &dlgProc);
+			MAKEINTRESOURCE(IDD_C86CTL_CONFIG), hParent, &dlgProc);
 
 		HICON hIcon;
 		hIcon = (HICON)LoadImage(C86CtlMain::getInstanceHandle(),
 			MAKEINTRESOURCE(IDI_ICON_C86CTL), IMAGE_ICON,
-			GetSystemMetrics(SM_CXSMICON), 
+			GetSystemMetrics(SM_CXSMICON),
 			GetSystemMetrics(SM_CYSMICON), 0);
-		if(hIcon)
+		if (hIcon)
 			SendMessage(hDlg, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 	}
-	ShowWindow( hDlg, SW_SHOW );
-
-
+	ShowWindow(hDlg, SW_SHOW);
 }
 
 
@@ -420,4 +415,3 @@ void CVisDlgConfig::destroy()
 	hDlg = NULL;
 	isInit = false;
 }
-

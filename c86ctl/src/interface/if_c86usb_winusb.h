@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	gimic コントロール WinUSB版
 	

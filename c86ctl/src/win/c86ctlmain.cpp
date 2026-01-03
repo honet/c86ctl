@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -74,6 +74,7 @@ INT C86CtlMain::init(HINSTANCE h)
 	hInstance = h;
 	return 0;
 }
+
 INT C86CtlMain::deinit(void)
 {
 	hInstance = NULL;
@@ -118,7 +119,6 @@ void C86CtlMain::updateMapping(void)
 
 	for (size_t devidx = 0; devidx < gIF.size(); devidx++) {
 		for (int modidx = 0; modidx < gIF[devidx]->getNumberOfModules(); modidx++) {
-
 			BaseSoundModule* module = gIF[devidx]->getModule(modidx);
 			if (module == NULL) continue;
 
@@ -137,8 +137,7 @@ void C86CtlMain::updateMapping(void)
 					ldev->connect(stream);
 					gLogicalDevices.push_back(LogicalDevicePtr(ldev));
 				}
-			}
-			else {
+			} else {
 				//CHECKME: 挿抜されるとここに来る
 				//assert(0);
 			}
@@ -148,7 +147,6 @@ void C86CtlMain::updateMapping(void)
 
 	gLogicalDevices.unlock();
 	gIF.unlock();
-
 }
 
 // ---------------------------------------------------------
@@ -171,7 +169,7 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 		pwnd->createMainWnd(param);
 		pThis->mainThreadReady = true;
 
-		SetTimer(0, 0, 50, 0);	// per 50msec
+		SetTimer(0, 0, 50, 0); // per 50msec
 
 		// メッセージループ
 		while ((b = ::GetMessage(&msg, NULL, 0, 0))) {
@@ -193,8 +191,8 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 				pwnd->deviceUpdate();
 				break;
 
-			case WM_TIMER:
-			{ // update statistics.
+			case WM_TIMER: {
+				// update statistics.
 				size_t ssz = pThis->gStream.size();
 				size_t ifsz = pThis->gIF.size();
 
@@ -224,7 +222,6 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 
 	return (DWORD)msg.wParam;
 }
-
 
 
 // ---------------------------------------------------------
@@ -267,7 +264,6 @@ unsigned int WINAPI C86CtlMain::threadSender(LPVOID param)
 			// update
 			for (size_t i = 0; i < ssz; i++) { pThis->gStream[i]->delay->tick(); }
 			for (size_t i = 0; i < ifsz; i++) { pThis->gIF[i]->tick(); }
-
 		}
 
 		pThis->senderThreadReady = false;
@@ -487,4 +483,3 @@ UCHAR C86CtlMain::in(UINT chipidx, UINT addr)
 	} else
 		return 0;
 }
-

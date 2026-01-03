@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -15,7 +15,7 @@
 #include "cbus_boardtype.h"
 
 #ifdef __cplusplus
-namespace c86ctl{
+namespace c86ctl {
 #endif
 
 /*----------------------------------------------------------------------------*/
@@ -69,7 +69,7 @@ enum ChipType {
 /*----------------------------------------------------------------------------*/
 /*  構造体定義                                                                */
 /*----------------------------------------------------------------------------*/
-struct Devinfo{
+struct Devinfo {
 	char Devname[16];
 	char Rev;
 	char Serial[15];
@@ -95,6 +95,7 @@ interface IRealChipBase : public IUnknown
 // IRealChip {F959C007-6B4D-46F3-BB60-9B0897C7E642}
 static const GUID IID_IRealChip = 
 { 0xf959c007, 0x6b4d, 0x46f3, { 0xbb, 0x60, 0x9b, 0x8, 0x97, 0xc7, 0xe6, 0x42 } };
+
 interface IRealChip : public IUnknown
 {
 public:
@@ -144,6 +145,7 @@ public:
 // IGimic {175C7DA0-8AA5-4173-96DA-BB43B8EB8F17}
 static const GUID IID_IGimic = 
 { 0x175c7da0, 0x8aa5, 0x4173, { 0x96, 0xda, 0xbb, 0x43, 0xb8, 0xeb, 0x8f, 0x17 } };
+
 interface IGimic : public IUnknown
 {
 	virtual int __stdcall getFWVer(UINT* major, UINT* minor, UINT* revision, UINT* build) = 0;

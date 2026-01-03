@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -20,56 +20,56 @@ using namespace c86ctl;
 using namespace c86ctl::vis;
 
 // --------------------------------------------------------
-void CVisC86Reg::drawRegView( IVisBitmap *canvas, int ltx, int lty,
-							  const UCHAR *regval, const UCHAR *regatime, int ynum )
+void CVisC86Reg::drawRegView(IVisBitmap* canvas, int ltx, int lty,
+                             const UCHAR* regval, const UCHAR* regatime, int ynum)
 {
 	const int dc = 8;
 	CHAR str[64];
-	CVisC86Skin *skin = &gVisSkin;
+	CVisC86Skin* skin = &gVisSkin;
 
 	int ox = 0;
 	int oy = 0;
-	int cx=6, cy=8;
-	for( int x=0; x<16; x++ ){
-		sprintf( str, "+%X", x );
-		int sx = ltx+ox+(cx*2+4)*(x+1);
-		int sy = lty+oy;
+	int cx = 6, cy = 8;
+	for (int x = 0; x < 16; x++) {
+		sprintf(str, "+%X", x);
+		int sx = ltx + ox + (cx * 2 + 4) * (x + 1);
+		int sy = lty + oy;
 
-		skin->drawStr( canvas, 1, sx, sy, str );
+		skin->drawStr(canvas, 1, sx, sy, str);
 	}
-	for( int y=0; y<ynum; y++ ){
-		sprintf( str, "%02X", y*16 );
-		int sx = ltx+ox;
-		int sy = lty+oy+cy*(y+1);
-		skin->drawStr( canvas, 1, sx, sy, str );
+	for (int y = 0; y < ynum; y++) {
+		sprintf(str, "%02X", y * 16);
+		int sx = ltx + ox;
+		int sy = lty + oy + cy * (y + 1);
+		skin->drawStr(canvas, 1, sx, sy, str);
 	}
-	
-	ox = cx*2+4;
+
+	ox = cx * 2 + 4;
 	oy = cy;
-	for( int y=0; y<ynum; y++ ){
-		for( int x=0; x<16; x++ ){
-			int a = y*16+x;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+	for (int y = 0; y < ynum; y++) {
+		for (int x = 0; x < 16; x++) {
+			int a = y * 16 + x;
 			int v = regval[a];
 			int c = regatime[a];
 
-			sprintf( str,"%02X", v );
-			int sx = ltx+ox+(cx*2+4)*x;
-			int sy = lty+oy+cy*y;
-			
-			visFillRect( canvas, sx, sy, cx*2, cy-1, skin->getColTbl(c) );
-			skin->drawStr( canvas, 2, sx, sy, str );
+			sprintf(str, "%02X", v);
+			int sx = ltx + ox + (cx * 2 + 4) * x;
+			int sy = lty + oy + cy * y;
+
+			visFillRect(canvas, sx, sy, cx * 2, cy - 1, skin->getColTbl(c));
+			skin->drawStr(canvas, 2, sx, sy, str);
 		}
 	}
 }
 
-bool CVisC86Reg::create( HWND parent )
+bool CVisC86Reg::create(HWND parent)
 {
-	if( !CVisWnd::create( _windowWidth, _windowHeight,
-		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent ) )
+	if (!CVisWnd::create(_windowWidth, _windowHeight,
+		WS_EX_TOOLWINDOW, (WS_POPUP | WS_CLIPCHILDREN), parent))
 		return false;
 
-	::ShowWindow( hWnd, SW_SHOWNOACTIVATE );
-	
+	::ShowWindow(hWnd, SW_SHOWNOACTIVATE);
+
 	return true;
 }
 
@@ -81,62 +81,62 @@ void CVisC86Reg::close()
 // --------------------------------------------------------
 void CVisC86OPNAReg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pOPNA ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pOPNA->reg[0], pOPNA->regATime[0] );
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy*21, pOPNA->reg[1], pOPNA->regATime[1] );
+	if (pOPNA) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pOPNA->reg[0], pOPNA->regATime[0]);
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy + cy * 20, "REGISTER BANK1 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 21, pOPNA->reg[1], pOPNA->regATime[1]);
 	}
 }
 
 void CVisC86OPN3LReg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pOPN3L ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pOPN3L->reg[0], pOPN3L->regATime[0] );
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy*21, pOPN3L->reg[1], pOPN3L->regATime[1] );
+	if (pOPN3L) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pOPN3L->reg[0], pOPN3L->regATime[0]);
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy + cy * 20, "REGISTER BANK1 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 21, pOPN3L->reg[1], pOPN3L->regATime[1]);
 	}
 }
 
 void CVisC86OPMReg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pOPM ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pOPM->reg, pOPM->regATime );
+	if (pOPM) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pOPM->reg, pOPM->regATime);
 	}
 }
 
 void CVisC86OPL3Reg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pOPL3 ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pOPL3->reg[0], pOPL3->regATime[0] );
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy*21, pOPL3->reg[1], pOPL3->regATime[1] );
+	if (pOPL3) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pOPL3->reg[0], pOPL3->regATime[0]);
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy + cy * 20, "REGISTER BANK1 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 21, pOPL3->reg[1], pOPL3->regATime[1]);
 	}
 }
 
 void CVisC86OPLLReg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pOPLL ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pOPLL->reg, pOPLL->regATime );
+	if (pOPLL) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pOPLL->reg, pOPLL->regATime);
 	}
 }
 
@@ -153,25 +153,25 @@ void CVisC86TMS3631Reg::onPaintClient()
 
 void CVisC86Generic1Reg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pChip ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pChip->reg, pChip->regATime );
+	if (pChip) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pChip->reg, pChip->regATime);
 	}
 }
 
 void CVisC86Generic2Reg::onPaintClient()
 {
-	visFillRect( clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255,0,0,0) );
+	visFillRect(clientCanvas, 0, 0, clientCanvas->getWidth(), clientCanvas->getHeight(), ARGB(255, 0, 0, 0));
 
-	if( pChip ){
-		int sx=5, sy=5, cx=6, cy=8;
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy* 1, pChip->reg[0], pChip->regATime[0] );
-		gVisSkin.drawStr( clientCanvas, 1, sx, sy+cy*20, "REGISTER BANK1 ------------------------------" );
-		drawRegView( clientCanvas, sx, sy+cy*21, pChip->reg[1], pChip->regATime[1] );
+	if (pChip) {
+		int sx = 5, sy = 5, cx = 6, cy = 8;
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy, "REGISTER BANK0 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 1, pChip->reg[0], pChip->regATime[0]);
+		gVisSkin.drawStr(clientCanvas, 1, sx, sy + cy * 20, "REGISTER BANK1 ------------------------------");
+		drawRegView(clientCanvas, sx, sy + cy * 21, pChip->reg[1], pChip->regATime[1]);
 	}
 }
 
@@ -198,4 +198,3 @@ CVisC86RegPtr c86ctl::vis::visC86RegViewFactory(Chip* pchip, int id)
 	}
 	return 0;
 }
-

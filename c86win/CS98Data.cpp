@@ -117,7 +117,7 @@ BOOL CS98Data::loadFile( CString &fname )
 			ifs >> r;
 			offset += r.len;
 			row.push_back(r);
-			if (offset == header.offset_to_loop_point){
+			if (offset == header.offset_to_loop_point) {
 				loopidx = static_cast<uint32_t>(row.size() - 1);
 			}
 		} while(!ifs.eof() && (ifs.tellg() < last ));

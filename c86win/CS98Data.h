@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86win
 	
 	Copyright (c) 2009-2010, honet. All rights reserved.
@@ -300,8 +300,8 @@ public:
 private:
 	std::vector<CDumpRow>::iterator getRowIt(int index)
 	{
-		if( index<0 ) return row.begin();
-		if( row.size() < index ) return row.end();
+		if (index < 0) return row.begin();
+		if (static_cast<int>(row.size()) < index) return row.end();
 
 		auto it = row.begin();
 		std::advance(it,index);

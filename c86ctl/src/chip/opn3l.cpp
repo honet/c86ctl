@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -59,7 +59,8 @@ void COPN3L::byteOut(UINT addr, UCHAR data)
 			ds->byteOut(addr, data);
 }
 
-bool COPN3L::setReg(UINT addr, UCHAR data) {
+bool COPN3L::setReg(UINT addr, UCHAR data)
+{
 	if (0x200 <= addr) return false;
 	int idx = 0;
 	if (0x100 <= addr) {
@@ -85,7 +86,8 @@ bool COPN3L::setReg(UINT addr, UCHAR data) {
 	return false;
 }
 
-UCHAR COPN3L::getReg(UINT addr) {
+UCHAR COPN3L::getReg(UINT addr)
+{
 	if (0x200 <= addr) return 0;
 	int idx = 0;
 	if (0x100 <= addr) {
@@ -101,7 +103,7 @@ bool COPN3L::fmCommonRegHandling(UCHAR adrs, UCHAR data)
 	bool handled = true;
 
 	switch (adrs) {
-	case 0x10:	// STATUS MASK
+	case 0x10: // STATUS MASK
 		//data&0x80; // IRQ RESET
 		//data&0x10; // MASK ZERO (ADPCM)
 		//data&0x08; // MASK BRDY (ADPCM)
@@ -110,19 +112,19 @@ bool COPN3L::fmCommonRegHandling(UCHAR adrs, UCHAR data)
 		//data&0x01; // MASK TIMER-A
 		break;
 
-		// prescaler
+	// prescaler
 	case 0x2d:
 	case 0x2e:
 	case 0x2f:
 		break;
 
-	case 0x24:	// Timer-A Corse
-	case 0x25:	// Timer-A Fine
-		//case 0x26:	// Timer-B
-	case 0x29:	// IRQ/SCH
+	case 0x24: // Timer-A Corse
+	case 0x25: // Timer-A Fine
+	//case 0x26:	// Timer-B
+	case 0x29: // IRQ/SCH
 		break;
 
-	case 0x20:	// new
+	case 0x20: // new
 		break;
 
 	default:

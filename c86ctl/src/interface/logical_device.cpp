@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	論理デバイス定義
 	
@@ -26,7 +26,7 @@
 #include "if_gimic_winusb.h"
 #include "if_gimic_hid.h"
 
-namespace c86ctl{
+namespace c86ctl {
 
 LogicalDevice::LogicalDevice()
 	: refcount(0)
@@ -103,7 +103,7 @@ int LogicalDevice::getModuleType(enum ChipType* type)
 {
 	return getChipType(type);
 }
-	
+
 int LogicalDevice::setSSGVolume(UCHAR vol)
 {
 	int ret = C86CTL_ERR_NONE;
@@ -221,7 +221,7 @@ int LogicalDevice::getModuleInfo(struct Devinfo* info)
 			if (gimic) {
 				return gimic->getModuleInfo(info);
 			}
-		} 
+		}
 #ifdef SUPPORT_HID
 		else if (typeid(streams[i]->module) == typeid(GimicHID::GimicModuleHID)) {
 			GimicHID::GimicModuleHID* gimic = dynamic_cast<GimicHID::GimicModuleHID*>(streams[i]->module);
@@ -264,7 +264,7 @@ int LogicalDevice::isValid(void)
 	return true;
 }
 
-void LogicalDevice::connect(Stream *s)
+void LogicalDevice::connect(Stream* s)
 {
 	streams.push_back(s);
 }
@@ -275,5 +275,4 @@ void LogicalDevice::disconnect(Stream* s)
 	if (it != streams.end())
 		streams.erase(it);
 }
-
 }

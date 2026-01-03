@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -154,7 +154,7 @@ bool CVisC86Main::update()
 			if (c86) {
 				int devtype = c86->getDeviceType();
 				if (devtype == 0) {
-					char slotname[] = { 'A', 'B', 'C', 'D' };
+					char slotname[] = {'A', 'B', 'C', 'D'};
 					sprintf(str, "C86BOX Slot.%c(%d)", slotname[c86->getSlotIndex()], c86->getChipIndex());
 				} else if (devtype == 1) {
 					sprintf(str, "picoC86(%d)", c86->getChipIndex());
@@ -491,7 +491,7 @@ void CVisC86Main::onPaintClient()
 			skin->drawStr(clientCanvas, 1, 15, y + dy, "FW-VER :"); dy += 10;
 			skin->drawStr(clientCanvas, 1, 15, y + dy, "CHIP   :"); dy += 10;
 			skin->drawStr(clientCanvas, 1, 15, y + dy, "CLOCK  :"); dy += 10;
-			//skin->drawStr( clientCanvas, 1, 15, y+dy, "SSG-VOL:" ); dy+=10;
+			//skin->drawStr(clientCanvas, 1, 15, y+dy, "SSG-VOL:"); dy += 10;
 			skin->drawStr(clientCanvas, 1, 15, y + dy, "SPEED  :"); dy += 10;
 		}
 		y += modHeight;
@@ -504,7 +504,6 @@ void CVisC86Main::onPaintClient()
 	// FPS
 	sprintf(str, "FPS: %0.1f", CVisManager::getInstance()->getCurrentFPS());
 	skin->drawStr(clientCanvas, 0, 260, ch - 12, str);
-
 }
 
 void CVisC86Main::onMouseEvent(UINT msg, WPARAM wp, LPARAM lp)

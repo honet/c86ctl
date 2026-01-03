@@ -29,7 +29,7 @@
 #define INIKEY_GIMIC_PLLCLK		TEXT("m%d_gimic_pllclk")
 
 
-namespace c86ctl{
+namespace c86ctl {
 
 class CC86CtlConfig
 {

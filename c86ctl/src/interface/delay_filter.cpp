@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	ディレイフィルタ
 	
@@ -27,7 +27,7 @@ DelayFilter::~DelayFilter()
 void DelayFilter::byteOut(UINT addr, UCHAR data)
 {
 	if (0 < delay) {
-		REQ r = { ::timeGetTime() + delay, static_cast<USHORT>(addr), data };
+		REQ r = {::timeGetTime() + delay, static_cast<USHORT>(addr), data};
 		dqueue.push(r);
 		return;
 	} else {
@@ -53,8 +53,8 @@ void DelayFilter::tick(void)
 			ds->byteOut(req.addr, req.dat);
 		}
 	}
-
 }
+
 int DelayFilter::setDelay(int d)
 {
 	if (d != delay) {
@@ -71,7 +71,4 @@ int DelayFilter::getDelay(int* d)
 	}
 	return C86CTL_ERR_INVALID_PARAM;
 }
-
 }
-
-

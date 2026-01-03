@@ -22,11 +22,11 @@
 // DLL Main
 BOOL APIENTRY DllMain(
 	HMODULE hModule,
-	DWORD  ul_reason_for_call,
+	DWORD ul_reason_for_call,
 	LPVOID lpReserved
-	)
+)
 {
-	switch (ul_reason_for_call){
+	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:
 		c86ctl::GetC86CtlMain()->init(hModule);
 		gConfig.init(hModule);
@@ -39,7 +39,7 @@ BOOL APIENTRY DllMain(
 	case DLL_THREAD_DETACH:
 		break;
 	}
-    return TRUE;
+	return TRUE;
 }
 
 #ifdef _MANAGED
@@ -74,18 +74,18 @@ int WINAPI c86ctl_reset(void)
 
 int WINAPI c86ctl_get_num_chips()
 {
-	c86ctl::C86CtlMain *c86 = c86ctl::GetC86CtlMain();
+	c86ctl::C86CtlMain* c86 = c86ctl::GetC86CtlMain();
 	return c86->getNumberOfChip();
 }
 
 int WINAPI c86ctl_get_chip_type(int chipidx)
 {
-	c86ctl::C86CtlMain *c86 = c86ctl::GetC86CtlMain();
-	if (chipidx<0 || c86->getNumberOfChip()<=chipidx)
+	c86ctl::C86CtlMain* c86 = c86ctl::GetC86CtlMain();
+	if (chipidx < 0 || c86->getNumberOfChip() <= chipidx)
 		return -1;
 
 	c86ctl::ChipType type = c86ctl::ChipType::CHIP_UNKNOWN;
-	c86ctl::IRealChip3 *chip = 0;
+	c86ctl::IRealChip3* chip = 0;
 	if (NOERROR == c86->getChipInterface(chipidx, c86ctl::IID_IRealChip3, (void**)&chip)) {
 		chip->getChipType(&type);
 		chip->Release();
@@ -116,4 +116,3 @@ UCHAR WINAPI c86ctl_in(UINT addr)
 {
 	return c86ctl::GetC86CtlMain()->in(0, addr);
 }
-

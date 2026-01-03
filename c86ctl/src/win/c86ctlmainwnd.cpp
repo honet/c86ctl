@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -59,13 +59,13 @@ using namespace c86ctl::vis;
 //#define WM_CHANGEVIS_STATE  (WM_APP+12)
 
 
-C86CtlMainWnd *C86CtlMainWnd::pthis = 0;
+C86CtlMainWnd* C86CtlMainWnd::pthis = 0;
 
 const TCHAR szAppName[] = _T("msg-receiver");
 
 int C86CtlMainWnd::createMainWnd(LPVOID param)
 {
-	WNDCLASSEX  wndclass;
+	WNDCLASSEX wndclass;
 
 	HINSTANCE hinst = C86CtlMain::getInstanceHandle();
 
@@ -90,7 +90,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		0, szAppName, NULL, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,CW_USEDEFAULT, CW_USEDEFAULT,
 		HWND_MESSAGE, NULL, hinst, NULL);
-	
+
 	if (!hwnd)
 		return -1;
 
@@ -115,7 +115,7 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 
 #ifdef SUPPORT_HID
 		// for HID interface
-	    HidD_GetHidGuid(&pFilterData->dbcc_classguid);
+		HidD_GetHidGuid(&pFilterData->dbcc_classguid);
 		hNotifyHIDDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 #endif
 
@@ -163,10 +163,10 @@ int C86CtlMainWnd::destroyMainWnd(LPVOID param)
 
 LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-	static UINT taskbarRestartMsg=0;
-	C86CtlMainWnd *pThis = C86CtlMainWnd::getInstance();
+	static UINT taskbarRestartMsg = 0;
+	C86CtlMainWnd* pThis = C86CtlMainWnd::getInstance();
 
-	switch(iMsg){
+	switch (iMsg) {
 	case WM_CREATE:
 		// タスクトレイアイコンの要再登録通知用
 		taskbarRestartMsg = ::RegisterWindowMessage(_T("TaskbarCreated"));
@@ -181,7 +181,7 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 		::PostThreadMessage(::GetCurrentThreadId(), WM_MYDEVCHANGE, wParam, lParam);
 		break;
 
-	case WM_TASKTRAY_EVENT:	{
+	case WM_TASKTRAY_EVENT: {
 		POINT point;
 		GetCursorPos(&point);
 
@@ -223,7 +223,6 @@ LRESULT CALLBACK C86CtlMainWnd::wndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
 		if (iMsg == taskbarRestartMsg) {
 			// タスクトレイアイコンの再登録
 			::Shell_NotifyIcon(NIM_ADD, &pThis->notifyIcon);
-
 		} else {
 			return DefWindowProc(hwnd, iMsg, wParam, lParam);
 		}

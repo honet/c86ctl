@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	gimic コントロール MIDI版(実験コード)
 	
@@ -53,7 +53,7 @@ using namespace c86ctl;
 /*----------------------------------------------------------------------------
 	コンストラクタ
 ----------------------------------------------------------------------------*/
-GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h), chip(0), chiptype(CHIP_OPNA)
+GimicMIDI::GimicMIDI(HMIDIOUT h) : hHandle(h), chip(0), chiptype(CHIP_OPNA)
 {
 	rbuff.alloc(128);
 }
@@ -63,11 +63,11 @@ GimicMIDI::GimicMIDI( HMIDIOUT h ) : hHandle(h), chip(0), chiptype(CHIP_OPNA)
 ----------------------------------------------------------------------------*/
 GimicMIDI::~GimicMIDI(void)
 {
-	if(hHandle) {
+	if (hHandle) {
 		midiOutClose(hHandle);
 		hHandle = NULL;
 	}
-	if( chip )
+	if (chip)
 		delete chip;
 }
 
@@ -88,20 +88,20 @@ int GimicMIDI::UpdateInstances( withlock< std::vector< std::shared_ptr<GimicIF> 
 
 	int DeviceID = gConfig.getInt(INISC_MAIN, INIKEY_MIDIDEVICE, -1);
 	HMIDIOUT hmidi = NULL;
-	
+
 	UINT res = midiOutOpen(&hmidi, DeviceID, 0, 0, CALLBACK_NULL);
-	if(res == MMSYSERR_NOERROR){
+	if (res == MMSYSERR_NOERROR) {
 		GimicMIDIPtr p = GimicMIDIPtr(new GimicMIDI(hmidi));
-		gimics.push_back( p );
+		gimics.push_back(p);
 		p->init();
 	}
 
 	gimics.unlock();
-	
+
 	return 0;
 }
 
-void GimicMIDI::sendSysEx( uint8_t *data, uint32_t sz )
+void GimicMIDI::sendSysEx(uint8_t* data, uint32_t sz)
 {
 	MIDIHDR head;
 	ZeroMemory(&head, sizeof(MIDIHDR));
@@ -128,34 +128,34 @@ int GimicMIDI::init(void)
 	return C86CTL_ERR_NONE;
 }
 
-int GimicMIDI::reset( void )
+int GimicMIDI::reset(void)
 {
 	// 転送完了待ち
-	while(rbuff.length()){
+	while (rbuff.length()) {
 		Sleep(10);
 	}
 
 	// GM System ON
-	UCHAR d[] = { 0xf0, 0x7e, 0x7f, 0x9, 0x1, 0xf7 };
-	sendSysEx( &d[0], 6 );
+	UCHAR d[] = {0xf0, 0x7e, 0x7f, 0x9, 0x1, 0xf7};
+	sendSysEx(&d[0], 6);
 	return C86CTL_ERR_NONE;
 }
 
 void GimicMIDI::out(UINT addr, UCHAR data)
 {
 	bool flag = true;
-	if( chip )
-		flag = chip->setReg(addr, data );
-	if( flag ){
+	if (chip)
+		flag = chip->setReg(addr, data);
+	if (flag) {
 		// data packing.
-		UCHAR d[3] = { (addr>>6)&0x0f, (addr&0x3f)<<1 | (data>>7), (data&0x7f) };
-		rbuff.push(d,3);
+		UCHAR d[3] = {(addr >> 6) & 0x0f, (addr & 0x3f) << 1 | (data >> 7), (data & 0x7f)};
+		rbuff.push(d, 3);
 	}
 }
 
 UCHAR GimicMIDI::in(UINT addr)
 {
-	if( chip )
+	if (chip)
 		return chip->getReg(addr);
 
 	return 0;
@@ -164,44 +164,46 @@ UCHAR GimicMIDI::in(UINT addr)
 int GimicMIDI::setSSGVolume(UCHAR vol)
 {
 	// master volume set.
-	UCHAR d[] = { 0xf0, 0x7f, 0x04, (vol<<6)&0x7f, (vol>>1)&0x7f, 0xf7 };
-	sendSysEx( &d[0], 6 );
+	UCHAR d[] = {0xf0, 0x7f, 0x04, (vol << 6) & 0x7f, (vol >> 1) & 0x7f, 0xf7};
+	sendSysEx(&d[0], 6);
 	return C86CTL_ERR_NONE;
 }
 
-int GimicMIDI::getSSGVolume(UCHAR *vol)
+int GimicMIDI::getSSGVolume(UCHAR* vol)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
 int GimicMIDI::setPLLClock(UINT clock)
 {
-	UCHAR d[] = { 0xf0, 0x7d, 0x40, 0x01, 0x00, 0x70,
-		clock&0x7f, (clock>>7)&0x7f, (clock>>14)&0x7f, 0xf7 };
-	sendSysEx( &d[0], 10 );
+	UCHAR d[] = {
+		0xf0, 0x7d, 0x40, 0x01, 0x00, 0x70,
+		clock & 0x7f, (clock >> 7) & 0x7f, (clock >> 14) & 0x7f, 0xf7
+	};
+	sendSysEx(&d[0], 10);
 	return C86CTL_ERR_NONE;
 }
-int GimicMIDI::getPLLClock(UINT *clock)
+int GimicMIDI::getPLLClock(UINT* clock)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
-int GimicMIDI::getMBInfo( struct Devinfo *info )
+int GimicMIDI::getMBInfo(struct Devinfo* info)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
-int GimicMIDI::getModuleInfo( struct Devinfo *info )
+int GimicMIDI::getModuleInfo(struct Devinfo* info)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
-int GimicMIDI::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
+int GimicMIDI::getFWVer(UINT* major, UINT* minor, UINT* rev, UINT* build)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 
-int GimicMIDI::getChipStatus( UINT addr, UCHAR *status )
+int GimicMIDI::getChipStatus(UINT addr, UCHAR* status)
 {
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
@@ -224,21 +226,21 @@ int GimicMIDI::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 void GimicMIDI::tick(void)
 {
 	UCHAR buff[150];
-	
-	if( !hHandle )
+
+	if (!hHandle)
 		return;
 
 	// 転送配列準備
-	buff[0] = 0xf0;		// start of sysex
-	buff[1] = 0x7d;		// device id
+	buff[0] = 0xf0; // start of sysex
+	buff[1] = 0x7d; // device id
 	UINT msz = rbuff.length();
 	UINT sz = msz / 3;
-	if( 0 < sz ){
-		rbuff.pop( &buff[2], MIN(sz*3,144) );
-		buff[sz*3+2] = 0xf7;		// end of sysex
-		sendSysEx( &buff[0], sz*3+3 );
+	if (0 < sz) {
+		rbuff.pop(&buff[2], MIN(sz * 3, 144));
+		buff[sz * 3 + 2] = 0xf7; // end of sysex
+		sendSysEx(&buff[0], sz * 3 + 3);
 	}
-	
+
 	return;
 }
 

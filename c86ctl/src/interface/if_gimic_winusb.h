@@ -108,7 +108,7 @@ public:
 	virtual std::basic_string<TCHAR> getNodeId();
 
 	virtual BaseSoundModule* getModule(int id) {
-		if (id<0 || id>nmodules)
+		if (id < 0 || id > nmodules)
 			return NULL;
 		return modules[id];
 	}

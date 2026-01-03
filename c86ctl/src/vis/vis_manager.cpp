@@ -20,14 +20,14 @@ using namespace c86ctl::vis;
 
 CVisManager* CVisManager::pInstance = NULL;
 
-void CVisManager::add( CVisWnd *wnd )
+void CVisManager::add(CVisWnd* wnd)
 {
 	::EnterCriticalSection(&cs);
 	clients.push_back(wnd);
 	::LeaveCriticalSection(&cs);
 }
 
-void CVisManager::del( CVisWnd *wnd )
+void CVisManager::del(CVisWnd* wnd)
 {
 	::EnterCriticalSection(&cs);
 	auto ei = std::remove(clients.begin(), clients.end(), wnd);
@@ -38,7 +38,7 @@ void CVisManager::del( CVisWnd *wnd )
 void CVisManager::draw(void)
 {
 	::EnterCriticalSection(&cs);
-	std::for_each( clients.begin(), clients.end(), [](CVisWnd* x){ x->redraw(); } );
+	std::for_each(clients.begin(), clients.end(), [](CVisWnd* x) { x->redraw(); });
 	::LeaveCriticalSection(&cs);
 
 	fps = counter.getFPS();

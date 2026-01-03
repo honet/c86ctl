@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -19,7 +19,7 @@ using namespace c86ctl;
 bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 {
 	bool handled = true;
-	UINT	shift, complement;
+	UINT shift, complement;
 	static bool isPlayed = false;
 	reg[adrs] = data;
 
@@ -116,8 +116,8 @@ bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 	case 0x0f: // pcm data.
 		break;
 
-		//case 0x10: // flag control
-		//	break;
+	//case 0x10: // flag control
+	//	break;
 
 	default:
 		handled = false;
@@ -125,7 +125,6 @@ bool COPNAAdpcm::setReg(UCHAR adrs, UCHAR data)
 
 	return handled;
 }
-
 
 
 void COPNA::byteOut(UINT addr, UCHAR data)
@@ -145,7 +144,7 @@ void COPNA::byteOut(UINT addr, UCHAR data)
 	//case 0x6c: case 0x6d: case 0x6e:
 	//	if(!modeOPNA)
 	//		*data &= 0x70;
-		
+
 	case 0xb4: // FM -- LR, AMS, PMS
 	case 0xb5:
 	case 0xb6:
@@ -192,7 +191,8 @@ void COPNA::byteOut(UINT addr, UCHAR data)
 		if (ds) ds->byteOut(addr, data);
 }
 
-bool COPNA::setReg(UINT addr, UCHAR data) {
+bool COPNA::setReg(UINT addr, UCHAR data)
+{
 	if (0x200 <= addr) return false;
 	int idx = 0;
 	if (0x100 <= addr) {
@@ -226,7 +226,8 @@ bool COPNA::setReg(UINT addr, UCHAR data) {
 	return false;
 }
 
-UCHAR COPNA::getReg(UINT addr) {
+UCHAR COPNA::getReg(UINT addr)
+{
 	if (0x200 <= addr) return 0;
 	if (0x0ff == addr) return 1; // ID reg.
 	int idx = 0;
@@ -243,7 +244,7 @@ bool COPNA::fmCommonRegHandling(UCHAR adrs, UCHAR data)
 	bool handled = true;
 
 	switch (adrs) {
-	case 0x10:	// STATUS MASK
+	case 0x10: // STATUS MASK
 		//data&0x80; // IRQ RESET
 		//data&0x10; // MASK ZERO (ADPCM)
 		//data&0x08; // MASK BRDY (ADPCM)
@@ -266,16 +267,16 @@ bool COPNA::fmCommonRegHandling(UCHAR adrs, UCHAR data)
 		prescale_ssg = 1;
 		break;
 
-	case 0x24:	// Timer-A Corse
-	case 0x25:	// Timer-A Fine
-	case 0x26:	// Timer-B
-	case 0x27:  // Timer Control
-	case 0x29:	// IRQ/SCH
+	case 0x24: // Timer-A Corse
+	case 0x25: // Timer-A Fine
+	case 0x26: // Timer-B
+	case 0x27: // Timer Control
+	case 0x29: // IRQ/SCH
 		break;
 	//if( addr == 0x29){
-		//	// SCH/IRQ ENABLE
-		//	modeOPNA = (data&0x80) ? true : false;
-		//	return true;
+	//	// SCH/IRQ ENABLE
+	//	modeOPNA = (data&0x80) ? true : false;
+	//	return true;
 	//}
 
 	default:
@@ -302,7 +303,7 @@ void COPNA::applyMask(int ch)
 			data |= (l ? 0x80 : 0) | (r ? 0x40 : 0);
 		}
 		ds->byteOut(0xb4 + ch, data);
-		//pIF->directOut( 0xb4+ch, data );
+		//pIF->directOut(0xb4 + ch, data);
 
 	} else if (6 <= ch && ch <= 8) { // FM 4~6
 		int fmNo = ch - 3;
@@ -313,24 +314,24 @@ void COPNA::applyMask(int ch)
 			data |= (l ? 0x80 : 0) | (r ? 0x40 : 0);
 		}
 		ds->byteOut(0x1b4 + (ch - 6), data);
-		//pIF->directOut( 0x1b4+(ch-6), data );
+		//pIF->directOut(0x1b4 + (ch - 6), data);
 
 	} else if (9 <= ch && ch <= 11) { // SSG 1~3
 		int ssgNo = ch - 9;
 		data = mask ? 0 : ssg->ch[ssgNo]->getLevel();
 		data |= ssg->ch[ssgNo]->isUseEnv() ? 0x10 : 0;
 		ds->byteOut(0x08 + ssgNo, data);
-		//pIF->directOut( 0x08+ssgNo, data );
+		//pIF->directOut(0x08 + ssgNo, data);
 
 	} else if (ch == 12) { // ADPCM
 		data = mask ? 0 : adpcm->getLevel();
 		ds->byteOut(0x10b, data);
-		//pIF->directOut( 0x10b, data );
+		//pIF->directOut(0x10b, data);
 
 	} else if (ch == 13) { // RHYTHM
 		data = mask ? 0 : rhythm->getTotalLevel();
 		ds->byteOut(0x11, data);
-		//pIF->directOut( 0x11, data );
+		//pIF->directOut(0x11, data);
 	}
 }
 

@@ -37,9 +37,9 @@ public:
 
 protected:
 	bool createFmView(COPNFmCh *pFmCh);
-	bool createFmSlotView( COPXFmSlot *slot, int i, int x, int y );
-	void drawFMView( IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh );
-	void drawFMSlotView( IVisBitmap *canvas, int x, int y, COPXFmSlot *pSlot, int slotidx );
+	bool createFmSlotView(COPXFmSlot *slot, int i, int x, int y);
+	void drawFMView(IVisBitmap *canvas, int x, int y, COPNFmCh *pFmCh);
+	void drawFMSlotView(IVisBitmap *canvas, int x, int y, COPXFmSlot *pSlot, int slotidx);
 	
 protected:
 	int id;

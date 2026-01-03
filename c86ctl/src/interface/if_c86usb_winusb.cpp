@@ -91,7 +91,6 @@ using namespace c86ctl;
 //   wLength      : 0
 
 
-
 /*----------------------------------------------------------------------------
 	コンストラクタ
 ----------------------------------------------------------------------------*/
@@ -246,7 +245,7 @@ int C86WinUSB::UpdateInstances(withlock< std::vector< std::shared_ptr<BaseSoundD
 	};
 
 	int nguids = sizeof(guids) / sizeof(guids[0]);
-	for (int k=0; k<nguids; k++) {
+	for (int k = 0; k < nguids; k++) {
 		HDEVINFO devinf = SetupDiGetClassDevs(guids[k], NULL, 0, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
 		if (devinf) {
@@ -408,7 +407,7 @@ void C86WinUSB::tick(void)
 		UINT buff[32];
 		UINT sz = 0, i = 0;
 
-		for (sz = 0; sz < 16; ) {
+		for (sz = 0; sz < 16;) {
 			if (!rbuff.pop(&buff[sz++]))
 				break;
 			if (rbuff.isempty())
@@ -551,7 +550,7 @@ void C86WinUSB::C86ModuleWinUSB::byteOut(UINT addr, UCHAR data)
 
 void C86WinUSB::C86ModuleWinUSB::directOut(UINT addr, UCHAR data)
 {
-	uint32_t d = (devidx<<17) | (addr&0xffff)<<8 | data;
+	uint32_t d = (devidx << 17) | (addr & 0xffff) << 8 | data;
 	devif->sendMsg(&d, 1);
 }
 
@@ -565,5 +564,3 @@ CBUS_BOARD_TYPE C86WinUSB::C86ModuleWinUSB::getBoardType()
 }
 
 #endif
-
-

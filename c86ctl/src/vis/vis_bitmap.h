@@ -38,7 +38,7 @@ public:
 		step(0),
 		bitmap(0)
 	{
-	};
+	}
 
 	CVisBitmap(int w, int h)
 		: hbmp(0),
@@ -49,9 +49,9 @@ public:
 		bitmap(0)
 	{
 		createDIB(w, h);
-	};
+	}
 
-	virtual ~CVisBitmap() {};
+	virtual ~CVisBitmap() {}
 
 public:
 	// construction

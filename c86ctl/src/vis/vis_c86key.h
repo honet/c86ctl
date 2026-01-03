@@ -67,12 +67,12 @@ public:
 	~CVisC86OPNAKey(){}
 
 protected:
-	virtual bool create( HWND parent = 0 );
+	virtual bool create(HWND parent = 0);
 	virtual void onPaintClient(void);
 	virtual void onKeyDown(DWORD keycode);
 	
 protected:
-	void drawADPCMTrackView( IVisBitmap *canvas, int ltx, int lty, int trNo );
+	void drawADPCMTrackView(IVisBitmap *canvas, int ltx, int lty, int trNo);
 
 protected:
 	CVisMuteSwPtr muteSw[14];
@@ -100,7 +100,7 @@ public:
 	~CVisC86OPN3LKey(){}
 
 protected:
-	virtual bool create( HWND parent = 0 );
+	virtual bool create(HWND parent = 0);
 	virtual void onPaintClient(void);
 	virtual void onKeyDown(DWORD keycode);
 
@@ -130,13 +130,13 @@ public:
 	~CVisC86OPMKey(){}
 	
 protected:
-	virtual bool create( HWND parent = 0 );
+	virtual bool create(HWND parent = 0);
 	virtual void onPaintClient(void);
 	virtual void onKeyDown(DWORD keycode);
 
 protected:
-	void drawFMTrackView( IVisBitmap *canvas, int ltx, int lty,
-						  int trNo, int fmNo, bool isMute, COPMFmCh *pFMCh );
+	void drawFMTrackView(IVisBitmap *canvas, int ltx, int lty,
+						 int trNo, int fmNo, bool isMute, COPMFmCh *pFMCh);
 protected:
 	CVisMuteSwPtr muteSw[8];
 	CVisSoloSwPtr soloSw[8];

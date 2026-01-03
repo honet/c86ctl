@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -28,7 +28,7 @@
 using namespace c86ctl;
 using namespace c86ctl::vis;
 
-std::map< HWND, CVisWnd* > CVisWnd::wndMap;
+std::map<HWND, CVisWnd*> CVisWnd::wndMap;
 CVisWnd* CVisWnd::creatingWnd;
 HANDLE CVisWnd::hCreatingMutex = NULL;
 
@@ -56,7 +56,8 @@ CVisWnd::~CVisWnd()
 	}
 }
 
-bool CVisWnd::isClose(int a, int b) const {
+bool CVisWnd::isClose(int a, int b) const
+{
 	const int margin = 10;
 	return abs(a - b) < margin;
 }
@@ -173,16 +174,15 @@ LRESULT CALLBACK CVisWnd::wndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		break;
 
 	case WM_MYCLOSEREQ: {
-		CVisWnd *wnd = CVisManager::getInstance()->find((HWND)wp);
+		CVisWnd* wnd = CVisManager::getInstance()->find((HWND)wp);
 		if (wnd) wnd->close();
 		break;
 	}
 //	case WM_LBUTTONDOWN:
 //		break;
 #if 0
-	case WM_MOVING:
-	{
-		std::map< HWND, CVisWnd* >::iterator it;
+	case WM_MOVING: {
+		std::map<HWND, CVisWnd*>::iterator it;
 		RECT* prc = reinterpret_cast<LPRECT>(lp);
 		if (::GetAsyncKeyState(VK_SHIFT) < 0)
 			break;
@@ -400,4 +400,3 @@ void CVisWnd::saveWndPos(void)
 		}
 	}
 }
-

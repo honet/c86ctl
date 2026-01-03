@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -25,6 +25,7 @@ namespace c86ctl {
 Stream::Stream() : module(0), chip(0), delay(0)
 {
 }
+
 Stream::~Stream()
 {
 	if (chip) delete chip;
@@ -54,7 +55,7 @@ Stream* Stream::Build(BaseSoundModule* module)
 	case CHIP_OPLL:
 		chip = new COPLL();
 		break;
-		//case CHIP_SPC;
+	//case CHIP_SPC;
 
 	//case CHIP_SN76489:
 	//case CHIP_SN76496:
@@ -97,6 +98,4 @@ Stream* Stream::Build(BaseSoundModule* module)
 
 	return s;
 }
-
 }
-

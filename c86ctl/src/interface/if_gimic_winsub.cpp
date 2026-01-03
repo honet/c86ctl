@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	gimic コントロール WinUSB版
 	
@@ -258,11 +258,11 @@ int GimicWinUSB::UpdateInstances(withlock< std::vector< std::shared_ptr<BaseSoun
 			// 既にインスタンスがあるかどうか検索
 			auto it = std::find_if(gimics.begin(), gimics.end(),
 				[devpath](std::shared_ptr<BaseSoundDevice> x) -> bool {
-				GimicWinUSB* gdev = dynamic_cast<GimicWinUSB*>(x.get());
-				if (!gdev) return false;
-				if (gdev->devPath != devpath) return false;
-				return true;
-			}
+					GimicWinUSB* gdev = dynamic_cast<GimicWinUSB*>(x.get());
+					if (!gdev) return false;
+					if (gdev->devPath != devpath) return false;
+					return true;
+				}
 			);
 
 			if (it == gimics.end()) {
@@ -406,14 +406,14 @@ void GimicWinUSB::out2buf(UCHAR idx, UINT addr, UCHAR data)
 			break;
 		}
 		if (addr < 0xfc) {
-			MSG d = { 2, { addr & 0xff, data } };
+			MSG d = {2, {addr & 0xff, data}};
 			rbuff.push(d);
 		} else if (0x100 <= addr && addr <= 0x1fb) {
-			MSG d = { 3, { 0xfe, addr & 0xff, data } };
+			MSG d = {3, {0xfe, addr & 0xff, data}};
 			rbuff.push(d);
 		}
 	} else {
-		MSG d = { 4, { 0xfc, (addr >> 8) & 0xff, addr & 0xff, data } };
+		MSG d = {4, {0xfc, (addr >> 8) & 0xff, addr & 0xff, data}};
 		rbuff.push(d);
 	}
 }
@@ -435,7 +435,7 @@ int GimicWinUSB::reset(void)
 	int ret;
 
 	// リセットコマンド送信
-	MSG d = { 2, { 0xfd, 0x82, 0 } };
+	MSG d = {2, {0xfd, 0x82, 0}};
 	ret = sendMsg(&d);
 
 	if (C86CTL_ERR_NONE == ret) {
@@ -464,7 +464,7 @@ int GimicWinUSB::getMBInfo(struct Devinfo* info)
 	if (!info)
 		return C86CTL_ERR_INVALID_PARAM;
 
-	MSG d = { 3, { 0xfd, 0x91, 0xff } };
+	MSG d = {3, {0xfd, 0x91, 0xff}};
 	if (C86CTL_ERR_NONE == (ret = transaction(&d, (uint8_t*)info, 32))) {
 		char* p = &info->Devname[15];
 		while (*p == 0 || *p == -1) *p-- = 0;
@@ -481,7 +481,7 @@ int GimicWinUSB::getModuleInfo(UCHAR idx, struct Devinfo* info)
 	if (!info)
 		return C86CTL_ERR_INVALID_PARAM;
 
-	MSG d = { 3, { 0xfd, 0x91, idx } };
+	MSG d = {3, {0xfd, 0x91, idx}};
 	if (C86CTL_ERR_NONE == (ret = transaction(&d, (uint8_t*)info, 32, true))) {
 		char* p = &info->Devname[15];
 		while (*p == 0 || *p == -1) *p-- = 0;
@@ -495,7 +495,7 @@ int GimicWinUSB::getModuleInfo(UCHAR idx, struct Devinfo* info)
 int GimicWinUSB::getFWVer(UINT* major, UINT* minor, UINT* rev, UINT* build)
 {
 	uint8_t rx[16];
-	MSG d = { 2, { 0xfd, 0x92 } };
+	MSG d = {2, {0xfd, 0x92}};
 	int ret;
 
 	if (C86CTL_ERR_NONE == (ret = transaction(&d, rx, 16))) {
@@ -574,18 +574,17 @@ void GimicWinUSB::checkConnection(void)
 {
 	UCHAR buff[65];
 	buff[0] = 0;
-	memset( buff, 0, 65 );
+	memset(buff, 0, 65);
 
 	::EnterCriticalSection(&csection);
 	devWrite(buff);
 	::LeaveCriticalSection(&csection);
 }
 
-std::basic_string<TCHAR> GimicWinUSB::getNodeId(){
+std::basic_string<TCHAR> GimicWinUSB::getNodeId()
+{
 	return devPath;
 }
-
-
 
 
 // -------------------------------------------------------------------------------
@@ -615,10 +614,10 @@ int GimicWinUSB::GimicModuleWinUSB::setSSGVolume(UCHAR vol)
 
 	gimicParam.ssgVol = vol;
 	if (devidx == 0) {
-		MSG d = { 3, { 0xfd, 0x84, vol } };
+		MSG d = {3, {0xfd, 0x84, vol}};
 		return devif->sendMsg(&d);
 	} else {
-		MSG d = { 4, { 0xfd, 0x88, static_cast<UCHAR>(devidx), vol } };
+		MSG d = {4, {0xfd, 0x88, static_cast<UCHAR>(devidx), vol}};
 		return devif->sendMsg(&d);
 	}
 }
@@ -632,10 +631,10 @@ int GimicWinUSB::GimicModuleWinUSB::getSSGVolume(UCHAR* vol)
 
 	int ret;
 	if (devidx == 0) {
-		MSG d = { 2, { 0xfd, 0x86 } };
+		MSG d = {2, {0xfd, 0x86}};
 		ret = devif->transaction(&d, (uint8_t*)vol, 1);
 	} else {
-		MSG d = { 3, { 0xfd, 0x8A, static_cast<UCHAR>(devidx) } };
+		MSG d = {3, {0xfd, 0x8A, static_cast<UCHAR>(devidx)}};
 		ret = devif->transaction(&d, (uint8_t*)vol, 1);
 	}
 
@@ -653,10 +652,10 @@ int GimicWinUSB::GimicModuleWinUSB::setPLLClock(UINT clock)
 	int ret;
 	gimicParam.clock = clock;
 	if (devidx == 0) {
-		MSG d = { 6, { 0xfd, 0x83, clock & 0xff, (clock >> 8) & 0xff, (clock >> 16) & 0xff, (clock >> 24) & 0xff, 0 } };
+		MSG d = {6, {0xfd, 0x83, clock & 0xff, (clock >> 8) & 0xff, (clock >> 16) & 0xff, (clock >> 24) & 0xff, 0}};
 		ret = devif->sendMsg(&d);
 	} else {
-		MSG d = { 7, { 0xfd, 0x87, static_cast<UCHAR>(devidx), clock & 0xff, (clock >> 8) & 0xff, (clock >> 16) & 0xff, (clock >> 24) & 0xff } };
+		MSG d = {7, { 0xfd, 0x87, static_cast<UCHAR>(devidx), clock & 0xff, (clock >> 8) & 0xff, (clock >> 16) & 0xff, (clock >> 24) & 0xff}};
 		ret = devif->sendMsg(&d);
 	}
 	return ret;
@@ -672,10 +671,10 @@ int GimicWinUSB::GimicModuleWinUSB::getPLLClock(UINT* clock)
 
 	int ret;
 	if (devidx == 0) {
-		MSG d = { 2, { 0xfd, 0x85 } };
+		MSG d = {2, {0xfd, 0x85}};
 		ret = devif->transaction(&d, (uint8_t*)clock, 4);
 	} else {
-		MSG d = { 3, { 0xfd, static_cast<UCHAR>(devidx), 0x89 } };
+		MSG d = {3, {0xfd, static_cast<UCHAR>(devidx), 0x89}};
 		ret = devif->transaction(&d, (uint8_t*)clock, 4);
 	}
 
@@ -686,7 +685,6 @@ int GimicWinUSB::GimicModuleWinUSB::getPLLClock(UINT* clock)
 	}
 	return ret;
 }
-
 
 
 /*
@@ -717,7 +715,7 @@ int GimicWinUSB::GimicModuleWinUSB::getChipStatus(UINT addr, UCHAR* status)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	uint8_t rx[4];
-	MSG d = { 4, { 0xfd, 0x94, static_cast<UCHAR>(devidx), addr & 0x01 } };
+	MSG d = {4, {0xfd, 0x94, static_cast<UCHAR>(devidx), addr & 0x01}};
 	int ret;
 
 	if (C86CTL_ERR_NONE == (ret = devif->transaction(&d, rx, 4))) {
@@ -741,24 +739,24 @@ void GimicWinUSB::GimicModuleWinUSB::directOut(UINT addr, UCHAR data)
 			break;
 		}
 		if (addr < 0xfc) {
-			MSG d = { 2, { addr & 0xff, data } };
+			MSG d = {2, {addr & 0xff, data}};
 			devif->sendMsg(&d);
 		} else if (0x100 <= addr && addr <= 0x1fb) {
-			MSG d = { 3, { 0xfe, addr & 0xff, data } };
+			MSG d = {3, {0xfe, addr & 0xff, data}};
 			devif->sendMsg(&d);
 		}
 	} else {
 		if (addr < 0x100) {
-			MSG d = { 4, { 0xfc, static_cast<UCHAR>(2 * devidx), addr & 0xff, data } };
+			MSG d = {4, {0xfc, static_cast<UCHAR>(2 * devidx), addr & 0xff, data}};
 			devif->sendMsg(&d);
 		} else if (addr < 0x200) {
-			MSG d = { 4, { 0xfc, static_cast<UCHAR>(2 * devidx + 1), addr & 0xff, data } };
+			MSG d = {4, {0xfc, static_cast<UCHAR>(2 * devidx + 1), addr & 0xff, data}};
 			devif->sendMsg(&d);
 		}
 	}
 }
 
-int GimicWinUSB::GimicModuleWinUSB::getModuleInfo( struct Devinfo *info )
+int GimicWinUSB::GimicModuleWinUSB::getModuleInfo(struct Devinfo* info)
 {
 	return devif->getModuleInfo(devidx, info);
 }
@@ -776,5 +774,3 @@ std::basic_string<TCHAR> GimicWinUSB::GimicModuleWinUSB::getNodeId()
 }
 
 #endif
-
-					

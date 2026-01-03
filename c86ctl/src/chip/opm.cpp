@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -18,12 +18,14 @@
 using namespace c86ctl;
 
 
-void COPMFmCh::setMasterClock(UINT clock) {
+void COPMFmCh::setMasterClock(UINT clock)
+{
 	mclk = clock;
 	dcent = static_cast<uint32_t>(log(static_cast<double>(mclk) / 3579545.0) * 1200.0 / log(2.0) + 0.5);
 }
 
-void COPMFmCh::getNote(int& oct, int& note) {
+void COPMFmCh::getNote(int& oct, int& note)
+{
 	//                          0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14
 	const uint32_t ntbl[15] = { 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 9,10,11,12 };
 	uint32_t cent = kcoct * 1200 + ntbl[kcnote] * 100 + (100 * kfcent / 63) + dcent + 50;
@@ -35,11 +37,10 @@ void COPMFmCh::getNote(int& oct, int& note) {
 bool COPMFm::setReg(UCHAR addr, UCHAR data)
 {
 	// M1==S1, M2==C3, C1==S2, C2==S4
-	const int slotidx[4] = { 0, 2, 1, 3 };
+	const int slotidx[4] = {0, 2, 1, 3};
 	bool handled = true;
 
 	if (0x40 <= addr) {
-
 		// 0=M1, 1=M2, 2=C1, 3=C2
 		int sidx = slotidx[(addr >> 3) & 0x03];
 		int cidx = addr & 0x07;
@@ -71,7 +72,6 @@ bool COPMFm::setReg(UCHAR addr, UCHAR data)
 			slot->setReleaseRate(data & 0x0f);
 			break;
 		}
-
 	} else if (0x20 <= addr) {
 		int cidx = addr & 0x07;
 

@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -20,11 +20,11 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 {
 	INT idx, slot, tmp, idxoffset = bank * 3;
 	bool handled = true;
-	const INT stbl[4] = { 0,2,1,3 };
+	const INT stbl[4] = {0, 2, 1, 3};
 
 	if (bank == 0) {
 		switch (adrs) {
-		case 0x27:// Timer Control / Mode
+		case 0x27: // Timer Control / Mode
 			ch[2]->setExMode((data >> 6) & 0x3);
 			break;
 
@@ -43,7 +43,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 			}
 			break;
 
-		case 0x22:	// LFO
+		case 0x22: // LFO
 			break;
 		default:
 			handled = false;
@@ -56,7 +56,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 	handled = true;
 
 	switch (adrs) {
-		// fno, block
+	// fno, block
 	case 0xa0: // ch1
 	case 0xa1: // ch2
 	case 0xa2: // ch3
@@ -90,7 +90,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + 2]->setFExHi(1, data);
 		break;
 
-		// algorithm, feedback
+	// algorithm, feedback
 	case 0xb0:
 	case 0xb1:
 	case 0xb2:
@@ -99,7 +99,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->setFeedback((data >> 3) & 0x07);
 		break;
 
-		// LR, AMS, PMS
+	// LR, AMS, PMS
 	case 0xb4:
 	case 0xb5:
 	case 0xb6:
@@ -109,7 +109,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->setPMS(data & 0x07);
 		break;
 
-		// slot - detune/multi
+	// slot - detune/multi
 	case 0x30:	case 0x31:	case 0x32:
 	case 0x34:	case 0x35:	case 0x36:
 	case 0x38:	case 0x39:	case 0x3a:
@@ -121,7 +121,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->slot[slot]->setDetune((data >> 4) & 0x7);
 		break;
 
-		// slot - total level
+	// slot - total level
 	case 0x40:	case 0x41:	case 0x42:
 	case 0x44:	case 0x45:	case 0x46:
 	case 0x48:	case 0x49:	case 0x4a:
@@ -132,7 +132,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->slot[slot]->setTotalLevel(data & 0x7f);
 		break;
 
-		// slot - keyscale / attack rate
+	// slot - keyscale / attack rate
 	case 0x50:	case 0x51:	case 0x52:
 	case 0x54:	case 0x55:	case 0x56:
 	case 0x58:	case 0x59:	case 0x5a:
@@ -144,7 +144,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->slot[slot]->setAttackRate(data & 0x1f);
 		break;
 
-		// slot - decay rate / amon
+	// slot - decay rate / amon
 	case 0x60:	case 0x61:	case 0x62:
 	case 0x64:	case 0x65:	case 0x66:
 	case 0x68:	case 0x69:	case 0x6a:
@@ -157,7 +157,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		else			ch[idx]->slot[slot]->AMOff();
 		break;
 
-		// slot - sustain rate
+	// slot - sustain rate
 	case 0x70:	case 0x71:	case 0x72:
 	case 0x74:	case 0x75:	case 0x76:
 	case 0x78:	case 0x79:	case 0x7a:
@@ -168,7 +168,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->slot[slot]->setSustainRate(data & 0x1f);
 		break;
 
-		// slot - sustain level / rerease rate
+	// slot - sustain level / rerease rate
 	case 0x80:	case 0x81:	case 0x82:
 	case 0x84:	case 0x85:	case 0x86:
 	case 0x88:	case 0x89:	case 0x8a:
@@ -180,7 +180,7 @@ bool COPNFm::setReg(UCHAR bank, UCHAR adrs, UCHAR data)
 		ch[idxoffset + idx]->slot[slot]->setReleaseRate(data & 0xf);
 		break;
 
-		// slot - ssgeg-type
+	// slot - ssgeg-type
 	case 0x90:	case 0x91:	case 0x92:
 	case 0x94:	case 0x95:	case 0x96:
 	case 0x98:	case 0x99:	case 0x9a:
