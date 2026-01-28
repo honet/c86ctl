@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="c86ctl/prj/vc22/c86ctl.vcxproj" Id="4b8bcf47-4d54-4802-9516-d5f75d35721d" />
+  <Project Path="c86win/c86win.vcxproj" Id="7f45e7eb-2d07-44f6-a91f-07b592289a96" />
+</Solution>
