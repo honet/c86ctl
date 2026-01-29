@@ -877,11 +877,12 @@ void CVisC86TMS3631Key::drawTrackView(IVisBitmap* canvas, int ltx, int lty, int 
 // --------------------------------------------------------
 CVisC86KeyPtr c86ctl::vis::visC86KeyViewFactory(Chip *pchip, int id)
 {
-	if (typeid(*pchip) == typeid(COPNA)){
-		return CVisC86KeyPtr(new CVisC86OPNAKey(dynamic_cast<COPNA*>(pchip), id ));
-	} else if (typeid(*pchip) == typeid(COPN3L)){
+	if (!pchip) return 0;
+	if (typeid(*pchip) == typeid(COPNA)) {
+		return CVisC86KeyPtr(new CVisC86OPNAKey(dynamic_cast<COPNA*>(pchip), id));
+	} else if (typeid(*pchip) == typeid(COPN3L)) {
 		return CVisC86KeyPtr(new CVisC86OPN3LKey(dynamic_cast<COPN3L*>(pchip), id));
-	} else if (typeid(*pchip) == typeid(COPM)){
+	} else if (typeid(*pchip) == typeid(COPM)) {
 		return CVisC86KeyPtr(new CVisC86OPMKey(dynamic_cast<COPM*>(pchip), id));
 	} else if (typeid(*pchip) == typeid(CTMS3631)) {
 		return CVisC86KeyPtr(new CVisC86TMS3631Key(dynamic_cast<CTMS3631*>(pchip), id));

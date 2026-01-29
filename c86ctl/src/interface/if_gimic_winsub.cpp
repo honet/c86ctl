@@ -161,25 +161,25 @@ bool GimicWinUSB::OpenDevice(std::basic_string<TCHAR> devpath)
 			}
 		} else if (!memcmp(info.Devname, "GMC-OPM", 7)) {
 			if (modules[n] == 0) {
-				modules[n] = new GimicModuleWinUSB(this, i, 0, CHIP_OPM);
+				modules[n++] = new GimicModuleWinUSB(this, i, 0, CHIP_OPM);
 			} else if (modules[n]->getChipType() != CHIP_OPM) {
 				goto MODULE_CHANGED;
 			}
 		} else if (!memcmp(info.Devname, "GMC-OPNA", 8)) {
 			if (modules[n] == 0) {
-				modules[n] = new GimicModuleWinUSB(this, i, 0, CHIP_OPNA);
+				modules[n++] = new GimicModuleWinUSB(this, i, 0, CHIP_OPNA);
 			} else if (modules[i]->getChipType() != CHIP_OPNA) {
 				goto MODULE_CHANGED;
 			}
 		} else if (!memcmp(info.Devname, "GMC-OPL3", 8)) {
 			if (modules[n] == 0) {
-				modules[n] = new GimicModuleWinUSB(this, i, 0, CHIP_OPL3);
+				modules[n++] = new GimicModuleWinUSB(this, i, 0, CHIP_OPL3);
 			} else if (modules[n]->getChipType() != CHIP_OPL3) {
 				goto MODULE_CHANGED;
 			}
 		} else if (!memcmp(info.Devname, "GMC-OPLL", 8)) {
 			if (modules[n] == 0) {
-				modules[n] = new GimicModuleWinUSB(this, i, 0, CHIP_OPLL);
+				modules[n++] = new GimicModuleWinUSB(this, i, 0, CHIP_OPLL);
 			} else if (modules[n]->getChipType() != CHIP_OPLL) {
 				goto MODULE_CHANGED;
 			}

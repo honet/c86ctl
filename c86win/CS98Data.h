@@ -202,7 +202,7 @@ public:
 	int len;
 	int sync;
 public:
-	int gtick;
+	UINT gtick;
 };
 
 typedef std::pair<CS98DeviceInfo, int/*std::shared_ptr<CS98LogAnalyzer>*/ > DeviceInfo;

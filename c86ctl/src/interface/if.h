@@ -1,4 +1,4 @@
-﻿/***
+/***
 	c86ctl
 	I/Fアクセスインタフェース定義 for GIMIC
 	
@@ -13,11 +13,15 @@
 #include <string>
 #include "c86ctl.h"
 
-//#define SUPPORT_MIDI <=全然メンテしていません
-#define SUPPORT_WINUSB
+// MIDI版は廃止。メンテしていません
+//#define SUPPORT_MIDI
+
+// HID版は一応ビルド通りますが、多分もう使われていないと思うので未動作確認。
 //#define SUPPORT_HID
 
-namespace c86ctl{
+#define SUPPORT_WINUSB
+
+namespace c86ctl {
 
 class GimicParam;
 
@@ -55,6 +59,7 @@ public:
 	virtual int getMBInfo(struct Devinfo *info) = 0;
 };
 */
+
 interface IFirmwareVersionInfo
 {
 public:

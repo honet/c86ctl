@@ -405,6 +405,7 @@ void CVisC86OPMFm::onPaintClient()
 // --------------------------------------------------------
 CVisC86FmPtr c86ctl::vis::visC86FmViewFactory(Chip *pchip, int id, int ch)
 {
+	if (!pchip) return 0;
 	if( typeid(*pchip) == typeid(COPNA) ){
 		return CVisC86FmPtr( new CVisC86OPNAFm(dynamic_cast<COPNA*>(pchip), id, ch ) );
 	}else if( typeid(*pchip) == typeid(COPN3L) ){

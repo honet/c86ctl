@@ -185,8 +185,10 @@ interface IC86Box : public IUnknown
 extern "C" {
 #endif
 
-HRESULT WINAPI CreateInstance( REFIID riid, void** ppi );
+// c++ interface
+HRESULT WINAPI CreateInstance(REFIID riid, void** ppi);
 
+// c interface
 int WINAPI c86ctl_initialize(void);
 int WINAPI c86ctl_deinitialize(void);
 int WINAPI c86ctl_reset(void);
@@ -195,9 +197,9 @@ int WINAPI c86ctl_get_chip_type(int chipidx);
 int WINAPI c86ctl_outex(UINT chipidx, UINT addr, UCHAR data);
 int WINAPI c86ctl_inex(UINT chipidx, UINT addr, UCHAR data);
 
-void WINAPI c86ctl_out( UINT addr, UCHAR data );	// DEPRECATED
-UCHAR WINAPI c86ctl_in( UINT addr );				// DEPRECATED
 
+void WINAPI c86ctl_out(UINT addr, UCHAR data);	// DEPRECATED
+UCHAR WINAPI c86ctl_in(UINT addr);				// DEPRECATED
 
 
 #ifdef __cplusplus

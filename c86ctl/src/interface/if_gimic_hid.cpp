@@ -96,12 +96,13 @@ using namespace c86ctl;
 /*----------------------------------------------------------------------------
 	コンストラクタ
 ----------------------------------------------------------------------------*/
-GimicHID::GimicHID( HANDLE h )
-	: hHandle(h), chip(0), chiptype(CHIP_UNKNOWN), cps(0), cal(0), calcount(0), delay(0)
+GimicHID::GimicHID(HANDLE h)
+	: hHandle(h), cps(0), cal(0), calcount(0), nmodules(0)
 {
-	rbuff.alloc( 128 );
-	dqueue.alloc(1024*16);
+	rbuff.alloc(128);
 	::InitializeCriticalSection(&csection);
+
+	memset(modules, 0, sizeof(modules));
 }
 
 /*----------------------------------------------------------------------------
@@ -112,17 +113,18 @@ GimicHID::~GimicHID(void)
 	::DeleteCriticalSection(&csection);
 	CloseHandle(hHandle);
 	hHandle = NULL;
-	if( chip )
-		delete chip;
+	for (int i = 0; i < nmodules; i++)
+		if (modules[i])
+			delete modules[i];
 }
 
 /*----------------------------------------------------------------------------
 	HIDIF factory
 ----------------------------------------------------------------------------*/
-int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> > > &gimics)
+int GimicHID::UpdateInstances(withlock< std::vector< std::shared_ptr<BaseSoundDevice> > > &gimics)
 {
 	gimics.lock();
-	std::for_each( gimics.begin(), gimics.end(), []( std::shared_ptr<DeviceIF> x ){ x->checkConnection(); } );
+	std::for_each( gimics.begin(), gimics.end(), [](std::shared_ptr<BaseSoundDevice> x){ x->checkConnection(); } );
 
 	GUID hidGuid;
 	HDEVINFO devinf;
@@ -136,11 +138,11 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> 
 		0,
 		DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
-	if( devinf ){
-		for(int i=0; ;i++) {
+	if (devinf) {
+		for (int i = 0; ; i++) {
 			ZeroMemory(&spid, sizeof(spid));
 			spid.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-			if(!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid)){
+			if (!SetupDiEnumDeviceInterfaces(devinf, NULL, &hidGuid, i, &spid)) {
 				//DWORD err = GetLastError();
 				break;
 			}
@@ -150,11 +152,11 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> 
 
 			// 必要なバッファサイズ取得
 			SetupDiGetDeviceInterfaceDetail(devinf, &spid, NULL, 0, &sz, 0);
-			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)(malloc(sz));
+			PSP_INTERFACE_DEVICE_DETAIL_DATA dev_det = (PSP_INTERFACE_DEVICE_DETAIL_DATA)malloc(sz);
 			dev_det->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
 			// デバイスノード取得
-			if(!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0)){
+			if (!SetupDiGetDeviceInterfaceDetail(devinf, &spid, dev_det, sz, &sz, 0)) {
 				free(dev_det);
 				break;
 			}
@@ -162,14 +164,14 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> 
 			// デバイスオープン
 			HANDLE hHID = CreateFile(
 				dev_det->DevicePath,
-				GENERIC_READ|GENERIC_WRITE,
-				0/*FILE_SHARE_READ|FILE_SHARE_WRITE*/,
+				GENERIC_READ | GENERIC_WRITE,
+				0/*FILE_SHARE_READ | FILE_SHARE_WRITE*/,
 				NULL,
 				OPEN_EXISTING,
 				0,//FILE_FLAG_NO_BUFFERING,
 				NULL);
 
-			if(hHID == INVALID_HANDLE_VALUE){
+			if (hHID == INVALID_HANDLE_VALUE) {
 				free(dev_det);
 				continue;
 			}
@@ -179,14 +181,13 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> 
 
 			// VID, PID, version 取得
 			HIDD_ATTRIBUTES attr;
-			if( !HidD_GetAttributes(hHID, &attr) )
+			if (!HidD_GetAttributes(hHID, &attr))
 				continue;
 
-			if((attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID)||
-				(attr.VendorID == C86USB_USBVID && attr.ProductID == C86USB_USBPID)){
-				
+			if (attr.VendorID == GIMIC_USBVID && attr.ProductID == GIMIC_USBPID) {
+				// 既にインスタンスがあるかどうか検索
 				auto it = std::find_if( gimics.begin(), gimics.end(),
-					[devpath](std::shared_ptr<DeviceIF> x) -> bool {
+					[devpath](std::shared_ptr<BaseSoundDevice> x) -> bool {
 						GimicHID *ghid = dynamic_cast<GimicHID*>(x.get());
 						if(!ghid) return false;
 						if(ghid->devPath != devpath ) return false;
@@ -194,25 +195,37 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> 
 						return true;
 					}
 				);
-				if( it == gimics.end() ){
-					// タイムアウト設定
-					COMMTIMEOUTS commTimeOuts;
-					commTimeOuts.ReadIntervalTimeout = 0;
-					commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
-					commTimeOuts.ReadTotalTimeoutMultiplier = 0;
-					commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
-					commTimeOuts.WriteTotalTimeoutMultiplier = 0;
-					::SetCommTimeouts( hHID, &commTimeOuts );
 
-					// インスタンス生成
+				if (it == gimics.end()) {
 					GimicHID *gimicHid = new GimicHID(hHID);
-					if( gimicHid ){
+					if (gimicHid) {
 						gimicHid->devPath = devpath;
-						gimics.push_back( DeviceIFPtr(gimicHid) );
-						gimicHid->init();
+						if (gimicHid->CreateModules()) {
+							gimics.push_back(std::shared_ptr<BaseSoundDevice>(gimicHid));
+						} else {
+							delete gimicHid;
+						}
 					}
+				} else if (!(*it)->isValid()) {
+					// 再接続
+					GimicHID* ghid = dynamic_cast<GimicHID*>(it->get());
+					ghid->hHandle = hHID;
+					if (!ghid->CreateModules()) {
+						// OpenDeviceが失敗した場合は音源モジュールが前回接続時と
+						// 異なっているため、別インスタンスを生成する
+						GimicHID* gimicHid = new GimicHID(hHID);
+						if (gimicHid) {
+							if (gimicHid->CreateModules()) {
+								gimics.push_back(std::shared_ptr<BaseSoundDevice>(gimicHid));
+							} else {
+								delete gimicHid;
+							}
+						}
+					}
+				} else {
+					CloseHandle(hHID);
 				}
-			}else{
+			} else {
 				CloseHandle(hHID);
 			}
 		}
@@ -226,7 +239,7 @@ int GimicHID::UpdateInstances( withlock< std::vector< std::shared_ptr<DeviceIF> 
 /*----------------------------------------------------------------------------
 	internal.
 ----------------------------------------------------------------------------*/
-int GimicHID::sendMsg( MSG *data )
+int GimicHID::sendMsg(MSG *data)
 {
 	UCHAR buff[66];
 	int ret = C86CTL_ERR_UNKNOWN;
@@ -234,42 +247,40 @@ int GimicHID::sendMsg( MSG *data )
 	buff[0] = 0; // HID interface id.
 
 	UINT sz = data->len;
-	if( 0<sz ){
+	if (0 < sz) {
 		memcpy( &buff[1], &data->dat[0], sz );
 		if( sz<64 )
 			memset( &buff[1+sz], 0xff, 64-sz );
 
 		::EnterCriticalSection(&csection);
-		int ret = devWrite(buff);
+		ret = devWrite(buff);
 		::LeaveCriticalSection(&csection);
 	}
 
 	return ret;
 }
 
-int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
+int GimicHID::transaction(MSG *txdata, uint8_t *rxdata, uint32_t rxsz)
 {
 	UCHAR buff[66];
 	buff[0] = 0; // HID interface id.
-	DWORD len = 0;
 	int ret = C86CTL_ERR_UNKNOWN;
 
 	::EnterCriticalSection(&csection);
 	{
 		UINT sz = txdata->len;
-		if( 0<sz ){
-			memcpy( &buff[1], &txdata->dat[0], sz );
-			if( sz<64 )
-				memset( &buff[1+sz], 0xff, 64-sz );
+		if (0 < sz) {
+			memcpy(&buff[1], &txdata->dat[0], sz);
+			if (sz<64)
+				memset(&buff[1 + sz], 0xff, 64 - sz);
 
 			ret = devWrite(buff);
 		}
 
-		if( C86CTL_ERR_NONE==ret ){
-			len = 0;
+		if (C86CTL_ERR_NONE == ret){
 			ret = devRead(buff);
-			if( C86CTL_ERR_NONE == ret )
-				memcpy( rxdata, &buff[1], rxsz ); // 1byte目はUSBのInterfaceNo.なので飛ばす
+			if (C86CTL_ERR_NONE == ret)
+				memcpy(rxdata, &buff[1], rxsz); // 1byte目はUSBのInterfaceNo.なので飛ばす
 		}
 	}
 	::LeaveCriticalSection(&csection);
@@ -277,53 +288,129 @@ int GimicHID::transaction( MSG *txdata, uint8_t *rxdata, uint32_t rxsz )
 	return ret;
 }
 
+int GimicHID::devWrite(LPCVOID data)
+{
+	if (!hHandle)
+		return C86CTL_ERR_NODEVICE;
+
+	DWORD len;
+	int ret = WriteFile(hHandle, data, 65, &len, NULL);
+
+	if (ret == 0 || 65 != len) {
+		CloseHandle(hHandle);
+		hHandle = NULL;
+		return C86CTL_ERR_UNKNOWN;
+	}
+	return C86CTL_ERR_NONE;
+}
+
+int GimicHID::devRead(LPVOID data)
+{
+	if (!hHandle)
+		return C86CTL_ERR_NODEVICE;
+
+	DWORD len;
+	if (!ReadFile(hHandle, data, 65, &len, NULL)) {
+		CloseHandle(hHandle);
+		hHandle = NULL;
+		return C86CTL_ERR_UNKNOWN;
+	}
+	return C86CTL_ERR_NONE;
+}
+
+void GimicHID::out2buf(UCHAR idx, UINT addr, UCHAR data)
+{
+	if (idx >= nmodules) return;
+
+	switch (modules[idx]->getChipType()) {
+	case CHIP_OPNA:
+	case CHIP_OPN3L:
+		if (0x100 <= addr && addr <= 0x110)
+			addr -= 0x40;
+		break;
+	case CHIP_OPM:
+		if (0xfc <= addr && addr <= 0xff)
+			addr -= 0xe0;
+		break;
+	}
+	if (addr < 0xfc) {
+		MSG d = { 2, { addr & 0xff, data } };
+		rbuff.push(d);
+	} else if (0x100 <= addr && addr <= 0x1fb) {
+		MSG d = { 3, { 0xfe, addr & 0xff, data } };
+		rbuff.push(d);
+	}
+}
+
+void GimicHID::out(UCHAR idx, UINT addr, UCHAR data)
+{
+	if (idx != 0)
+		return;
+
+	out2buf(idx, addr, data);
+}
+
 /*----------------------------------------------------------------------------
 	実装
 ----------------------------------------------------------------------------*/
 
-int GimicHID::init(void)
+bool GimicHID::CreateModules(void)
 {
+	// タイムアウト設定
+	COMMTIMEOUTS commTimeOuts;
+	commTimeOuts.ReadIntervalTimeout = 0;
+	commTimeOuts.ReadTotalTimeoutConstant = 500; //ms
+	commTimeOuts.ReadTotalTimeoutMultiplier = 0;
+	commTimeOuts.WriteTotalTimeoutConstant = 500; //ms
+	commTimeOuts.WriteTotalTimeoutMultiplier = 0;
+	::SetCommTimeouts(hHandle, &commTimeOuts);
+
 	Devinfo info;
+	ChipType chiptype = CHIP_UNKNOWN;
 	getModuleInfo(0, &info);
-	if( !memcmp( info.Devname, "GMC-OPN3L", 9 ) ){
+	if (!memcmp(info.Devname, "GMC-OPN3L", 9)) {
 		chiptype = CHIP_OPN3L;
-	}else if( !memcmp( info.Devname, "GMC-OPM", 7 ) ){
+	} else if (!memcmp(info.Devname, "GMC-OPM", 7)) {
 		chiptype = CHIP_OPM;
-	}else if( !memcmp( info.Devname, "GMC-OPNA", 8 ) ){
+	} else if (!memcmp(info.Devname, "GMC-OPNA", 8)) {
 		chiptype = CHIP_OPNA;
-	}else if( !memcmp( info.Devname, "GMC-OPL3", 8 ) ){
+	} else if (!memcmp(info.Devname, "GMC-OPL3", 8)) {
 		chiptype = CHIP_OPL3;
-	}else if( !memcmp( info.Devname, "GMC-OPLL", 8 ) ){
+	} else if (!memcmp(info.Devname, "GMC-OPLL", 8)) {
 		chiptype = CHIP_OPLL;
-//	}else if( !memcmp( info.Devname, "GMC-SPC", 8 ) ){
+//	} else if (!memcmp(info.Devname, "GMC-SPC", 8)) {
+	}
+
+	if (modules[0] == nullptr) {
+		modules[0] = new GimicModuleHID(this, 0, 0, chiptype);
+	} else if (modules[0]->getChipType() != chiptype) {
+		// MODULE_CHANGED;
+		return false;
 	}
 	
 	// 値をキャッシュさせるためのダミー呼び出し
 	UCHAR vol;
-	getSSGVolume(0, &vol);
+	modules[0]->getSSGVolume(&vol);
 	UINT clock;
-	getPLLClock(0, &clock);
+	modules[0]->getPLLClock(&clock);
 	
-	return C86CTL_ERR_NONE;
+	return true;
 }
 
 int GimicHID::reset(void)
 {
 	int ret;
-	
-	// ディレイキューの廃棄
-	dqueue.flush();
 
 	// リセットコマンド送信
 	MSG d = { 2, { 0xfd, 0x82, 0 } };
 	ret =  sendMsg( &d );
 	
-	if( C86CTL_ERR_NONE == ret ){
+	if (C86CTL_ERR_NONE == ret) {
 		// 各ステータス値リセット
 		//   マスクの適用をreset内でする（送信処理が発生する）ので
 		//   リセット後に処理しないとダメ。
-		if( chip )
-			chip->reset();
+		//if (chip)
+		//	chip->reset();
 	}
 
 	return ret;
@@ -334,111 +421,240 @@ int GimicHID::isValid(void)
 	return (hHandle == 0) ? FALSE : TRUE;
 }
 
-int GimicHID::setSSGVolume(UCHAR idx, UCHAR vol)
+int GimicHID::getMBInfo(struct Devinfo* info)
 {
-	if( chiptype != CHIP_OPNA )
+	int ret;
+
+	if (!info)
+		return C86CTL_ERR_INVALID_PARAM;
+
+	MSG d = { 3, { 0xfd, 0x91, 0xff } };
+	if (C86CTL_ERR_NONE == (ret = transaction(&d, (uint8_t*)info, 32))) {
+		char* p = &info->Devname[15];
+		while (*p == 0 || *p == -1) *p-- = 0;
+		p = &info->Serial[14];
+		while (*p == 0 || *p == -1) *p-- = 0;
+	}
+	return ret;
+}
+
+int GimicHID::getModuleInfo(UCHAR idx, struct Devinfo* info)
+{
+	int ret;
+
+	if (!info)
+		return C86CTL_ERR_INVALID_PARAM;
+
+	MSG d = { 3, { 0xfd, 0x91, 0 } };
+	if (C86CTL_ERR_NONE == (ret = transaction(&d, (uint8_t*)info, 32))) {
+		char* p = &info->Devname[15];
+		while (*p == 0 || *p == -1) *p-- = 0;
+		p = &info->Serial[14];
+		while (*p == 0 || *p == -1) *p-- = 0;
+	}
+	return ret;
+}
+
+//UCHAR GimicHID::in(UCHAR idx, UINT addr)
+//{
+//	if (chip)
+//		return chip->getReg(addr);
+//
+//	return 0;
+//}
+
+void GimicHID::tick(void)
+{
+	int ret;
+
+	if (!rbuff.isempty()) {
+		UCHAR buff[128];
+		UINT sz = 0, i = 1;
+		MSG d;
+
+		buff[0] = 0; // HID interface id.
+
+		for (;;) {
+			UINT l = rbuff.front()->len;
+			if (64 < (sz + l))
+				break;
+			if (!rbuff.pop(&d))
+				break;
+			sz += d.len;
+			for (UINT j = 0; j < d.len; j++)
+				buff[i++] = d.dat[j];
+			if (rbuff.isempty())
+				break;
+		}
+
+		if (sz < 64)
+			memset(&buff[1 + sz], 0xff, 64 - sz);
+
+		// WriteFileがスレッドセーフかどうかよく分からないので
+		// 念のため保護しているが、たぶんいらない。
+		// (directOut()と重なる可能性がある)
+		::EnterCriticalSection(&csection);
+		ret = devWrite(buff);
+		::LeaveCriticalSection(&csection);
+
+		if (ret == C86CTL_ERR_NONE)
+			cal += 64;
+	}
+
+	return;
+}
+
+void GimicHID::update(void)
+{
+	if (1 <= calcount++) {
+		cps = cal;
+		cal = 0;
+		calcount = 0;
+	}
+}
+
+void GimicHID::checkConnection(void)
+{
+	UCHAR buff[65];
+	buff[0] = 0;
+	memset(buff, 0, 65);
+
+	::EnterCriticalSection(&csection);
+	devWrite(buff);
+	::LeaveCriticalSection(&csection);
+}
+
+std::basic_string<TCHAR> GimicHID::getNodeId() {
+	return devPath;
+}
+
+
+// -------------------------------------------------------------------------------
+GimicHID::GimicModuleHID::GimicModuleHID(GimicHID* device, int boardidx, int chipidx, ChipType chipType)
+	: devif(device), devidx(boardidx), chipidx(chipidx), chiptype(chipType)
+{
+	// 値をキャッシュさせるためのダミー呼び出し
+	UCHAR vol;
+	getSSGVolume(&vol);
+	UINT clock;
+	getPLLClock(&clock);
+}
+
+GimicHID::GimicModuleHID::GimicModuleHID::~GimicModuleHID()
+{
+}
+
+void GimicHID::GimicModuleHID::byteOut(UINT addr, UCHAR data)
+{
+	devif->out(devidx, addr, data);
+}
+
+void GimicHID::GimicModuleHID::directOut(UINT addr, UCHAR data)
+{
+	switch (chiptype) {
+	case CHIP_OPNA:
+	case CHIP_OPN3L:
+		if (0x100 <= addr && addr <= 0x110)
+			addr -= 0x40;
+		break;
+	case CHIP_OPM:
+		if (0xfc <= addr && addr <= 0xff)
+			addr -= 0xe0;
+		break;
+	}
+	if (addr < 0xfc) {
+		MSG d = { 2, { addr & 0xff, data } };
+		devif->sendMsg(&d);
+	} else if (0x100 <= addr && addr <= 0x1fb) {
+		MSG d = { 3, { 0xfe, addr & 0xff, data } };
+		devif->sendMsg(&d);
+	}
+}
+
+int GimicHID::GimicModuleHID::setSSGVolume(UCHAR vol)
+{
+	if (chiptype != CHIP_OPNA)
 		return C86CTL_ERR_UNSUPPORTED;
 
 	gimicParam.ssgVol = vol;
 	MSG d = { 3, { 0xfd, 0x84, vol } };
-	return sendMsg( &d );
+	return devif->sendMsg(&d);
 }
 
-int GimicHID::getSSGVolume(UCHAR idx, UCHAR *vol)
+int GimicHID::GimicModuleHID::getSSGVolume(UCHAR *vol)
 {
-	if( chiptype != CHIP_OPNA )
+	if (chiptype != CHIP_OPNA)
 		return C86CTL_ERR_UNSUPPORTED;
-	if( !vol )
+	if (!vol)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	MSG d = { 2, { 0xfd, 0x86 } };
-	int ret = transaction( &d, (uint8_t*)vol, 1 );
+	int ret = devif->transaction(&d, (uint8_t*)vol, 1);
 	
-	if( C86CTL_ERR_NONE == ret )
+	if (C86CTL_ERR_NONE == ret)
 		gimicParam.ssgVol = *vol;
 	
 	return ret;
 }
 
-int GimicHID::setPLLClock(UCHAR idx, UINT clock)
+int GimicHID::GimicModuleHID::setPLLClock(UINT clock)
 {
 	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3  )
 		return C86CTL_ERR_UNSUPPORTED;
 
 	gimicParam.clock = clock;
-	MSG d = { 6, { 0xfd, 0x83, clock&0xff, (clock>>8)&0xff, (clock>>16)&0xff, (clock>>24)&0xff, 0 } };
-	int ret = sendMsg( &d );
+	MSG d = { 6, { 0xfd, 0x83, clock & 0xff, (clock >> 8) & 0xff, (clock >> 16) & 0xff, (clock >> 24) & 0xff, 0 } };
+	int ret = devif->sendMsg(&d);
 
-	//if( ret == C86CTL_ERR_NONE ){
-	//	if( chip )
-	//		chip->setMasterClock(clock);
-	//}
 	return ret;
 }
 
-int GimicHID::getPLLClock(UCHAR idx, UINT *clock)
+int GimicHID::GimicModuleHID::getPLLClock(UINT *clock)
 {
-	if( chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3 )
+	if (chiptype != CHIP_OPNA && chiptype != CHIP_OPM && chiptype != CHIP_OPL3)
 		return C86CTL_ERR_UNSUPPORTED;
 
-	if( !clock )
+	if (!clock)
 		return C86CTL_ERR_INVALID_PARAM;
 
 	MSG d = { 2, { 0xfd, 0x85 } };
-	int ret = transaction( &d, (uint8_t*)clock, 4 );
+	int ret = devif->transaction(&d, (uint8_t*)clock, 4);
 
-	if( ret == C86CTL_ERR_NONE ){
-		if( gimicParam.clock != *clock ){
+	if (ret == C86CTL_ERR_NONE) {
+		if (gimicParam.clock != *clock) {
 			gimicParam.clock = *clock;
-//			if( chip )
-//				chip->setMasterClock(*clock);
 		}
 	}
 	return ret;
 }
 
-int GimicHID::getMBInfo( struct Devinfo *info )
-{
-	int ret;
-	
-	if( !info )
-		return C86CTL_ERR_INVALID_PARAM;
 
-	MSG d = { 3, { 0xfd, 0x91, 0xff } };
-	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
-		char *p = &info->Devname[15];
-		while( *p==0 || *p==-1 ) *p--=0;
-		p = &info->Serial[14];
-		while(*p==0||*p==-1) *p--=0;
-	}
-	return ret;
+
+int GimicHID::GimicModuleHID::getModuleInfo(struct Devinfo* info)
+{
+	return devif->getModuleInfo(devidx, info);
 }
 
-int GimicHID::getModuleInfo( UCHAR idx, struct Devinfo *info )
+const GimicParam* GimicHID::GimicModuleHID::getGimicParam()
 {
-	int ret;
-	
-	if( !info )
-		return C86CTL_ERR_INVALID_PARAM;
-
-	MSG d = { 3, { 0xfd, 0x91, 0 } };
-	if( C86CTL_ERR_NONE == (ret = transaction( &d, (uint8_t*)info, 32 )) ){
-		char *p = &info->Devname[15];
-		while(*p==0||*p==-1) *p--=0;
-		p = &info->Serial[14];
-		while(*p==0||*p==-1) *p--=0;
-	}
-	return ret;
+	return &gimicParam;
 }
 
-int GimicHID::getModuleType(UCHAR idx, enum ChipType *type)
+std::basic_string<TCHAR> GimicHID::GimicModuleHID::getNodeId()
 {
-	if( !type )
-		return C86CTL_ERR_INVALID_PARAM;
-
-	*type = chiptype;
-	return C86CTL_ERR_NONE;
+	TCHAR buf[128];
+	_sntprintf(buf, 128, _T("\\%d"), devidx);
+	return devif->getNodeId() + buf;
 }
+
+//int GimicHID::getModuleType(UCHAR idx, enum ChipType *type)
+//{
+//	if (!type)
+//		return C86CTL_ERR_INVALID_PARAM;
+//
+//	*type = chiptype;
+//	return C86CTL_ERR_NONE;
+//}
 
 int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 {
@@ -446,25 +662,25 @@ int GimicHID::getFWVer( UINT *major, UINT *minor, UINT *rev, UINT *build )
 	MSG d = { 2, { 0xfd, 0x92 } };
 	int ret;
 
-	if( C86CTL_ERR_NONE == (ret = transaction( &d, rx, 16 )) ){
-		if( major ) *major = *((uint32_t*)&rx[0]);
-		if( minor ) *minor = *((uint32_t*)&rx[4]);
-		if( rev )   *rev   = *((uint32_t*)&rx[8]);
-		if( build ) *build = *((uint32_t*)&rx[12]);
+	if( C86CTL_ERR_NONE == (ret = transaction(&d, rx, 16))){
+		if (major) *major = *((uint32_t*)&rx[0]);
+		if (minor) *minor = *((uint32_t*)&rx[4]);
+		if (rev)   *rev   = *((uint32_t*)&rx[8]);
+		if (build) *build = *((uint32_t*)&rx[12]);
 	}
 	return ret;
 }
 
-int GimicHID::getChipStatus( UCHAR idx, UINT addr, UCHAR *status )
+int GimicHID::GimicModuleHID::getChipStatus(UINT addr, UCHAR *status)
 {
-	if( !status )
+	if (!status)
 		return C86CTL_ERR_INVALID_PARAM;
 	
 	uint8_t rx[4];
-	MSG d = { 3, { 0xfd, 0x93, addr&0x01 } };
+	MSG d = { 3, { 0xfd, 0x93, addr & 0x01 } };
 	int ret;
 
-	if( C86CTL_ERR_NONE == (ret = transaction( &d, rx, 4 )) ){
+	if (C86CTL_ERR_NONE == (ret = devif->transaction(&d, rx, 4))){
 		*status = *((uint32_t*)&rx[0]);
 	}
 	return ret;
@@ -491,197 +707,6 @@ int GimicHID::adpcmRead( UINT startAddr, UINT size, UCHAR *data )
 	return C86CTL_ERR_NOT_IMPLEMENTED;
 }
 */
-
-void GimicHID::directOut(UCHAR idx, UINT addr, UCHAR data)
-{
-	switch( chiptype ){
-	case CHIP_OPNA:
-	case CHIP_OPN3L:
-		if( 0x100<=addr && addr<=0x110 )
-			addr -= 0x40;
-		break;
-	case CHIP_OPM:
-		if( 0xfc<=addr && addr<=0xff )
-			addr -= 0xe0;
-		break;
-	}
-	if( addr < 0xfc ){
-		MSG d = { 2, { addr&0xff, data } };
-		sendMsg(&d);
-	}else if( 0x100 <= addr && addr <= 0x1fb ){
-		MSG d = { 3, { 0xfe, addr&0xff, data } };
-		sendMsg(&d);
-	}
-}
-
-void GimicHID::out2buf(UINT addr, UCHAR data)
-{
-	bool flag = true;
-	if( chip ){
-		flag = chip->setReg( addr, data );
-		chip->filter( addr, &data );
-	}
-	if( flag ){
-		switch( chiptype ){
-		case CHIP_OPNA:
-		case CHIP_OPN3L:
-			if( 0x100<=addr && addr<=0x110 )
-				addr -= 0x40;
-			break;
-		case CHIP_OPM:
-			if( 0xfc<=addr && addr<=0xff )
-				addr -= 0xe0;
-			break;
-		}
-		if( addr < 0xfc ){
-			MSG d = { 2, { addr&0xff, data } };
-			rbuff.push(d);
-		}else if( 0x100 <= addr && addr <= 0x1fb ){
-			MSG d = { 3, { 0xfe, addr&0xff, data } };
-			rbuff.push(d);
-		}
-	}
-}
-void GimicHID::out(UCHAR idx, UINT addr, UCHAR data)
-{
-	if( 0<delay ){
-		REQ r = { ::timeGetTime()+delay, addr, data };
-		dqueue.push(r);
-		return;
-	}
-	if(delay==0){
-		if( dqueue.isempty() )
-			delay = -1;
-	}
-
-	out2buf(addr, data);
-}
-
-UCHAR GimicHID::in(UCHAR idx, UINT addr)
-{
-	if( chip )
-		return chip->getReg(addr);
-
-	return 0;
-}
-
-void GimicHID::tick(void)
-{
-	int ret;
-	
-	if( 0<=delay && !dqueue.isempty() ){
-		UINT t = timeGetTime();
-		while( !dqueue.isempty() && t>=dqueue.front()->t ){
-			if( rbuff.remain()<4 ) break;
-			REQ req;
-			dqueue.pop(&req);
-			out2buf( req.addr, req.dat );
-		}
-	}
-	
-	if( !rbuff.isempty() ){
-		UCHAR buff[128];
-		UINT sz=0, i=1;
-		MSG d;
-
-		buff[0] = 0; // HID interface id.
-
-		for(;;){
-			UINT l = rbuff.front()->len;
-			if( 64<(sz+l) )
-				break;
-			if( !rbuff.pop(&d) )
-				break;
-			sz += d.len;
-			for( UINT j=0; j<d.len; j++ )
-				buff[i++] = d.dat[j];
-			if( rbuff.isempty() )
-				break;
-		}
-
-		if( sz<64 )
-			memset( &buff[1+sz], 0xff, 64-sz );
-
-		// WriteFileがスレッドセーフかどうかよく分からないので
-		// 念のため保護しているが、たぶんいらない。
-		// (directOut()と重なる可能性がある)
-		::EnterCriticalSection(&csection);
-		ret = devWrite(buff);
-		::LeaveCriticalSection(&csection);
-
-		if( ret == C86CTL_ERR_NONE )
-			cal+=64;
-	}
-
-	return;
-}
-
-void GimicHID::update(void)
-{
-	if( chip )
-		chip->update();
-
-	if( 1 <= calcount++ ){
-		cps = cal;
-		cal = 0;
-		calcount = 0;
-	}
-};
-void GimicHID::checkConnection(void)
-{
-	UCHAR buff[65];
-	buff[0] = 0;
-	memset( buff, 0, 65 );
-
-	::EnterCriticalSection(&csection);
-	devWrite(buff);
-	::LeaveCriticalSection(&csection);
-};
-
-int GimicHID::setDelay(int d)
-{
-	return C86CTL_ERR_NONE;
-}
-
-int GimicHID::getDelay(int *d)
-{
-	if(d){
-		*d = delay;
-		return C86CTL_ERR_NONE;
-	}
-	return C86CTL_ERR_INVALID_PARAM;
-}
-
-int GimicHID::getNumberOfModules()
-{
-	return 1;
-}
-
-bool GimicHID::isChipConnected(int idx)
-{
-	if (idx!=0)
-		return false;
-	
-	return (chip==0) ? false : true;
-}
-
-int GimicHID::connectChip(int idx, IChip *dev)
-{
-	if (idx!=0)
-		return C86CTL_ERR_INVALID_PARAM;
-
-	chip = dev;
-	return C86CTL_ERR_NONE;
-}
-
-int GimicHID::disconnectChip(int idx)
-{
-	if (idx!=0)
-		return C86CTL_ERR_INVALID_PARAM;
-
-	chip = NULL;
-	return C86CTL_ERR_NONE;
-}
 
 
 #endif

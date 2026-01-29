@@ -113,16 +113,20 @@ int C86CtlMainWnd::createMainWnd(LPVOID param)
 		pFilterData->dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
 		pFilterData->dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 
+#ifdef SUPPORT_HID
 		// for HID interface
-//	    HidD_GetHidGuid(&pFilterData->dbcc_classguid);
-//		hNotifyHIDDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+	    HidD_GetHidGuid(&pFilterData->dbcc_classguid);
+		hNotifyHIDDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+#endif
 
+#ifdef SUPPORT_WINUSB
 		// for WinUSB interface
-		// gimic
+		// gimic/C86
 		memcpy(&pFilterData->dbcc_classguid, &GUID_DEVINTERFACE_GIMIC_WINUSB_TARGET, sizeof(GUID));
 		hNotifyWinUSBDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
 		memcpy(&pFilterData->dbcc_classguid, &GUID_DEVINTERFACE_C86BOX_WINUSB_TARGET, sizeof(GUID));
 		hNotifyWinUSBDevNode = ::RegisterDeviceNotification(hwnd, pFilterData, DEVICE_NOTIFY_WINDOW_HANDLE);
+#endif
 	}
 
 	if (gConfig.getInt(INISC_MAIN, _T("GUI"), 1))

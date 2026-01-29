@@ -24,6 +24,7 @@
 
 #include "if_c86usb_winusb.h"
 #include "if_gimic_winusb.h"
+#include "if_gimic_hid.h"
 
 namespace c86ctl{
 
@@ -215,6 +216,20 @@ int LogicalDevice::getModuleInfo(struct Devinfo* info)
 	// 複数モジュールに接続されている場合は順にスキャンして
 	// サポートしていたモジュールの値を代表値とする。
 	for (size_t i = 0; i < streams.size(); i++) {
+		if (typeid(streams[i]->module) == typeid(GimicWinUSB::GimicModuleWinUSB)) {
+			GimicWinUSB::GimicModuleWinUSB* gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
+			if (gimic) {
+				return gimic->getModuleInfo(info);
+			}
+		} 
+#ifdef SUPPORT_HID
+		else if (typeid(streams[i]->module) == typeid(GimicHID::GimicModuleHID)) {
+			GimicHID::GimicModuleHID* gimic = dynamic_cast<GimicHID::GimicModuleHID*>(streams[i]->module);
+			if (gimic) {
+				return gimic->getModuleInfo(info);
+			}
+		}
+#endif
 		GimicWinUSB::GimicModuleWinUSB* gimic = dynamic_cast<GimicWinUSB::GimicModuleWinUSB*>(streams[i]->module);
 		if (gimic) {
 			return gimic->getModuleInfo(info);
@@ -242,8 +257,8 @@ int LogicalDevice::writeBoardControl(UINT index, UINT val)
 
 int LogicalDevice::isValid(void)
 {
-	for (size_t i = 0; i < streams.size(); i++) {
-		if (!streams[i]->module->isValid())
+	for (auto& stream : streams) {
+		if (!stream->module->isValid())
 			return false;
 	}
 	return true;

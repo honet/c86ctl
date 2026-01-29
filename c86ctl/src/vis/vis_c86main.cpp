@@ -1,4 +1,4 @@
-/***
+﻿/***
 	c86ctl
 	
 	Copyright (c) 2009-2012, honet. All rights reserved.
@@ -69,7 +69,7 @@ bool CVisC86Main::update()
 #endif
 
 	info.resize(sz);
-	for (size_t i = 0; i < sz; i++) {
+	for (int i = 0; i < sz; i++) {
 		Stream* s = GetC86CtlMain()->getStream(i);
 
 		info[i].chiptype = s->module->getChipType();

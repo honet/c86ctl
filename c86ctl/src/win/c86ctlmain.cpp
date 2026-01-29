@@ -184,7 +184,9 @@ unsigned int WINAPI C86CtlMain::threadMain(LPVOID param)
 
 			case WM_MYDEVCHANGE:
 				//::OutputDebugString(L"DEVICE CHANGED!\r\n");
-				//GimicHID::UpdateInstances(pThis->gIF);
+#ifdef SUPPORT_HID
+				GimicHID::UpdateInstances(pThis->gIF);
+#endif
 				GimicWinUSB::UpdateInstances(pThis->gIF);
 				C86WinUSB::UpdateInstances(pThis->gIF);
 				pThis->updateMapping();
@@ -307,9 +309,12 @@ int C86CtlMain::initialize(void)
 		return C86CTL_ERR_UNKNOWN;
 
 	// インスタンス生成
-	//GimicHID::UpdateInstances(gIF);
 	GimicWinUSB::UpdateInstances(gIF);
+#ifdef SUPPORT_HID
+	GimicHID::UpdateInstances(gIF);
+#endif
 	//gGIMIC = GimicMIDI::CreateInstances(); // deprecated.
+
 	C86WinUSB::UpdateInstances(gIF);
 	updateMapping();
 
@@ -394,42 +399,46 @@ void C86CtlMain::loadConfig(void)
 	TCHAR key[128];
 	int val = 0;
 
-	for (int i = 0; i < static_cast<int>(gIF.size()); i++) {
+	for (int i = 0; i < static_cast<int>(gStream.size()); i++) {
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, static_cast<int>(i));
 		val = gConfig.getInt(INISC_MAIN, key, -1);
-//		if( val>=0 ) gIF[i]->setDelay(val);
+		if (val >= 0) {
+			getStream(i)->delay->setDelay(val);
+		}
+	}
 
-	// TODO: なおす
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
-//		val = gConfig.getInt(INISC_MAIN, key, -1);
-//		if( val>=0 ) gIF[i]->setSSGVolume((UCHAR)val);
+	for (int i = 0; i < static_cast<int>(gLogicalDevices.size()); i++) {
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+		val = gConfig.getInt(INISC_MAIN, key, -1);
+		if (val >= 0) gLogicalDevices[i]->setSSGVolume((UCHAR)val);
 
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
-//		val = gConfig.getInt(INISC_MAIN, key, -1);
-//		if( val>=0 ) gIF[i]->setPLLClock((UINT)val);
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+		val = gConfig.getInt(INISC_MAIN, key, -1);
+		if (val >= 0) gLogicalDevices[i]->setPLLClock((UINT)val);
 	}
 }
 
 void C86CtlMain::saveConfig(void)
 {
 	TCHAR key[128];
-	for (int i = 0; i < static_cast<int>(gIF.size()); i++) {
+	for (int i = 0; i < static_cast<int>(gStream.size()); i++) {
+		auto stream = getStream(i);
 		int delay = 0;
-//		gIF[i]->getDelay(&delay);
+		stream->delay->getDelay(&delay);
 		_sntprintf(key, sizeof(key), INIKEY_DELAY, i);
 		gConfig.writeInt(INISC_MAIN, key, delay);
+	}
 
-	// TODO: なおす
-//		UCHAR vol=0;
-//		gGIMIC[i]->getSSGVolume(&vol);
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
-//		gConfig.writeInt(INISC_MAIN, key, vol);
+	for (int i = 0; i < static_cast<int>(gLogicalDevices.size()); i++) {
+		UCHAR vol = 0;
+		gLogicalDevices[i]->getSSGVolume(&vol);
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_SSGVOL, i);
+		gConfig.writeInt(INISC_MAIN, key, vol);
 
-//		UINT clock=0;
-//		gGIMIC[i]->getPLLClock(&clock);
-//		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
-//		gConfig.writeInt(INISC_MAIN, key, clock);
-		
+		UINT clock = 0;
+		gLogicalDevices[i]->getPLLClock(&clock);
+		_sntprintf(key, sizeof(key), INIKEY_GIMIC_PLLCLK, i);
+		gConfig.writeInt(INISC_MAIN, key, clock);
 	}
 }
 

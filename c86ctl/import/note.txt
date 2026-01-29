@@ -1,8 +1,8 @@
--- c86ctl --
+﻿-- c86ctl --
 honet.kk(at)gmail.com
 
-import�f�B���N�g������Microsoft���O���x���_�[�񋟂̃t�@�C��
-�̔z�u�ꏊ�ł��BDDK/SDK���K�X�擾���Ĕz�u���Ă��������B
+importディレクトリ内はMicrosoft等外部ベンダー提供のファイルの配置場所です。
+必要に応じてDDK/SDK/WDKより適宜取得して配置してください。
 
 import/ddk
   HIDPI.H
